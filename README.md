@@ -36,3 +36,6 @@ Dane zamówień trwają na dysku `/data` (zmienna `DATA_DIR`).
 
 ## Ogłoszenie z linku
 `POST /api/fetch-ad {url}` pobiera stronę (`lib/fetchAd.js`), czyta dane `JobPosting` (JSON-LD) albo główny tekst strony i zwraca `{title, company, text}`. Klient widzi wynik i może go poprawić; gdy pobranie się nie uda (np. LinkedIn), wkleja treść ręcznie. Zabezpieczenia: tylko http/https, blokada adresów prywatnych sprawdzana przy łączeniu (SSRF, DNS rebinding), limit 1,5 MB i 10 s, 3 przekierowania, limit 20 pobrań / 10 min na IP.
+
+## Dokumenty prawne
+Regulamin i polityka prywatności są w `public/index.html` (widoki `#regulamin`, `#prywatnosc`) jako **wzory**. Przed sprzedażą uzupełnij pola w `[nawiasach]`, usuń ramki `.draft` i skonsultuj tekst z prawnikiem. Kreator wymaga dwóch zgód: akceptacji regulaminu/polityki oraz zgody na wykonanie usługi od razu (utrata prawa odstąpienia dla treści cyfrowych). Dane zamówień nie są jeszcze automatycznie usuwane po okresie podanym w regulaminie.

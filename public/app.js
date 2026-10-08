@@ -143,7 +143,8 @@ function validate(n) {
     if (!a.title) return `Ogłoszenie ${i + 1}: podaj nazwę stanowiska.`;
     if (a.text.length < 80) return `Ogłoszenie ${i + 1}: wklej pełną treść oferty (min. 80 znaków).`;
   }
-  if (n === 6 && !$('#consent').checked) return 'Zaznacz zgodę na przetwarzanie danych.';
+  if (n === 6 && !$('#consent').checked) return 'Zaakceptuj Regulamin i Politykę prywatności.';
+  if (n === 6 && !$('#waiver').checked) return 'Zaznacz zgodę na wykonanie usługi od razu po płatności.';
   return '';
 }
 const openWiz = (p) => {
@@ -164,7 +165,7 @@ $('#wizForm').onsubmit = async (e) => {
   if (step < 6) return go(step + 1);
   const v = (id) => $('#' + id).value;
   const body = {
-    pkg: pkg(), consent: $('#consent').checked, ads: rows('ads'),
+    pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu') },
   };
   $('#next').disabled = true;
@@ -253,9 +254,20 @@ function showResult() {
 }
 $('#newOrder').onclick = () => {
   try { history.replaceState(null, '', location.pathname); } catch {}
-  $('#result').hidden = true; landing(true); document.title = 'CV Pod Ogłoszenie';
+  $('#result').hidden = true; landing(true); route();
   $('#wizForm').reset(); ['exp', 'edu', 'ads'].forEach((b) => { $('#' + b).replaceChildren(); addRow(b); }); go(1); window.scrollTo(0, 0);
 };
+
+const LEGAL = { '#regulamin': 'legal-regulamin', '#prywatnosc': 'legal-prywatnosc' };
+function route() {
+  if (!$('#result').hidden || !$('#gen').hidden) return;
+  const id = LEGAL[location.hash];
+  $('#landing').hidden = !!id;
+  Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = l !== id));
+  if (id) { window.scrollTo(0, 0); try { document.title = location.hash === '#regulamin' ? 'Regulamin – CV Pod Ogłoszenie' : 'Polityka prywatności – CV Pod Ogłoszenie'; } catch {} }
+  else { try { document.title = 'CV Pod Ogłoszenie'; } catch {} const t = location.hash.length > 1 && document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+}
+window.addEventListener('hashchange', route); route();
 
 addRow('exp'); addRow('edu'); addRow('ads'); refresh(); go(1);
 const q = new URLSearchParams(location.search);

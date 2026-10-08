@@ -38,7 +38,7 @@
   <ol class="steps">
     <li><b>Klikasz „Zamów”</b><span>Otwiera się krótki kreator. Nic nie wypełniasz na tej stronie.</span></li>
     <li><b>Opisujesz siebie</b><span>Dane kontaktowe, doświadczenie, szkoły i umiejętności. Raz.</span></li>
-    <li><b>Wklejasz link</b><span>Do ogłoszenia (lub kilku). Treść pobieramy sami.</span></li>
+    <li><b>Wklejasz link</b><span>Do ogłoszenia (lub kilku). Gdy link się nie uda, wklejasz treść sam.</span></li>
     <li><b>Płacisz i pobierasz</b><span>Dla każdego ogłoszenia dostajesz osobne CV i list w PDF.</span></li>
   </ol>
 </div></section>
@@ -64,11 +64,80 @@
   <details><summary>Czy dokumenty zawierają zmyślone informacje?</summary><p>Nie. Dokumenty powstają wyłącznie z faktów, które sam podasz. Nic nie jest dopisywane: ani stanowiska, ani daty, ani certyfikaty.</p></details>
   <details><summary>Jak wygląda płatność?</summary><p>Płacisz przez Stripe: BLIK, kartą lub Apple/Google Pay. Dokumenty generują się dopiero po potwierdzeniu płatności.</p></details>
   <details><summary>Co oznacza „+20 zł za kolejne ogłoszenie”?</summary><p>Za każde dodatkowe ogłoszenie w tym samym zamówieniu dostajesz osobne CV (a w pakiecie z listem także osobny list), dopasowane do tej oferty.</p></details>
+  <details><summary>Co jeśli strona nie odczyta ogłoszenia z linku?</summary><p>Część serwisów (np. LinkedIn) blokuje automatyczne pobieranie ogłoszeń. Wtedy kreator pokaże komunikat, a Ty wklejasz treść ogłoszenia samodzielnie. Zapłacić możesz dopiero po uzupełnieniu treści, więc nie zapłacisz za CV bez ogłoszenia.</p></details>
   <details><summary>W jakim formacie dostanę dokumenty?</summary><p>Zobaczysz je na stronie i zapiszesz jako PDF jednym kliknięciem.</p></details>
 </div></section>
 </main>
 
-<footer class="foot" id="foot"><div class="inner"><span>CV Pod Ogłoszenie</span><button class="btn sm" data-open>Zamów CV</button></div></footer>
+<footer class="foot" id="foot"><div class="inner"><span>CV Pod Ogłoszenie · <a href="#regulamin">Regulamin</a> · <a href="#prywatnosc">Polityka prywatności</a> · [E-MAIL KONTAKTOWY]</span><button class="btn sm" data-open>Zamów CV</button></div></footer>
+
+
+<!-- Dokumenty prawne (widok przez #regulamin / #prywatnosc) -->
+<section class="legal" id="legal-regulamin" hidden><div class="inner narrow">
+<a class="back" href="#top">← Wróć na stronę główną</a>
+<p class="draft">Wzór dokumentu: uzupełnij pola w nawiasach kwadratowych i skonsultuj tekst z prawnikiem przed uruchomieniem sprzedaży. Potem usuń tę ramkę.</p>
+<h1>Regulamin serwisu CV Pod Ogłoszenie</h1>
+<h2>§1 Postanowienia ogólne</h2>
+<ol><li>Serwis „CV Pod Ogłoszenie” („Serwis”) prowadzi [NAZWA FIRMY / IMIĘ I NAZWISKO], [ADRES], NIP [NIP] („Usługodawca”). Kontakt: [E-MAIL], [TELEFON].</li>
+<li>Regulamin określa zasady korzystania z Serwisu i zawierania umów o świadczenie usług drogą elektroniczną.</li>
+<li>Klientem jest osoba, która zamawia usługę w Serwisie, w tym konsument w rozumieniu Kodeksu cywilnego.</li></ol>
+<h2>§2 Przedmiot usługi</h2>
+<ol><li>Usługa polega na przygotowaniu dokumentów aplikacyjnych: CV oraz, w pakiecie „CV + list motywacyjny”, listu motywacyjnego, dopasowanych do wskazanego przez Klienta ogłoszenia o pracę.</li>
+<li>Za każde dodatkowe ogłoszenie w tym samym zamówieniu Klient otrzymuje osobne CV (i list, jeśli wybrał pakiet z listem) dopasowane do tego ogłoszenia.</li>
+<li>Dokumenty powstają na podstawie danych podanych przez Klienta, z wykorzystaniem narzędzi sztucznej inteligencji. Usługodawca nie dopisuje stanowisk, dat ani kwalifikacji, których Klient nie podał, ale Klient musi sprawdzić treść dokumentów przed ich wysłaniem pracodawcy.</li>
+<li>Usługodawca nie gwarantuje zaproszenia na rozmowę ani zatrudnienia.</li></ol>
+<h2>§3 Ogłoszenie z linku i wklejanie treści</h2>
+<ol><li>Klient może podać link do ogłoszenia. Serwis próbuje pobrać z niego treść oferty, ale nie gwarantuje, że się uda. Wiele serwisów blokuje automatyczne pobieranie lub wymaga logowania.</li>
+<li><b>Jeżeli Serwis nie przetworzy ogłoszenia z linku albo pobierze je niekompletnie, Klient musi wkleić treść ogłoszenia samodzielnie.</b> Bez treści ogłoszenia zamówienia nie można opłacić.</li>
+<li>Klient odpowiada za to, że treść ogłoszenia, którą wkleił lub zatwierdził, jest właściwa i że ma prawo jej użyć w tym celu.</li></ol>
+<h2>§4 Ceny i płatności</h2>
+<ol><li>Ceny są podane w złotych i zawierają podatek VAT, o ile Usługodawca jest jego płatnikiem: samo CV – 39 zł, CV z listem motywacyjnym – 49 zł, każde kolejne ogłoszenie – 20 zł.</li>
+<li>Płatności obsługuje Stripe (m.in. BLIK, karta, Apple Pay, Google Pay). Płatność następuje z góry, przed wykonaniem usługi.</li></ol>
+<h2>§5 Realizacja</h2>
+<ol><li>Po zaksięgowaniu płatności dokumenty są przygotowywane automatycznie, zwykle w ciągu kilku minut, i wyświetlane w Serwisie pod unikalnym adresem zamówienia. Klient zapisuje je jako PDF.</li>
+<li>Dokumenty są dostępne przez [OKRES, np. 30 dni] od realizacji. Klient powinien zapisać je od razu.</li>
+<li>Jeśli generowanie się nie powiedzie, Klient może ponowić je bez dodatkowej opłaty.</li></ol>
+<h2>§6 Odstąpienie od umowy</h2>
+<ol><li>Usługa jest treścią cyfrową dostarczaną na wyraźne żądanie Klienta. Klient, który przed złożeniem zamówienia zaznaczył zgodę na rozpoczęcie wykonania usługi i przyjął do wiadomości utratę prawa odstąpienia, traci to prawo po pełnym wykonaniu usługi (art. 38 pkt 13 ustawy o prawach konsumenta).</li>
+<li>Przed wykonaniem usługi Klient może zrezygnować z zamówienia, pisząc na adres [E-MAIL].</li></ol>
+<h2>§7 Reklamacje</h2>
+<ol><li>Reklamacje można składać na adres [E-MAIL]. Usługodawca odpowiada w ciągu 14 dni.</li>
+<li>Reklamacja może dotyczyć w szczególności niewykonania usługi lub dokumentów niezgodnych z podanymi danymi (np. błędnie przepisana data).</li></ol>
+<h2>§8 Obowiązki Klienta</h2>
+<ol><li>Klient podaje dane prawdziwe i swoje własne. Nie podaje danych osób trzecich bez podstawy prawnej.</li>
+<li>Zaleca się, aby nie wpisywać danych szczególnych kategorii (np. o zdrowiu), chyba że są niezbędne w ogłoszeniu.</li></ol>
+<h2>§9 Postanowienia końcowe</h2>
+<ol><li>Do umów stosuje się prawo polskie. Konsumentowi przysługują uprawnienia wynikające z bezwzględnie obowiązujących przepisów.</li>
+<li>Usługodawca może zmienić Regulamin z ważnych przyczyn. Zamówienia złożone wcześniej realizuje się według poprzedniej wersji.</li>
+<li>Regulamin obowiązuje od [DATA].</li></ol>
+</div></section>
+
+<section class="legal" id="legal-prywatnosc" hidden><div class="inner narrow">
+<a class="back" href="#top">← Wróć na stronę główną</a>
+<p class="draft">Wzór dokumentu: uzupełnij pola w nawiasach kwadratowych i skonsultuj tekst z prawnikiem przed uruchomieniem sprzedaży. Potem usuń tę ramkę.</p>
+<h1>Polityka prywatności</h1>
+<h2>1. Administrator danych</h2>
+<p>Administratorem Twoich danych jest [NAZWA FIRMY / IMIĘ I NAZWISKO], [ADRES], NIP [NIP]. Kontakt w sprawach danych: [E-MAIL].</p>
+<h2>2. Jakie dane przetwarzamy</h2>
+<p>Dane z formularza zamówienia: imię i nazwisko, e-mail, telefon, miasto, link do profilu, przebieg pracy i nauki, umiejętności oraz inne informacje, które sam wpiszesz. Treść ogłoszeń, które podasz (wklejoną lub pobraną z linku). Dane transakcji (kwota, status płatności). Dane płatnicze (np. numer karty) trafiają bezpośrednio do Stripe i nie są dostępne dla nas.</p>
+<h2>3. Cele i podstawy prawne</h2>
+<ul><li>Wykonanie zamówienia i obsługa płatności – art. 6 ust. 1 lit. b RODO (umowa).</li>
+<li>Rozliczenia i księgowość – art. 6 ust. 1 lit. c RODO (obowiązek prawny).</li>
+<li>Bezpieczeństwo, obrona przed nadużyciami i dochodzenie roszczeń – art. 6 ust. 1 lit. f RODO (uzasadniony interes).</li></ul>
+<h2>4. Odbiorcy danych</h2>
+<ul><li>Stripe – obsługa płatności.</li>
+<li>Dostawca narzędzi AI (Anthropic) – otrzymuje Twoje dane i treść ogłoszenia wyłącznie po to, aby przygotować dokumenty. Dane mogą być przetwarzane poza Europejskim Obszarem Gospodarczym (USA) na podstawie standardowych klauzul umownych lub innego mechanizmu zgodnego z RODO.</li>
+<li>Dostawca hostingu: [HOSTING]. Biuro rachunkowe: [BIURO].</li></ul>
+<h2>5. Jak długo przechowujemy dane</h2>
+<p>Dane zamówienia: [OKRES, np. 30 dni] od realizacji, potem je usuwamy. Dokumenty księgowe: 5 lat od końca roku podatkowego.</p>
+<h2>6. Twoje prawa</h2>
+<p>Masz prawo dostępu do danych, ich sprostowania, usunięcia, ograniczenia przetwarzania, przenoszenia oraz sprzeciwu wobec przetwarzania opartego na uzasadnionym interesie. Napisz na [E-MAIL]. Możesz też złożyć skargę do Prezesa Urzędu Ochrony Danych Osobowych (uodo.gov.pl).</p>
+<h2>7. Dobrowolność i zautomatyzowane decyzje</h2>
+<p>Podanie danych jest dobrowolne, ale niezbędne do przygotowania dokumentów. Nie podejmujemy wobec Ciebie decyzji wywołujących skutki prawne wyłącznie w sposób zautomatyzowany. Narzędzia AI służą do napisania Twoich dokumentów, które sam sprawdzasz i wysyłasz.</p>
+<h2>8. Pliki cookie</h2>
+<p>Serwis nie używa plików cookie do analityki ani reklam. Strona płatności Stripe może używać własnych plików cookie zgodnie z polityką Stripe.</p>
+<p>Polityka obowiązuje od [DATA].</p>
+</div></section>
 
 <!-- Kreator -->
 <div id="wiz" class="wiz" hidden role="dialog" aria-modal="true" aria-labelledby="wizTitle">
@@ -112,12 +181,14 @@
       <label class="f">Uwagi dla autora <span class="h">np. zmiana branży, przerwa w pracy</span><textarea id="notes"></textarea></label>
     </section>
     <section data-step="5" hidden>
-      <p class="hint">Dla <b>każdego</b> ogłoszenia powstanie osobne CV. Wklej link do ogłoszenia, a pobierzemy jego treść. Gdy link się nie uda, wklej treść oferty ręcznie.</p>
+      <p class="hint">Dla <b>każdego</b> ogłoszenia powstanie osobne CV. Wklej link, a spróbujemy pobrać treść oferty.</p>
+      <div class="note"><b>Ważne:</b> jeśli strona nie przetworzy ogłoszenia z linku (np. serwis blokuje pobieranie), <b>musisz wkleić treść ogłoszenia samodzielnie</b>. Bez treści nie przejdziesz do płatności.</div>
       <div id="ads"></div><button type="button" class="btn ghost sm" id="addAd">+ Dodaj ogłoszenie (+20 zł)</button>
     </section>
     <section data-step="6" hidden>
       <div id="sum"></div>
-      <label class="check"><input type="checkbox" id="consent"> Wyrażam zgodę na przetwarzanie podanych danych w celu przygotowania dokumentów. Dane trafiają do dostawcy AI wyłącznie w tym celu.</label>
+      <label class="check"><input type="checkbox" id="consent"> <span>Akceptuję <a href="#regulamin" target="_blank" rel="noopener">Regulamin</a> i zapoznałem/am się z <a href="#prywatnosc" target="_blank" rel="noopener">Polityką prywatności</a>. Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów.</span></label>
+      <label class="check"><input type="checkbox" id="waiver"> <span>Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.</span></label>
     </section>
     <section data-step="7" hidden>
       <div class="note"><b>Tryb DEMO.</b> Tutaj otworzyłaby się płatność Stripe (BLIK / karta). Kliknij, aby zasymulować udaną płatność.</div>

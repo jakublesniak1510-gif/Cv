@@ -111,6 +111,14 @@ textarea{min-height:88px;resize:vertical}
 .fstatus{font-size:14px;color:var(--mute);margin:-4px 0 12px;min-height:0}.fstatus:empty{display:none}
 .fstatus.good{color:var(--ok);font-weight:600}.fstatus.bad{color:var(--err);font-weight:600}
 .linkbox[hidden],.adfields[hidden]{display:none}
+/* dokumenty prawne */
+.legal{padding-block:40px 80px}.legal[hidden]{display:none}
+.legal h1{font-size:clamp(28px,4vw,38px);font-weight:800;margin:16px 0 8px}
+.legal h2{font-size:19px;margin:28px 0 8px}.legal p,.legal li{color:var(--ink);font-size:15.5px}.legal li{margin-bottom:6px}
+.legal a{color:var(--brand)}.legal .back{text-decoration:none;font-weight:600;font-size:14px}
+.draft{background:var(--mark);color:var(--ink);border-radius:10px;padding:10px 14px;font-size:14px;margin:16px 0}
+.check a{color:var(--brand)}.foot a{color:var(--mute)}.foot a:hover{color:var(--ink)}
+.foot .inner{flex-wrap:wrap}
 /* generowanie i wynik */
 .gen{position:fixed;inset:0;z-index:60;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;text-align:center}
 .gen-box{max-width:420px}.gen-box h2{font-size:28px;margin:18px 0 8px}.gen-box p{color:var(--mute)}
