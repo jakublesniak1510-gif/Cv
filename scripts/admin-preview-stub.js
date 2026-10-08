@@ -17,7 +17,7 @@
     if (p === '/orders') {
       const q = (u.searchParams.get('q') || '').toLowerCase(), st = u.searchParams.get('status') || '', page = +u.searchParams.get('page') || 0;
       let l = S.rows;
-      if (st) l = l.filter((o) => o.status === st || (st === 'problem' && (o.status === 'paid' || o.mail === 'failed')) || (st === 'invoice' && o.invoice === 'todo'));
+      if (st) l = l.filter((o) => o.status === st || (st === 'problem' && (o.status === 'paid' || o.mail === 'failed')));
       if (q) l = l.filter((o) => o.email.toLowerCase().includes(q) || o.id.startsWith(q) || (o.code || '').toLowerCase().includes(q));
       return json({ total: l.length, page, rows: l.slice(page * 50, page * 50 + 50) });
     }
@@ -28,7 +28,6 @@
       if (m === 'GET') return json(o);
       if (m === 'DELETE') { delete S.details[id]; S.rows = S.rows.filter((r) => r.id !== id); return json({ ok: true }); }
       if (act === 'resend') return o.status === 'done' ? json({ ok: true, mail: { status: 'sent' } }) : json({ error: 'Dokumenty nie są jeszcze gotowe.' }, 409);
-      if (act === 'invoice') { o.invoiceData = { ...o.invoiceData, issued: !!body.issued, issuedAt: body.issued ? Date.now() : null }; setStatus(id, { invoice: body.issued ? 'issued' : 'todo' }); return json({ ok: true }); }
       if (act === 'regenerate') { setStatus(id, { status: 'done', mail: 'sent', error: null }); return json({ ok: true }); }
     }
     if (p === '/codes' && m === 'GET') return json(S.codes);

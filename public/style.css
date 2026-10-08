@@ -509,8 +509,4 @@ textarea{min-height:88px;resize:vertical}
 .rate .starpick button{background:none;border:0;font-size:30px;line-height:1;cursor:pointer;color:var(--line);padding:2px}
 .rate .starpick button.on{color:#E8A400}
 .rate textarea{font:15px var(--f-b);border:1px solid var(--line);border-radius:10px;padding:10px;min-height:80px;background:var(--surface);color:var(--ink)}
-/* faktura */
-.invoice{display:grid;gap:10px;grid-template-columns:1fr 1fr;margin:4px 0 8px}
-.invoice .full{grid-column:1/-1}
-@media(max-width:560px){.invoice{grid-template-columns:1fr}}
 @media(max-width:760px){body.mcta-on .chat-fab{bottom:84px}}

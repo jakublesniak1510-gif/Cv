@@ -64,7 +64,7 @@ loaders.dash = async () => {
   $('#facts').replaceChildren(...[
     ...Object.entries(s.byPkg).map(([k, n]) => [PK[k] || k, `${n} (${Math.round((100 * n) / total)}%)`]),
     ['Z dodatkami', `${s.addonsShare}%`], ['Z kodem rabatowym', `${s.codesShare}%`],
-    ['Czeka na płatność', String(s.pending)], ['Faktury do wystawienia', String(s.invoicesTodo)],
+    ['Czeka na płatność', String(s.pending)],
     ['Ocena klientów', s.reviews.count ? `${String(s.reviews.avg).replace('.', ',')} / 5 (${s.reviews.count})` : 'brak ocen'], [`Koszt AI (${s.ai.month})`, `$${s.ai.usd.toFixed(2)} · ${s.ai.calls} wywołań`],
   ].map(([k, v]) => el('div', {}, el('dt', { textContent: k }), el('dd', { textContent: v }))));
   drawChart(s.byDay);
@@ -132,7 +132,7 @@ function orderTable(rows, compact = false) {
     el('tbody', {}, rows.map((o) => {
       const tr = el('tr', { className: 'click', tabIndex: 0 },
         el('td', { className: 'num', textContent: dt(o.created) }), el('td', { className: 'ell', textContent: o.email, title: o.email }),
-        el('td', {}, o.pkgName, o.followup ? el('span', { className: 'tag', textContent: 'kolejne', style: 'margin-left:6px' }) : null, o.invoice === 'todo' ? el('span', { className: 'tag', textContent: 'faktura', style: 'margin-left:6px' }) : null),
+        el('td', {}, o.pkgName, o.followup ? el('span', { className: 'tag', textContent: 'kolejne', style: 'margin-left:6px' }) : null),
         compact ? null : el('td', { className: 'mono', textContent: o.code || '—' }), el('td', { className: 'r', textContent: zl(o.total) }),
         el('td', {}, status(o.status)), compact ? null : el('td', {}, mailSt(o.mail)));
       tr.addEventListener('click', () => openOrder(o.id));
@@ -200,8 +200,6 @@ async function openOrder(id) {
       o.code && ['Kod', `${o.code} (−${zl(o.discount)})`],
       ['Poprawki', `${o.revisions} z 10`], ['Kod klienta', o.myCode || '—'], ['Dane znikną', dd(o.expires)],
     ])),
-    o.invoiceData ? el('div', {}, el('h3', { textContent: 'Faktura' }), kv([['Firma', o.invoiceData.name], ['NIP', el('span', { className: 'mono', textContent: o.invoiceData.nip })], ['Adres', o.invoiceData.address],
-      ['Status', o.invoiceData.issued ? `wystawiona ${dt(o.invoiceData.issuedAt)}` : 'do wystawienia (w ciągu 3 dni roboczych)']]), invBtn(o)) : null,
     el('div', {}, el('h3', { textContent: 'Klient' }), kv([['E-mail', o.email], ['Telefon', o.phone || '—'], ['Zdjęcie', o.hasPhoto ? 'tak' : 'nie'],
       ['Przypomnienie', o.reminder?.consent ? (o.reminder.sent ? 'wysłane' : 'zgoda, jeszcze nie wysłane') : 'bez zgody'], ['Szablon', `${o.design?.tpl || '—'} / ${o.design?.color || '—'}`]])),
     el('div', {}, el('h3', { textContent: `Ogłoszenia (${o.adsList.length})` }), el('ul', { className: 'list' }, o.adsList.map((a, i) => {
@@ -211,11 +209,6 @@ async function openOrder(id) {
     o.mailInfo ? el('div', {}, el('h3', { textContent: 'E-mail' }), kv([['Do', o.mailInfo.to], ['Status', MAIL[o.mailInfo.status] || o.mailInfo.status], ['Kiedy', dt(o.mailInfo.at)]])) : null,
   ].filter(Boolean));
   x.focus();
-}
-function invBtn(o) {
-  const b = el('button', { className: 'btn ghost sm', style: 'margin-top:8px', textContent: o.invoiceData.issued ? 'Cofnij: niewystawiona' : 'Oznacz jako wystawioną' });
-  b.onclick = async () => { b.disabled = true; try { await post(`/orders/${o.id}/invoice`, { issued: !o.invoiceData.issued }); toast('Zapisano.'); openOrder(o.id); loaders[current()]?.(); } catch (x) { toast(x.message); b.disabled = false; } };
-  return b;
 }
 const current = () => $('#nav [aria-current]')?.dataset.v || 'dash';
 

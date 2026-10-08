@@ -112,15 +112,6 @@ async function checkCode(raw, email) {
 }
 // Rabat w groszach: kwotowy albo procentowy (kody akcji promocyjnych z panelu).
 const discountFor = (c, pkg, n, ad, returning, langs) => (c.percent ? Math.round((calcTotal(pkg, n, ad, returning, langs, 0) * c.percent) / 100) : c.discount || 0);
-// Faktura na życzenie: dane firmy z poprawnym NIP (suma kontrolna).
-const nipOk = (n) => /^\d{10}$/.test(n) && [6, 5, 7, 2, 3, 4, 5, 6, 7].reduce((s, w, i) => s + w * +n[i], 0) % 11 === +n[9];
-function cleanInvoice(v) {
-  if (!v?.want) return null;
-  const nip = String(v.nip || '').replace(/\D/g, ''), name = str(v.name, 160), address = str(v.address, 200);
-  if (!name || !address) throw new Error('Do faktury podaj nazwę firmy i adres.');
-  if (!nipOk(nip)) throw new Error('Sprawdź NIP: powinien mieć 10 cyfr.');
-  return { name, nip, address, issued: false };
-}
 const newCode = (prefix) => `${prefix}-${crypto.randomBytes(4).toString('hex').toUpperCase().slice(0, 6)}`;
 const cleanAddons = (a = {}) => ({ interview: !!a.interview, messages: !!a.messages });
 // Edytowane przez klienta CV: ten sam kształt co z generatora, przycięte długości.
@@ -179,7 +170,7 @@ async function checkout(order) {
 
 app.post('/api/orders', async (req, res) => {
   try {
-    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, invoice } = req.body || {};
+    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
     const a = cleanAds(ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
@@ -190,8 +181,7 @@ app.post('/api/orders', async (req, res) => {
     const c = await checkCode(code, p.email);
     if (c.error) return res.status(400).json({ error: c.error });
     const disc = discountFor(c, pkg, a.length, ad, false, langs);
-    const inv = cleanInvoice(invoice);
-    const order = { id: crypto.randomUUID(), invoice: inv, pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, false, langs, disc), profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, false, langs, disc), profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -209,7 +199,7 @@ app.post('/api/orders/:id/followup', async (req, res) => {
     if (c.error) return res.status(400).json({ error: c.error });
     const pkg = ['cv', 'cv_letter', 'pack3'].includes(req.body?.pkg) ? req.body.pkg : parent.pkg;
     const disc = discountFor(c, pkg, a.length, ad, true, langs);
-    const order = { id: crypto.randomUUID(), invoice: parent.invoice ? { ...parent.invoice, issued: false } : null, parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, true, langs, disc), profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const order = { id: crypto.randomUUID(), parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, true, langs, disc), profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -236,7 +226,7 @@ app.get('/api/orders/:id', async (req, res) => {
     if (c && Date.now() < c.expires) myCode = { code: c.id, discount: c.amount / 100, expires: c.expires, uses: (c.usedBy || []).length, usedByMe: (c.usedBy || []).includes(emailHash(o.profile.email)) };
   }
   const rv = await reviews.get(o.id);
-  res.json(view(o, { myCode, review: rv ? { rating: rv.rating, text: rv.text } : null, invoice: o.invoice ? { name: o.invoice.name } : null }));
+  res.json(view(o, { myCode, review: rv ? { rating: rv.rating, text: rv.text } : null }));
 });
 
 // Opinia klienta: tylko po gotowym zamówieniu, jedna na zamówienie (można ją zmienić).

@@ -437,16 +437,10 @@ function validate(n) {
     if (!a.title) return `Ogłoszenie ${i + 1}: podaj nazwę stanowiska.`;
     if (a.text.length < 80) return `Ogłoszenie ${i + 1}: wklej pełną treść oferty (min. 80 znaków).`;
   }
-  if (n === 6 && $('#wantInvoice').checked) {
-    const nip = $('#invNip').value.replace(/\D/g, '');
-    if (!$('#invName').value.trim() || !$('#invAddr').value.trim()) return 'Do faktury podaj nazwę firmy i adres.';
-    if (!/^\d{10}$/.test(nip) || [6, 5, 7, 2, 3, 4, 5, 6, 7].reduce((a, w, i) => a + w * +nip[i], 0) % 11 !== +nip[9]) return 'Sprawdź NIP: powinien mieć 10 cyfr.';
-  }
   if (n === 6 && !$('#consent').checked) return 'Zaakceptuj Regulamin i Politykę prywatności.';
   if (n === 6 && !$('#waiver').checked) return 'Zaznacz zgodę na wykonanie usługi od razu po płatności.';
   return '';
 }
-$('#wantInvoice').onchange = (e) => { $('#invoiceBox').hidden = !e.target.checked; if (e.target.checked) $('#invName').focus(); };
 let lastFocus = null;
 const modal = (open) => {
   ['nav', 'landing', 'foot', 'demoBar'].forEach((i) => { const n = $('#' + i); if (n) n.inert = open; });
@@ -471,7 +465,7 @@ $('#wizForm').onsubmit = async (e) => {
   if (step < 6) return go(step + 1);
   const v = (id) => $('#' + id).value;
   const body = {
-    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, invoice: $('#wantInvoice').checked ? { want: true, name: $('#invName').value, nip: $('#invNip').value, address: $('#invAddr').value } : null, pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   $('#next').disabled = true;

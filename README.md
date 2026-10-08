@@ -79,7 +79,6 @@ Włącza się po ustawieniu `ADMIN_PASSWORD`. Zalecane drugie zabezpieczenie: ko
 
 Przykładowe dane do obejrzenia panelu lokalnie: `DATA_DIR=/tmp/cvpo-demo node scripts/admin-seed.mjs`, potem `DATA_DIR=/tmp/cvpo-demo ADMIN_PASSWORD=test npm start` i http://localhost:3000/admin.
 
-## Opinie, faktury, przygotowanie do rozmowy
+## Opinie, przygotowanie do rozmowy
 - **Opinie** – klient ocenia dokumenty (1–5 gwiazdek, komentarz, zgoda na publikację) na stronie zamówienia. Na stronie głównej sekcja „Opinie klientów” pojawia się dopiero, gdy zatwierdzisz w panelu (zakładka Opinie) pierwszą opinię z treścią. Średnia liczy wszystkie oceny oprócz spamu. Dane w `data/reviews.json`.
-- **Faktura** – w podsumowaniu zamówienia klient zaznacza „Potrzebuję faktury” i podaje firmę, NIP (sprawdzana suma kontrolna) i adres. W panelu filtr „Faktura do wystawienia”, przycisk „Oznacz jako wystawioną”, dane w eksporcie CSV. Fakturę wystawiasz w swoim programie księgowym w ciągu 3 dni roboczych (tak mówi regulamin).
 - **Przygotowanie do rozmowy (50 zł)** – 12 pytań w kategoriach z celem pytania i przykładową odpowiedzią (STAR), „Opowiedz o sobie”, mocne strony, braki, pytania do pracodawcy, wynagrodzenie, lista kontrolna; na stronie i w PDF.
