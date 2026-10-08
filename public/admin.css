@@ -91,7 +91,6 @@ tbody tr.click{cursor:pointer}tbody tr.click:hover{background:var(--alt)}
 .st.pending{background:var(--alt);color:var(--ink2)}.st.pending::before{content:"○"}
 .st.generating{background:var(--info-bg);color:var(--brand)}.st.generating::before{content:"↻"}
 .st.paid,.st.failed{background:var(--err-bg);color:var(--err)}.st.paid::before,.st.failed::before{content:"!"}
-.st.refunded{background:var(--warn-bg);color:var(--warn)}.st.refunded::before{content:"↩"}
 .st.sent{background:var(--ok-bg);color:var(--ok)}.st.sent::before{content:"✉"}
 .st.skipped{background:var(--alt);color:var(--mute)}.st.skipped::before{content:"–"}
 .tag{display:inline-block;background:var(--alt);color:var(--ink2);border-radius:6px;padding:1px 7px;font-size:12px;font-weight:600}

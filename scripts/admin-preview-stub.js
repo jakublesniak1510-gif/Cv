@@ -29,7 +29,6 @@
       if (m === 'DELETE') { delete S.details[id]; S.rows = S.rows.filter((r) => r.id !== id); return json({ ok: true }); }
       if (act === 'resend') return o.status === 'done' ? json({ ok: true, mail: { status: 'sent' } }) : json({ error: 'Dokumenty nie są jeszcze gotowe.' }, 409);
       if (act === 'regenerate') { setStatus(id, { status: 'done', mail: 'sent', error: null }); return json({ ok: true }); }
-      if (act === 'refund') { if (o.refund) return json({ error: 'Zwrot został już wykonany.' }, 409); setStatus(id, { status: 'refunded', refund: { id: 'demo', amount: o.total, reason: body.reason, at: Date.now() } }); return json({ ok: true }); }
     }
     if (p === '/codes' && m === 'GET') return json(S.codes);
     if (p === '/codes' && m === 'POST') {

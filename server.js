@@ -357,7 +357,7 @@ app.post('/api/orders/:id/retry', async (req, res) => {
   res.json({ ok: true });
 });
 
-adminRoutes(app, { stripe, DEMO, BASE_URL, markPaidAndGenerate, trySend, retentionMs: RETENTION_MS });
+adminRoutes(app, { DEMO, BASE_URL, markPaidAndGenerate, trySend, retentionMs: RETENTION_MS });
 
 // Dane zamówień (w tym zdjęcia) kasujemy po 30 dniach.
 // Co godzinę: kasowanie starych zamówień i kodów oraz jednorazowe przypomnienie po 7 dniach (tylko za zgodą klienta).

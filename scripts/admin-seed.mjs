@@ -35,7 +35,6 @@ for (let i = 0; i < 70; i++) {
     results: status === 'done' ? ads.map((a) => ({ position: a.title, lang: 'pl', match: { score: 70 + Math.floor(rnd() * 30) }, variants: Object.fromEntries(extraLangs.map((l) => [l, {}])) })) : [],
     mail: status === 'done' ? { status: i === 8 ? 'failed' : 'sent', to: email, at: created + 150e3 } : undefined,
     error: status === 'paid' ? 'Generowanie nie powiodło się. Spróbuj ponownie.' : undefined,
-    refund: i === 12 ? { id: 'demo', amount: calcTotal(pkg, n, addons, false, extraLangs, discount) / 100, reason: 'Klient zrezygnował', at: created + 3 * 3600e3 } : undefined,
   };
 }
 codes.START10 = { id: 'START10', amount: 1000, percent: 0, maxUses: 100, usedBy: Array.from({ length: 23 }, (_, i) => String(i)), note: 'Start strony – post na Facebooku', created: now - 20 * day, expires: now + 10 * day };

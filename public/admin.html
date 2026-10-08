@@ -33,7 +33,7 @@
   </aside>
 
   <main>
-    <div class="demo" id="demoNote" hidden>Tryb DEMO: brak klucza Stripe, więc płatności i zwroty są symulowane.</div>
+    <div class="demo" id="demoNote" hidden>Tryb DEMO: brak klucza Stripe, więc płatności są symulowane.</div>
 
     <!-- Pulpit -->
     <section data-view="dash">
@@ -57,7 +57,7 @@
         <input id="q" type="search" placeholder="Szukaj: e-mail, numer zamówienia, kod" aria-label="Szukaj zamówień">
         <select id="stFilter" aria-label="Status">
           <option value="">Wszystkie statusy</option><option value="done">Gotowe</option><option value="pending">Czeka na płatność</option>
-          <option value="generating">Generuje się</option><option value="problem">Wymaga uwagi</option><option value="refunded">Zwrócone</option>
+          <option value="generating">Generuje się</option><option value="problem">Wymaga uwagi</option>
         </select>
       </div>
       <div class="tbl-wrap" id="ordTable"></div>
@@ -102,7 +102,7 @@
           <button class="btn" type="submit">Pobierz CSV</button>
         </form>
         <div class="actions"><button class="btn ghost sm" data-range="this">Ten miesiąc</button><button class="btn ghost sm" data-range="prev">Poprzedni miesiąc</button></div>
-        <p class="help">Opłacone zamówienia z datą płatności, kwotą, rabatem, kodem i zwrotem. Separator „;”, otwiera się poprawnie w polskim Excelu. Pamiętaj: dane zamówień są kasowane po 30 dniach, więc pobieraj zestawienie co miesiąc.</p>
+        <p class="help">Opłacone zamówienia z datą płatności, kwotą, rabatem i kodem. Separator „;”, otwiera się poprawnie w polskim Excelu. Pamiętaj: dane zamówień są kasowane po 30 dniach, więc pobieraj zestawienie co miesiąc.</p>
       </div>
     </section>
   </main>
