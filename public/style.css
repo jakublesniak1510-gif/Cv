@@ -282,6 +282,14 @@ textarea{min-height:88px;resize:vertical}
 .paper .clause{font-size:10px;color:#6B7890;margin-top:24px}
 .paper.letter p{margin:0 0 13px;white-space:pre-wrap}.paper.letter .date{text-align:right;color:#546178;margin-bottom:22px}
 .paper.letter .lhead h1{color:var(--acc);font-size:26px}.paper.letter .rule{border-top:2px solid var(--acc);margin:14px 0 26px}
+/* zdjęcie w szablonach bez monogramu */
+.paper .pic{flex:none;width:96px;height:96px;border-radius:50%;background:#E9EEF8 center/cover no-repeat}
+.paper .who{flex:1;min-width:0}
+.paper .ini.photo{background-size:cover;background-position:center;background-repeat:no-repeat;color:transparent}
+.t-klasyczny .top{display:flex;align-items:center;gap:24px}
+.t-os .top .pic{width:84px;height:84px;box-shadow:0 0 0 3px #fff,0 0 0 5px var(--acc)}
+.t-szwajcarski .split .pic{width:112px;height:112px;border-radius:0;align-self:flex-start}
+@container (max-width:560px){.paper .pic{width:72px;height:72px}.t-szwajcarski .split .pic{width:84px;height:84px;order:-1}.t-klasyczny .top{align-items:flex-start}}
 /* ---------- Nowoczesny ---------- */
 .t-nowoczesny .pg{padding:0;display:grid;grid-template-columns:31% minmax(0,1fr)}
 .t-nowoczesny .side{background:var(--acc);color:#fff;padding:40px 24px;font-size:13px}
