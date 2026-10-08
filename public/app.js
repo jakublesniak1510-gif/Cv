@@ -3,8 +3,29 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const el = (t, p = {}, ...k) => { const e = Object.assign(document.createElement(t), p); e.append(...k.filter((x) => x != null && x !== false)); return e; };
 const PRICE = { cv: 39, cv_letter: 49, extra: 20 };
-const STEPS = ['Pakiet', 'Twoje dane', 'Doświadczenie', 'Wykształcenie i umiejętności', 'Ogłoszenia', 'Podsumowanie'];
+const STEPS = ['Pakiet i wygląd CV', 'Twoje dane', 'Doświadczenie', 'Wykształcenie i umiejętności', 'Ogłoszenia', 'Podsumowanie'];
 let cfg = { demo: false, maxAds: 5, noPrint: false };
+// Szablony i kolory: muszą zgadzać się z lib/designs.js.
+const TPLS = [['nowoczesny', 'Nowoczesny', 'Kolorowy pasek boczny z kontaktem i umiejętnościami.'], ['wyrazisty', 'Wyrazisty', 'Mocny kolorowy nagłówek, który przyciąga wzrok.'], ['klasyczny', 'Klasyczny', 'Przejrzysty układ, pewny wybór w każdej branży.'], ['elegancki', 'Elegancki', 'Szeryfowa typografia na stanowiska biurowe i kierownicze.']];
+const COLORS = { niebieski: '#2548E8', granat: '#1E3A5F', morski: '#0F766E', bordo: '#9F1239', fiolet: '#6D28D9', grafit: '#374151' };
+const COLOR_NAMES = { niebieski: 'niebieski', granat: 'granatowy', morski: 'morski', bordo: 'bordowy', fiolet: 'fioletowy', grafit: 'grafitowy' };
+let design = { tpl: 'nowoczesny', color: 'niebieski' };
+const tplName = (t) => (TPLS.find((x) => x[0] === t) || TPLS[0])[1];
+const ro = new ResizeObserver((es) => es.forEach((e) => e.target.style.setProperty('--s', e.contentRect.width / 794)));
+const thumb = (r, d, on = false) => { const t = el('div', { className: 'thumb' }, cvNode(r, on, d)); ro.observe(t); return t; };
+// Wybór szablonu i koloru; thumbs: miniatury z przykładowym CV.
+function designPicker(box, d, onChange, { thumbs = true } = {}) {
+  const draw = () => {
+    const sample = exResult(1);
+    box.replaceChildren(
+      el('div', { className: 'dp-tpls' + (thumbs ? '' : ' compact') }, !thumbs && el('span', { className: 'dp-lbl', textContent: 'Szablon:' }), ...TPLS.map(([id, name, desc]) => el('button', {
+        type: 'button', className: 'dp-tpl', ariaPressed: String(d.tpl === id), onclick: () => { d.tpl = id; onChange(d); draw(); },
+      }, thumbs && thumb(sample, { tpl: id, color: d.color }), el('b', { textContent: name }), thumbs && el('span', { textContent: desc })))),
+      el('div', { className: 'dp-colors', role: 'group', ariaLabel: 'Kolor' }, el('span', { className: 'dp-lbl', textContent: 'Kolor:' }),
+        ...Object.entries(COLORS).map(([id, hex]) => el('button', { type: 'button', className: 'sw', title: COLOR_NAMES[id], ariaLabel: `Kolor ${COLOR_NAMES[id]}`, ariaPressed: String(d.color === id), style: `--c:${hex}`, onclick: () => { d.color = id; onChange(d); draw(); } }))));
+  };
+  draw();
+}
 let step = 1, orderId = null;
 
 // Zwraca fragment, w którym wskazane słowa są owinięte w <mark> (bez innerHTML).
@@ -93,7 +114,7 @@ const exResult = (i) => {
     education: BASE.edu, skills: e.skills, languages: BASE.langs, certificates: BASE.certs, interests: '',
     clause: 'Wyrażam zgodę na przetwarzanie moich danych osobowych dla potrzeb niezbędnych do realizacji procesu rekrutacji zgodnie z art. 6 ust. 1 lit. a Rozporządzenia Parlamentu Europejskiego i Rady (UE) 2016/679.' } };
 };
-const changesList = (e) => [el('h3', { textContent: 'Co zmieniliśmy w tym CV' }), el('ul', {}, ...e.changes.map((c) => el('li', { textContent: c }))), e.notAdded && el('p', { className: 'notadded' }, el('b', { textContent: 'Czego nie dopisaliśmy: ' }), e.notAdded)];
+const changesList = (e) => [el('h3', { textContent: 'Co zmieniliśmy w tym CV' }), el('ul', {}, ...e.changes.map((c) => el('li', { textContent: c }))), e.notAdded && el('p', { className: 'notadded' }, el('b', { textContent: 'Czego nie dopisaliśmy: ' }), e.notAdded)].filter(Boolean);
 function drawEx(i) {
   const e = EX[i], r = exResult(i);
   $$('#exTabs button').forEach((b, j) => b.setAttribute('aria-selected', j === i));
@@ -106,28 +127,42 @@ function drawEx(i) {
 EX.forEach((e, i) => $('#exTabs').append(el('button', { type: 'button', role: 'tab', textContent: e.tab, onclick: () => drawEx(i) })));
 drawEx(0);
 
+/* galeria szablonów i hero */
+const gal = { tpl: 'nowoczesny', color: 'niebieski' };
+function drawGallery() {
+  const sample = exResult(1);
+  $('#galColors').replaceChildren(el('span', { className: 'dp-lbl', textContent: 'Kolor:' }), ...Object.entries(COLORS).map(([id, hex]) => el('button', { type: 'button', className: 'sw', title: COLOR_NAMES[id], ariaLabel: `Kolor ${COLOR_NAMES[id]}`, ariaPressed: String(gal.color === id), style: `--c:${hex}`, onclick: () => { gal.color = id; drawGallery(); } })));
+  $('#galGrid').replaceChildren(...TPLS.map(([id, name, desc]) => el('div', { className: 'gal-card' },
+    el('button', { type: 'button', className: 'gal-thumb', ariaLabel: `Podgląd szablonu ${name}`, onclick: () => openEx(1, { tpl: id, color: gal.color }) }, thumb(sample, { tpl: id, color: gal.color })),
+    el('div', { className: 'gal-meta' }, el('b', { textContent: name }), el('span', { textContent: desc })),
+    el('button', { type: 'button', className: 'btn ghost sm', textContent: 'Wybierz ten szablon', onclick: () => { design = { tpl: id, color: gal.color }; drawWizDesign(); saveDraft(); openWiz(); } }))));
+}
+const drawWizDesign = () => designPicker($('#wizDesign'), design, (d) => { design = d; saveDraft(); });
+$('#heroThumb').replaceChildren(thumb(exResult(0), { tpl: 'nowoczesny', color: 'niebieski' }, true));
+
 /* pełny podgląd przykładu (okno) */
 let exI = 0, exDoc = 'cv';
+const exDesign = { tpl: 'nowoczesny', color: 'niebieski' };
 function drawExView() {
   const e = EX[exI], r = exResult(exI);
   $('#exSide').replaceChildren(
-    el('h3', { textContent: '1. Dane, które podajesz raz' }),
-    el('div', { className: 'exbase' }, el('b', { textContent: BASE.name }), el('div', { textContent: BASE.contact.join(' · ') }),
+    el('details', { className: 'exdet', open: matchMedia('(min-width: 901px)').matches }, el('summary', { textContent: '1. Dane, które podajesz raz' }), el('div', { className: 'exbase' }, el('b', { textContent: BASE.name }), el('div', { textContent: BASE.contact.join(' · ') }),
       ...BASE.jobs.map((j) => el('div', {}, el('b', { textContent: j.title }), ` · ${j.company} (${j.period})`)),
-      el('div', {}, el('b', { textContent: 'Umiejętności: ' }), BASE.skills), el('div', {}, el('b', { textContent: 'Języki: ' }), BASE.langs.join(', '))),
+      el('div', {}, el('b', { textContent: 'Umiejętności: ' }), BASE.skills), el('div', {}, el('b', { textContent: 'Języki: ' }), BASE.langs.join(', ')))),
     el('h3', { textContent: '2. Ogłoszenie (wybierz)' }),
-    el('div', { className: 'adlist' }, ...EX.map((x, i) => el('button', { type: 'button', 'aria-selected': i === exI, onclick: () => { exI = i; exDoc = 'cv'; drawExView(); } }, el('b', { textContent: x.title }), el('span', { textContent: x.company })))),
+    el('div', { className: 'adlist' }, ...EX.map((x, i) => el('button', { type: 'button', ariaPressed: String(i === exI), onclick: () => { exI = i; exDoc = 'cv'; drawExView(); } }, el('b', { textContent: x.title }), el('span', { textContent: x.company })))),
     el('div', { className: 'doc ad' }, el('div', { className: 'tagline', textContent: 'Treść ogłoszenia' }), el('p', {}, hl(e.ad, e.kws))));
-  $('#exDocTabs').replaceChildren(...[['cv', 'CV'], ['letter', 'List motywacyjny']].map(([k, t]) => el('button', { type: 'button', textContent: t, 'aria-selected': k === exDoc, onclick: () => { exDoc = k; drawExView(); } })));
-  $('#exPaper').replaceChildren(exDoc === 'cv' ? cvNode(r, true) : letterNode(r));
+  $('#exDocTabs').replaceChildren(...[['cv', 'CV'], ['letter', 'List motywacyjny']].map(([k, t]) => el('button', { type: 'button', role: 'tab', ariaSelected: String(k === exDoc), textContent: t, onclick: () => { exDoc = k; drawExView(); } })));
+  $('#exPaper').replaceChildren(exDoc === 'cv' ? cvNode(r, true, exDesign) : letterNode(r, exDesign));
   $('#exChanges').replaceChildren(...changesList(e));
 }
-function openEx(i = 0) { exI = i; exDoc = 'cv'; drawExView(); $('#exview').hidden = false; document.body.style.overflow = 'hidden'; $('.exv-body').scrollTop = 0; setTimeout(() => $('#exClose').focus(), 0); }
-const closeEx = () => { $('#exview').hidden = true; document.body.style.overflow = ''; };
+function openEx(i = 0, d) { exI = i; exDoc = 'cv'; if (d) Object.assign(exDesign, d); designPicker($('#exDesign'), exDesign, () => drawExView(), { thumbs: false }); drawExView(); modal(true); $('#exview').hidden = false; $('.exv-body').scrollTop = 0; setTimeout(() => $('#exClose').focus(), 0); }
+const closeEx = () => { $('#exview').hidden = true; modal(false); };
 $$('[data-example]').forEach((b) => (b.onclick = () => openEx(+b.dataset.example || 0)));
 $('#exClose').onclick = closeEx;
-$('#exCta').onclick = () => { closeEx(); openWiz(); };
+$('#exCta').onclick = () => { closeEx(); lastFocus = null; openWiz(); };
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#exview').hidden) closeEx(); });
+drawGallery();
 
 /* ---------- Kreator ---------- */
 const rowT = {
@@ -189,12 +224,34 @@ const pkg = () => $('input[name=pkg]:checked').value;
 const nAds = () => Math.max(1, $('#ads').children.length);
 const total = () => PRICE[pkg()] + PRICE.extra * (nAds() - 1);
 
+const DKEY = 'cvpo-draft-v1', FIELDS = ['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'];
+let saveT, restoring = false;
+function saveDraft() {
+  if (restoring) return;
+  clearTimeout(saveT);
+  saveT = setTimeout(() => { try { localStorage.setItem(DKEY, JSON.stringify({ design, pkg: pkg(), f: Object.fromEntries(FIELDS.map((k) => [k, $('#' + k).value])), exp: rows('exp'), edu: rows('edu'), ads: rows('ads') })); } catch {} }, 300);
+}
+const clearDraft = () => { try { localStorage.removeItem(DKEY); } catch {} };
+function restoreDraft() {
+  let d; try { d = JSON.parse(localStorage.getItem(DKEY)); } catch {}
+  if (!d || !d.f || !(d.f.name || d.f.email || d.exp?.some((e) => e.title) || d.ads?.some((a) => a.text))) return false;
+  restoring = true;
+  const r = $(`input[name=pkg][value="${d.pkg}"]`); if (r) r.checked = true;
+  if (d.design && COLORS[d.design.color] && TPLS.some((t) => t[0] === d.design.tpl)) design = { ...d.design };
+  FIELDS.forEach((k) => ($('#' + k).value = d.f[k] || ''));
+  ['exp', 'edu', 'ads'].forEach((b) => { $('#' + b).replaceChildren(); (d[b]?.length ? d[b] : [{}]).forEach((v) => addRow(b, v)); });
+  restoring = false; refresh();
+  return true;
+}
 function refresh() {
+  saveDraft();
   $('#total').textContent = total() + ' zł';
   $('#brk').textContent = nAds() > 1 ? `${PRICE[pkg()]} zł + ${nAds() - 1} × ${PRICE.extra} zł` : '';
   $('#addAd').disabled = nAds() >= cfg.maxAds;
+  $('#addAd').title = nAds() >= cfg.maxAds ? `Maksymalnie ${cfg.maxAds} ogłoszeń w jednym zamówieniu` : '';
 }
 $$('input[name=pkg]').forEach((r) => (r.onchange = refresh));
+$('#wizForm').addEventListener('input', saveDraft);
 $('#addExp').onclick = () => addRow('exp');
 $('#addEdu').onclick = () => addRow('edu');
 $('#addAd').onclick = () => addRow('ads');
@@ -216,6 +273,7 @@ function drawSummary() {
   const ads = rows('ads');
   $('#sum').replaceChildren(
     el('div', { className: 'sumrow' }, el('span', { textContent: pkg() === 'cv' ? 'CV' : 'CV + list motywacyjny' }), el('span', { textContent: PRICE[pkg()] + ' zł' })),
+    el('div', { className: 'sumrow' }, el('span', { textContent: `Wygląd: ${tplName(design.tpl)}, kolor ${COLOR_NAMES[design.color]}` }), el('span', { textContent: 'w cenie' })),
     ...ads.map((a, i) => el('div', { className: 'sumrow' }, el('span', { textContent: `Ogłoszenie ${i + 1}: ${a.title}` }), el('span', { textContent: i === 0 ? 'w cenie' : '+' + PRICE.extra + ' zł' }))),
     el('div', { className: 'sumrow' }, el('span', { textContent: 'Razem' }), el('span', { textContent: total() + ' zł' })));
 }
@@ -232,12 +290,18 @@ function validate(n) {
   if (n === 6 && !$('#waiver').checked) return 'Zaznacz zgodę na wykonanie usługi od razu po płatności.';
   return '';
 }
+let lastFocus = null;
+const modal = (open) => {
+  ['nav', 'landing', 'foot', 'demoBar'].forEach((i) => { const n = $('#' + i); if (n) n.inert = open; });
+  document.body.style.overflow = open ? 'hidden' : '';
+  if (open) lastFocus = document.activeElement; else if (lastFocus?.focus) lastFocus.focus();
+};
 const openWiz = (p) => {
   if (p) { $(`input[name=pkg][value=${p}]`).checked = true; refresh(); }
-  $('#wiz').hidden = false; document.body.style.overflow = 'hidden'; go(step === 7 ? 6 : step);
+  modal(true); $('#wiz').hidden = false; go(step === 7 ? 6 : step);
   setTimeout(() => $('#wizClose').focus(), 0);
 };
-const closeWiz = () => { $('#wiz').hidden = true; document.body.style.overflow = ''; };
+const closeWiz = () => { $('#wiz').hidden = true; modal(false); };
 $$('[data-open]').forEach((b) => (b.onclick = () => openWiz(b.dataset.pkg)));
 $('#wizClose').onclick = closeWiz;
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#wiz').hidden) closeWiz(); });
@@ -250,7 +314,7 @@ $('#wizForm').onsubmit = async (e) => {
   if (step < 6) return go(step + 1);
   const v = (id) => $('#' + id).value;
   const body = {
-    pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    design, pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu') },
   };
   $('#next').disabled = true;
@@ -291,6 +355,7 @@ async function poll() {
   let r; try { r = await fetch(`/api/orders/${orderId}`); } catch { r = null; }
   if (!r || !r.ok) { $('#genTitle').textContent = 'Nie znaleziono zamówienia'; $('#genMsg').textContent = 'Sprawdź link lub wróć na stronę główną.'; return; }
   data = await r.json();
+  data.design = data.design || { ...design };
   if (data.status === 'done') { $('#gen').hidden = true; return showResult(); }
   if (data.status === 'paid') { $('#genTitle').textContent = 'Coś poszło nie tak'; $('#genMsg').textContent = data.error || 'Generowanie nie powiodło się. Płatność jest zachowana.'; $('#retry').hidden = false; return; }
   $('#genMsg').textContent = data.status === 'pending' ? 'Czekamy na potwierdzenie płatności…' : 'To zajmie około minuty. Nie zamykaj tej strony. Gotowe dokumenty wyślemy też na Twój e-mail.';
@@ -298,24 +363,46 @@ async function poll() {
 }
 $('#retry').onclick = async () => { await fetch(`/api/orders/${orderId}/retry`, { method: 'POST' }); startResult(orderId); };
 
-function section(p, t, ...c) { p.append(el('h3', { textContent: t }), ...c); }
-function cvNode(r, on) {
-  const c = r.cv, kw = r.keywords || [], p = el('div', { className: 'paper' + ((on ?? $('#hlTog').checked) ? '' : ' nohl') });
-  p.append(el('h1', { textContent: c.name }), c.headline && el('div', { className: 'hl', textContent: c.headline }), el('div', { className: 'ct', textContent: (c.contact || []).filter(Boolean).join('  ·  ') }));
-  if (c.summary) section(p, 'Profil zawodowy', el('div', {}, hl(c.summary, kw)));
-  if (c.experience?.length) { section(p, 'Doświadczenie zawodowe'); c.experience.forEach((e) => p.append(el('div', { className: 'role' }, el('span', { textContent: e.title }), el('em', { textContent: e.period })), el('div', { className: 'co', textContent: e.company }), el('ul', {}, ...(e.bullets || []).map((b) => el('li', {}, hl(b, kw)))))); }
-  if (c.education?.length) { section(p, 'Wykształcenie'); c.education.forEach((e) => p.append(el('div', { className: 'role' }, el('span', { textContent: e.school }), el('em', { textContent: e.period })), el('div', { className: 'co', style: 'margin-bottom:8px', textContent: e.degree }))); }
-  if (c.skills?.length) section(p, 'Umiejętności', el('div', { className: 'chips' }, ...c.skills.map((s) => el('span', {}, hl(s, kw)))));
-  if (c.languages?.length) section(p, 'Języki', el('div', { textContent: c.languages.join(' · ') }));
-  if (c.certificates?.length) section(p, 'Certyfikaty i kursy', el('div', { textContent: c.certificates.join(' · ') }));
-  if (c.interests) section(p, 'Zainteresowania', el('div', { textContent: c.interests }));
-  if (c.clause) p.append(el('div', { className: 'clause', textContent: c.clause }));
+function initials(n) { return String(n || '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join(''); }
+function paperEl(cls, d) { const p = el('div', { className: `paper t-${d.tpl} ${cls}` }); p.style.setProperty('--acc', COLORS[d.color] || COLORS.niebieski); return p; }
+function cvNode(r, on, d) {
+  d = d || (data && data.design) || design;
+  const c = r.cv, kw = r.keywords || [], p = paperEl((on ?? $('#hlTog').checked) ? '' : 'nohl', d);
+  const contact = (c.contact || []).filter(Boolean);
+  const sec = (t, ...k) => el('section', {}, el('h3', { textContent: t }), ...k);
+  const name = el('h1', { textContent: c.name }), head = c.headline ? el('div', { className: 'hl', textContent: c.headline }) : null;
+  const ct = el('div', { className: 'ct', textContent: contact.join('  ·  ') });
+  const summary = c.summary ? sec('Profil zawodowy', el('div', {}, hl(c.summary, kw))) : null;
+  const exp = c.experience?.length ? sec('Doświadczenie zawodowe', ...c.experience.map((e) => el('div', { className: 'job' }, el('div', { className: 'role' }, el('span', { textContent: e.title }), el('em', { textContent: e.period })), e.company ? el('div', { className: 'co', textContent: e.company }) : null, el('ul', {}, ...(e.bullets || []).map((b) => el('li', {}, hl(b, kw))))))) : null;
+  const edu = c.education?.length ? sec('Wykształcenie', ...c.education.map((e) => el('div', { className: 'job' }, el('div', { className: 'role' }, el('span', { textContent: e.school }), el('em', { textContent: e.period })), e.degree ? el('div', { className: 'deg', textContent: e.degree }) : null))) : null;
+  const skills = c.skills?.length ? sec('Umiejętności', el('div', { className: 'chips' }, ...c.skills.map((x) => el('span', {}, hl(x, kw))))) : null;
+  const langs = c.languages?.length ? sec('Języki', el('div', { textContent: c.languages.join(' · ') })) : null;
+  const certs = c.certificates?.length ? sec('Certyfikaty i kursy', el('div', { textContent: c.certificates.join(' · ') })) : null;
+  const intr = c.interests ? sec('Zainteresowania', el('div', { textContent: c.interests })) : null;
+  const clause = c.clause ? el('div', { className: 'clause', textContent: c.clause }) : null;
+  let pg;
+  if (d.tpl === 'nowoczesny') {
+    pg = el('div', { className: 'pg' },
+      el('aside', { className: 'side' }, el('div', { className: 'ini', textContent: initials(c.name) }), sec('Kontakt', el('ul', { className: 'clist' }, ...contact.map((x) => el('li', { textContent: x })))), skills, langs, certs, intr),
+      el('div', { className: 'mainc' }, el('header', { className: 'top' }, name, head), summary, exp, edu, clause));
+  } else if (d.tpl === 'wyrazisty') {
+    pg = el('div', { className: 'pg' }, el('header', { className: 'band' }, name, head, ct),
+      el('div', { className: 'body' }, summary, exp, edu, el('div', { className: 'two' }, skills, el('div', {}, langs, certs)), intr, clause));
+  } else {
+    pg = el('div', { className: 'pg' }, el('header', { className: 'top' }, name, head, ct, d.tpl === 'elegancki' ? el('div', { className: 'rule' }) : null), summary, exp, edu, skills, langs, certs, intr, clause);
+  }
+  p.append(pg);
   return p;
 }
-function letterNode(r) {
-  const p = el('div', { className: 'paper letter' });
-  p.append(el('div', { style: 'text-align:right;margin-bottom:20px', textContent: `${r.cv.contact?.[2] ? r.cv.contact[2] + ', ' : ''}${new Date().toLocaleDateString('pl-PL')}` }), el('div', { style: 'font-weight:600;margin-bottom:20px', textContent: r.cv.name }));
-  (r.letter || '').split(/\n\n+/).forEach((x) => p.append(el('p', { textContent: x })));
+function letterNode(r, d) {
+  d = d || (data && data.design) || design;
+  const c = r.cv, p = paperEl('letter', d), contact = (c.contact || []).filter(Boolean).join('  ·  ');
+  const date = el('div', { className: 'date', textContent: `${c.contact?.[2] ? c.contact[2] + ', ' : ''}${new Date().toLocaleDateString('pl-PL')}` });
+  const paras = (r.letter || '').split(/\n\n+/).map((x) => el('p', { textContent: x }));
+  const head = d.tpl === 'wyrazisty'
+    ? el('header', { className: 'band' }, el('h1', { textContent: c.name }), el('div', { className: 'ct', textContent: contact }))
+    : el('header', { className: 'top lhead' }, el('h1', { textContent: c.name }), el('div', { className: 'ct', textContent: contact }), el('div', { className: 'rule' }));
+  p.append(el('div', { className: 'pg' }, head, el('div', { className: 'body' }, date, ...paras)));
   return p;
 }
 function drawMail() {
@@ -333,20 +420,23 @@ function drawMail() {
     } }));
 }
 function showResult() {
+  clearDraft();
   $('#result').hidden = false; window.scrollTo(0, 0);
   const withLetter = data.pkg === 'cv_letter';
   const draw = () => {
-    $('#adTabs').replaceChildren(...(data.results.length > 1 ? data.results.map((r, i) => el('button', { type: 'button', textContent: `${i + 1}. ${(r.position || '').slice(0, 32)}`, onclick: () => { curAd = i; draw(); } })) : []));
+    $('#adTabs').replaceChildren(...(data.results.length > 1 ? data.results.map((r, i) => el('button', { type: 'button', role: 'tab', textContent: `${i + 1}. ${(r.position || '').slice(0, 32)}`, onclick: () => { curAd = i; draw(); } })) : []));
     $$('#adTabs button').forEach((b, i) => b.setAttribute('aria-selected', i === curAd));
     $('#adTabs').hidden = data.results.length < 2;
-    $('#docTabs').replaceChildren(...(withLetter ? [['cv', 'CV'], ['letter', 'List motywacyjny']].map(([k, t]) => el('button', { type: 'button', textContent: t, onclick: () => { curDoc = k; draw(); } })) : []));
+    $('#docTabs').replaceChildren(...(withLetter ? [['cv', 'CV'], ['letter', 'List motywacyjny']].map(([k, t]) => el('button', { type: 'button', role: 'tab', textContent: t, onclick: () => { curDoc = k; draw(); } })) : []));
     $$('#docTabs button').forEach((b, i) => b.setAttribute('aria-selected', ['cv', 'letter'][i] === curDoc));
     $('#docTabs').hidden = !withLetter;
     const r = data.results[curAd];
-    $('#paper').replaceChildren(!withLetter || curDoc === 'cv' ? cvNode(r) : letterNode(r));
+    $('#print').textContent = `Pobierz PDF: ${!withLetter || curDoc === 'cv' ? 'CV' : 'list'}`;
+    $('#paper').replaceChildren(!withLetter || curDoc === 'cv' ? cvNode(r, undefined, data.design) : letterNode(r, data.design));
     try { document.title = `${curDoc === 'letter' ? 'List' : 'CV'} ${r.cv.name} – ${r.position}`; } catch {}
   };
   drawMail();
+  designPicker($('#resDesign'), data.design, (d) => { data.design = d; draw(); fetch(`/api/orders/${orderId}/design`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) }).catch(() => {}); }, { thumbs: false });
   $('#hlTog').onchange = draw;
   $('#print').hidden = !!cfg.noPrint;
   $('#print').onclick = () => window.print();
@@ -355,8 +445,9 @@ function showResult() {
 $('#newOrder').onclick = () => {
   try { history.replaceState(null, '', location.pathname); } catch {}
   $('#result').hidden = true; landing(true); route();
-  $('#wizForm').reset(); ['exp', 'edu', 'ads'].forEach((b) => { $('#' + b).replaceChildren(); addRow(b); }); go(1); window.scrollTo(0, 0);
+  resetWizard(); window.scrollTo(0, 0);
 };
+function resetWizard() { design = { tpl: 'nowoczesny', color: 'niebieski' }; drawWizDesign(); restoring = true; $('#wizForm').reset(); ['exp', 'edu', 'ads'].forEach((b) => { $('#' + b).replaceChildren(); addRow(b); }); restoring = false; refresh(); go(1); }
 
 const LEGAL = { '#regulamin': 'legal-regulamin', '#prywatnosc': 'legal-prywatnosc' };
 function route() {
@@ -369,7 +460,11 @@ function route() {
 }
 window.addEventListener('hashchange', route); route();
 
-addRow('exp'); addRow('edu'); addRow('ads'); refresh(); go(1);
+addRow('exp'); addRow('edu'); addRow('ads');
+if (restoreDraft()) $('#draftNote').hidden = false;
+refresh(); go(1); drawWizDesign();
+$('#clearDraft').onclick = () => { clearDraft(); resetWizard(); $('#draftNote').hidden = true; };
 const q = new URLSearchParams(location.search);
 if (q.get('id')) startResult(q.get('id'));
+else if (q.has('canceled')) { try { history.replaceState(null, '', location.pathname); } catch {} openWiz(); go(6); $('#werr').textContent = 'Płatność została anulowana. Twoje dane są zachowane, możesz spróbować ponownie.'; }
 })();

@@ -42,3 +42,6 @@ Regulamin i polityka prywatności są w `public/index.html` (widoki `#regulamin`
 
 ## Wysyłka dokumentów e-mailem
 Po wygenerowaniu serwer renderuje PDF (`lib/pdf.js`, czcionka Inter z `fonts/`) i wysyła je klientowi jako załączniki (`lib/mail.js`, nodemailer). Ustaw `SMTP_URL` i `MAIL_FROM` (nadawca musi mieć skonfigurowaną domenę: SPF/DKIM u dostawcy poczty, inaczej wiadomości trafią do spamu). Bez `SMTP_URL` maile nie są wysyłane, a klient pobiera dokumenty na stronie. Błąd wysyłki nie psuje zamówienia; strona pokazuje komunikat i przycisk „Wyślij ponownie” (`POST /api/orders/:id/resend`, limit raz na minutę).
+
+## Szablony CV
+4 szablony (`nowoczesny`, `wyrazisty`, `klasyczny`, `elegancki`) × 6 kolorów, zdefiniowane w `lib/designs.js` i zduplikowane w `public/app.js` (TPLS, COLORS). Na stronie wygląd robi CSS (`.paper.t-*`, zmienna `--acc`), w e-mailu `lib/pdf.js` (pdfkit; czcionki Inter i Caladea w `fonts/`). Klient wybiera wygląd w kreatorze, a po zakupie może go zmienić (`POST /api/orders/:id/design`); kolejne wysyłki e-mail idą w nowym wyglądzie.

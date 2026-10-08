@@ -7,6 +7,7 @@ import { getOrder, saveOrder, updateOrder } from './lib/store.js';
 import { generateForAd } from './lib/generate.js';
 import { fetchAd, AdError } from './lib/fetchAd.js';
 import { mailEnabled, sendOrderMail } from './lib/mail.js';
+import { cleanDesign } from './lib/designs.js';
 
 const PORT = process.env.PORT || 3000;
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
@@ -66,7 +67,7 @@ app.post('/api/fetch-ad', async (req, res) => {
 
 app.post('/api/orders', async (req, res) => {
   try {
-    const { pkg, profile, ads, consent } = req.body || {};
+    const { pkg, profile, ads, consent, design } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
     const cleanAds = arr(ads, MAX_ADS).map((a) => ({ title: str(a?.title, 100), text: str(a?.text, 10000) })).filter((a) => a.text.length >= 80);
     if (!cleanAds.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
@@ -77,7 +78,7 @@ app.post('/api/orders', async (req, res) => {
     const total = calcTotal(pkg, cleanAds.length); // cena zawsze liczona po stronie serwera
     const id = crypto.randomUUID();
     const order = {
-      id, pkg, total, profile: p, ads: cleanAds, status: 'pending', results: [], created: Date.now(),
+      id, pkg, total, profile: p, ads: cleanAds, design: cleanDesign(design), status: 'pending', results: [], created: Date.now(),
     };
     await saveOrder(order);
 
@@ -113,7 +114,7 @@ app.get('/api/orders/:id', async (req, res) => {
     const s = await stripe.checkout.sessions.retrieve(o.stripeSession).catch(() => null);
     if (s?.payment_status === 'paid') { await markPaidAndGenerate(o.id); o = await getOrder(o.id); }
   }
-  res.json({ id: o.id, pkg: o.pkg, total: o.total, status: o.status, results: o.results, error: o.error, mail: o.mail });
+  res.json({ id: o.id, pkg: o.pkg, total: o.total, status: o.status, results: o.results, error: o.error, mail: o.mail, design: cleanDesign(o.design) });
 });
 
 // Tylko tryb DEMO: symulacja płatności.
@@ -150,6 +151,15 @@ async function markPaidAndGenerate(id) {
     await updateOrder(id, { status: 'paid', error: 'Generowanie nie powiodło się. Spróbuj ponownie.' });
   } finally { inFlight.delete(id); }
 }
+
+// Klient może zmienić szablon i kolor po zakupie (bez dopłaty); kolejne maile idą w nowym wyglądzie.
+app.post('/api/orders/:id/design', async (req, res) => {
+  const o = await getOrder(req.params.id);
+  if (!o) return res.sendStatus(404);
+  const design = cleanDesign(req.body);
+  await updateOrder(o.id, { design });
+  res.json({ design });
+});
 
 app.post('/api/orders/:id/resend', async (req, res) => {
   const o = await getOrder(req.params.id);

@@ -20,7 +20,7 @@
       if (!b.consent) return json({ error: 'Wymagana zgoda na przetwarzanie danych.' }, 400);
       if (!ads.length) return json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' }, 400);
       const id = 'preview-' + Math.random().toString(36).slice(2);
-      orders[id] = { id, pkg: b.pkg, profile: b.profile, ads, status: 'pending', total: P[b.pkg] + P.extra * (ads.length - 1) };
+      orders[id] = { id, design: b.design, pkg: b.pkg, profile: b.profile, ads, status: 'pending', total: P[b.pkg] + P.extra * (ads.length - 1) };
       return json({ id, demo: true });
     }
     const pay = /^\/api\/orders\/([^/]+)\/demo-pay$/.exec(url);
@@ -29,9 +29,10 @@
       setTimeout(() => { o.results = o.ads.map((ad) => tailor({ profile: o.profile, ad, withLetter: o.pkg === 'cv_letter' })); o.status = 'done'; o.mail = { status: 'sent', to: o.profile.email }; }, 2200);
       return json({ ok: true });
     }
+    if (/\/design$/.test(url) && m === 'POST') { const o = orders[url.split('/')[3]]; if (o) o.design = JSON.parse(opts.body); return json({ design: o && o.design }); }
     if (/\/resend$/.test(url) && m === 'POST') return json({ mail: orders[url.split('/')[3]].mail });
     const get = /^\/api\/orders\/([^/]+)$/.exec(url);
-    if (get && orders[get[1]]) { const o = orders[get[1]]; return json({ id: o.id, pkg: o.pkg, total: o.total, status: o.status, results: o.results, mail: o.mail }); }
+    if (get && orders[get[1]]) { const o = orders[get[1]]; return json({ id: o.id, pkg: o.pkg, total: o.total, status: o.status, results: o.results, mail: o.mail, design: o.design }); }
     return json({ error: 'not found' }, 404);
   };
 })();

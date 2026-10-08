@@ -2,15 +2,18 @@
 <html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CV Pod Ogłoszenie</title>
 <meta name="description" content="Osobne CV i list motywacyjny dopasowane do każdego ogłoszenia o pracę. CV od 39 zł.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%232548E8%22/%3E%3Crect x=%229%22 y=%228%22 width=%2214%22 height=%2216%22 rx=%222%22 fill=%22%23fff%22/%3E%3Crect x=%2212%22 y=%2213%22 width=%228%22 height=%222.4%22 fill=%22%23FFE45C%22/%3E%3Crect x=%2212%22 y=%2217.5%22 width=%226%22 height=%221.6%22 fill=%22%232548E8%22/%3E%3C/svg%3E">
+<meta property="og:title" content="CV Pod Ogłoszenie"><meta property="og:description" content="Osobne CV i list motywacyjny dopasowane do każdego ogłoszenia o pracę. CV od 39 zł.">
+<meta name="theme-color" content="#2548E8">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Caladea:wght@400;700&family=Instrument+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="style.css"></head>
 <body>
 <div id="demoBar" class="demobar" hidden>Tryb DEMO: płatność jest symulowana.</div>
 
 <header class="nav" id="nav"><div class="inner">
   <a class="logo" href="#top">CV<span>Pod</span>Ogłoszenie</a>
-  <nav><a href="#jak">Jak to działa</a><a href="#przyklad">Przykład</a><a href="#cennik">Cennik</a><a href="#faq">FAQ</a></nav>
+  <nav><a href="#jak">Jak to działa</a><a href="#przyklad">Przykład</a><a href="#szablony">Szablony</a><a href="#cennik">Cennik</a><a href="#faq">FAQ</a></nav>
   <button class="btn sm" data-open>Zamów CV</button>
 </div></header>
 
@@ -27,9 +30,7 @@
     <div class="doc ad"><div class="tagline">Ogłoszenie</div><h4>Kasjer / Sprzedawca</h4>
       <p>Szukamy osoby do <mark>obsługi klienta</mark> i <mark>kasy fiskalnej</mark>. Wymagamy <mark>komunikatywności</mark> i gotowości do pracy zmianowej.</p></div>
     <div class="arrow" aria-hidden="true">→</div>
-    <div class="doc cvm"><div class="tagline">Twoje CV pod to ogłoszenie</div><h4>Anna Nowak</h4><div class="sub">Kasjer / Sprzedawca</div>
-      <p class="h">Umiejętności</p><p><mark>obsługa klienta</mark> · <mark>kasa fiskalna</mark> · <mark>komunikatywność</mark> · Excel</p>
-      <p class="h">Doświadczenie</p><p>• Obsługa kasy i rozliczanie zmiany<br>• Rozmowy z klientami, reklamacje</p></div>
+    <div class="hero-thumb" id="heroThumb" aria-label="Przykładowe CV w szablonie Nowoczesnym"></div></div>
   </div>
 </div></section>
 
@@ -46,13 +47,20 @@
 <section class="sec alt" id="przyklad"><div class="inner">
   <h2>To samo doświadczenie, trzy różne CV</h2>
   <p class="sub2">Jedna osoba aplikuje na trzy stanowiska. Zmienia się nagłówek, profil, kolejność umiejętności i punktów w opisie pracy. Żółte są słowa z ogłoszenia. Niczego nie dopisujemy, czego nie podałeś.</p>
-  <div class="seg" id="exTabs" role="tablist"></div>
+  <div class="seg" id="exTabs" role="tablist" aria-label="Przykładowe ogłoszenia"></div>
   <div class="ex-grid"><div class="doc ad" id="exAd"></div><div class="doc cvm big" id="exCv"></div></div>
   <div class="changes" id="exChg"></div>
   <p style="margin-top:20px"><button class="btn" data-example>Zobacz pełne CV i list</button></p>
 </div></section>
 
-<section class="sec" id="cennik"><div class="inner">
+<section class="sec" id="szablony"><div class="inner">
+  <h2>Szablony, które przyciągają wzrok</h2>
+  <p class="sub2">Cztery układy i sześć kolorów. Wybierasz w kreatorze, a po zakupie możesz zmienić wygląd w każdej chwili, bez dopłaty. Kliknij miniaturę, aby zobaczyć pełne CV.</p>
+  <div class="dp-colors" id="galColors" role="group" aria-label="Kolor szablonów"></div>
+  <div class="gal-grid" id="galGrid"></div>
+</div></section>
+
+<section class="sec alt" id="cennik"><div class="inner">
   <h2>Cennik</h2>
   <div class="prices">
     <div class="price-card"><h3>CV</h3><div class="amt">39 zł</div><ul><li>CV dopasowane do jednego ogłoszenia</li><li>Słowa kluczowe pod systemy ATS</li><li>PDF na stronie i w e-mailu</li></ul><button class="btn ghost" data-open data-pkg="cv">Wybierz CV</button></div>
@@ -61,7 +69,7 @@
   </div>
 </div></section>
 
-<section class="sec alt" id="faq"><div class="inner narrow">
+<section class="sec" id="faq"><div class="inner narrow">
   <h2>Pytania</h2>
   <details><summary>Czy dokumenty zawierają zmyślone informacje?</summary><p>Nie. Dokumenty powstają wyłącznie z faktów, które sam podasz. Nic nie jest dopisywane: ani stanowiska, ani daty, ani certyfikaty.</p></details>
   <details><summary>Jak wygląda płatność?</summary><p>Płacisz przez Stripe: BLIK, kartą lub Apple/Google Pay. Dokumenty generują się dopiero po potwierdzeniu płatności.</p></details>
@@ -154,7 +162,10 @@
         <label class="opt"><input type="radio" name="pkg" value="cv"><span class="o-t">Samo CV<b>39 zł</b></span><span class="o-d">CV dopasowane do ogłoszenia</span></label>
         <label class="opt"><input type="radio" name="pkg" value="cv_letter" checked><span class="o-t">CV + list motywacyjny<b>49 zł</b></span><span class="o-d">Komplet dokumentów pod ogłoszenie</span></label>
       </div>
-      <p class="hint">Każde kolejne ogłoszenie (inny zawód lub firma) to <b>+20 zł</b> i osobne, dopasowane CV. Dodasz je w kroku „Ogłoszenia”.</p>
+      <h3 class="sh">Wygląd CV <span class="h">(możesz go zmienić także po zakupie)</span></h3>
+      <div id="wizDesign"></div>
+      <p class="hint" style="margin-top:14px">Każde kolejne ogłoszenie (inny zawód lub firma) to <b>+20 zł</b> i osobne, dopasowane CV. Dodasz je w kroku „Ogłoszenia”.</p>
+      <p class="note" id="draftNote" hidden>Przywróciliśmy dane wpisane wcześniej na tym urządzeniu. <button type="button" class="link" id="clearDraft">Zacznij od nowa</button></p>
       <button type="button" class="link" id="fill" hidden>Wstaw dane przykładowe</button>
     </section>
     <section data-step="2" hidden>
@@ -211,12 +222,12 @@
   <div class="exv-body">
    <aside class="exv-side" id="exSide"></aside>
    <div class="exv-main">
-    <div class="seg" id="exDocTabs"></div>
+    <div class="ex-tools"><div class="seg" id="exDocTabs" role="tablist" aria-label="Dokument"></div><div id="exDesign" class="res-design"></div></div>
     <div id="exPaper"></div>
     <div class="changes" id="exChanges"></div>
    </div>
   </div>
-  <div class="exv-foot"><span>Zamów takie dokumenty pod swoje ogłoszenie.</span><button class="btn" id="exCta">Zamów CV od 39 zł</button></div>
+  <div class="exv-foot"><span class="exv-cta-txt">Zamów takie dokumenty pod swoje ogłoszenie.</span><button class="btn" id="exCta">Zamów CV od 39 zł</button></div>
  </div>
 </div>
 
@@ -227,8 +238,9 @@
 <section id="result" class="result" hidden><div class="inner">
   <div class="res-top noprint"><div><p class="eyebrow">Zamówienie opłacone</p><h2>Twoje dokumenty</h2></div><button class="btn ghost" id="newOrder">Nowe zamówienie</button></div>
   <div class="res-tools noprint">
-    <div class="seg" id="adTabs"></div>
-    <div class="seg" id="docTabs"></div>
+    <div class="seg" id="adTabs" role="tablist" aria-label="Ogłoszenia"></div>
+    <div class="seg" id="docTabs" role="tablist" aria-label="Dokument"></div>
+    <div class="res-design" id="resDesign"></div>
     <label class="tog"><input type="checkbox" id="hlTog" checked> Pokaż dopasowane słowa kluczowe</label>
     <button class="btn" id="print">Pobierz PDF</button>
   </div>
