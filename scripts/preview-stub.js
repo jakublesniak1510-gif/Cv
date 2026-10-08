@@ -7,7 +7,7 @@
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const total = (pkg, n, a, fu, langs = [], disc = 0) => P[pkg] + ['interview', 'messages', 'linkedin', 'docx'].reduce((t, k) => t + (a[k] ? P[k] : 0), 0) + P.extraLang * langs.length - disc;
   const score = (m) => ({ ...m, score: m.found.length + m.missing.length ? Math.round((100 * m.found.length) / (m.found.length + m.missing.length)) : null });
-  const view = (o) => ({ review: o.review || null, myCode: o.status === 'done' ? { code: 'KOD-' + (o.parentId || o.id).slice(-6).toUpperCase(), discount: 10, expires: o.created + 90 * 864e5, uses: 0, usedByMe: !!o.parentId && /^KOD-/.test(o.code || '') } : null, extraLangs: o.extraLangs, id: o.id, pkg: o.pkg, addons: o.addons, total: o.total, status: o.status, results: o.results, mail: o.mail, design: o.design, photo: o.profile.photo || '', parentId: o.parentId || null, revisionsLeft: MAXREV - o.revisions, expires: o.created + 30 * 864e5 });
+  const view = (o) => ({ createAccount: !!o.createAccount, email: o.profile.email, review: o.review || null, myCode: o.status === 'done' ? { code: 'KOD-' + (o.parentId || o.id).slice(-6).toUpperCase(), discount: 10, expires: o.created + 90 * 864e5, uses: 0, usedByMe: !!o.parentId && /^KOD-/.test(o.code || '') } : null, extraLangs: o.extraLangs, id: o.id, pkg: o.pkg, addons: o.addons, total: o.total, status: o.status, results: o.results, mail: o.mail, design: o.design, photo: o.profile.photo || '', parentId: o.parentId || null, revisionsLeft: MAXREV - o.revisions, expires: o.created + 30 * 864e5 });
   const make = (fields) => { const id = 'preview-' + Math.random().toString(36).slice(2); orders[id] = { id, status: 'pending', revisions: 0, created: Date.now(), ...fields }; return orders[id]; };
   window.fetch = async (url, opts = {}) => {
     const m = (opts.method || 'GET').toUpperCase(), body = opts.body ? JSON.parse(opts.body) : {};
@@ -19,6 +19,7 @@
     if (url.startsWith('/api/account')) {
       const p = url.replace('/api/account', ''), A = (window.__acc ||= { logged: false, email: '', apps: [] });
       if (p === '/link') { if (!/^\S+@\S+\.\S+$/.test(body.email || '')) return json({ error: 'Podaj poprawny adres e-mail.' }, 400); A.pending = body.email.toLowerCase(); return json({ ok: true, demoLink: 'https://twojadomena.pl/konto?t=podglad' }); }
+      if (p === '/from-order') { const o = orders[body.orderId]; if (!o || o.status !== 'done') return json({ error: 'Konto założysz po otrzymaniu dokumentów.' }, 409); A.logged = true; A.email = o.profile.email.toLowerCase(); return json({ ok: true }); }
       if (p === '/login') { if (!A.pending) return json({ error: 'Link wygasł albo został już użyty. Poproś o nowy.' }, 401); A.logged = true; A.email = A.pending; return json({ ok: true }); }
       if (!A.logged) return json({ error: 'Zaloguj się.' }, 401);
       if (p === '' && m === 'GET') return json({ email: A.email, apps: A.apps, statuses: ['wysłane', 'rozmowa', 'oferta', 'odmowa', 'brak odpowiedzi'], orders: Object.values(orders).filter((o) => o.status === 'done').map((o) => ({ id: o.id, created: o.created, pkg: { cv: 'CV', cv_letter: 'CV + list motywacyjny', pack3: 'Pakiet 3 CV + listy motywacyjne' }[o.pkg], status: o.status, positions: o.results.map((r) => ({ position: r.position, company: r.company || '' })) })) });
@@ -58,7 +59,7 @@
       if (!ads.length) return json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' }, 400);
       const a = body.addons || {};
       const disc = /^KOD-/.test(body.code || '') ? 1000 : 0;
-      const o = make({ design: body.design, pkg: body.pkg, addons: a, extraLangs: body.extraLangs || [], profile: body.profile, ads, total: total(body.pkg, ads.length, a, false, body.extraLangs || [], disc) });
+      const o = make({ createAccount: !!body.createAccount, design: body.design, pkg: body.pkg, addons: a, extraLangs: body.extraLangs || [], profile: body.profile, ads, total: total(body.pkg, ads.length, a, false, body.extraLangs || [], disc) });
       return json({ id: o.id, demo: true });
     }
     let r;

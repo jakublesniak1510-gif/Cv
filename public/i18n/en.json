@@ -837,5 +837,19 @@
 "Ogłoszenie {0}: {1}": "Job ad {0}: {1}",
 "Ogłoszenie {0}: {1} (po angielsku)": "Job ad {0}: {1} (in English)",
 "Dodatkowa wersja: {0}": "Extra language version: {0}",
-"Wklej link (https://…) albo całą treść ogłoszenia": "Paste a link (https://…) or the full job ad text"
+"Wklej link (https://…) albo całą treść ogłoszenia": "Paste a link (https://…) or the full job ad text",
+"Załóż darmowe konto": "Create a free account",
+"na ten e-mail (opcjonalnie): wszystkie zamówienia w jednym miejscu i lista aplikacji z przypomnieniem przed rozmową. Możesz też kupić bez konta.": "for this email (optional): all your orders in one place and an application list with interview reminders. You can also buy without an account.",
+"Czy muszę zakładać konto?": "Do I need to create an account?",
+"Nie. Możesz kupić bez konta: dokumenty dostaniesz na stronie i e-mailem. Konto jest darmowe i opcjonalne. Zaznaczysz je w podsumowaniu zamówienia albo założysz później jednym kliknięciem na stronie dokumentów. Na koncie masz wszystkie zamówienia i listę aplikacji z przypomnieniem przed rozmową.": "No. You can buy without an account: you get your documents on the page and by email. The account is free and optional. Tick it in the order summary or create it later with one click on your documents page. Your account shows all your orders and an application list with interview reminders.",
+"Przejdź do konta": "Go to my account",
+"Zamówienie i dokumenty znajdziesz w zakładce „Moje konto”. Tam też poprowadzisz listę aplikacji z przypomnieniem przed rozmową.": "You will find this order and its documents under “My account”, where you can also keep an application list with interview reminders.",
+"To zamówienie jest na Twoim koncie": "This order is in your account",
+"Konto założone": "Account created",
+"Załóż konto jednym kliknięciem": "Create an account with one click",
+"Załóż darmowe konto (opcjonalnie)": "Create a free account (optional)",
+"Bez hasła, na adres {0}. Zobaczysz tam wszystkie zamówienia i poprowadzisz listę aplikacji z przypomnieniem dzień przed rozmową. Konto możesz usunąć w każdej chwili.": "No password, for {0}. You will see all your orders there and can keep an application list with a reminder the day before an interview. You can delete the account at any time.",
+"Zaloguj się albo załóż darmowe konto. Bez hasła: wpisz e-mail, a wyślemy Ci link. Jeśli nie masz jeszcze konta, założy się przy pierwszym logowaniu.": "Log in or create a free account. No password: enter your email and we will send you a link. If you don't have an account yet, it is created when you first log in.",
+"Konto nie jest potrzebne do zakupu. Na koncie zobaczysz swoje zamówienia i poprowadzisz listę aplikacji z przypomnieniem przed rozmową.": "You don't need an account to buy. Your account shows your orders and lets you keep an application list with interview reminders.",
+"Konto założysz po otrzymaniu dokumentów.": "You can create an account once your documents are ready."
 }

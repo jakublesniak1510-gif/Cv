@@ -470,7 +470,7 @@ $('#wizForm').onsubmit = async (e) => {
   if (step < 6) return go(step + 1);
   const v = (id) => $('#' + id).value;
   const body = {
-    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, reviewAsk: $('#reviewAsk').checked, uiLang: window.I18N?.lang || 'pl', pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, reviewAsk: $('#reviewAsk').checked, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   $('#next').disabled = true;
@@ -814,6 +814,20 @@ function drawMyCode() {
     el('p', { className: 'hint', textContent: k.uses ? `Kod został użyty ${k.uses} ${k.uses === 1 ? 'raz' : 'razy'}.` : 'Kod nie był jeszcze używany.' }));
 }
 
+// Konto jest opcjonalne: po zakupie można je założyć jednym kliknięciem (albo założy się samo, jeśli klient zaznaczył to w zamówieniu).
+async function drawAcctOffer() {
+  const box = $('#acctOffer'); box.hidden = true;
+  const link = el('a', { className: 'btn ghost sm', href: '/konto', textContent: 'Przejdź do konta' }); link.dataset.acct = '';
+  const done = (t) => { box.replaceChildren(el('h3', { textContent: t }), el('p', { className: 'hint', textContent: 'Zamówienie i dokumenty znajdziesz w zakładce „Moje konto”. Tam też poprowadzisz listę aplikacji z przypomnieniem przed rozmową.' }), link); box.hidden = false; };
+  try { const a = await accApi(); if (a.email === data.email?.toLowerCase()) return done('To zamówienie jest na Twoim koncie'); } catch {}
+  const create = async () => { try { await accApi('/from-order', { method: 'POST', body: JSON.stringify({ orderId }) }); done('Konto założone'); } catch (x) { flash(x.message, true); } };
+  if (data.createAccount) return create();
+  const btn = el('button', { className: 'btn sm', type: 'button', textContent: 'Załóż konto jednym kliknięciem', onclick: create });
+  box.replaceChildren(el('h3', { textContent: 'Załóż darmowe konto (opcjonalnie)' }),
+    el('p', { className: 'hint', textContent: `Bez hasła, na adres ${data.email || 'z zamówienia'}. Zobaczysz tam wszystkie zamówienia i poprowadzisz listę aplikacji z przypomnieniem dzień przed rozmową. Konto możesz usunąć w każdej chwili.` }), btn);
+  box.hidden = false;
+}
+
 // Ocena po zamówieniu: gwiazdki obowiązkowe, komentarz i zgoda na publikację opcjonalne.
 function drawRate() {
   const box = $('#rate');
@@ -878,7 +892,7 @@ function showResult() {
   $('#reviseBtn').onclick = openRevise;
   $('#editor').hidden = $('#reviseBox').hidden = true; editing = null;
   if (data.expires) $('#retention').textContent = `Dane tego zamówienia, w tym dokumenty${data.photo ? ' i zdjęcie' : ''}, usuniemy automatycznie ${new Date(data.expires).toLocaleDateString('pl-PL')}. Zapisz PDF-y u siebie.`;
-  drawFollowup(); drawMyCode(); drawRate();
+  drawFollowup(); drawMyCode(); drawRate(); drawAcctOffer();
   draw();
   if (location.hash === '#ocena') setTimeout(() => $('#rate').scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
 }
@@ -1179,7 +1193,8 @@ function accLogin(err) {
     } catch (x) { msg.className = 'err'; msg.textContent = x.message; } finally { btn.disabled = false; }
   };
   return el('div', { className: 'inner narrow' }, el('h1', { textContent: 'Moje konto' }),
-    el('p', { className: 'lead', textContent: 'Bez hasła: wpisz e-mail, a wyślemy Ci link do logowania. Na koncie zobaczysz swoje zamówienia i poprowadzisz listę aplikacji z przypomnieniem przed rozmową.' }), form);
+    el('p', { className: 'lead', textContent: 'Zaloguj się albo załóż darmowe konto. Bez hasła: wpisz e-mail, a wyślemy Ci link. Jeśli nie masz jeszcze konta, założy się przy pierwszym logowaniu.' }),
+    el('p', { className: 'hint', textContent: 'Konto nie jest potrzebne do zakupu. Na koncie zobaczysz swoje zamówienia i poprowadzisz listę aplikacji z przypomnieniem przed rozmową.' }), form);
 }
 function accDash(d) {
   const wrap = el('div', { className: 'inner' });

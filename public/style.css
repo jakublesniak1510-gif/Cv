@@ -556,3 +556,4 @@ html[lang="pl"] .i18n-only{display:none}
 .nav .btn{white-space:nowrap}
 html:not([lang="pl"]) .nav nav{gap:16px}
 @media(max-width:1360px){html:not([lang="pl"]) .nav nav a.nav-x{display:none}}
+.acct-offer{border:1px solid var(--line);border-radius:14px;padding:18px;background:var(--soft-b);margin-top:18px;display:grid;gap:8px;justify-items:start}.acct-offer h3{margin:0}.acct-offer p{margin:0}

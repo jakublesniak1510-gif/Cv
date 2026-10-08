@@ -837,5 +837,19 @@
 "Ogłoszenie {0}: {1}": "Оголошення {0}: {1}",
 "Ogłoszenie {0}: {1} (po angielsku)": "Оголошення {0}: {1} (англійською)",
 "Dodatkowa wersja: {0}": "Додаткова мовна версія: {0}",
-"Wklej link (https://…) albo całą treść ogłoszenia": "Вставте посилання (https://…) або весь текст оголошення"
+"Wklej link (https://…) albo całą treść ogłoszenia": "Вставте посилання (https://…) або весь текст оголошення",
+"Załóż darmowe konto": "Створіть безкоштовний акаунт",
+"na ten e-mail (opcjonalnie): wszystkie zamówienia w jednym miejscu i lista aplikacji z przypomnieniem przed rozmową. Możesz też kupić bez konta.": "на цей e-mail (необов’язково): усі замовлення в одному місці та список заявок із нагадуванням перед співбесідою. Купити можна і без акаунта.",
+"Czy muszę zakładać konto?": "Чи потрібно створювати акаунт?",
+"Nie. Możesz kupić bez konta: dokumenty dostaniesz na stronie i e-mailem. Konto jest darmowe i opcjonalne. Zaznaczysz je w podsumowaniu zamówienia albo założysz później jednym kliknięciem na stronie dokumentów. Na koncie masz wszystkie zamówienia i listę aplikacji z przypomnieniem przed rozmową.": "Ні. Купити можна без акаунта: документи ви отримаєте на сторінці та e-mailом. Акаунт безкоштовний і необов’язковий. Позначте його в підсумку замовлення або створіть пізніше одним кліком на сторінці документів. В акаунті є всі замовлення та список заявок із нагадуванням перед співбесідою.",
+"Przejdź do konta": "Перейти до акаунта",
+"Zamówienie i dokumenty znajdziesz w zakładce „Moje konto”. Tam też poprowadzisz listę aplikacji z przypomnieniem przed rozmową.": "Замовлення та документи ви знайдете в розділі «Мій акаунт». Там також можна вести список заявок із нагадуванням перед співбесідою.",
+"To zamówienie jest na Twoim koncie": "Це замовлення є у вашому акаунті",
+"Konto założone": "Акаунт створено",
+"Załóż konto jednym kliknięciem": "Створити акаунт одним кліком",
+"Załóż darmowe konto (opcjonalnie)": "Створіть безкоштовний акаунт (необов’язково)",
+"Bez hasła, na adres {0}. Zobaczysz tam wszystkie zamówienia i poprowadzisz listę aplikacji z przypomnieniem dzień przed rozmową. Konto możesz usunąć w każdej chwili.": "Без пароля, на адресу {0}. Там ви побачите всі замовлення та зможете вести список заявок із нагадуванням за день до співбесіди. Акаунт можна видалити будь-коли.",
+"Zaloguj się albo załóż darmowe konto. Bez hasła: wpisz e-mail, a wyślemy Ci link. Jeśli nie masz jeszcze konta, założy się przy pierwszym logowaniu.": "Увійдіть або створіть безкоштовний акаунт. Без пароля: введіть e-mail, і ми надішлемо посилання. Якщо акаунта ще немає, він створиться під час першого входу.",
+"Konto nie jest potrzebne do zakupu. Na koncie zobaczysz swoje zamówienia i poprowadzisz listę aplikacji z przypomnieniem przed rozmową.": "Для покупки акаунт не потрібен. В акаунті ви побачите свої замовлення та зможете вести список заявок із нагадуванням перед співбесідою.",
+"Konto założysz po otrzymaniu dokumentów.": "Акаунт можна створити після отримання документів."
 }

@@ -191,6 +191,7 @@
   <details><summary>Czy mogę wgrać swoje stare CV?</summary><p>Tak. W kreatorze wgrywasz PDF lub plik Word, a formularz uzupełnia się sam. Sprawdzasz dane i poprawiasz, co trzeba. Pliku nie zapisujemy.</p></details>
   <details><summary>Czy zrobicie CV po angielsku lub niemiecku?</summary><p>Tak. Główny język dokumentów wybierasz przy ogłoszeniu i jest w cenie: polski, angielski, niemiecki, ukraiński, hiszpański lub francuski. Każda dodatkowa wersja językowa tych samych dokumentów kosztuje 5 zł.</p></details>
   <details><summary>Jak długo przechowujecie moje dane?</summary><p>30 dni. Po tym czasie zamówienie, w tym treść dokumentów i zdjęcie, jest automatycznie usuwane. Zapisz PDF-y u siebie, a kopię masz też w e-mailu.</p></details>
+  <details><summary>Czy muszę zakładać konto?</summary><p>Nie. Możesz kupić bez konta: dokumenty dostaniesz na stronie i e-mailem. Konto jest darmowe i opcjonalne. Zaznaczysz je w podsumowaniu zamówienia albo założysz później jednym kliknięciem na stronie dokumentów. Na koncie masz wszystkie zamówienia i listę aplikacji z przypomnieniem przed rozmową.</p></details>
   <details><summary>Czy to abonament?</summary><p>Nie. Płacisz jednorazowo za konkretne zamówienie, bez okresu próbnego i bez automatycznych opłat. Nie musisz niczego anulować.</p></details>
   <details><summary>Czy CV przejdzie przez systemy ATS?</summary><p>CV zawiera słowa kluczowe z ogłoszenia (tylko te, które są prawdą o Tobie) i standardowe nazwy sekcji. Jeśli firma korzysta z ATS, wybierz szablon „Klasyczny ATS”: jest najprostszy do odczytania przez programy.</p></details>
   <details><summary>Co dokładnie zawiera przygotowanie do rozmowy?</summary><p>12 pytań, które mogą paść przy tym ogłoszeniu, z przykładowymi odpowiedziami opartymi na Twoim doświadczeniu i informacją, co rekruter sprawdza. Do tego gotowa odpowiedź na „Proszę opowiedzieć o sobie”, Twoje mocne strony i braki wobec wymagań, 5 pytań do pracodawcy, wskazówki do rozmowy o wynagrodzeniu i lista kontrolna. Dostajesz to na stronie i jako PDF.</p></details>
@@ -249,7 +250,7 @@
 <ol><li>Darmowy skaner CV ocenia, jak przesłane CV pasuje do wskazanego ogłoszenia. Wynik ma charakter pomocniczy.</li>
 <li>Asystent na stronie udziela ogólnych wskazówek dotyczących CV i rekrutacji. Odpowiedzi są generowane automatycznie i nie stanowią porady prawnej.</li>
 <li>Darmowe narzędzia (generator klauzuli RODO, kalkulator wynagrodzeń, generator podziękowania) działają w przeglądarce. Wyniki kalkulatora są szacunkowe.</li>
-<li>Konto klienta jest bezpłatne. Logowanie odbywa się jednorazowym linkiem wysyłanym na e-mail. Klient może w każdej chwili usunąć konto. Konto nieużywane przez 12 miesięcy jest usuwane automatycznie.</li></ol>
+<li>Konto klienta jest bezpłatne i opcjonalne: zakup nie wymaga zakładania konta. Logowanie odbywa się jednorazowym linkiem wysyłanym na e-mail. Klient może w każdej chwili usunąć konto. Konto nieużywane przez 12 miesięcy jest usuwane automatycznie.</li></ol>
 <h2>§6 Odstąpienie od umowy</h2>
 <ol><li>Usługa jest treścią cyfrową dostarczaną na wyraźne żądanie Klienta. Klient, który przed złożeniem zamówienia zaznaczył zgodę na rozpoczęcie wykonania usługi i przyjął do wiadomości utratę prawa odstąpienia, traci to prawo po pełnym wykonaniu usługi (art. 38 pkt 13 ustawy o prawach konsumenta).</li>
 <li>Przed wykonaniem usługi Klient może zrezygnować z zamówienia, pisząc na adres [E-MAIL].</li></ol>
@@ -369,6 +370,7 @@
     <section data-step="6" hidden>
       <div id="sum"></div>
       <div class="codebox"><label class="f">Kod rabatowy<span class="urlrow"><input type="text" id="codeInput" autocomplete="off" placeholder="np. KOD-AB12CD"><button type="button" class="btn ghost sm" id="codeApply">Zastosuj</button></span></label><p class="fstatus" id="codeMsg" role="status"></p></div>
+      <label class="check"><input type="checkbox" id="createAccount"> <span><b>Załóż darmowe konto</b> na ten e-mail (opcjonalnie): wszystkie zamówienia w jednym miejscu i lista aplikacji z przypomnieniem przed rozmową. Możesz też kupić bez konta.</span></label>
       <label class="check"><input type="checkbox" id="reviewAsk"> <span>Poproś mnie raz o ocenę dokumentów (jeden e-mail po 4 dniach, opcjonalnie).</span></label>
       <label class="check"><input type="checkbox" id="reminder"> <span>Przypomnij mi raz po 7 dniach o możliwości zamówienia CV pod kolejne ogłoszenie (opcjonalnie, jedna wiadomość e-mail).</span></label>
       <p class="perk small">Po opłaceniu dostaniesz <b>swój kod −10 zł</b> (ważny 90 dni): na kolejne zamówienie dla Ciebie i dla Twoich znajomych.</p>
@@ -431,6 +433,7 @@
   <div class="panel noprint" id="editor" hidden></div>
   <div class="panel noprint" id="reviseBox" hidden></div>
   <div id="paper"></div>
+  <section class="acct-offer noprint" id="acctOffer" hidden></section>
   <section class="rate noprint" id="rate" hidden></section>
   <section class="referral noprint" id="referral" hidden></section>
   <section class="followup noprint" id="followup" hidden></section>
