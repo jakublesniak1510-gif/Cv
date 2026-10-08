@@ -1,7 +1,7 @@
 // Atrapa API dla podglądu statycznego: ta sama strona, ale bez serwera, płatności i AI.
 (() => {
   const orders = {};
-  const P = { cv: 3900, cv_letter: 4900, pack3: 7900, interview: 1500, messages: 900, extraLang: 500 };
+  const P = { cv: 3900, cv_letter: 4900, pack3: 7900, interview: 5000, messages: 900, extraLang: 500 };
   const MAXREV = 10;
   const json = (b, status = 200) => new Response(JSON.stringify(b), { status, headers: { 'Content-Type': 'application/json' } });
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));

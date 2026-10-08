@@ -2,7 +2,7 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const el = (t, p = {}, ...k) => { const e = Object.assign(document.createElement(t), p); e.append(...k.filter((x) => x != null && x !== false)); return e; };
-let PRICE = { cv: 39, cv_letter: 49, pack3: 79, interview: 15, messages: 9, extraLang: 5 };
+let PRICE = { cv: 39, cv_letter: 49, pack3: 79, interview: 50, messages: 9, extraLang: 5 };
 const PKG_ADS = { cv: 1, cv_letter: 1, pack3: 3 };
 const PKG_NAME = { cv: 'CV', cv_letter: 'CV + list motywacyjny', pack3: 'Pakiet 3 CV + listy motywacyjne' };
 let promo = null; // zastosowany kod rabatowy: { code, discount, label }

@@ -52,7 +52,7 @@ Po wygenerowaniu serwer renderuje PDF (`lib/pdf.js`, czcionka Inter z `fonts/`) 
 - **Import starego CV** – `POST /api/import` (PDF/DOCX/TXT do 5 MB; `lib/importCv.js`); plik nie jest zapisywany.
 - **Zdjęcie** – przycinane w przeglądarce do 480×480 JPEG, pokazywane we wszystkich szablonach (na stronie i w PDF); nie trafia do AI.
 - **Wersja angielska** – język dokumentów per ogłoszenie (`auto`/`pl`/`en`), bez dopłaty.
-- **Dodatki** – przygotowanie do rozmowy (15 zł) i wiadomość do rekrutera + e-mail (9 zł); ceny w `lib/pricing.js`.
+- **Dodatki** – przygotowanie do rozmowy (50 zł) i wiadomość do rekrutera + e-mail (9 zł); ceny w `lib/pricing.js`.
 - **Kolejne zamówienie** – `POST /api/orders/:id/followup`: klient wybiera pakiet (CV / CV + list / Pakiet 3), dane z poprzedniego zamówienia.
 - **Usuwanie danych po 30 dniach** – automatycznie co godzinę (`deleteOlderThan` w `lib/store.js`).
 - **Podstrony SEO** – `/cv/:zawod`, `/poradnik/:artykul`, `/sitemap.xml`, `/robots.txt`; treści w `lib/content.js`.
