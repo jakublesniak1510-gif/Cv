@@ -26,11 +26,12 @@
     const pay = /^\/api\/orders\/([^/]+)\/demo-pay$/.exec(url);
     if (pay && m === 'POST') {
       const o = orders[pay[1]]; o.status = 'generating';
-      setTimeout(() => { o.results = o.ads.map((ad) => tailor({ profile: o.profile, ad, withLetter: o.pkg === 'cv_letter' })); o.status = 'done'; }, 2200);
+      setTimeout(() => { o.results = o.ads.map((ad) => tailor({ profile: o.profile, ad, withLetter: o.pkg === 'cv_letter' })); o.status = 'done'; o.mail = { status: 'sent', to: o.profile.email }; }, 2200);
       return json({ ok: true });
     }
+    if (/\/resend$/.test(url) && m === 'POST') return json({ mail: orders[url.split('/')[3]].mail });
     const get = /^\/api\/orders\/([^/]+)$/.exec(url);
-    if (get && orders[get[1]]) { const o = orders[get[1]]; return json({ id: o.id, pkg: o.pkg, total: o.total, status: o.status, results: o.results }); }
+    if (get && orders[get[1]]) { const o = orders[get[1]]; return json({ id: o.id, pkg: o.pkg, total: o.total, status: o.status, results: o.results, mail: o.mail }); }
     return json({ error: 'not found' }, 404);
   };
 })();

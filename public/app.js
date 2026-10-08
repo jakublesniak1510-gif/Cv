@@ -20,29 +20,114 @@ fetch('/api/config').then((r) => r.json()).then((c) => {
   cfg = c; $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
 });
 
-/* ---------- Przykład dopasowania (strona główna) ---------- */
+/* ---------- Przykład dopasowania ---------- */
+const BASE = {
+  name: 'Anna Nowak', contact: ['+48 600 100 200', 'anna.nowak@example.com', 'Kraków', 'linkedin.com/in/anna-nowak'],
+  jobs: [{ title: 'Specjalistka ds. obsługi klienta', company: 'Nova Serwis Sp. z o.o.', period: '03.2022 – obecnie' }, { title: 'Sprzedawca / kasjer', company: 'Market Dom', period: '06.2019 – 02.2022' }],
+  edu: [{ school: 'Uniwersytet Ekonomiczny w Krakowie', degree: 'Zarządzanie, licencjat', period: '2016 – 2019' }],
+  skills: 'obsługa klienta, obsługa kasy fiskalnej, komunikatywność, praca zmianowa, CRM, rozwiązywanie reklamacji, obsługa zgłoszeń, Excel, inwentaryzacja',
+  langs: ['angielski B2', 'niemiecki A2'], certs: ['Kurs obsługi klienta B2B'],
+  facts: ['Obsługa 40–50 zgłoszeń dziennie w systemie CRM', 'Rozwiązywanie reklamacji klientów', 'Kontakt z klientami zagranicznymi po angielsku', 'Obsługa kasy fiskalnej i rozliczanie zmiany', 'Obsługa klienta, reklamacje przy kasie', 'Inwentaryzacja towaru', 'Praca zmianowa w zespole 8 osób'],
+};
 const EX = [
-  { tab: 'Kasjer / Sprzedawca', title: 'Kasjer / Sprzedawca', ad: 'Szukamy osoby do obsługi klienta i obsługi kasy fiskalnej w supermarkecie. Wymagamy komunikatywności, uczciwości i gotowości do pracy zmianowej.',
-    kws: ['obsługi klienta', 'obsługa klienta', 'kasa fiskalna', 'obsługa kasy', 'komunikatywności', 'komunikatywność', 'pracy zmianowej', 'praca zmianowa'],
-    sub: 'Kasjer / Sprzedawca', sum: 'Aplikuję na stanowisko kasjera. Mam ponad 2 lata praktyki w obsłudze klienta i kasy w sklepie, jestem komunikatywna i pracuję zmianowo.',
-    skills: ['obsługa klienta', 'obsługa kasy fiskalnej', 'komunikatywność', 'praca zmianowa', 'inwentaryzacja', 'Excel'],
-    bullets: ['Obsługa kasy fiskalnej i rozliczanie zmiany', 'Obsługa klienta, rozwiązywanie reklamacji przy kasie', 'Praca zmianowa w zespole 8 osób'] },
-  { tab: 'Specjalista ds. obsługi klienta', title: 'Specjalista ds. obsługi klienta', ad: 'Do biura obsługi poszukujemy specjalisty. Zakres: obsługa zgłoszeń, rozwiązywanie reklamacji, praca w systemie CRM. Wymagamy znajomości angielskiego.',
-    kws: ['obsługa zgłoszeń', 'obsługi zgłoszeń', 'reklamacji', 'CRM', 'angielskiego', 'angielski'],
-    sub: 'Specjalista ds. obsługi klienta', sum: 'Aplikuję na stanowisko specjalisty ds. obsługi klienta. Na co dzień prowadzę zgłoszenia i reklamacje w systemie CRM, komunikuję się po angielsku.',
-    skills: ['CRM', 'rozwiązywanie reklamacji', 'obsługa zgłoszeń', 'angielski B2', 'Excel', 'praca zmianowa'],
-    bullets: ['Obsługa 40–50 zgłoszeń dziennie w systemie CRM', 'Rozwiązywanie reklamacji klientów', 'Kontakt z klientami zagranicznymi po angielsku'] },
+  { tab: 'Kasjer / Sprzedawca', title: 'Kasjer / Sprzedawca', company: 'Supermarket Zielony Rynek',
+    ad: 'Szukamy osoby do obsługi klienta i obsługi kasy fiskalnej w supermarkecie. Wymagamy komunikatywności, uczciwości i gotowości do pracy zmianowej. Oferujemy umowę o pracę i pakiet benefitów.',
+    kws: ['obsługi klienta', 'obsługa klienta', 'kasy fiskalnej', 'kasa fiskalna', 'komunikatywności', 'komunikatywność', 'pracy zmianowej', 'praca zmianowa'],
+    sum: 'Aplikuję na stanowisko: Kasjer / Sprzedawca. Przez prawie trzy lata obsługiwałam kasę fiskalną i klientów w Market Dom, pracując zmianowo w zespole 8 osób. Jestem komunikatywna i znam inwentaryzację towaru.',
+    skills: ['obsługa klienta', 'obsługa kasy fiskalnej', 'komunikatywność', 'praca zmianowa', 'inwentaryzacja', 'CRM', 'Excel'],
+    bullets: [[1, 0], [3, 4, 6, 5]],
+    changes: ['Nagłówek zmieniony na „Kasjer / Sprzedawca”.', 'Na początku umiejętności z ogłoszenia: obsługa kasy fiskalnej i praca zmianowa.', 'W pracy w Market Dom na górze obsługa kasy, bo o nią chodzi w ofercie.', 'Pominięty punkt o kontakcie po angielsku, bo oferta go nie wymaga.'],
+    letter: `Szanowni Państwo,
+
+z zainteresowaniem odpowiadam na ogłoszenie na stanowisko Kasjera / Sprzedawcy w Supermarkecie Zielony Rynek. Pracę w handlu zaczynałam w 2019 roku w Market Dom, gdzie przez prawie trzy lata obsługiwałam kasę fiskalną, rozliczałam zmiany i codziennie rozmawiałam z klientami.
+
+Szukają Państwo osoby komunikatywnej i gotowej do pracy zmianowej. Pracowałam zmianowo w zespole ośmiu osób, zajmowałam się też reklamacjami przy kasie oraz inwentaryzacją towaru.
+
+Obecnie pracuję w obsłudze klienta w firmie Nova Serwis, gdzie rozwiązuję reklamacje i prowadzę zgłoszenia w systemie CRM.
+
+Chętnie opowiem o swoim doświadczeniu na rozmowie. Dziękuję za rozważenie mojej kandydatury.
+
+Z poważaniem,
+Anna Nowak` },
+  { tab: 'Specjalista ds. obsługi klienta', title: 'Specjalista ds. obsługi klienta', company: 'Telko Group',
+    ad: 'Do biura obsługi poszukujemy specjalisty. Zakres: obsługa zgłoszeń, rozwiązywanie reklamacji, praca w systemie CRM. Wymagamy min. 2 lat doświadczenia i znajomości angielskiego. Oferujemy umowę o pracę i elastyczne godziny.',
+    kws: ['obsługa zgłoszeń', 'obsługi zgłoszeń', 'reklamacji', 'reklamacje', 'CRM', 'angielskiego', 'angielski', 'obsługi klienta', 'obsługa klienta'],
+    sum: 'Aplikuję na stanowisko: Specjalista ds. obsługi klienta. Od 2022 roku obsługuję zgłoszenia i reklamacje w systemie CRM, a z klientami zagranicznymi rozmawiam po angielsku.',
+    skills: ['CRM', 'rozwiązywanie reklamacji', 'obsługa zgłoszeń', 'obsługa klienta', 'angielski B2', 'Excel'],
+    bullets: [[0, 1, 2], [4, 6]],
+    changes: ['Nagłówek zmieniony na „Specjalista ds. obsługi klienta”.', 'CRM, reklamacje i zgłoszenia na początku umiejętności, tak jak w ofercie.', 'Angielski wyeksponowany w profilu i w obecnej pracy.', 'Z pracy w sklepie zostały tylko punkty o kliencie i zmianach.'],
+    letter: `Szanowni Państwo,
+
+odpowiadam na ogłoszenie na stanowisko Specjalisty ds. obsługi klienta w Telko Group. Od marca 2022 roku pracuję jako Specjalistka ds. obsługi klienta w Nova Serwis, gdzie codziennie obsługuję 40–50 zgłoszeń w systemie CRM i rozwiązuję reklamacje klientów. To dokładnie ten zakres obowiązków, który opisują Państwo w ogłoszeniu.
+
+Wymagają Państwo znajomości angielskiego. W obecnej pracy kontaktuję się po angielsku z klientami zagranicznymi, na poziomie B2. Wcześniej, w Market Dom, przez prawie trzy lata pracowałam bezpośrednio z klientami i zajmowałam się reklamacjami.
+
+Chętnie przedstawię swoje doświadczenie na rozmowie i dowiem się więcej o zespole. Dziękuję za rozważenie mojej kandydatury.
+
+Z poważaniem,
+Anna Nowak` },
+  { tab: 'Magazynier', title: 'Magazynier', company: 'Hurtownia Sigma',
+    ad: 'Poszukujemy magazyniera do pracy w hurtowni. Zakres: przyjmowanie i wydawanie towaru, inwentaryzacja, praca z dokumentacją magazynową. Wymagamy rzetelności i gotowości do pracy zmianowej. Mile widziane uprawnienia na wózki widłowe.',
+    kws: ['inwentaryzacja', 'inwentaryzacji', 'pracy zmianowej', 'praca zmianowa'],
+    sum: 'Aplikuję na stanowisko: Magazynier. Mam praktykę w inwentaryzacji towaru i w pracy zmianowej w zespole 8 osób. Znam Excel i system CRM.',
+    skills: ['inwentaryzacja', 'praca zmianowa', 'Excel', 'CRM', 'obsługa klienta'],
+    bullets: [[0], [5, 6, 3]],
+    changes: ['Nagłówek zmieniony na „Magazynier”.', 'Na górze inwentaryzacja i praca zmianowa, bo tego szuka oferta.', 'Z obecnej pracy został jeden punkt, reszta dotyczy obsługi klienta.'],
+    notAdded: 'uprawnień na wózki widłowe, bo nie zostały podane. Jeśli je masz, wpisz je w kreatorze, a trafią do CV.',
+    letter: `Szanowni Państwo,
+
+z zainteresowaniem odpowiadam na ogłoszenie na stanowisko Magazyniera w Hurtowni Sigma. Wymagają Państwo rzetelności i gotowości do pracy zmianowej. W Market Dom, w latach 2019–2022, pracowałam zmianowo w zespole ośmiu osób i zajmowałam się inwentaryzacją towaru, co wiąże się bezpośrednio z częścią obowiązków opisanych w ogłoszeniu.
+
+Wymieniają Państwo także pracę z dokumentacją magazynową. Na co dzień pracuję z dokumentami i danymi: rozliczałam zmiany przy kasie, a obecnie prowadzę zgłoszenia w systemie CRM i korzystam z Excela.
+
+Chętnie opowiem o swoim doświadczeniu na rozmowie. Dziękuję za rozważenie mojej kandydatury.
+
+Z poważaniem,
+Anna Nowak` },
 ];
-function drawEx(i) {
+const exResult = (i) => {
   const e = EX[i];
+  return { position: e.title, keywords: e.kws, letter: e.letter, cv: {
+    name: BASE.name, headline: e.title, contact: BASE.contact, summary: e.sum,
+    experience: BASE.jobs.map((j, k) => ({ ...j, bullets: e.bullets[k].map((n) => BASE.facts[n]) })),
+    education: BASE.edu, skills: e.skills, languages: BASE.langs, certificates: BASE.certs, interests: '',
+    clause: 'Wyrażam zgodę na przetwarzanie moich danych osobowych dla potrzeb niezbędnych do realizacji procesu rekrutacji zgodnie z art. 6 ust. 1 lit. a Rozporządzenia Parlamentu Europejskiego i Rady (UE) 2016/679.' } };
+};
+const changesList = (e) => [el('h3', { textContent: 'Co zmieniliśmy w tym CV' }), el('ul', {}, ...e.changes.map((c) => el('li', { textContent: c }))), e.notAdded && el('p', { className: 'notadded' }, el('b', { textContent: 'Czego nie dopisaliśmy: ' }), e.notAdded)];
+function drawEx(i) {
+  const e = EX[i], r = exResult(i);
   $$('#exTabs button').forEach((b, j) => b.setAttribute('aria-selected', j === i));
-  $('#exAd').replaceChildren(el('div', { className: 'tagline', textContent: 'Ogłoszenie' }), el('h4', { textContent: e.title }), el('p', {}, hl(e.ad, e.kws)));
-  $('#exCv').replaceChildren(el('div', { className: 'tagline', textContent: 'CV Anny Nowak pod to ogłoszenie' }), el('h4', { textContent: 'Anna Nowak' }), el('div', { className: 'sub', textContent: e.sub }),
+  $('#exAd').replaceChildren(el('div', { className: 'tagline', textContent: `Ogłoszenie · ${e.company}` }), el('h4', { textContent: e.title }), el('p', {}, hl(e.ad, e.kws)));
+  $('#exCv').replaceChildren(el('div', { className: 'tagline', textContent: 'CV Anny Nowak pod to ogłoszenie' }), el('h4', { textContent: 'Anna Nowak' }), el('div', { className: 'sub', textContent: e.title }),
     el('p', {}, hl(e.sum, e.kws)), el('p', { className: 'h', textContent: 'Umiejętności' }), el('p', {}, hl(e.skills.join(' · '), e.kws)),
-    el('p', { className: 'h', textContent: 'Doświadczenie, najważniejsze na górze' }), ...e.bullets.map((b) => el('p', {}, '• ', hl(b, e.kws))));
+    el('p', { className: 'h', textContent: `${r.cv.experience[1].title}, ${r.cv.experience[1].company}` }), ...r.cv.experience[1].bullets.map((b) => el('p', {}, '• ', hl(b, e.kws))));
+  $('#exChg').replaceChildren(...changesList(e));
 }
 EX.forEach((e, i) => $('#exTabs').append(el('button', { type: 'button', role: 'tab', textContent: e.tab, onclick: () => drawEx(i) })));
 drawEx(0);
+
+/* pełny podgląd przykładu (okno) */
+let exI = 0, exDoc = 'cv';
+function drawExView() {
+  const e = EX[exI], r = exResult(exI);
+  $('#exSide').replaceChildren(
+    el('h3', { textContent: '1. Dane, które podajesz raz' }),
+    el('div', { className: 'exbase' }, el('b', { textContent: BASE.name }), el('div', { textContent: BASE.contact.join(' · ') }),
+      ...BASE.jobs.map((j) => el('div', {}, el('b', { textContent: j.title }), ` · ${j.company} (${j.period})`)),
+      el('div', {}, el('b', { textContent: 'Umiejętności: ' }), BASE.skills), el('div', {}, el('b', { textContent: 'Języki: ' }), BASE.langs.join(', '))),
+    el('h3', { textContent: '2. Ogłoszenie (wybierz)' }),
+    el('div', { className: 'adlist' }, ...EX.map((x, i) => el('button', { type: 'button', 'aria-selected': i === exI, onclick: () => { exI = i; exDoc = 'cv'; drawExView(); } }, el('b', { textContent: x.title }), el('span', { textContent: x.company })))),
+    el('div', { className: 'doc ad' }, el('div', { className: 'tagline', textContent: 'Treść ogłoszenia' }), el('p', {}, hl(e.ad, e.kws))));
+  $('#exDocTabs').replaceChildren(...[['cv', 'CV'], ['letter', 'List motywacyjny']].map(([k, t]) => el('button', { type: 'button', textContent: t, 'aria-selected': k === exDoc, onclick: () => { exDoc = k; drawExView(); } })));
+  $('#exPaper').replaceChildren(exDoc === 'cv' ? cvNode(r, true) : letterNode(r));
+  $('#exChanges').replaceChildren(...changesList(e));
+}
+function openEx(i = 0) { exI = i; exDoc = 'cv'; drawExView(); $('#exview').hidden = false; document.body.style.overflow = 'hidden'; $('.exv-body').scrollTop = 0; setTimeout(() => $('#exClose').focus(), 0); }
+const closeEx = () => { $('#exview').hidden = true; document.body.style.overflow = ''; };
+$$('[data-example]').forEach((b) => (b.onclick = () => openEx(+b.dataset.example || 0)));
+$('#exClose').onclick = closeEx;
+$('#exCta').onclick = () => { closeEx(); openWiz(); };
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#exview').hidden) closeEx(); });
 
 /* ---------- Kreator ---------- */
 const rowT = {
@@ -208,14 +293,14 @@ async function poll() {
   data = await r.json();
   if (data.status === 'done') { $('#gen').hidden = true; return showResult(); }
   if (data.status === 'paid') { $('#genTitle').textContent = 'Coś poszło nie tak'; $('#genMsg').textContent = data.error || 'Generowanie nie powiodło się. Płatność jest zachowana.'; $('#retry').hidden = false; return; }
-  $('#genMsg').textContent = data.status === 'pending' ? 'Czekamy na potwierdzenie płatności…' : 'To zajmie około minuty. Nie zamykaj tej strony.';
+  $('#genMsg').textContent = data.status === 'pending' ? 'Czekamy na potwierdzenie płatności…' : 'To zajmie około minuty. Nie zamykaj tej strony. Gotowe dokumenty wyślemy też na Twój e-mail.';
   timer = setTimeout(poll, cfg.demo ? 800 : 2500);
 }
 $('#retry').onclick = async () => { await fetch(`/api/orders/${orderId}/retry`, { method: 'POST' }); startResult(orderId); };
 
 function section(p, t, ...c) { p.append(el('h3', { textContent: t }), ...c); }
-function cvNode(r) {
-  const c = r.cv, kw = r.keywords || [], p = el('div', { className: 'paper' + ($('#hlTog').checked ? '' : ' nohl') });
+function cvNode(r, on) {
+  const c = r.cv, kw = r.keywords || [], p = el('div', { className: 'paper' + ((on ?? $('#hlTog').checked) ? '' : ' nohl') });
   p.append(el('h1', { textContent: c.name }), c.headline && el('div', { className: 'hl', textContent: c.headline }), el('div', { className: 'ct', textContent: (c.contact || []).filter(Boolean).join('  ·  ') }));
   if (c.summary) section(p, 'Profil zawodowy', el('div', {}, hl(c.summary, kw)));
   if (c.experience?.length) { section(p, 'Doświadczenie zawodowe'); c.experience.forEach((e) => p.append(el('div', { className: 'role' }, el('span', { textContent: e.title }), el('em', { textContent: e.period })), el('div', { className: 'co', textContent: e.company }), el('ul', {}, ...(e.bullets || []).map((b) => el('li', {}, hl(b, kw)))))); }
@@ -233,6 +318,20 @@ function letterNode(r) {
   (r.letter || '').split(/\n\n+/).forEach((x) => p.append(el('p', { textContent: x })));
   return p;
 }
+function drawMail() {
+  const m = data.mail, n = $('#mailNote');
+  n.hidden = !m || m.status === 'skipped';
+  if (n.hidden) return;
+  const ok = m.status === 'sent';
+  n.className = 'mailnote noprint ' + (ok ? 'good' : 'bad');
+  n.replaceChildren(el('span', { textContent: ok ? `Wysłaliśmy dokumenty (PDF) na adres ${m.to}. Sprawdź też folder Spam.${cfg.fakeFetch ? ' Podgląd: e-mail nie jest naprawdę wysyłany.' : ''}` : `Nie udało się wysłać e-maila na adres ${m.to}. Pobierz dokumenty poniżej albo spróbuj ponownie.` }), ' ',
+    el('button', { type: 'button', className: 'link', textContent: ok ? 'Wyślij ponownie' : 'Spróbuj ponownie', onclick: async (ev) => {
+      ev.target.disabled = true;
+      const r = await fetch(`/api/orders/${orderId}/resend`, { method: 'POST' }); const j = await r.json().catch(() => ({}));
+      if (r.status === 429) { ev.target.textContent = j.error; return; }
+      if (j.mail) data.mail = j.mail; drawMail();
+    } }));
+}
 function showResult() {
   $('#result').hidden = false; window.scrollTo(0, 0);
   const withLetter = data.pkg === 'cv_letter';
@@ -247,6 +346,7 @@ function showResult() {
     $('#paper').replaceChildren(!withLetter || curDoc === 'cv' ? cvNode(r) : letterNode(r));
     try { document.title = `${curDoc === 'letter' ? 'List' : 'CV'} ${r.cv.name} – ${r.position}`; } catch {}
   };
+  drawMail();
   $('#hlTog').onchange = draw;
   $('#print').hidden = !!cfg.noPrint;
   $('#print').onclick = () => window.print();

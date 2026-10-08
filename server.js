@@ -6,6 +6,7 @@ import { calcTotal, MAX_ADS } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder } from './lib/store.js';
 import { generateForAd } from './lib/generate.js';
 import { fetchAd, AdError } from './lib/fetchAd.js';
+import { mailEnabled, sendOrderMail } from './lib/mail.js';
 
 const PORT = process.env.PORT || 3000;
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
@@ -112,7 +113,7 @@ app.get('/api/orders/:id', async (req, res) => {
     const s = await stripe.checkout.sessions.retrieve(o.stripeSession).catch(() => null);
     if (s?.payment_status === 'paid') { await markPaidAndGenerate(o.id); o = await getOrder(o.id); }
   }
-  res.json({ id: o.id, pkg: o.pkg, total: o.total, status: o.status, results: o.results, error: o.error });
+  res.json({ id: o.id, pkg: o.pkg, total: o.total, status: o.status, results: o.results, error: o.error, mail: o.mail });
 });
 
 // Tylko tryb DEMO: symulacja płatności.
@@ -124,6 +125,14 @@ app.post('/api/orders/:id/demo-pay', async (req, res) => {
   res.json({ ok: true });
 });
 
+// Wysyłka e-mailem nigdy nie psuje zamówienia: błąd tylko zapisujemy, a klient pobiera dokumenty na stronie.
+async function trySend(order) {
+  const to = order.profile.email;
+  if (!mailEnabled()) return { status: 'skipped', to };
+  try { await sendOrderMail(order, BASE_URL); return { status: 'sent', to, at: Date.now() }; }
+  catch (e) { console.error('Wysyłka e-mail nie powiodła się', order.id, e.message); return { status: 'failed', to, at: Date.now() }; }
+}
+
 const inFlight = new Set();
 async function markPaidAndGenerate(id) {
   const o = await getOrder(id);
@@ -133,13 +142,23 @@ async function markPaidAndGenerate(id) {
     await updateOrder(id, { status: 'generating' });
     const withLetter = o.pkg === 'cv_letter';
     const results = await Promise.all(o.ads.map((ad) => generateForAd({ profile: o.profile, ad, withLetter })));
-    await updateOrder(id, { status: 'done', results });
+    const mail = await trySend({ ...o, results });
+    await updateOrder(id, { status: 'done', results, mail });
   } catch (e) {
     console.error('Generowanie nie powiodło się', id, e);
     // Płatność zostaje opłacona; status 'paid' pozwala ponowić generowanie.
     await updateOrder(id, { status: 'paid', error: 'Generowanie nie powiodło się. Spróbuj ponownie.' });
   } finally { inFlight.delete(id); }
 }
+
+app.post('/api/orders/:id/resend', async (req, res) => {
+  const o = await getOrder(req.params.id);
+  if (!o || o.status !== 'done') return res.sendStatus(409);
+  if (o.mail?.at && Date.now() - o.mail.at < 60_000) return res.status(429).json({ error: 'Poczekaj minutę przed ponowną wysyłką.' });
+  const mail = await trySend(o);
+  await updateOrder(o.id, { mail });
+  res.json({ mail });
+});
 
 app.post('/api/orders/:id/retry', async (req, res) => {
   const o = await getOrder(req.params.id);

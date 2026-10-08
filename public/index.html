@@ -20,7 +20,7 @@
     <p class="eyebrow">CV i listy motywacyjne na zamówienie</p>
     <h1>Jedno ogłoszenie. Jedno CV pisane właśnie pod nie.</h1>
     <p class="lead">Podajesz swoje doświadczenie raz. Wklejasz ogłoszenia, a my przygotowujemy osobne CV i list dla każdego stanowiska, z tymi słowami kluczowymi, których szuka rekruter.</p>
-    <div class="cta"><button class="btn lg" data-open>Zamów CV od 39 zł</button><a class="btn ghost lg" href="#przyklad">Zobacz przykład</a></div>
+    <div class="cta"><button class="btn lg" data-open>Zamów CV od 39 zł</button><button class="btn ghost lg" data-example>Zobacz przykład</button></div>
     <ul class="ticks"><li>Płatność BLIK lub kartą</li><li>Gotowe w kilka minut</li><li>PDF do pobrania</li></ul>
   </div>
   <div class="stage" aria-label="Ogłoszenie i dopasowane CV">
@@ -39,22 +39,24 @@
     <li><b>Klikasz „Zamów”</b><span>Otwiera się krótki kreator. Nic nie wypełniasz na tej stronie.</span></li>
     <li><b>Opisujesz siebie</b><span>Dane kontaktowe, doświadczenie, szkoły i umiejętności. Raz.</span></li>
     <li><b>Wklejasz link</b><span>Do ogłoszenia (lub kilku). Gdy link się nie uda, wklejasz treść sam.</span></li>
-    <li><b>Płacisz i pobierasz</b><span>Dla każdego ogłoszenia dostajesz osobne CV i list w PDF.</span></li>
+    <li><b>Płacisz i pobierasz</b><span>Osobne CV i list dla każdego ogłoszenia. PDF trafia też na Twój e-mail.</span></li>
   </ol>
 </div></section>
 
 <section class="sec alt" id="przyklad"><div class="inner">
-  <h2>To samo doświadczenie, dwa różne CV</h2>
-  <p class="sub2">Przykład dla jednej osoby. Zmienia się nagłówek, profil, kolejność umiejętności i akcenty w opisie pracy. Pogrubione są słowa z ogłoszenia.</p>
+  <h2>To samo doświadczenie, trzy różne CV</h2>
+  <p class="sub2">Jedna osoba aplikuje na trzy stanowiska. Zmienia się nagłówek, profil, kolejność umiejętności i punktów w opisie pracy. Żółte są słowa z ogłoszenia. Niczego nie dopisujemy, czego nie podałeś.</p>
   <div class="seg" id="exTabs" role="tablist"></div>
   <div class="ex-grid"><div class="doc ad" id="exAd"></div><div class="doc cvm big" id="exCv"></div></div>
+  <div class="changes" id="exChg"></div>
+  <p style="margin-top:20px"><button class="btn" data-example>Zobacz pełne CV i list</button></p>
 </div></section>
 
 <section class="sec" id="cennik"><div class="inner">
   <h2>Cennik</h2>
   <div class="prices">
-    <div class="price-card"><h3>CV</h3><div class="amt">39 zł</div><ul><li>CV dopasowane do jednego ogłoszenia</li><li>Słowa kluczowe pod systemy ATS</li><li>PDF do pobrania</li></ul><button class="btn ghost" data-open data-pkg="cv">Wybierz CV</button></div>
-    <div class="price-card feat"><span class="badge">Najczęściej wybierany</span><h3>CV + list motywacyjny</h3><div class="amt">49 zł</div><ul><li>CV i list pod to samo ogłoszenie</li><li>List 250–330 słów, bez ogólników</li><li>Oba dokumenty jako PDF</li></ul><button class="btn" data-open data-pkg="cv_letter">Wybierz komplet</button></div>
+    <div class="price-card"><h3>CV</h3><div class="amt">39 zł</div><ul><li>CV dopasowane do jednego ogłoszenia</li><li>Słowa kluczowe pod systemy ATS</li><li>PDF na stronie i w e-mailu</li></ul><button class="btn ghost" data-open data-pkg="cv">Wybierz CV</button></div>
+    <div class="price-card feat"><span class="badge">Najczęściej wybierany</span><h3>CV + list motywacyjny</h3><div class="amt">49 zł</div><ul><li>CV i list pod to samo ogłoszenie</li><li>List na jedną stronę A4, bez ogólników</li><li>PDF na stronie i w e-mailu</li></ul><button class="btn" data-open data-pkg="cv_letter">Wybierz komplet</button></div>
     <div class="price-card"><h3>Kolejne ogłoszenie</h3><div class="amt">+20 zł</div><ul><li>Osobne CV (i list) pod każdą ofertę</li><li>Dane wpisujesz tylko raz</li><li>Do 5 ogłoszeń w jednym zamówieniu</li></ul><button class="btn ghost" data-open>Dodaj w kreatorze</button></div>
   </div>
 </div></section>
@@ -65,7 +67,7 @@
   <details><summary>Jak wygląda płatność?</summary><p>Płacisz przez Stripe: BLIK, kartą lub Apple/Google Pay. Dokumenty generują się dopiero po potwierdzeniu płatności.</p></details>
   <details><summary>Co oznacza „+20 zł za kolejne ogłoszenie”?</summary><p>Za każde dodatkowe ogłoszenie w tym samym zamówieniu dostajesz osobne CV (a w pakiecie z listem także osobny list), dopasowane do tej oferty.</p></details>
   <details><summary>Co jeśli strona nie odczyta ogłoszenia z linku?</summary><p>Część serwisów (np. LinkedIn) blokuje automatyczne pobieranie ogłoszeń. Wtedy kreator pokaże komunikat, a Ty wklejasz treść ogłoszenia samodzielnie. Zapłacić możesz dopiero po uzupełnieniu treści, więc nie zapłacisz za CV bez ogłoszenia.</p></details>
-  <details><summary>W jakim formacie dostanę dokumenty?</summary><p>Zobaczysz je na stronie i zapiszesz jako PDF jednym kliknięciem.</p></details>
+  <details><summary>W jakim formacie dostanę dokumenty?</summary><p>Zobaczysz je na stronie i zapiszesz jako PDF jednym kliknięciem. Gotowe PDF-y wysyłamy też automatycznie na e-mail podany w zamówieniu.</p></details>
 </div></section>
 </main>
 
@@ -94,7 +96,7 @@
 <ol><li>Ceny są podane w złotych i zawierają podatek VAT, o ile Usługodawca jest jego płatnikiem: samo CV – 39 zł, CV z listem motywacyjnym – 49 zł, każde kolejne ogłoszenie – 20 zł.</li>
 <li>Płatności obsługuje Stripe (m.in. BLIK, karta, Apple Pay, Google Pay). Płatność następuje z góry, przed wykonaniem usługi.</li></ol>
 <h2>§5 Realizacja</h2>
-<ol><li>Po zaksięgowaniu płatności dokumenty są przygotowywane automatycznie, zwykle w ciągu kilku minut, i wyświetlane w Serwisie pod unikalnym adresem zamówienia. Klient zapisuje je jako PDF.</li>
+<ol><li>Po zaksięgowaniu płatności dokumenty są przygotowywane automatycznie, zwykle w ciągu kilku minut, wyświetlane w Serwisie pod unikalnym adresem zamówienia oraz wysyłane na adres e-mail podany w zamówieniu jako pliki PDF. Klient może też zapisać je jako PDF w Serwisie. Jeśli wysyłka e-mailem się nie powiedzie, dokumenty pozostają dostępne w Serwisie.</li>
 <li>Dokumenty są dostępne przez [OKRES, np. 30 dni] od realizacji. Klient powinien zapisać je od razu.</li>
 <li>Jeśli generowanie się nie powiedzie, Klient może ponowić je bez dodatkowej opłaty.</li></ol>
 <h2>§6 Odstąpienie od umowy</h2>
@@ -127,6 +129,7 @@
 <h2>4. Odbiorcy danych</h2>
 <ul><li>Stripe – obsługa płatności.</li>
 <li>Dostawca narzędzi AI (Anthropic) – otrzymuje Twoje dane i treść ogłoszenia wyłącznie po to, aby przygotować dokumenty. Dane mogą być przetwarzane poza Europejskim Obszarem Gospodarczym (USA) na podstawie standardowych klauzul umownych lub innego mechanizmu zgodnego z RODO.</li>
+<li>Dostawca poczty e-mail ([DOSTAWCA SMTP]) – wysyła Ci gotowe dokumenty na podany adres.</li>
 <li>Dostawca hostingu: [HOSTING]. Biuro rachunkowe: [BIURO].</li></ul>
 <h2>5. Jak długo przechowujemy dane</h2>
 <p>Dane zamówienia: [OKRES, np. 30 dni] od realizacji, potem je usuwamy. Dokumenty księgowe: 5 lat od końca roku podatkowego.</p>
@@ -201,6 +204,22 @@
  </div>
 </div>
 
+<!-- Przykład -->
+<div id="exview" class="exv" hidden role="dialog" aria-modal="true" aria-label="Przykład dokumentów">
+ <div class="exv-box">
+  <div class="exv-head"><div><div class="wiz-kicker">Przykład</div><h2>Jedna osoba, trzy ogłoszenia, trzy różne CV</h2></div><button class="x" id="exClose" aria-label="Zamknij">×</button></div>
+  <div class="exv-body">
+   <aside class="exv-side" id="exSide"></aside>
+   <div class="exv-main">
+    <div class="seg" id="exDocTabs"></div>
+    <div id="exPaper"></div>
+    <div class="changes" id="exChanges"></div>
+   </div>
+  </div>
+  <div class="exv-foot"><span>Zamów takie dokumenty pod swoje ogłoszenie.</span><button class="btn" id="exCta">Zamów CV od 39 zł</button></div>
+ </div>
+</div>
+
 <!-- Generowanie -->
 <div id="gen" class="gen" hidden><div class="gen-box"><div class="spinner" aria-hidden="true"></div><h2 id="genTitle">Piszemy Twoje dokumenty</h2><p id="genMsg">To zajmie około minuty. Nie zamykaj tej strony.</p><button class="btn" id="retry" hidden>Spróbuj ponownie</button></div></div>
 
@@ -213,6 +232,7 @@
     <label class="tog"><input type="checkbox" id="hlTog" checked> Pokaż dopasowane słowa kluczowe</label>
     <button class="btn" id="print">Pobierz PDF</button>
   </div>
+  <p class="mailnote noprint" id="mailNote" hidden></p>
   <p class="note noprint" id="printNote" hidden>W podglądzie nie można pobierać plików. Na działającej stronie ten przycisk zapisuje dokument jako PDF.</p>
   <p class="note noprint" id="simNote" hidden>Podgląd używa uproszczonego dopasowania. Na działającej stronie CV i list pisze Claude, pełniej i pod treść ogłoszenia.</p>
   <div id="paper"></div>

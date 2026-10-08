@@ -39,3 +39,6 @@ Dane zamówień trwają na dysku `/data` (zmienna `DATA_DIR`).
 
 ## Dokumenty prawne
 Regulamin i polityka prywatności są w `public/index.html` (widoki `#regulamin`, `#prywatnosc`) jako **wzory**. Przed sprzedażą uzupełnij pola w `[nawiasach]`, usuń ramki `.draft` i skonsultuj tekst z prawnikiem. Kreator wymaga dwóch zgód: akceptacji regulaminu/polityki oraz zgody na wykonanie usługi od razu (utrata prawa odstąpienia dla treści cyfrowych). Dane zamówień nie są jeszcze automatycznie usuwane po okresie podanym w regulaminie.
+
+## Wysyłka dokumentów e-mailem
+Po wygenerowaniu serwer renderuje PDF (`lib/pdf.js`, czcionka Inter z `fonts/`) i wysyła je klientowi jako załączniki (`lib/mail.js`, nodemailer). Ustaw `SMTP_URL` i `MAIL_FROM` (nadawca musi mieć skonfigurowaną domenę: SPF/DKIM u dostawcy poczty, inaczej wiadomości trafią do spamu). Bez `SMTP_URL` maile nie są wysyłane, a klient pobiera dokumenty na stronie. Błąd wysyłki nie psuje zamówienia; strona pokazuje komunikat i przycisk „Wyślij ponownie” (`POST /api/orders/:id/resend`, limit raz na minutę).
