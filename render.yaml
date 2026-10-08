@@ -33,3 +33,5 @@ services:
         sync: false
       - key: CODE_SALT
         sync: false
+      - key: ACCOUNT_SECRET
+        sync: false
