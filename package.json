@@ -1,0 +1,19 @@
+{
+  "name": "cv-generator",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.132.1",
+    "dotenv": "^18.0.6",
+    "express": "^5.2.1",
+    "stripe": "^23.0.0"
+  }
+}
