@@ -553,3 +553,6 @@ html[lang="pl"] .i18n-only{display:none}
 .i18n-note{max-width:1080px;margin:16px auto 0;padding:10px 16px;background:var(--soft-b);border-radius:10px;font-size:14px}
 .legal-note{background:var(--soft-b);border-radius:10px;padding:10px 14px}
 @media(max-width:760px){.langsw a{padding:4px 6px}}
+.nav .btn{white-space:nowrap}
+html:not([lang="pl"]) .nav nav{gap:16px}
+@media(max-width:1360px){html:not([lang="pl"]) .nav nav a.nav-x{display:none}}

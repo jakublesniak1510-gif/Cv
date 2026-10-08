@@ -9,7 +9,7 @@ const fonts = [...html.matchAll(/<link rel="stylesheet" href="(https:\/\/fonts[^
 const body = /<body>([\s\S]*)<\/body>/.exec(html)[1].replace(/<script src="\/app.js"><\/script>/, '');
 const dicts = Object.fromEntries(['en', 'uk'].filter((l) => fs.existsSync(new URL(`../public/i18n/${l}.json`, import.meta.url))).map((l) => [l, JSON.parse(r(`public/i18n/${l}.json`))]));
 const head = `${process.env.PREVIEW_HEAD || ''}<script>window.__I18N_DICT = ${JSON.stringify(dicts)};\n${r('public/i18n.js')}</script>`;
-fs.writeFileSync(out, `<title>${title}</title>\n${fonts}\n${head}\n<style>\n${r('public/style.css')}\n</style>\n${body}\n<script>\n${strip(r('lib/content-a.js'))}
+fs.writeFileSync(out, `<meta charset="utf-8"><title>${title}</title>\n${fonts}\n${head}\n<style>\n${r('public/style.css')}\n</style>\n${body}\n<script>\n${strip(r('lib/content-a.js'))}
 ${strip(r('lib/content-b.js'))}
 ${strip(r('lib/cities.js'))}
 ${strip(r('lib/tools.js'))}

@@ -15,10 +15,11 @@
   if (lang === 'pl') return;
 
   // Fragmenty, których nie tłumaczymy: dokumenty, przykłady, treści poradnika i dokumenty prawne.
-  const SKIP = '.paper,.doc,#page,.legal ol,.legal ul,.legal p:not(.legal-note),.legal h2,.msgbox,.tool-out,textarea,script,style,code,[data-noi18n],#chatLog .me';
+  const SKIP = '.paper,.doc,#page,.legal ol,.legal ul,.legal p:not(.legal-note),.legal h2,.msgbox,.tool-out,script,style,code,[data-noi18n],#chatLog .me';
   const norm = (s) => s.replace(/\s+/g, ' ').trim();
-  let dict = new Map(), pats = [];
+  let dict = new Map(), pats = [], done = new Set();
   const load = (d) => {
+    done = new Set(Object.values(d).map(norm));
     dict = new Map(Object.entries(d).filter(([k]) => !k.includes('{0}')));
     pats = Object.entries(d).filter(([k]) => k.includes('{0}')).map(([k, v]) => {
       const re = new RegExp('^' + k.replace(/[.*+?^$()|[\]\\]/g, '\\$&').replace(/\{(\d)\}/g, '(.+?)') + '$');
@@ -28,6 +29,7 @@
   const tr = (raw) => {
     const s = norm(raw); if (!s || !/[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]/.test(s)) return null;
     if (dict.has(s)) return dict.get(s);
+    if (done.has(s)) return null;
     for (const [re, v] of pats) { const m = re.exec(s); if (m) return v.replace(/\{(\d)\}/g, (_, i) => m[+i + 1]); }
     if (window.__I18N_MISS) window.__I18N_MISS.add(s);
     return null;
