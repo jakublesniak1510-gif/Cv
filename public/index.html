@@ -1,68 +1,150 @@
 <!doctype html>
 <html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CV pod ogłoszenie – gotowe w 2 minuty</title>
-<meta name="description" content="Wklej ogłoszenie, uzupełnij dane. Dostajesz CV i list motywacyjny idealnie dopasowane do oferty. CV od 39 zł.">
-<link rel="stylesheet" href="style.css"></head><body>
-<div id="demo" class="demo" hidden>Tryb DEMO – płatność jest symulowana (brak klucza Stripe).</div>
-<div class="wrap">
-<header class="top"><div class="logo">CV<b>Pod</b>Ogłoszenie</div><a href="#form" class="btn ghost">Zamów</a></header>
-<section class="hero">
-<h1>CV i list motywacyjny napisane pod Twoje ogłoszenie</h1>
-<p>Uzupełnij dane raz, wklej ogłoszenie o pracę. Dostajesz gotowe dokumenty dopasowane do wymagań oferty – do pobrania jako PDF.</p>
-<a href="#form" class="btn">Zacznij – od 39 zł</a>
-</section>
-<section class="steps">
-<div class="card"><b>1.</b> Wypełnij formularz ze swoim doświadczeniem</div>
-<div class="card"><b>2.</b> Wklej treść ogłoszenia (lub kilku)</div>
-<div class="card"><b>3.</b> Zapłać BLIK-iem lub kartą</div>
-<div class="card"><b>4.</b> Pobierz CV i list jako PDF</div>
-</section>
+<title>CV Pod Ogłoszenie</title>
+<meta name="description" content="Osobne CV i list motywacyjny dopasowane do każdego ogłoszenia o pracę. CV od 39 zł.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css"></head>
+<body>
+<div id="demoBar" class="demobar" hidden>Tryb DEMO: płatność jest symulowana.</div>
 
-<form id="form" novalidate>
-<h2>Wybierz pakiet</h2>
-<div class="plans">
-<label class="card plan"><input type="radio" name="pkg" value="cv"><div class="price">39 zł</div><b>Samo CV</b><ul><li>CV dopasowane do ogłoszenia</li><li>Słowa kluczowe pod ATS</li><li>PDF do pobrania</li></ul></label>
-<label class="card plan"><span class="tag">Najczęściej wybierany</span><input type="radio" name="pkg" value="cv_letter" checked><div class="price">49 zł</div><b>CV + list motywacyjny</b><ul><li>Komplet dokumentów pod ofertę</li><li>List 250–330 słów</li><li>PDF do pobrania</li></ul></label>
-<div class="card"><div class="price">+20 zł <small>/ ogłoszenie</small></div><b>Kolejne ogłoszenie</b><ul><li>Dodaj więcej ofert poniżej</li><li>Osobne CV (i list) pod każdą</li><li>Dane wpisujesz tylko raz</li></ul></div>
+<header class="nav" id="nav"><div class="inner">
+  <a class="logo" href="#top">CV<span>Pod</span>Ogłoszenie</a>
+  <nav><a href="#jak">Jak to działa</a><a href="#przyklad">Przykład</a><a href="#cennik">Cennik</a><a href="#faq">FAQ</a></nav>
+  <button class="btn sm" data-open>Zamów CV</button>
+</div></header>
+
+<main id="landing">
+<section class="hero" id="top"><div class="inner hero-grid">
+  <div>
+    <p class="eyebrow">CV i listy motywacyjne na zamówienie</p>
+    <h1>Jedno ogłoszenie. Jedno CV pisane właśnie pod nie.</h1>
+    <p class="lead">Podajesz swoje doświadczenie raz. Wklejasz ogłoszenia, a my przygotowujemy osobne CV i list dla każdego stanowiska, z tymi słowami kluczowymi, których szuka rekruter.</p>
+    <div class="cta"><button class="btn lg" data-open>Zamów CV od 39 zł</button><a class="btn ghost lg" href="#przyklad">Zobacz przykład</a></div>
+    <ul class="ticks"><li>Płatność BLIK lub kartą</li><li>Gotowe w kilka minut</li><li>PDF do pobrania</li></ul>
+  </div>
+  <div class="stage" aria-label="Ogłoszenie i dopasowane CV">
+    <div class="doc ad"><div class="tagline">Ogłoszenie</div><h4>Kasjer / Sprzedawca</h4>
+      <p>Szukamy osoby do <mark>obsługi klienta</mark> i <mark>kasy fiskalnej</mark>. Wymagamy <mark>komunikatywności</mark> i gotowości do pracy zmianowej.</p></div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="doc cvm"><div class="tagline">Twoje CV pod to ogłoszenie</div><h4>Anna Nowak</h4><div class="sub">Kasjer / Sprzedawca</div>
+      <p class="h">Umiejętności</p><p><mark>obsługa klienta</mark> · <mark>kasa fiskalna</mark> · <mark>komunikatywność</mark> · Excel</p>
+      <p class="h">Doświadczenie</p><p>• Obsługa kasy i rozliczanie zmiany<br>• Rozmowy z klientami, reklamacje</p></div>
+  </div>
+</div></section>
+
+<section class="sec" id="jak"><div class="inner">
+  <h2>Jak to działa</h2>
+  <ol class="steps">
+    <li><b>Klikasz „Zamów”</b><span>Otwiera się krótki kreator. Nic nie wypełniasz na tej stronie.</span></li>
+    <li><b>Opisujesz siebie</b><span>Dane kontaktowe, doświadczenie, szkoły i umiejętności. Raz.</span></li>
+    <li><b>Wklejasz ogłoszenia</b><span>Nazwa stanowiska i treść oferty. Możesz dodać kilka.</span></li>
+    <li><b>Płacisz i pobierasz</b><span>Dla każdego ogłoszenia dostajesz osobne CV i list w PDF.</span></li>
+  </ol>
+</div></section>
+
+<section class="sec alt" id="przyklad"><div class="inner">
+  <h2>To samo doświadczenie, dwa różne CV</h2>
+  <p class="sub2">Przykład dla jednej osoby. Zmienia się nagłówek, profil, kolejność umiejętności i akcenty w opisie pracy. Pogrubione są słowa z ogłoszenia.</p>
+  <div class="seg" id="exTabs" role="tablist"></div>
+  <div class="ex-grid"><div class="doc ad" id="exAd"></div><div class="doc cvm big" id="exCv"></div></div>
+</div></section>
+
+<section class="sec" id="cennik"><div class="inner">
+  <h2>Cennik</h2>
+  <div class="prices">
+    <div class="price-card"><h3>CV</h3><div class="amt">39 zł</div><ul><li>CV dopasowane do jednego ogłoszenia</li><li>Słowa kluczowe pod systemy ATS</li><li>PDF do pobrania</li></ul><button class="btn ghost" data-open data-pkg="cv">Wybierz CV</button></div>
+    <div class="price-card feat"><span class="badge">Najczęściej wybierany</span><h3>CV + list motywacyjny</h3><div class="amt">49 zł</div><ul><li>CV i list pod to samo ogłoszenie</li><li>List 250–330 słów, bez ogólników</li><li>Oba dokumenty jako PDF</li></ul><button class="btn" data-open data-pkg="cv_letter">Wybierz komplet</button></div>
+    <div class="price-card"><h3>Kolejne ogłoszenie</h3><div class="amt">+20 zł</div><ul><li>Osobne CV (i list) pod każdą ofertę</li><li>Dane wpisujesz tylko raz</li><li>Do 5 ogłoszeń w jednym zamówieniu</li></ul><button class="btn ghost" data-open>Dodaj w kreatorze</button></div>
+  </div>
+</div></section>
+
+<section class="sec alt" id="faq"><div class="inner narrow">
+  <h2>Pytania</h2>
+  <details><summary>Czy dokumenty zawierają zmyślone informacje?</summary><p>Nie. Dokumenty powstają wyłącznie z faktów, które sam podasz. Nic nie jest dopisywane: ani stanowiska, ani daty, ani certyfikaty.</p></details>
+  <details><summary>Jak wygląda płatność?</summary><p>Płacisz przez Stripe: BLIK, kartą lub Apple/Google Pay. Dokumenty generują się dopiero po potwierdzeniu płatności.</p></details>
+  <details><summary>Co oznacza „+20 zł za kolejne ogłoszenie”?</summary><p>Za każde dodatkowe ogłoszenie w tym samym zamówieniu dostajesz osobne CV (a w pakiecie z listem także osobny list), dopasowane do tej oferty.</p></details>
+  <details><summary>W jakim formacie dostanę dokumenty?</summary><p>Zobaczysz je na stronie i zapiszesz jako PDF jednym kliknięciem.</p></details>
+</div></section>
+</main>
+
+<footer class="foot" id="foot"><div class="inner"><span>CV Pod Ogłoszenie</span><button class="btn sm" data-open>Zamów CV</button></div></footer>
+
+<!-- Kreator -->
+<div id="wiz" class="wiz" hidden role="dialog" aria-modal="true" aria-labelledby="wizTitle">
+ <div class="wiz-box">
+  <div class="wiz-head"><div><div class="wiz-kicker" id="wizKicker"></div><h2 id="wizTitle"></h2></div><button class="x" id="wizClose" aria-label="Zamknij">×</button></div>
+  <ol class="stepper" id="stepper"></ol>
+  <form id="wizForm" novalidate>
+   <div class="wiz-body">
+    <section data-step="1">
+      <div class="opts">
+        <label class="opt"><input type="radio" name="pkg" value="cv"><span class="o-t">Samo CV<b>39 zł</b></span><span class="o-d">CV dopasowane do ogłoszenia</span></label>
+        <label class="opt"><input type="radio" name="pkg" value="cv_letter" checked><span class="o-t">CV + list motywacyjny<b>49 zł</b></span><span class="o-d">Komplet dokumentów pod ogłoszenie</span></label>
+      </div>
+      <p class="hint">Każde kolejne ogłoszenie (inny zawód lub firma) to <b>+20 zł</b> i osobne, dopasowane CV. Dodasz je w kroku „Ogłoszenia”.</p>
+      <button type="button" class="link" id="fill" hidden>Wstaw dane przykładowe</button>
+    </section>
+    <section data-step="2" hidden>
+      <div class="grid2">
+        <label class="f">Imię i nazwisko *<input type="text" id="name" autocomplete="name"></label>
+        <label class="f">E-mail *<input type="email" id="email" autocomplete="email"></label>
+        <label class="f">Telefon<input type="tel" id="phone" autocomplete="tel"></label>
+        <label class="f">Miasto<input type="text" id="city"></label>
+        <label class="f">Link <span class="h">LinkedIn, portfolio</span><input type="text" id="link"></label>
+        <label class="f">Ogólny zawód <span class="h">gdy ogłoszenie nie ma nazwy</span><input type="text" id="headline"></label>
+      </div>
+      <label class="f">Krótko o sobie <span class="h">opcjonalnie</span><textarea id="summary"></textarea></label>
+    </section>
+    <section data-step="3" hidden>
+      <p class="hint">Dodaj prace od najnowszej. Każdy punkt obowiązków w nowej linii. Im konkretniej (liczby, wyniki), tym lepsze CV.</p>
+      <div id="exp"></div><button type="button" class="btn ghost sm" id="addExp">+ Dodaj stanowisko</button>
+    </section>
+    <section data-step="4" hidden>
+      <h3 class="sh">Wykształcenie</h3><div id="edu"></div><button type="button" class="btn ghost sm" id="addEdu">+ Dodaj szkołę</button>
+      <h3 class="sh">Umiejętności i dodatki</h3>
+      <label class="f">Umiejętności <span class="h">po przecinku: im więcej, tym lepsze dopasowanie</span><textarea id="skills"></textarea></label>
+      <div class="grid2">
+        <label class="f">Języki<input type="text" id="languages" placeholder="angielski B2, niemiecki A2"></label>
+        <label class="f">Certyfikaty i kursy<input type="text" id="certificates"></label>
+      </div>
+      <label class="f">Zainteresowania <span class="h">opcjonalnie</span><input type="text" id="interests"></label>
+      <label class="f">Uwagi dla autora <span class="h">np. zmiana branży, przerwa w pracy</span><textarea id="notes"></textarea></label>
+    </section>
+    <section data-step="5" hidden>
+      <p class="hint">Dla <b>każdego</b> ogłoszenia powstanie osobne CV. Wpisz nazwę stanowiska i wklej pełną treść oferty.</p>
+      <div id="ads"></div><button type="button" class="btn ghost sm" id="addAd">+ Dodaj ogłoszenie (+20 zł)</button>
+    </section>
+    <section data-step="6" hidden>
+      <div id="sum"></div>
+      <label class="check"><input type="checkbox" id="consent"> Wyrażam zgodę na przetwarzanie podanych danych w celu przygotowania dokumentów. Dane trafiają do dostawcy AI wyłącznie w tym celu.</label>
+    </section>
+    <section data-step="7" hidden>
+      <div class="note"><b>Tryb DEMO.</b> Tutaj otworzyłaby się płatność Stripe (BLIK / karta). Kliknij, aby zasymulować udaną płatność.</div>
+      <div class="payrow"><button type="button" class="btn lg" id="payBlik">Zapłać BLIK-iem</button><button type="button" class="btn ghost lg" id="payCard">Zapłać kartą</button></div>
+    </section>
+    <div class="err" id="werr" role="alert"></div>
+   </div>
+   <div class="wiz-foot"><button type="button" class="btn ghost" id="back">Wstecz</button><div class="tot">Razem <strong id="total">49 zł</strong><small id="brk"></small></div><button type="submit" class="btn" id="next">Dalej</button></div>
+  </form>
+ </div>
 </div>
 
-<h2>Twoje dane</h2>
-<div class="card">
-<div class="grid2">
-<label class="f">Imię i nazwisko *<input type="text" id="name" autocomplete="name"></label>
-<label class="f">E-mail *<input type="email" id="email" autocomplete="email"></label>
-<label class="f">Telefon<input type="tel" id="phone" autocomplete="tel"></label>
-<label class="f">Miasto<input type="text" id="city"></label>
-<label class="f">Link (LinkedIn, portfolio) <span class="h">opcjonalnie</span><input type="text" id="link"></label>
-<label class="f">Obecne / docelowe stanowisko <span class="h">nagłówek CV</span><input type="text" id="headline"></label>
-</div>
-<label class="f">Krótko o sobie <span class="h">opcjonalnie – przeredagujemy pod ogłoszenie</span><textarea id="summary"></textarea></label>
-</div>
+<!-- Generowanie -->
+<div id="gen" class="gen" hidden><div class="gen-box"><div class="spinner" aria-hidden="true"></div><h2 id="genTitle">Piszemy Twoje dokumenty</h2><p id="genMsg">To zajmie około minuty. Nie zamykaj tej strony.</p><button class="btn" id="retry" hidden>Spróbuj ponownie</button></div></div>
 
-<h2>Doświadczenie zawodowe</h2>
-<div id="exp"></div><button type="button" class="btn ghost" id="addExp">+ Dodaj stanowisko</button>
-
-<h2>Wykształcenie</h2>
-<div id="edu"></div><button type="button" class="btn ghost" id="addEdu">+ Dodaj szkołę</button>
-
-<h2>Umiejętności i reszta</h2>
-<div class="card">
-<label class="f">Umiejętności <span class="h">po przecinku</span><textarea id="skills"></textarea></label>
-<div class="grid2">
-<label class="f">Języki <span class="h">np. angielski B2, niemiecki A2</span><input type="text" id="languages"></label>
-<label class="f">Certyfikaty, kursy<input type="text" id="certificates"></label>
-</div>
-<label class="f">Zainteresowania <span class="h">opcjonalnie</span><input type="text" id="interests"></label>
-<label class="f">Dodatkowe informacje dla piszącego <span class="h">np. dlaczego zmieniasz branżę, luka w CV, osiągnięcia</span><textarea id="notes"></textarea></label>
-</div>
-
-<h2>Ogłoszenie o pracę</h2>
-<div id="ads"></div><button type="button" class="btn ghost" id="addAd">+ Kolejne ogłoszenie (+20 zł)</button>
-
-<label class="f" style="margin-top:20px;font-weight:400"><input type="checkbox" id="consent"> Wyrażam zgodę na przetwarzanie podanych danych w celu przygotowania dokumentów. Dane są przetwarzane przez dostawcę AI wyłącznie w tym celu. *</label>
-<div class="err" id="err" role="alert"></div>
-<div class="total noprint"><div>Razem: <strong id="total">49 zł</strong> <small id="breakdown"></small></div><button class="btn" id="pay" type="submit">Zapłać i wygeneruj</button></div>
-</form>
-<footer>Płatności obsługuje Stripe (BLIK, karta, Apple/Google Pay). Dokumenty powstają wyłącznie z podanych przez Ciebie faktów.</footer>
-</div>
-<script src="app.js" type="module"></script></body></html>
+<!-- Wynik -->
+<section id="result" class="result" hidden><div class="inner">
+  <div class="res-top noprint"><div><p class="eyebrow">Zamówienie opłacone</p><h2>Twoje dokumenty</h2></div><button class="btn ghost" id="newOrder">Nowe zamówienie</button></div>
+  <div class="res-tools noprint">
+    <div class="seg" id="adTabs"></div>
+    <div class="seg" id="docTabs"></div>
+    <label class="tog"><input type="checkbox" id="hlTog" checked> Pokaż dopasowane słowa kluczowe</label>
+    <button class="btn" id="print">Pobierz PDF</button>
+  </div>
+  <p class="note noprint" id="printNote" hidden>W podglądzie nie można pobierać plików. Na działającej stronie ten przycisk zapisuje dokument jako PDF.</p>
+  <p class="note noprint" id="simNote" hidden>Podgląd używa uproszczonego dopasowania. Na działającej stronie CV i list pisze Claude, pełniej i pod treść ogłoszenia.</p>
+  <div id="paper"></div>
+</div></section>
+<script src="app.js"></script>
+</body></html>

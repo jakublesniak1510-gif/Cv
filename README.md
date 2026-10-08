@@ -22,7 +22,9 @@ npm start              # http://localhost:3000
 - `server.js` – API, Stripe Checkout, webhook, kolejka generowania
 - `lib/pricing.js` – cennik (kwota zawsze liczona po stronie serwera)
 - `lib/generate.js` – prompt i wywołanie Claude
-- `public/` – formularz (`index.html`) i widok wyniku z PDF przez drukowanie (`order.html`)
+- `public/` – strona główna, kreator zamówienia (okno otwierane przyciskiem) i widok wyniku z PDF przez drukowanie
+- `lib/tailor.js` – proste dopasowanie bez AI (tryb zapasowy i podgląd)
+- `scripts/build-preview.mjs` – składa statyczny podgląd: `node scripts/build-preview.mjs out.html`
 - Zamówienia: `data/orders.json` (plik; do produkcji zamień na bazę danych)
 
 ## Wdrożenie na Render (najprostsze)

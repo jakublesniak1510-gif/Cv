@@ -51,13 +51,13 @@ function cleanProfile(p = {}) {
   };
 }
 
-app.get('/api/config', (_req, res) => res.json({ demo: DEMO, maxAds: MAX_ADS }));
+app.get('/api/config', (_req, res) => res.json({ demo: DEMO, maxAds: MAX_ADS, noPrint: false }));
 
 app.post('/api/orders', async (req, res) => {
   try {
     const { pkg, profile, ads, consent } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
-    const cleanAds = arr(ads, MAX_ADS).map((a) => ({ text: str(a?.text, 10000) })).filter((a) => a.text.length >= 80);
+    const cleanAds = arr(ads, MAX_ADS).map((a) => ({ title: str(a?.title, 100), text: str(a?.text, 10000) })).filter((a) => a.text.length >= 80);
     if (!cleanAds.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
     const p = cleanProfile(profile);
     if (!p.name || !/^\S+@\S+\.\S+$/.test(p.email)) return res.status(400).json({ error: 'Podaj imię i nazwisko oraz poprawny e-mail.' });
@@ -70,7 +70,7 @@ app.post('/api/orders', async (req, res) => {
     };
     await saveOrder(order);
 
-    if (DEMO) return res.json({ id, url: `/order.html?id=${id}&demo=1` });
+    if (DEMO) return res.json({ id, demo: true });
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -83,7 +83,7 @@ app.post('/api/orders', async (req, res) => {
           product_data: { name: `${pkg === 'cv' ? 'CV' : 'CV + list motywacyjny'} (ogłoszeń: ${cleanAds.length})` },
         },
       }],
-      success_url: `${BASE_URL}/order.html?id=${id}&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${BASE_URL}/?id=${id}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${BASE_URL}/?canceled=1`,
     });
     await updateOrder(id, { stripeSession: session.id });
