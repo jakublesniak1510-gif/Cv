@@ -45,3 +45,18 @@ Po wygenerowaniu serwer renderuje PDF (`lib/pdf.js`, czcionka Inter z `fonts/`) 
 
 ## Szablony CV
 6 szablonów (`nowoczesny`, `os` – oś czasu, `szwajcarski`, `geometria`, `elegancki`, `klasyczny` – ATS) × 6 kolorów, zdefiniowane w `lib/designs.js` i zduplikowane w `public/app.js` (TPLS, COLORS). Na stronie wygląd robi CSS (`.paper.t-*`, zmienna `--acc`), w e-mailu `lib/pdf.js` (pdfkit; czcionki Inter i Caladea w `fonts/`). Klient wybiera wygląd w kreatorze, a po zakupie może go zmienić (`POST /api/orders/:id/design`); kolejne wysyłki e-mail idą w nowym wyglądzie.
+
+## Funkcje dodatkowe
+- **Raport dopasowania** – przy każdym CV: spełnione i brakujące wymagania z ogłoszenia (`match` w wyniku). Brakujące można dopisać jednym kliknięciem (poprawka z `resolves`).
+- **Edycja i darmowa poprawka** – `PUT /api/orders/:id/results/:i` (ręczna edycja) i `POST /api/orders/:id/revise` (AI, maks. 10 na zamówienie).
+- **Import starego CV** – `POST /api/import` (PDF/DOCX/TXT do 5 MB; `lib/importCv.js`); plik nie jest zapisywany.
+- **Zdjęcie** – przycinane w przeglądarce do 480×480 JPEG, pokazywane w szablonach Nowoczesny, Geometria, Elegancki; nie trafia do AI.
+- **Wersja angielska** – język dokumentów per ogłoszenie (`auto`/`pl`/`en`), bez dopłaty.
+- **Dodatki** – przygotowanie do rozmowy (15 zł) i wiadomość do rekrutera + e-mail (9 zł); ceny w `lib/pricing.js`.
+- **Kolejne ogłoszenie później** – `POST /api/orders/:id/followup`, 20 zł/ogłoszenie, dane klienta z poprzedniego zamówienia.
+- **Usuwanie danych po 30 dniach** – automatycznie co godzinę (`deleteOlderThan` w `lib/store.js`).
+- **Podstrony SEO** – `/cv/:zawod`, `/poradnik/:artykul`, `/sitemap.xml`, `/robots.txt`; treści w `lib/content.js`.
+- Model AI: `claude-opus-5-5` (zmiana przez `ANTHROPIC_MODEL`), z automatycznym przejściem na model zapasowy przy odmowie.
+
+## Własna domena
+Kup domenę (np. w OVH, home.pl, nazwa.pl), w panelu Render dodaj ją w Settings → Custom Domains i ustaw rekordy DNS według instrukcji Render. Potem zmień `BASE_URL` na nowy adres i zaktualizuj adres webhooka w Stripe.

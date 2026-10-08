@@ -2,9 +2,10 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const el = (t, p = {}, ...k) => { const e = Object.assign(document.createElement(t), p); e.append(...k.filter((x) => x != null && x !== false)); return e; };
-const PRICE = { cv: 39, cv_letter: 49, extra: 20 };
+let PRICE = { cv: 39, cv_letter: 49, extra: 20, interview: 15, messages: 9 };
+let data; // bieżące zamówienie na stronie wyniku
 const STEPS = ['Pakiet i wygląd CV', 'Twoje dane', 'Doświadczenie', 'Wykształcenie i umiejętności', 'Ogłoszenia', 'Podsumowanie'];
-let cfg = { demo: false, maxAds: 5, noPrint: false };
+let cfg = { demo: false, maxAds: 5, noPrint: false, maxRevisions: 10 };
 // Szablony i kolory: muszą zgadzać się z lib/designs.js.
 const TPLS = [
   ['nowoczesny', 'Nowoczesny', 'Kolorowy pasek boczny z monogramem, kontaktem i umiejętnościami.'],
@@ -20,11 +21,17 @@ const COLOR_NAMES = { niebieski: 'niebieski', granat: 'granatowy', morski: 'mors
 let design = { tpl: 'nowoczesny', color: 'niebieski' };
 const tplName = (t) => (TPLS.find((x) => x[0] === t) || TPLS[0])[1];
 const ro = new ResizeObserver((es) => es.forEach((e) => e.target.style.setProperty('--s', e.contentRect.width / 794)));
-const thumb = (r, d, on = false) => { const t = el('div', { className: 'thumb' }, cvNode(r, on, d)); ro.observe(t); return t; };
+const thumb = (r, d, on = false, photo = '') => { const t = el('div', { className: 'thumb' }, cvNode(r, on, d, photo)); ro.observe(t); return t; };
 function initials(n) { return String(n || '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join(''); }
 function paperEl(cls, d) { const p = el('div', { className: `paper t-${d.tpl} ${cls}` }); p.style.setProperty('--acc', COLORS[d.color] || COLORS.niebieski); return p; }
 // Wspólne klocki dokumentu; każdy szablon składa je po swojemu (węzeł DOM można wstawić tylko raz).
-function parts(c, kw) {
+const LBL = {
+  pl: { summary: 'Profil zawodowy', exp: 'Doświadczenie zawodowe', edu: 'Wykształcenie', skills: 'Umiejętności', langs: 'Języki', certs: 'Certyfikaty i kursy', interests: 'Zainteresowania', contact: 'Kontakt', locale: 'pl-PL' },
+  en: { summary: 'Professional summary', exp: 'Work experience', edu: 'Education', skills: 'Skills', langs: 'Languages', certs: 'Certifications', interests: 'Interests', contact: 'Contact', locale: 'en-GB' },
+};
+const PHOTO_TPLS = ['nowoczesny', 'geometria', 'elegancki'];
+function parts(c, kw, lang = 'pl', photo = '') {
+  const L = LBL[lang] || LBL.pl;
   const contact = (c.contact || []).filter(Boolean);
   const [first = '', ...rest] = String(c.name || '').split(/\s+/);
   const sec = (t, ...k) => el('section', {}, el('h3', { textContent: t }), el('div', { className: 'cnt' }, ...k));
@@ -38,17 +45,17 @@ function parts(c, kw) {
     head: () => (c.headline ? el('div', { className: 'hl', textContent: c.headline }) : null),
     ct: () => el('div', { className: 'ct', textContent: contact.join('  ·  ') }),
     clist: () => el('ul', { className: 'clist' }, ...contact.map((x) => el('li', { textContent: x }))),
-    mono: () => el('div', { className: 'ini', textContent: initials(c.name) }),
+    mono: () => (photo ? el('div', { className: 'ini photo', role: 'img', ariaLabel: c.name, style: `background-image:url(${photo})` }) : el('div', { className: 'ini', textContent: initials(c.name) })),
     rule: () => el('div', { className: 'rule' }),
-    summary: () => (c.summary ? sec('Profil zawodowy', el('div', { className: 'lead' }, hl(c.summary, kw))) : null),
-    exp: () => (c.experience?.length ? sec('Doświadczenie zawodowe', ...c.experience.map((e) => job(e.title, e.period, e.company, 'co', e.bullets))) : null),
-    edu: () => (c.education?.length ? sec('Wykształcenie', ...c.education.map((e) => job(e.school, e.period, e.degree, 'deg'))) : null),
-    skills: () => (c.skills?.length ? sec('Umiejętności', el('div', { className: 'chips' }, ...c.skills.map((x) => el('span', {}, hl(x, kw))))) : null),
-    langs: () => (c.languages?.length ? sec('Języki', el('div', { textContent: c.languages.join(' · ') })) : null),
-    certs: () => (c.certificates?.length ? sec('Certyfikaty i kursy', el('div', { textContent: c.certificates.join(' · ') })) : null),
-    intr: () => (c.interests ? sec('Zainteresowania', el('div', { textContent: c.interests })) : null),
+    summary: () => (c.summary ? sec(L.summary, el('div', { className: 'summ' }, hl(c.summary, kw))) : null),
+    exp: () => (c.experience?.length ? sec(L.exp, ...c.experience.map((e) => job(e.title, e.period, e.company, 'co', e.bullets))) : null),
+    edu: () => (c.education?.length ? sec(L.edu, ...c.education.map((e) => job(e.school, e.period, e.degree, 'deg'))) : null),
+    skills: () => (c.skills?.length ? sec(L.skills, el('div', { className: 'chips' }, ...c.skills.map((x) => el('span', {}, hl(x, kw))))) : null),
+    langs: () => (c.languages?.length ? sec(L.langs, el('div', { textContent: c.languages.join(' · ') })) : null),
+    certs: () => (c.certificates?.length ? sec(L.certs, el('div', { textContent: c.certificates.join(' · ') })) : null),
+    intr: () => (c.interests ? sec(L.interests, el('div', { textContent: c.interests })) : null),
     clause: () => (c.clause ? el('div', { className: 'clause', textContent: c.clause }) : null),
-    contactSec: () => sec('Kontakt', el('ul', { className: 'clist' }, ...contact.map((x) => el('li', { textContent: x })))),
+    contactSec: () => sec(L.contact, el('ul', { className: 'clist' }, ...contact.map((x) => el('li', { textContent: x })))),
   };
 }
 const CV_LAYOUT = {
@@ -70,16 +77,17 @@ const LETTER_HEAD = {
   szwajcarski: (k) => el('header', { className: 'top lhead' }, el('div', { className: 'sq' }), k.name(), k.ct(), k.rule()),
   os: (k) => el('header', { className: 'top lhead' }, el('div', { className: 'split' }, k.name(), k.clist()), k.rule()),
 };
-function cvNode(r, on, d) {
+function cvNode(r, on, d, photo) {
   d = d || (data && data.design) || design;
+  if (photo === undefined) photo = (data && data.photo) || '';
   const p = paperEl((on ?? $('#hlTog').checked) ? '' : 'nohl', d);
-  p.append(el('div', { className: 'pg' }, ...(CV_LAYOUT[d.tpl] || CV_LAYOUT.nowoczesny)(parts(r.cv, r.keywords || []))));
+  p.append(el('div', { className: 'pg' }, ...(CV_LAYOUT[d.tpl] || CV_LAYOUT.nowoczesny)(parts(r.cv, r.keywords || [], r.lang, PHOTO_TPLS.includes(d.tpl) ? photo : ''))));
   return p;
 }
 function letterNode(r, d) {
   d = d || (data && data.design) || design;
-  const c = r.cv, p = paperEl('letter', d), k = parts(c, []);
-  const date = el('div', { className: 'date', textContent: `${c.contact?.[2] ? c.contact[2] + ', ' : ''}${new Date().toLocaleDateString('pl-PL')}` });
+  const c = r.cv, p = paperEl('letter', d), k = parts(c, [], r.lang);
+  const date = el('div', { className: 'date', textContent: `${c.contact?.[2] ? c.contact[2] + ', ' : ''}${new Date().toLocaleDateString((LBL[r.lang] || LBL.pl).locale)}` });
   const head = (LETTER_HEAD[d.tpl] || ((x) => el('header', { className: 'top lhead' }, x.name(), x.ct(), x.rule())))(k);
   p.append(el('div', { className: 'pg' }, head, el('div', { className: 'body' }, date, ...(r.letter || '').split(/\n\n+/).map((x) => el('p', { textContent: x })))));
   return p;
@@ -109,7 +117,7 @@ function hl(text, kws) {
 }
 
 fetch('/api/config').then((r) => r.json()).then((c) => {
-  cfg = c; $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
+  cfg = c; drawLists(); if (c.prices) PRICE = { cv: c.prices.cv, cv_letter: c.prices.cv_letter, extra: c.prices.extraAd, interview: c.prices.interview, messages: c.prices.messages }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
 });
 
 /* ---------- Przykład dopasowania ---------- */
@@ -209,7 +217,33 @@ function drawGallery() {
     el('button', { type: 'button', className: 'btn ghost sm', textContent: 'Wybierz ten szablon', onclick: () => { design = { tpl: id, color: gal.color }; drawWizDesign(); saveDraft(); openWiz(); } }))));
 }
 const drawWizDesign = () => designPicker($('#wizDesign'), design, (d) => { design = d; saveDraft(); });
-$('#heroThumb').replaceChildren(thumb(exResult(0), { tpl: 'nowoczesny', color: 'niebieski' }, true));
+/* animowane demo w nagłówku: słowa z ogłoszenia zapalają się w ogłoszeniu i w CV */
+EX[0].groups = [['obsługi klienta', 'obsługa klienta'], ['kasy fiskalnej', 'kasa fiskalna'], ['komunikatywności', 'komunikatywność'], ['pracy zmianowej', 'praca zmianowa']];
+EX[1].groups = [['obsługa zgłoszeń', 'obsługi zgłoszeń'], ['reklamacji', 'reklamacje'], ['CRM'], ['angielskiego', 'angielski']];
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let demoI = 0, demoT = null, demoOn = false;
+function tagMarks(root, groups) { $$('mark', root).forEach((m) => { const t = m.textContent.toLowerCase(), g = groups.findIndex((v) => v.some((x) => x.toLowerCase() === t)); if (g >= 0) m.dataset.g = g; }); }
+function runDemo() {
+  clearTimeout(demoT);
+  const i = demoI++ % 2, e = EX[i], n = e.groups.length;
+  $('#demoTitle').textContent = e.title;
+  $('#demoAd').replaceChildren(hl(e.ad, e.groups.flat()));
+  $('#heroThumb').replaceChildren(thumb(exResult(i), { tpl: 'nowoczesny', color: 'niebieski' }, true));
+  tagMarks($('#demo'), e.groups);
+  const set = (g) => { $('#demoScore').textContent = `${g} / ${n}`; $('#demoFill').style.width = `${(100 * g) / n}%`; };
+  if (reduceMotion) { $$('#demo mark[data-g]').forEach((m) => m.classList.add('on')); set(n); return; }
+  set(0);
+  let g = 0;
+  const step = () => {
+    if (!demoOn) return;
+    if (g < n) { $$(`#demo mark[data-g="${g}"]`).forEach((m) => m.classList.add('on')); set(++g); demoT = setTimeout(step, 750); }
+    else demoT = setTimeout(runDemo, 3800);
+  };
+  demoT = setTimeout(step, 900);
+}
+// Animacja działa tylko wtedy, gdy nagłówek jest widoczny.
+new IntersectionObserver(([en]) => { const on = en.isIntersecting && !document.hidden; if (on && !demoOn) { demoOn = true; runDemo(); } else if (!on) { demoOn = false; clearTimeout(demoT); } }).observe($('#demo'));
+runDemo();
 
 /* pełny podgląd przykładu (okno) */
 let exI = 0, exDoc = 'cv';
@@ -229,7 +263,7 @@ function drawExView() {
 }
 function openEx(i = 0, d) { exI = i; exDoc = 'cv'; if (d) Object.assign(exDesign, d); designPicker($('#exDesign'), exDesign, () => drawExView(), { thumbs: false }); drawExView(); modal(true); $('#exview').hidden = false; $('.exv-body').scrollTop = 0; setTimeout(() => $('#exClose').focus(), 0); }
 const closeEx = () => { $('#exview').hidden = true; modal(false); };
-$$('[data-example]').forEach((b) => (b.onclick = () => openEx(+b.dataset.example || 0)));
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-example]'); if (b) openEx(+b.dataset.example || 0); });
 $('#exClose').onclick = closeEx;
 $('#exCta').onclick = () => { closeEx(); lastFocus = null; openWiz(); };
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#exview').hidden) closeEx(); });
@@ -241,16 +275,16 @@ const rowT = {
   edu: () => `<div class="grid4"><label class="f">Szkoła<input type="text" data-k="school"></label><label class="f">Kierunek / tytuł<input type="text" data-k="degree"></label><label class="f">Od<input type="text" data-k="from"></label><label class="f">Do<input type="text" data-k="to"></label></div>`,
   ads: () => `<div class="seg modes" role="tablist"><button type="button" role="tab" data-mode="link">Link do ogłoszenia</button><button type="button" role="tab" data-mode="paste">Wklej treść</button></div>
 <div class="linkbox"><label class="f">Adres ogłoszenia<span class="urlrow"><input type="text" data-k="url" inputmode="url" placeholder="https://…"><button type="button" class="btn sm fetchbtn">Pobierz</button></span></label><div class="fstatus" role="status"></div></div>
-<div class="adfields"><label class="f">Nazwa stanowiska<input type="text" data-k="title" placeholder="np. Kasjer / Sprzedawca"></label><label class="f">Treść ogłoszenia <span class="h">sprawdź i w razie potrzeby popraw</span><textarea data-k="text" style="min-height:150px"></textarea></label></div>`,
+<div class="adfields"><label class="adlang">Język dokumentów <select data-k="lang"><option value="auto">jak w ogłoszeniu</option><option value="pl">polski</option><option value="en">angielski</option></select></label><label class="f">Nazwa stanowiska<input type="text" data-k="title" placeholder="np. Kasjer / Sprzedawca"></label><label class="f">Treść ogłoszenia <span class="h">sprawdź i w razie potrzeby popraw</span><textarea data-k="text" style="min-height:150px"></textarea></label></div>`,
 };
-const label = { exp: 'Stanowisko', edu: 'Szkoła', ads: 'Ogłoszenie' };
+const label = { exp: 'Stanowisko', edu: 'Szkoła', ads: 'Ogłoszenie', fuAds: 'Ogłoszenie' };
 function addRow(box, v = {}) {
   const e = el('div', { className: 'entry' });
-  e.innerHTML = `<div class="etop"><span></span><button type="button" class="rm">Usuń</button></div>` + rowT[box]();
+  e.innerHTML = `<div class="etop"><span></span><button type="button" class="rm">Usuń</button></div>` + rowT[box === 'fuAds' ? 'ads' : box]();
   $('.rm', e).onclick = () => { e.remove(); renum(box); refresh(); };
   $('#' + box).append(e);
   Object.entries(v).forEach(([k, val]) => { const i = $(`[data-k="${k}"]`, e); if (i) i.value = val; });
-  if (box === 'ads') initAd(e, v.text ? 'paste' : 'link');
+  if (box === 'ads' || box === 'fuAds') initAd(e, v.text ? 'paste' : 'link');
   renum(box); refresh();
 }
 function setMode(e, mode) {
@@ -288,19 +322,21 @@ function initAd(e, mode) {
 }
 function renum(box) {
   const rows = $('#' + box).children;
-  [...rows].forEach((e, i) => { $('.etop span', e).textContent = `${label[box]} ${i + 1}`; $('.rm', e).hidden = box === 'ads' && rows.length === 1; });
+  [...rows].forEach((e, i) => { $('.etop span', e).textContent = `${label[box]} ${i + 1}`; $('.rm', e).hidden = (box === 'ads' || box === 'fuAds') && rows.length === 1; });
 }
 const rows = (box) => $$('#' + box + ' .entry').map((e) => Object.fromEntries($$('[data-k]', e).map((i) => [i.dataset.k, i.value.trim()])));
 const pkg = () => $('input[name=pkg]:checked').value;
 const nAds = () => Math.max(1, $('#ads').children.length);
-const total = () => PRICE[pkg()] + PRICE.extra * (nAds() - 1);
+const addons = () => ({ interview: $('#adInterview').checked, messages: $('#adMessages').checked });
+const addonsTotal = () => (addons().interview ? PRICE.interview : 0) + (addons().messages ? PRICE.messages : 0);
+const total = () => PRICE[pkg()] + PRICE.extra * (nAds() - 1) + addonsTotal();
 
 const DKEY = 'cvpo-draft-v1', FIELDS = ['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'];
 let saveT, restoring = false;
 function saveDraft() {
   if (restoring) return;
   clearTimeout(saveT);
-  saveT = setTimeout(() => { try { localStorage.setItem(DKEY, JSON.stringify({ design, pkg: pkg(), f: Object.fromEntries(FIELDS.map((k) => [k, $('#' + k).value])), exp: rows('exp'), edu: rows('edu'), ads: rows('ads') })); } catch {} }, 300);
+  saveT = setTimeout(() => { try { localStorage.setItem(DKEY, JSON.stringify({ design, photo, addons: addons(), pkg: pkg(), f: Object.fromEntries(FIELDS.map((k) => [k, $('#' + k).value])), exp: rows('exp'), edu: rows('edu'), ads: rows('ads') })); } catch {} }, 300);
 }
 const clearDraft = () => { try { localStorage.removeItem(DKEY); } catch {} };
 function restoreDraft() {
@@ -311,6 +347,8 @@ function restoreDraft() {
   if (d.design && LEGACY[d.design.tpl]) d.design.tpl = LEGACY[d.design.tpl];
   if (d.design && COLORS[d.design.color] && TPLS.some((t) => t[0] === d.design.tpl)) design = { ...d.design };
   FIELDS.forEach((k) => ($('#' + k).value = d.f[k] || ''));
+  if (d.addons) { $('#adInterview').checked = !!d.addons.interview; $('#adMessages').checked = !!d.addons.messages; }
+  setPhoto(d.photo || '');
   ['exp', 'edu', 'ads'].forEach((b) => { $('#' + b).replaceChildren(); (d[b]?.length ? d[b] : [{}]).forEach((v) => addRow(b, v)); });
   restoring = false; refresh();
   return true;
@@ -318,11 +356,13 @@ function restoreDraft() {
 function refresh() {
   saveDraft();
   $('#total').textContent = total() + ' zł';
-  $('#brk').textContent = nAds() > 1 ? `${PRICE[pkg()]} zł + ${nAds() - 1} × ${PRICE.extra} zł` : '';
+  $('#brk').textContent = [nAds() > 1 ? `${PRICE[pkg()]} zł + ${nAds() - 1} × ${PRICE.extra} zł` : '', addonsTotal() ? `dodatki ${addonsTotal()} zł` : ''].filter(Boolean).join(' · ');
+  $$('.opt b[data-price]').forEach((b) => (b.textContent = `+${PRICE[b.dataset.price]} zł`));
   $('#addAd').disabled = nAds() >= cfg.maxAds;
   $('#addAd').title = nAds() >= cfg.maxAds ? `Maksymalnie ${cfg.maxAds} ogłoszeń w jednym zamówieniu` : '';
 }
 $$('input[name=pkg]').forEach((r) => (r.onchange = refresh));
+$('#adInterview').onchange = $('#adMessages').onchange = refresh;
 $('#wizForm').addEventListener('input', saveDraft);
 $('#addExp').onclick = () => addRow('exp');
 $('#addEdu').onclick = () => addRow('edu');
@@ -346,7 +386,9 @@ function drawSummary() {
   $('#sum').replaceChildren(
     el('div', { className: 'sumrow' }, el('span', { textContent: pkg() === 'cv' ? 'CV' : 'CV + list motywacyjny' }), el('span', { textContent: PRICE[pkg()] + ' zł' })),
     el('div', { className: 'sumrow' }, el('span', { textContent: `Wygląd: ${tplName(design.tpl)}, kolor ${COLOR_NAMES[design.color]}` }), el('span', { textContent: 'w cenie' })),
-    ...ads.map((a, i) => el('div', { className: 'sumrow' }, el('span', { textContent: `Ogłoszenie ${i + 1}: ${a.title}` }), el('span', { textContent: i === 0 ? 'w cenie' : '+' + PRICE.extra + ' zł' }))),
+    ...ads.map((a, i) => el('div', { className: 'sumrow' }, el('span', { textContent: `Ogłoszenie ${i + 1}: ${a.title}${a.lang === 'en' ? ' (po angielsku)' : ''}` }), el('span', { textContent: i === 0 ? 'w cenie' : '+' + PRICE.extra + ' zł' }))),
+    ...(addons().interview ? [el('div', { className: 'sumrow' }, el('span', { textContent: 'Przygotowanie do rozmowy' }), el('span', { textContent: '+' + PRICE.interview + ' zł' }))] : []),
+    ...(addons().messages ? [el('div', { className: 'sumrow' }, el('span', { textContent: 'Wiadomość do rekrutera i e-mail z aplikacją' }), el('span', { textContent: '+' + PRICE.messages + ' zł' }))] : []),
     el('div', { className: 'sumrow' }, el('span', { textContent: 'Razem' }), el('span', { textContent: total() + ' zł' })));
 }
 function validate(n) {
@@ -374,7 +416,7 @@ const openWiz = (p) => {
   setTimeout(() => $('#wizClose').focus(), 0);
 };
 const closeWiz = () => { $('#wiz').hidden = true; modal(false); };
-$$('[data-open]').forEach((b) => (b.onclick = () => openWiz(b.dataset.pkg)));
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (b) { e.preventDefault(); openWiz(b.dataset.pkg); } });
 $('#wizClose').onclick = closeWiz;
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#wiz').hidden) closeWiz(); });
 $('#back').onclick = () => go(step - 1);
@@ -386,8 +428,8 @@ $('#wizForm').onsubmit = async (e) => {
   if (step < 6) return go(step + 1);
   const v = (id) => $('#' + id).value;
   const body = {
-    design, pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
-    profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu') },
+    design, addons: addons(), pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   $('#next').disabled = true;
   try {
@@ -401,6 +443,52 @@ $('#wizForm').onsubmit = async (e) => {
 };
 const demoPay = async () => { await fetch(`/api/orders/${orderId}/demo-pay`, { method: 'POST' }); closeWiz(); startResult(orderId); };
 $('#payBlik').onclick = $('#payCard').onclick = demoPay;
+
+/* zdjęcie: przycinamy do kwadratu 480 px po stronie przeglądarki */
+let photo = '';
+function setPhoto(p) {
+  photo = p || '';
+  $('#photoPrev').style.backgroundImage = photo ? `url(${photo})` : '';
+  $('#photoPrev').classList.toggle('has', !!photo); $('#photoDel').hidden = !photo;
+}
+$('#photoFile').onchange = (e) => {
+  const file = e.target.files[0]; e.target.value = '';
+  if (!file) return;
+  if (file.size > 15 * 1024 * 1024) return ($('#werr').textContent = 'Zdjęcie jest za duże (maks. 15 MB).');
+  const img = new Image(), url = URL.createObjectURL(file);
+  img.onload = () => {
+    const S = 480, side = Math.min(img.width, img.height), c = document.createElement('canvas');
+    c.width = c.height = S;
+    c.getContext('2d').drawImage(img, (img.width - side) / 2, Math.max(0, (img.height - side) / 2 - side * 0.08), side, side, 0, 0, S, S);
+    URL.revokeObjectURL(url); setPhoto(c.toDataURL('image/jpeg', 0.85)); saveDraft();
+  };
+  img.onerror = () => ($('#werr').textContent = 'Nie udało się wczytać zdjęcia. Użyj pliku JPG lub PNG.');
+  img.src = url;
+};
+$('#photoDel').onclick = () => { setPhoto(''); saveDraft(); };
+
+/* import starego CV */
+$('#importFile').onchange = async (e) => {
+  const file = e.target.files[0]; e.target.value = '';
+  const st = $('#importStatus'); st.className = 'fstatus';
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { st.textContent = 'Plik musi mieć do 5 MB.'; st.classList.add('bad'); return; }
+  st.textContent = 'Czytam Twoje CV…';
+  try {
+    const b64 = await new Promise((ok, no) => { const fr = new FileReader(); fr.onload = () => ok(String(fr.result).split(',')[1]); fr.onerror = no; fr.readAsDataURL(file); });
+    const r = await fetch('/api/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: file.name, data: b64 }) });
+    const j = await r.json(); if (!r.ok) throw new Error(j.error);
+    const p = j.profile || {};
+    FIELDS.forEach((k) => { if (p[k] && !$('#' + k).value.trim()) $('#' + k).value = p[k]; });
+    const empty = (b) => !rows(b).some((x) => Object.values(x).some(Boolean));
+    if (p.experience?.length && empty('exp')) { $('#exp').replaceChildren(); p.experience.forEach((x) => addRow('exp', x)); }
+    if (p.education?.length && empty('edu')) { $('#edu').replaceChildren(); p.education.forEach((x) => addRow('edu', x)); }
+    saveDraft();
+    st.textContent = j.ai ? 'Gotowe. Uzupełniliśmy formularz danymi z CV (także w kolejnych krokach). Sprawdź je i popraw, jeśli trzeba.' : 'Odczytaliśmy dane kontaktowe. Resztę uzupełnij ręcznie.';
+    if (cfg.preview) st.textContent += ' Podgląd: zamiast odczytu pliku wstawiamy przykładowe dane.';
+    st.classList.add('good');
+  } catch (x) { st.textContent = x.message || 'Nie udało się odczytać pliku.'; st.classList.add('bad'); }
+};
 
 /* dane przykładowe (tryb DEMO) */
 $('#fill').onclick = () => {
@@ -416,7 +504,7 @@ $('#fill').onclick = () => {
 };
 
 /* ---------- Generowanie i wynik ---------- */
-let data, curAd = 0, curDoc = 'cv', timer;
+let curAd = 0, curDoc = 'cv', timer;
 function landing(show) { ['landing', 'nav', 'foot'].forEach((i) => ($('#' + i).hidden = !show)); }
 function startResult(id) {
   orderId = id; landing(false); $('#result').hidden = true; $('#gen').hidden = false; $('#retry').hidden = true;
@@ -449,27 +537,169 @@ function drawMail() {
       if (j.mail) data.mail = j.mail; drawMail();
     } }));
 }
+const DOCS = { cv: 'CV', letter: 'List motywacyjny', interview: 'Rozmowa', messages: 'Wiadomości' };
+const docsOf = (r) => ['cv', ...(data.pkg === 'cv_letter' ? ['letter'] : []), ...(r.interview?.length ? ['interview'] : []), ...(r.messages ? ['messages'] : [])];
+let editing = null; // kopia dokumentu w trakcie ręcznej edycji
+
+function interviewNode(r, d) {
+  const p = paperEl('extra', { tpl: 'klasyczny', color: d.color });
+  p.append(el('div', { className: 'pg' }, el('header', { className: 'top lhead' }, el('h1', { textContent: 'Przygotowanie do rozmowy' }), el('div', { className: 'ct', textContent: r.position }), el('div', { className: 'rule' })),
+    el('div', { className: 'qa' }, ...r.interview.map((x, i) => el('div', { className: 'q' }, el('span', { textContent: i + 1 }), el('div', {}, el('b', { textContent: x.q }), el('p', { textContent: x.a })))))));
+  return p;
+}
+function copyBtn(text) {
+  return el('button', { type: 'button', className: 'link copy noprint', textContent: 'Kopiuj', onclick: async (e) => {
+    try { await navigator.clipboard.writeText(text); e.target.textContent = 'Skopiowano'; } catch { e.target.textContent = 'Zaznacz tekst i skopiuj'; }
+  } });
+}
+function messagesNode(r, d) {
+  const m = r.messages, p = paperEl('extra', { tpl: 'klasyczny', color: d.color });
+  p.append(el('div', { className: 'pg' }, el('header', { className: 'top lhead' }, el('h1', { textContent: 'Wiadomości do rekrutera' }), el('div', { className: 'ct', textContent: r.position }), el('div', { className: 'rule' })),
+    el('h3', { textContent: 'Wiadomość na LinkedIn' }), copyBtn(m.linkedin), el('div', { className: 'msgbox', textContent: m.linkedin }),
+    el('h3', { textContent: 'E-mail z aplikacją' }), copyBtn(`${m.email.subject}\n\n${m.email.body}`),
+    el('div', { className: 'msgbox' }, el('b', { textContent: `Temat: ${m.email.subject}` }), '\n\n', m.email.body)));
+  return p;
+}
+
+function drawMatch(r) {
+  const box = $('#matchBox'), m = r.match;
+  box.hidden = curDoc !== 'cv' || !m;
+  if (box.hidden) return;
+  const pct = m.score ?? 100;
+  box.replaceChildren(
+    el('div', { className: 'ring', style: `--p:${pct}`, title: 'Odsetek wymagań z ogłoszenia, które pokazuje Twoje CV' }, el('b', { textContent: `${pct}%` })),
+    el('div', { className: 'mcol ok' }, el('h3', { textContent: `Raport dopasowania: spełniasz ${m.found.length} z ${m.found.length + m.missing.length} wymagań` }), el('ul', {}, ...m.found.map((x) => el('li', { textContent: x })))),
+    el('div', { className: 'mcol miss' }, el('h3', { textContent: m.missing.length ? 'Brakuje w CV' : 'Niczego nie brakuje' }),
+      m.missing.length ? el('ul', {}, ...m.missing.map((x) => {
+        const inp = el('input', { type: 'text', placeholder: 'Mam to: np. kiedy i gdzie', ariaLabel: `Opisz: ${x.keyword}` });
+        return el('li', {}, el('b', { textContent: x.keyword }), el('small', { textContent: x.hint }),
+          el('div', { className: 'addf' }, inp, el('button', { type: 'button', className: 'btn sm', textContent: 'Dopisz', onclick: (e) => {
+            if (inp.value.trim().length < 3) return inp.focus();
+            revise('cv', `Kandydat podaje nowy fakt o sobie: "${inp.value.trim()}". Dodaj go w odpowiednim miejscu CV, bo odpowiada wymaganiu z ogłoszenia: ${x.keyword}.`, x.keyword, e.target);
+          } })));
+      })) : el('p', { className: 'hint', textContent: 'Wszystkie główne wymagania z ogłoszenia są pokazane w Twoim CV.' })));
+}
+
+async function revise(doc, instruction, resolves, btn) {
+  if (btn) btn.disabled = true;
+  const out = $('#reviseMsg');
+  if (out) { out.className = 'hint'; out.textContent = 'Poprawiamy dokument…'; }
+  try {
+    const r = await fetch(`/api/orders/${orderId}/revise`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ i: curAd, doc, instruction, resolves }) });
+    const j = await r.json(); if (!r.ok) throw new Error(j.error);
+    data.results[curAd] = j.result; data.revisionsLeft = j.revisionsLeft;
+    redraw();
+    const o = $('#reviseMsg'); if (o) { o.className = 'ok'; o.textContent = `Gotowe. ${j.note || ''}`; }
+    else flash(`Gotowe. ${j.note || ''}`);
+  } catch (x) {
+    const o = $('#reviseMsg'); if (o) { o.className = 'err'; o.textContent = x.message; } else flash(x.message, true);
+  }
+  if (btn) btn.disabled = false;
+}
+function flash(t, bad) { const n = el('div', { className: 'toast' + (bad ? ' bad' : ''), role: 'status', textContent: t }); document.body.append(n); setTimeout(() => n.remove(), 5000); }
+
+function openRevise() {
+  const box = $('#reviseBox'), doc = curDoc === 'letter' ? 'letter' : 'cv';
+  $('#editor').hidden = true;
+  const chips = doc === 'cv' ? ['Skróć do jednej strony', 'Bardziej formalnie', 'Prostszy język', 'Mocniej podkreśl doświadczenie z ogłoszenia', 'Popraw błędy językowe'] : ['Skróć', 'Bardziej formalnie', 'Cieplejszy ton', 'Dodaj konkretny przykład z mojej pracy', 'Popraw błędy językowe'];
+  const ta = el('textarea', { placeholder: 'Opisz, co zmienić, np. „przenieś kurs B2B wyżej” albo „dodaj, że mam prawo jazdy kat. B”.', rows: 3, ariaLabel: 'Co zmienić' });
+  box.replaceChildren(el('h3', { textContent: `Darmowa poprawka: ${doc === 'cv' ? 'CV' : 'list motywacyjny'}` }),
+    el('p', { className: 'hint', textContent: 'Wybierz gotową prośbę albo opisz zmianę własnymi słowami. Nowe fakty o sobie możesz dopisać tutaj.' }),
+    el('div', { className: 'chipsel' }, ...chips.map((c) => el('button', { type: 'button', textContent: c, onclick: () => { ta.value = c; ta.focus(); } }))),
+    el('div', { className: 'row' }, ta),
+    el('p', {}, el('button', { type: 'button', className: 'btn', textContent: 'Popraw bez dopłaty', onclick: (e) => { if (ta.value.trim().length < 3) return ta.focus(); revise(doc, ta.value.trim(), null, e.target); } }), ' ', el('button', { type: 'button', className: 'btn ghost', textContent: 'Zamknij', onclick: () => (box.hidden = true) })),
+    el('p', { id: 'reviseMsg', className: 'hint' }));
+  box.hidden = false; ta.focus();
+}
+
+function openEditor() {
+  const box = $('#editor'), r = data.results[curAd], doc = curDoc === 'letter' ? 'letter' : 'cv';
+  $('#reviseBox').hidden = true;
+  editing = { doc, cv: JSON.parse(JSON.stringify(r.cv)), letter: r.letter };
+  const fld = (label, value, on, rowsN) => { const i = rowsN ? el('textarea', { value, rows: rowsN }) : el('input', { type: 'text', value }); i.oninput = () => { on(i.value); drawPaper(); }; return el('label', { className: 'f' }, label, i); };
+  const list = (v) => v.split(/[,\n]/).map((x) => x.trim()).filter(Boolean);
+  const c = editing.cv;
+  const body = doc === 'letter' ? [fld('Treść listu', editing.letter, (v) => (editing.letter = v), 16)] : [
+    fld('Nagłówek', c.headline, (v) => (c.headline = v)), fld('Profil zawodowy', c.summary, (v) => (c.summary = v), 4),
+    ...c.experience.map((e) => fld(`${e.title}${e.company ? ', ' + e.company : ''}: punkty (każdy w nowej linii)`, e.bullets.join('\n'), (v) => (e.bullets = v.split('\n').map((x) => x.trim()).filter(Boolean)), Math.max(3, e.bullets.length + 1))),
+    fld('Umiejętności (po przecinku)', c.skills.join(', '), (v) => (c.skills = list(v)), 2),
+    fld('Języki', c.languages.join(', '), (v) => (c.languages = list(v))),
+    fld('Certyfikaty i kursy', c.certificates.join(', '), (v) => (c.certificates = list(v))),
+    fld('Zainteresowania', c.interests || '', (v) => (c.interests = v)),
+  ];
+  box.replaceChildren(el('h3', { textContent: doc === 'cv' ? 'Edytuj CV' : 'Edytuj list motywacyjny' }), el('p', { className: 'hint', textContent: 'Zmiany widzisz od razu w dokumencie poniżej.' }), el('div', { className: 'editor-grid' }, ...body),
+    el('p', {}, el('button', { type: 'button', className: 'btn', textContent: 'Zapisz zmiany', onclick: async (e) => {
+      e.target.disabled = true;
+      const r2 = await fetch(`/api/orders/${orderId}/results/${curAd}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(doc === 'cv' ? { cv: editing.cv } : { letter: editing.letter }) });
+      const j = await r2.json().catch(() => ({}));
+      if (r2.ok) { data.results[curAd] = j.result; editing = null; box.hidden = true; redraw(); flash('Zapisano zmiany.'); } else { e.target.disabled = false; flash(j.error || 'Nie udało się zapisać.', true); }
+    } }), ' ', el('button', { type: 'button', className: 'btn ghost', textContent: 'Anuluj', onclick: () => { editing = null; box.hidden = true; drawPaper(); } })));
+  box.hidden = false;
+}
+
+function drawPaper() {
+  const base = data.results[curAd], r = editing ? { ...base, cv: editing.cv, letter: editing.letter } : base, d = data.design;
+  const node = { cv: () => cvNode(r, undefined, d), letter: () => letterNode(r, d), interview: () => interviewNode(r, d), messages: () => messagesNode(r, d) }[curDoc];
+  $('#paper').replaceChildren(node());
+}
+
+function drawFollowup() {
+  const box = $('#followup');
+  box.hidden = false;
+  if (box.dataset.ready === orderId) return;
+  box.dataset.ready = orderId;
+  const doc = data.pkg === 'cv' ? 'CV' : 'CV i list';
+  box.replaceChildren(el('h3', { textContent: 'Masz kolejne ogłoszenie?' }),
+    el('p', { className: 'hint', textContent: `Twoje dane już mamy. ${doc} pod nowe ogłoszenie kosztuje ${PRICE.extra} zł, w tym samym wyglądzie.` }),
+    el('div', { id: 'fuAds' }),
+    el('p', {}, el('button', { type: 'button', className: 'btn', id: 'fuPay', textContent: `Zamów za ${PRICE.extra} zł`, onclick: async (e) => {
+      const ads = rows('fuAds'), err = $('#fuErr');
+      const bad = ads.find((a) => !a.title || a.text.length < 80);
+      if (bad) { err.textContent = 'Podaj nazwę stanowiska i pełną treść ogłoszenia (min. 80 znaków).'; return; }
+      e.target.disabled = true; err.textContent = '';
+      try {
+        const r = await fetch(`/api/orders/${orderId}/followup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ads }) });
+        const j = await r.json(); if (!r.ok) throw new Error(j.error);
+        if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); delete box.dataset.ready; startResult(j.id); } else location.href = j.url;
+      } catch (x) { err.textContent = x.message; e.target.disabled = false; }
+    } }), cfg.demo ? el('span', { className: 'hint', textContent: '  Podgląd: płatność jest symulowana.' }) : null),
+    el('p', { className: 'err', id: 'fuErr' }));
+  addRow('fuAds');
+}
+
+let redraw = () => {};
 function showResult() {
   clearDraft();
   $('#result').hidden = false; window.scrollTo(0, 0);
-  const withLetter = data.pkg === 'cv_letter';
+  curAd = Math.min(curAd, data.results.length - 1);
   const draw = () => {
-    $('#adTabs').replaceChildren(...(data.results.length > 1 ? data.results.map((r, i) => el('button', { type: 'button', role: 'tab', textContent: `${i + 1}. ${(r.position || '').slice(0, 32)}`, onclick: () => { curAd = i; draw(); } })) : []));
+    const r = data.results[curAd], docs = docsOf(r);
+    if (!docs.includes(curDoc)) curDoc = 'cv';
+    $('#adTabs').replaceChildren(...data.results.map((x, i) => el('button', { type: 'button', role: 'tab', textContent: `${i + 1}. ${(x.position || '').slice(0, 32)}${x.lang === 'en' ? ' (EN)' : ''}`, onclick: () => { curAd = i; editing = null; $('#editor').hidden = $('#reviseBox').hidden = true; draw(); } })));
     $$('#adTabs button').forEach((b, i) => b.setAttribute('aria-selected', i === curAd));
     $('#adTabs').hidden = data.results.length < 2;
-    $('#docTabs').replaceChildren(...(withLetter ? [['cv', 'CV'], ['letter', 'List motywacyjny']].map(([k, t]) => el('button', { type: 'button', role: 'tab', textContent: t, onclick: () => { curDoc = k; draw(); } })) : []));
-    $$('#docTabs button').forEach((b, i) => b.setAttribute('aria-selected', ['cv', 'letter'][i] === curDoc));
-    $('#docTabs').hidden = !withLetter;
-    const r = data.results[curAd];
-    $('#print').textContent = `Pobierz PDF: ${!withLetter || curDoc === 'cv' ? 'CV' : 'list'}`;
-    $('#paper').replaceChildren(!withLetter || curDoc === 'cv' ? cvNode(r, undefined, data.design) : letterNode(r, data.design));
-    try { document.title = `${curDoc === 'letter' ? 'List' : 'CV'} ${r.cv.name} – ${r.position}`; } catch {}
+    $('#docTabs').replaceChildren(...docs.map((k) => el('button', { type: 'button', role: 'tab', textContent: DOCS[k], onclick: () => { curDoc = k; editing = null; $('#editor').hidden = $('#reviseBox').hidden = true; draw(); } })));
+    $$('#docTabs button').forEach((b, i) => b.setAttribute('aria-selected', docs[i] === curDoc));
+    $('#docTabs').hidden = docs.length < 2;
+    $('#print').textContent = `Pobierz PDF: ${{ cv: 'CV', letter: 'list', interview: 'pytania', messages: 'wiadomości' }[curDoc]}`;
+    const editable = curDoc === 'cv' || curDoc === 'letter';
+    $('#resActions').hidden = !editable;
+    $('#revLeft').textContent = `Pozostało poprawek: ${data.revisionsLeft ?? cfg.maxRevisions}`;
+    $('#hlTog').parentElement.hidden = curDoc !== 'cv';
+    drawMatch(r); drawPaper();
+    try { document.title = `${DOCS[curDoc]} ${r.cv.name} – ${r.position}`; } catch {}
   };
+  redraw = draw;
   drawMail();
   designPicker($('#resDesign'), data.design, (d) => { data.design = d; draw(); fetch(`/api/orders/${orderId}/design`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) }).catch(() => {}); }, { thumbs: false });
   $('#hlTog').onchange = draw;
   $('#print').hidden = !!cfg.noPrint;
   $('#print').onclick = () => window.print();
+  $('#editBtn').onclick = openEditor;
+  $('#reviseBtn').onclick = openRevise;
+  $('#editor').hidden = $('#reviseBox').hidden = true; editing = null;
+  if (data.expires) $('#retention').textContent = `Dane tego zamówienia, w tym dokumenty${data.photo ? ' i zdjęcie' : ''}, usuniemy automatycznie ${new Date(data.expires).toLocaleDateString('pl-PL')}. Zapisz PDF-y u siebie.`;
+  drawFollowup();
   draw();
 }
 $('#newOrder').onclick = () => {
@@ -477,12 +707,101 @@ $('#newOrder').onclick = () => {
   $('#result').hidden = true; landing(true); route();
   resetWizard(); window.scrollTo(0, 0);
 };
-function resetWizard() { design = { tpl: 'nowoczesny', color: 'niebieski' }; drawWizDesign(); restoring = true; $('#wizForm').reset(); ['exp', 'edu', 'ads'].forEach((b) => { $('#' + b).replaceChildren(); addRow(b); }); restoring = false; refresh(); go(1); }
+function resetWizard() { design = { tpl: 'nowoczesny', color: 'niebieski' }; drawWizDesign(); setPhoto(''); restoring = true; $('#wizForm').reset(); ['exp', 'edu', 'ads'].forEach((b) => { $('#' + b).replaceChildren(); addRow(b); }); restoring = false; refresh(); go(1); }
+
+/* ---------- Podstrony: zawody i poradnik ---------- */
+let CONTENT = null;
+const CLAUSE = 'Wyrażam zgodę na przetwarzanie moich danych osobowych dla potrzeb niezbędnych do realizacji procesu rekrutacji zgodnie z art. 6 ust. 1 lit. a Rozporządzenia Parlamentu Europejskiego i Rady (UE) 2016/679.';
+async function loadContent() {
+  if (!CONTENT) { try { CONTENT = await (await fetch('/content.json')).json(); } catch { CONTENT = { PROFESSIONS: [], ARTICLES: [] }; } }
+  return CONTENT;
+}
+const profResult = (p) => ({ position: p.sample.headline, lang: 'pl', keywords: [], cv: {
+  name: p.sample.name, headline: p.sample.headline, contact: p.sample.contact, summary: p.sample.summary,
+  experience: p.sample.jobs.map((j) => ({ title: j.title, company: j.company, period: j.period, bullets: j.bullets })),
+  education: [p.sample.education], skills: p.sample.skills, languages: p.sample.languages || [], certificates: [], interests: '', clause: CLAUSE } });
+const pageHref = (r) => (cfg.preview ? '#' + (r ? r.replace('/', '-') : 'top') : '/' + r);
+const pageLink = (r, props, ...kids) => { const a = el('a', { href: pageHref(r), ...props }, ...kids); a.dataset.page = r; return a; };
+const openBtn = (t, cls = 'btn') => { const b = el('button', { type: 'button', className: cls, textContent: t }); b.dataset.open = ''; return b; };
+
+async function drawLists() {
+  const C = await loadContent();
+  $('#profGrid').replaceChildren(...C.PROFESSIONS.map((p, k) => pageLink(`cv/${p.slug}`, { className: 'prof-card' },
+    thumb(profResult(p), { tpl: TPLS[k % TPLS.length][0], color: Object.keys(COLORS)[k % 6] }), el('b', { textContent: p.name }))));
+  $('#artGrid').replaceChildren(...C.ARTICLES.map((a) => pageLink(`poradnik/${a.slug}`, { className: 'art-card' }, el('small', { textContent: `${a.readMinutes} min czytania` }), el('b', { textContent: a.title }), el('span', { textContent: a.lead }))));
+  $('#footProf').replaceChildren(...C.PROFESSIONS.slice(0, 6).map((p) => pageLink(`cv/${p.slug}`, { textContent: p.name })));
+}
+
+function profPage(p, C) {
+  const d = { tpl: 'nowoczesny', color: 'niebieski' }, r = profResult(p);
+  const side = el('div', { className: 'side-thumb' }), full = el('div', { className: 'side-full' });
+  const paint = () => { side.replaceChildren(thumb(r, d, false, '')); full.replaceChildren(cvNode(r, false, d, '')); };
+  const picker = el('div'); designPicker(picker, d, paint, { thumbs: false }); paint();
+  return el('div', { className: 'inner' },
+    el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', el('a', { href: '#zawody', textContent: 'CV dla zawodów' }), '›', el('span', { textContent: p.name })),
+    el('h1', { textContent: p.title }), el('p', { className: 'lead', textContent: p.intro }),
+    el('div', { className: 'page-grid' },
+      el('div', {},
+        el('h2', { textContent: 'Słowa kluczowe z ogłoszeń' }), el('p', { className: 'hint', textContent: 'Te sformułowania często pojawiają się w ofertach. Jeśli to prawda o Tobie, użyj ich w CV w takim samym brzmieniu.' }),
+        el('div', { className: 'kw' }, ...p.keywords.map((k) => el('span', { textContent: k }))),
+        el('h2', { textContent: 'Wskazówki do CV' }), el('ol', { className: 'tips' }, ...p.tips.map((t) => el('li', { textContent: t }))),
+        el('h2', { textContent: 'Przykładowe CV' }), el('p', { className: 'hint', textContent: 'Dane w przykładzie są fikcyjne. Szablon i kolor zmienisz w panelu obok.' }), full,
+        el('h2', { textContent: 'Pytania' }), ...p.faq.map((f) => el('details', {}, el('summary', { textContent: f.q }), el('p', { textContent: f.a }))),
+        el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Masz konkretne ogłoszenie?' }), el('p', { className: 'hint', textContent: 'Wklej link, a przygotujemy CV pisane pod nie. Od 39 zł, z darmową poprawką.' })), openBtn('Zamów CV')),
+        el('h2', { textContent: 'Inne zawody' }), el('div', { className: 'more' }, ...C.PROFESSIONS.filter((x) => x.slug !== p.slug).map((x) => pageLink(`cv/${x.slug}`, { textContent: x.name })))),
+      el('aside', { className: 'side-card' }, el('b', { textContent: `Przykład: ${p.sample.name}` }), side, picker, openBtn('Zamów CV pod swoje ogłoszenie'), el('p', { className: 'hint', textContent: 'Raport dopasowania, darmowa poprawka, PDF w e-mailu.' }))));
+}
+function articlePage(a, C) {
+  return el('div', { className: 'inner narrow article' },
+    el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', el('a', { href: '#poradnik', textContent: 'Poradnik' }), '›', el('span', { textContent: a.title })),
+    el('h1', { textContent: a.title }), el('p', { className: 'meta', textContent: `${a.readMinutes} min czytania` }), el('p', { className: 'lead', textContent: a.lead }),
+    ...a.sections.flatMap((sec) => [el('h2', { textContent: sec.h }), ...sec.p.map((t) => el('p', { textContent: t }))]),
+    el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Zrób CV pod swoje ogłoszenie' }), el('p', { className: 'hint', textContent: 'Wklejasz link, dostajesz CV z raportem dopasowania. Od 39 zł.' })), openBtn('Zamów CV')),
+    el('h2', { textContent: 'Przeczytaj też' }), el('div', { className: 'more' }, ...C.ARTICLES.filter((x) => x.slug !== a.slug).map((x) => pageLink(`poradnik/${x.slug}`, { textContent: x.title })), ...C.PROFESSIONS.slice(0, 4).map((x) => pageLink(`cv/${x.slug}`, { textContent: `CV: ${x.name}` }))));
+}
+function setMeta(desc) { let m = document.querySelector('meta[name=description]'); if (!m) { m = el('meta', { name: 'description' }); document.head.append(m); } m.content = desc; }
+function navTo(r) {
+  try {
+    if (cfg.preview) history.pushState(null, '', r ? '#' + r.replace('/', '-') : '#top');
+    else history.pushState(null, '', '/' + r);
+  } catch {}
+}
+async function showPage(r, push = true) {
+  const C = await loadContent(), [kind, slug] = r.split('/');
+  const item = kind === 'cv' ? C.PROFESSIONS.find((p) => p.slug === slug) : C.ARTICLES.find((a) => a.slug === slug);
+  if (!item) return showHome(push);
+  $('#landing').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true));
+  $('#page').hidden = false;
+  $('#page').replaceChildren(kind === 'cv' ? profPage(item, C) : articlePage(item, C));
+  try { document.title = `${item.title} | CV Pod Ogłoszenie`; } catch {}
+  setMeta(item.metaDescription);
+  if (push) navTo(r);
+  window.scrollTo(0, 0);
+}
+function showHome(push) {
+  $('#page').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#landing').hidden = false;
+  try { document.title = 'CV Pod Ogłoszenie'; } catch {}
+  if (push) navTo('');
+  window.scrollTo(0, 0);
+}
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[data-page]');
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+  e.preventDefault();
+  if (!$('#result').hidden) { location.href = cfg.preview ? '#top' : '/' + a.dataset.page; return; }
+  a.dataset.page ? showPage(a.dataset.page) : showHome(true);
+});
+window.addEventListener('popstate', () => route());
 
 const LEGAL = { '#regulamin': 'legal-regulamin', '#prywatnosc': 'legal-prywatnosc' };
 function route() {
   if (!$('#result').hidden || !$('#gen').hidden) return;
-  const id = LEGAL[location.hash];
+  const h = location.hash, hm = /^#(cv|poradnik)-([\w-]+)$/.exec(h), pm = /^\/(cv|poradnik)\/([\w-]+)\/?$/.exec(location.pathname);
+  if (hm) return showPage(`${hm[1]}/${hm[2]}`, false);
+  const anchor = h.length > 1 && document.getElementById(h.slice(1));
+  if (pm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage(`${pm[1]}/${pm[2]}`, false);
+  $('#page').hidden = true;
+  const id = LEGAL[h];
   $('#landing').hidden = !!id;
   Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = l !== id));
   if (id) { window.scrollTo(0, 0); try { document.title = location.hash === '#regulamin' ? 'Regulamin – CV Pod Ogłoszenie' : 'Polityka prywatności – CV Pod Ogłoszenie'; } catch {} }
@@ -495,6 +814,7 @@ if (restoreDraft()) $('#draftNote').hidden = false;
 refresh(); go(1); drawWizDesign();
 $('#clearDraft').onclick = () => { clearDraft(); resetWizard(); $('#draftNote').hidden = true; };
 const q = new URLSearchParams(location.search);
+if (window.__ROUTE) showPage(window.__ROUTE, false);
 if (q.get('id')) startResult(q.get('id'));
 else if (q.has('canceled')) { try { history.replaceState(null, '', location.pathname); } catch {} openWiz(); go(6); $('#werr').textContent = 'Płatność została anulowana. Twoje dane są zachowane, możesz spróbować ponownie.'; }
 })();
