@@ -2,7 +2,9 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const el = (t, p = {}, ...k) => { const e = Object.assign(document.createElement(t), p); e.append(...k.filter((x) => x != null && x !== false)); return e; };
-let PRICE = { cv: 39, cv_letter: 49, extra: 20, interview: 15, messages: 9, extraLang: 5 };
+let PRICE = { cv: 39, cv_letter: 49, pack3: 79, interview: 15, messages: 9, extraLang: 5 };
+const PKG_ADS = { cv: 1, cv_letter: 1, pack3: 3 };
+const PKG_NAME = { cv: 'CV', cv_letter: 'CV + list motywacyjny', pack3: 'Pakiet 3 CV + listy motywacyjne' };
 let promo = null; // zastosowany kod rabatowy/polecający: { code, discount, label }
 let data; // bieżące zamówienie na stronie wyniku
 const STEPS = ['Pakiet i wygląd CV', 'Twoje dane', 'Doświadczenie', 'Wykształcenie i umiejętności', 'Ogłoszenia', 'Podsumowanie'];
@@ -123,7 +125,7 @@ function hl(text, kws) {
 }
 
 fetch('/api/config').then((r) => r.json()).then((c) => {
-  cfg = c; drawLists(); if (c.prices) PRICE = { cv: c.prices.cv, cv_letter: c.prices.cv_letter, extra: c.prices.extraAd, interview: c.prices.interview, messages: c.prices.messages, extraLang: c.prices.extraLang }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
+  cfg = c; drawLists(); if (c.prices) PRICE = { cv: c.prices.cv, cv_letter: c.prices.cv_letter, pack3: c.prices.pack3, interview: c.prices.interview, messages: c.prices.messages, extraLang: c.prices.extraLang }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
 });
 
 /* ---------- Przykład dopasowania ---------- */
@@ -337,7 +339,7 @@ const addons = () => ({ interview: $('#adInterview').checked, messages: $('#adMe
 const extraLangs = () => $$('#langPick input:checked').map((i) => i.value);
 const addonsTotal = () => (addons().interview ? PRICE.interview : 0) + (addons().messages ? PRICE.messages : 0) + PRICE.extraLang * extraLangs().length;
 const discount = () => (promo ? Math.min(promo.discount, PRICE[pkg()] - 2) : 0);
-const total = () => PRICE[pkg()] + PRICE.extra * (nAds() - 1) + addonsTotal() - discount();
+const total = () => PRICE[pkg()] + addonsTotal() - discount();
 
 const DKEY = 'cvpo-draft-v1', FIELDS = ['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'];
 let saveT, restoring = false;
@@ -365,10 +367,11 @@ function restoreDraft() {
 function refresh() {
   saveDraft();
   $('#total').textContent = total() + ' zł';
-  $('#brk').textContent = [nAds() > 1 ? `${PRICE[pkg()]} zł + ${nAds() - 1} × ${PRICE.extra} zł` : '', addonsTotal() ? `dodatki ${addonsTotal()} zł` : '', discount() ? `rabat −${discount()} zł` : ''].filter(Boolean).join(' · ');
+  $('#brk').textContent = [addonsTotal() ? `dodatki ${addonsTotal()} zł` : '', discount() ? `rabat −${discount()} zł` : ''].filter(Boolean).join(' · ');
   $$('.opt b[data-price]').forEach((b) => (b.textContent = `+${PRICE[b.dataset.price]} zł`));
-  $('#addAd').disabled = nAds() >= cfg.maxAds;
-  $('#addAd').title = nAds() >= cfg.maxAds ? `Maksymalnie ${cfg.maxAds} ogłoszeń w jednym zamówieniu` : '';
+  const maxA = PKG_ADS[pkg()];
+  $('#addAd').hidden = maxA === 1; $('#addAd').disabled = nAds() >= maxA;
+  $('#packTip').hidden = maxA !== 1;
 }
 $$('input[name=pkg]').forEach((r) => (r.onchange = refresh));
 $('#adInterview').onchange = $('#adMessages').onchange = refresh;
@@ -387,6 +390,7 @@ async function applyCode(raw, quiet) {
   refresh(); if (step === 6) drawSummary();
 }
 $('#codeApply').onclick = () => applyCode($('#codeInput').value);
+$('#toPack').onclick = () => { $('input[name=pkg][value=pack3]').checked = true; refresh(); $('#werr').textContent = ''; };
 {
   const ref = new URLSearchParams(location.search).get('ref');
   try { if (ref) localStorage.setItem(REF_KEY, ref); } catch {}
@@ -414,9 +418,9 @@ function go(n) {
 function drawSummary() {
   const ads = rows('ads');
   $('#sum').replaceChildren(
-    el('div', { className: 'sumrow' }, el('span', { textContent: pkg() === 'cv' ? 'CV' : 'CV + list motywacyjny' }), el('span', { textContent: PRICE[pkg()] + ' zł' })),
+    el('div', { className: 'sumrow' }, el('span', { textContent: PKG_NAME[pkg()] }), el('span', { textContent: PRICE[pkg()] + ' zł' })),
     el('div', { className: 'sumrow' }, el('span', { textContent: `Wygląd: ${tplName(design.tpl)}, kolor ${COLOR_NAMES[design.color]}` }), el('span', { textContent: 'w cenie' })),
-    ...ads.map((a, i) => el('div', { className: 'sumrow' }, el('span', { textContent: `Ogłoszenie ${i + 1}: ${a.title}${a.lang === 'en' ? ' (po angielsku)' : ''}` }), el('span', { textContent: i === 0 ? 'w cenie' : '+' + PRICE.extra + ' zł' }))),
+    ...ads.map((a, i) => el('div', { className: 'sumrow' }, el('span', { textContent: `Ogłoszenie ${i + 1}: ${a.title}${a.lang === 'en' ? ' (po angielsku)' : ''}` }), el('span', { textContent: 'w cenie' }))),
     ...(addons().interview ? [el('div', { className: 'sumrow' }, el('span', { textContent: 'Przygotowanie do rozmowy' }), el('span', { textContent: '+' + PRICE.interview + ' zł' }))] : []),
     ...(addons().messages ? [el('div', { className: 'sumrow' }, el('span', { textContent: 'Wiadomość do rekrutera i e-mail z aplikacją' }), el('span', { textContent: '+' + PRICE.messages + ' zł' }))] : []),
     ...extraLangs().map((l) => el('div', { className: 'sumrow' }, el('span', { textContent: `Dodatkowa wersja: ${LANGS[l]}` }), el('span', { textContent: '+' + PRICE.extraLang + ' zł' }))),
@@ -427,6 +431,7 @@ function validate(n) {
   const v = (id) => $('#' + id).value.trim();
   if (n === 2) { if (!v('name')) return 'Podaj imię i nazwisko.'; if (!/^\S+@\S+\.\S+$/.test(v('email'))) return 'Podaj poprawny adres e-mail.'; }
   if (n === 4 && !rows('exp').some((e) => e.title || e.company) && !rows('edu').some((e) => e.school)) return 'Dodaj co najmniej jedno stanowisko (krok 3) lub szkołę.';
+  if (n === 5 && nAds() > PKG_ADS[pkg()]) return 'Wybrany pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe ogłoszenia albo wybierz Pakiet 3 za 79 zł.';
   if (n === 5) for (const [i, a] of rows('ads').entries()) {
     if (!a.text) return `Ogłoszenie ${i + 1}: kliknij „Pobierz” przy linku albo wklej treść oferty.`;
     if (!a.title) return `Ogłoszenie ${i + 1}: podaj nazwę stanowiska.`;
@@ -587,6 +592,7 @@ $('#fill').onclick = () => {
   addRow('exp', { title: 'Specjalistka ds. obsługi klienta', company: 'Nova Serwis Sp. z o.o.', from: '03.2022', to: 'obecnie', description: 'Obsługa 40–50 zgłoszeń dziennie w systemie CRM\nRozwiązywanie reklamacji klientów\nKontakt z klientami zagranicznymi po angielsku' });
   addRow('exp', { title: 'Sprzedawca / kasjer', company: 'Market Dom', from: '06.2019', to: '02.2022', description: 'Obsługa kasy fiskalnej i rozliczanie zmiany\nObsługa klienta, reklamacje przy kasie\nInwentaryzacja towaru\nPraca zmianowa w zespole 8 osób' });
   addRow('edu', { school: 'Uniwersytet Ekonomiczny w Krakowie', degree: 'Zarządzanie, licencjat', from: '2016', to: '2019' });
+  $('input[name=pkg][value=pack3]').checked = true; refresh();
   addRow('ads', { title: EX[0].title, text: 'Kasjer / Sprzedawca. ' + EX[0].ad + ' Oferujemy umowę o pracę i pakiet benefitów.' });
   addRow('ads', { title: EX[1].title, text: 'Specjalista ds. obsługi klienta. ' + EX[1].ad + ' Oferujemy umowę o pracę i elastyczne godziny.' });
   $('#werr').textContent = 'Wstawiono dane przykładowe. Kliknij „Dalej”, aby przejść przez kroki.';
@@ -627,7 +633,7 @@ function drawMail() {
     } }));
 }
 const DOCS = { cv: 'CV', letter: 'List motywacyjny', interview: 'Rozmowa', messages: 'Wiadomości' };
-const docsOf = (r) => ['cv', ...(data.pkg === 'cv_letter' ? ['letter'] : []), ...(r.interview?.length ? ['interview'] : []), ...(r.messages ? ['messages'] : [])];
+const docsOf = (r) => ['cv', ...(data.pkg !== 'cv' ? ['letter'] : []), ...(r.interview?.length ? ['interview'] : []), ...(r.messages ? ['messages'] : [])];
 let editing = null; // kopia dokumentu w trakcie ręcznej edycji
 let curLang = null; // aktywna dodatkowa wersja językowa (null = główny język)
 const cur = () => { const b = data.results[curAd]; return (curLang && b.variants?.[curLang]) || b; };
@@ -739,32 +745,45 @@ function drawFollowup() {
   box.hidden = false;
   if (box.dataset.ready === orderId) return;
   box.dataset.ready = orderId;
-  const doc = data.pkg === 'cv' ? 'CV' : 'CV i list';
-  box.replaceChildren(el('h3', { textContent: 'Masz kolejne ogłoszenie?' }),
-    el('p', { className: 'hint', textContent: `Twoje dane już mamy. ${doc} pod nowe ogłoszenie kosztuje ${PRICE.extra} zł, w tym samym wyglądzie.` }),
-    el('div', { id: 'fuAds' }),
-    el('label', { className: 'f fucode' }, 'Kod rabatowy (np. nagroda za polecenie) ', el('input', { type: 'text', id: 'fuCode', placeholder: 'opcjonalnie', autocomplete: 'off' })),
-    el('p', {}, el('button', { type: 'button', className: 'btn', id: 'fuPay', textContent: `Zamów za ${PRICE.extra} zł`, onclick: async (e) => {
+  let fpkg = 'cv_letter';
+  const pick = el('div', { className: 'fupick seg', role: 'tablist' });
+  const drawPick = () => {
+    pick.replaceChildren(...['cv', 'cv_letter', 'pack3'].map((k) => el('button', { type: 'button', role: 'tab', ariaSelected: String(k === fpkg), textContent: `${PKG_NAME[k]} · ${PRICE[k]} zł`, onclick: () => { fpkg = k; drawPick(); } })));
+    const n = $('#fuAds')?.children.length || 0;
+    if ($('#fuAdd')) { $('#fuAdd').hidden = PKG_ADS[fpkg] === 1; $('#fuAdd').disabled = n >= PKG_ADS[fpkg]; }
+    if ($('#fuPay')) $('#fuPay').textContent = `Zamów za ${PRICE[fpkg]} zł`;
+  };
+  box.replaceChildren(el('h3', { textContent: 'Masz kolejne ogłoszenia?' }),
+    el('p', { className: 'hint', textContent: 'Twoje dane już mamy, więc nie wpisujesz ich ponownie. Dokumenty powstaną w tym samym wyglądzie.' + (data.buyerCoupon ? ` Twój kod ${data.buyerCoupon.code} obniży cenę o ${data.buyerCoupon.discount} zł.` : '') }),
+    pick, el('div', { id: 'fuAds' }),
+    el('button', { type: 'button', className: 'btn ghost sm', id: 'fuAdd', textContent: '+ Dodaj ogłoszenie (w pakiecie do 3)', onclick: () => { addRow('fuAds'); drawPick(); } }),
+    el('label', { className: 'f fucode' }, 'Kod rabatowy ', el('input', { type: 'text', id: 'fuCode', placeholder: 'opcjonalnie', autocomplete: 'off', value: data.buyerCoupon?.code || '' })),
+    el('p', {}, el('button', { type: 'button', className: 'btn', id: 'fuPay', textContent: '', onclick: async (e) => {
       const ads = rows('fuAds'), err = $('#fuErr'), code = $('#fuCode').value.trim();
+      if (ads.length > PKG_ADS[fpkg]) { err.textContent = 'Ten pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe albo wybierz Pakiet 3.'; return; }
       const bad = ads.find((a) => !a.title || a.text.length < 80);
       if (bad) { err.textContent = 'Podaj nazwę stanowiska i pełną treść ogłoszenia (min. 80 znaków).'; return; }
       e.target.disabled = true; err.textContent = '';
       try {
-        const r = await fetch(`/api/orders/${orderId}/followup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ads, code }) });
+        const r = await fetch(`/api/orders/${orderId}/followup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pkg: fpkg, ads, code }) });
         const j = await r.json(); if (!r.ok) throw new Error(j.error);
         if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); delete box.dataset.ready; startResult(j.id); } else location.href = j.url;
       } catch (x) { err.textContent = x.message; e.target.disabled = false; }
     } }), cfg.demo ? el('span', { className: 'hint', textContent: '  Podgląd: płatność jest symulowana.' }) : null),
     el('p', { className: 'err', id: 'fuErr' }));
-  addRow('fuAds');
+  addRow('fuAds'); drawPick();
 }
 
 function drawReferral() {
   const box = $('#referral'), r = data.referral;
-  box.hidden = !r;
-  if (!r) return;
+  box.hidden = !r && !data.buyerCoupon;
+  if (box.hidden) return;
+  if (!r) { box.replaceChildren(el('div', { className: 'perk' }, el('b', { textContent: `Twój kod zniżkowy: ${data.buyerCoupon.code}` }), ` −${data.buyerCoupon.discount} zł na kolejne zamówienie.`)); return; }
   const link = cfg.preview ? `https://twojadomena.pl/?ref=${r.code}` : `${location.origin}/?ref=${r.code}`;
-  box.replaceChildren(el('h3', { textContent: `Poleć nas i zyskaj ${r.discount} zł` }),
+  const own = data.buyerCoupon;
+  box.replaceChildren(
+    ...(own ? [el('div', { className: 'perk' }, el('b', { textContent: `Twój kod zniżkowy: ${own.code}` }), ` −${own.discount} zł na kolejne zamówienie, ważny do ${new Date(own.expires).toLocaleDateString('pl-PL')}. Wpisaliśmy go już w formularzu kolejnego zamówienia poniżej.`)] : []),
+    el('h3', { textContent: `Poleć nas i zyskaj ${r.discount} zł` }),
     el('p', { className: 'hint', textContent: `Znajomy z Twoim kodem zapłaci ${r.discount} zł mniej, a Ty dostaniesz kod na ${r.discount} zł rabatu za każde jego zamówienie.` }),
     el('div', { className: 'refrow' }, el('code', { textContent: r.code }), el('input', { type: 'text', readOnly: true, value: link, ariaLabel: 'Link polecający', onfocus: (e) => e.target.select() }),
       el('button', { type: 'button', className: 'btn sm', textContent: 'Kopiuj link', onclick: async (e) => { try { await navigator.clipboard.writeText(link); e.target.textContent = 'Skopiowano'; } catch { e.target.previousSibling.select(); e.target.textContent = 'Zaznaczono, skopiuj'; } } })),

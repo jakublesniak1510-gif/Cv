@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import crypto from 'node:crypto';
 import Stripe from 'stripe';
-import { lineItems, calcTotal, MAX_ADS, PRICES, LANGS, REFERRAL_DISCOUNT } from './lib/pricing.js';
+import { lineItems, calcTotal, MAX_ADS, PRICES, LANGS, REFERRAL_DISCOUNT, BUYER_COUPON, withLetter as hasLetter } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes } from './lib/store.js';
 import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
@@ -119,7 +119,7 @@ const cleanCv = (c = {}) => ({
 });
 
 app.get('/api/config', (_req, res) => res.json({
-  demo: DEMO, ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, referral: REFERRAL_DISCOUNT / 100,
+  demo: DEMO, ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, referral: REFERRAL_DISCOUNT / 100, buyerCoupon: BUYER_COUPON / 100,
   prices: Object.fromEntries(Object.entries(PRICES).map(([k, v]) => [k, v / 100])),
 }));
 
@@ -176,7 +176,7 @@ app.post('/api/orders', async (req, res) => {
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
 });
 
-// Kolejne ogłoszenia dla klienta, który już zamówił: dane są zapisane, płaci 20 zł za ogłoszenie.
+// Kolejne zamówienie klienta, który już kupował: dane są zapisane, wybiera pakiet (1 ogłoszenie albo Pakiet 3).
 app.post('/api/orders/:id/followup', async (req, res) => {
   try {
     const parent = await getOrder(req.params.id);
@@ -186,7 +186,8 @@ app.post('/api/orders/:id/followup', async (req, res) => {
     const ad = cleanAddons(req.body?.addons), langs = cleanLangs(req.body?.extraLangs);
     const c = await checkCode(req.body?.code, parent.profile.email);
     if (c.error) return res.status(400).json({ error: c.error });
-    const order = { id: crypto.randomUUID(), parentId: parent.id, rootId: parent.rootId || parent.id, pkg: parent.pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: c.discount || 0, total: calcTotal(parent.pkg, a.length, ad, true, langs, c.discount || 0), profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const pkg = ['cv', 'cv_letter', 'pack3'].includes(req.body?.pkg) ? req.body.pkg : parent.pkg;
+    const order = { id: crypto.randomUUID(), parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: c.discount || 0, total: calcTotal(pkg, a.length, ad, true, langs, c.discount || 0), profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -212,7 +213,9 @@ app.get('/api/orders/:id', async (req, res) => {
     const r = await codes.get(o.referralCode), all = await codes.all();
     referral = { code: o.referralCode, discount: REFERRAL_DISCOUNT / 100, uses: r?.uses || 0, rewards: Object.values(all).filter((x) => x.type === 'coupon' && x.ownerOrderId === (r?.ownerOrderId) && !x.used).map((x) => x.id) };
   }
-  res.json(view(o, { referral }));
+  let buyerCoupon = null;
+  if (o.buyerCoupon) { const c = await codes.get(o.buyerCoupon); if (c && !c.used && Date.now() < c.expires) buyerCoupon = { code: c.id, discount: c.amount / 100, expires: c.expires }; }
+  res.json(view(o, { referral, buyerCoupon }));
 });
 
 // Tylko tryb DEMO: symulacja płatności.
@@ -245,6 +248,10 @@ async function afterPaid(o) {
         if (mailEnabled()) sendReward(c.ownerEmail, reward, BASE_URL, c.ownerOrderId).catch((e) => console.error('Mail nagrody', e.message));
       }
     }
+    // Każdy kupujący dostaje jednorazowy kod zniżkowy na kolejne zamówienie (zapowiadany przed zakupem).
+    const coupon = { id: newCode('ZNIZKA'), type: 'coupon', amount: BUYER_COUPON, ownerEmail: o.profile.email.toLowerCase(), ownerOrderId: o.id, used: false, created: Date.now(), expires: Date.now() + CODE_TTL };
+    await codes.save(coupon);
+    o.buyerCoupon = coupon.id;
     const root = o.rootId || o.parentId || o.id;
     const existing = Object.values(await codes.all()).find((c) => c.type === 'referral' && c.ownerOrderId === root);
     if (existing) return existing.id;
@@ -261,7 +268,7 @@ async function markPaidAndGenerate(id) {
   inFlight.add(id);
   try {
     await updateOrder(id, { status: 'generating' });
-    const withLetter = o.pkg === 'cv_letter';
+    const withLetter = hasLetter(o.pkg);
     const results = await Promise.all(o.ads.map(async (ad) => {
       const r = await generateForAd({ profile: o.profile, ad, withLetter, addons: o.addons });
       const langs = (o.extraLangs || []).filter((l) => l !== r.lang);
@@ -270,7 +277,7 @@ async function markPaidAndGenerate(id) {
     }));
     const referralCode = await afterPaid(o);
     const mail = await trySend({ ...o, results, referralCode });
-    await updateOrder(id, { status: 'done', results, mail, referralCode });
+    await updateOrder(id, { status: 'done', results, mail, referralCode, buyerCoupon: o.buyerCoupon || null });
   } catch (e) {
     console.error('Generowanie nie powiodło się', id, e);
     await updateOrder(id, { status: 'paid', error: 'Generowanie nie powiodło się. Spróbuj ponownie.' });
@@ -291,7 +298,7 @@ app.put('/api/orders/:id/results/:i', async (req, res) => {
   const lang = str(req.body?.lang, 5), base = d.o.results[d.i];
   const r = { ...(base.variants?.[lang] || base) };
   if (req.body?.cv) r.cv = cleanCv(req.body.cv);
-  if (typeof req.body?.letter === 'string' && d.o.pkg === 'cv_letter') r.letter = str(req.body.letter, 8000);
+  if (typeof req.body?.letter === 'string' && hasLetter(d.o.pkg)) r.letter = str(req.body.letter, 8000);
   const merged = base.variants?.[lang] ? { ...base, variants: { ...base.variants, [lang]: r } } : { ...r, variants: base.variants };
   const results = d.o.results.map((x, k) => (k === d.i ? merged : x));
   await updateOrder(d.o.id, { results });
@@ -303,7 +310,7 @@ app.post('/api/orders/:id/revise', async (req, res) => {
   const d = await doneOrder(req, res); if (!d) return;
   const { o, i } = d;
   if ((o.revisions || 0) >= MAX_REVISIONS) return res.status(429).json({ error: 'Wykorzystano limit poprawek. Napisz do nas, jeśli dokument nadal wymaga zmian.' });
-  const doc = req.body?.doc === 'letter' && o.pkg === 'cv_letter' ? 'letter' : 'cv';
+  const doc = req.body?.doc === 'letter' && hasLetter(o.pkg) ? 'letter' : 'cv';
   const instruction = str(req.body?.instruction, 500);
   if (instruction.length < 3) return res.status(400).json({ error: 'Opisz, co zmienić.' });
   try {

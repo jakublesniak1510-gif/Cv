@@ -264,6 +264,11 @@ textarea{min-height:88px;resize:vertical}
 .chat-sugg{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 10px}.chat-sugg button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:99px;padding:5px 10px;font:13px var(--f-b);cursor:pointer}
 .chat-form{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}.chat-form input{margin:0;flex:1}
 @media print{.chat,.chat-fab{display:none!important}}
+.perk{background:color-mix(in srgb,var(--ok) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--ok) 45%,var(--line));border-radius:12px;padding:12px 16px;margin-top:14px;font-size:15px;color:var(--ink)}
+.perk.small{font-size:14px;padding:9px 12px}
+.badge.alt{background:var(--ok)}
+.referral .perk{margin:0 0 16px}
+.fupick{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}
 /* przykład */
 .changes{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-top:16px}
 .changes h3{font-size:16px;margin-bottom:8px}.changes ul{margin:0;padding:0;list-style:none}

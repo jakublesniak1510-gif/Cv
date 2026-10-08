@@ -6,7 +6,7 @@ Strona generująca CV i listy motywacyjne dopasowane do konkretnego ogłoszenia 
 |---|---|
 | CV | 39 zł |
 | CV + list motywacyjny | 49 zł |
-| Każde kolejne ogłoszenie (osobne CV/list) | +20 zł |
+| Pakiet 3: trzy CV pod ten sam zawód + list do każdego | 79 zł |
 
 ## Uruchomienie
 ```
@@ -53,7 +53,8 @@ Po wygenerowaniu serwer renderuje PDF (`lib/pdf.js`, czcionka Inter z `fonts/`) 
 - **Zdjęcie** – przycinane w przeglądarce do 480×480 JPEG, pokazywane we wszystkich szablonach (na stronie i w PDF); nie trafia do AI.
 - **Wersja angielska** – język dokumentów per ogłoszenie (`auto`/`pl`/`en`), bez dopłaty.
 - **Dodatki** – przygotowanie do rozmowy (15 zł) i wiadomość do rekrutera + e-mail (9 zł); ceny w `lib/pricing.js`.
-- **Kolejne ogłoszenie później** – `POST /api/orders/:id/followup`, 20 zł/ogłoszenie, dane klienta z poprzedniego zamówienia.
+- **Kolejne zamówienie** – `POST /api/orders/:id/followup`: klient wybiera pakiet (CV / CV + list / Pakiet 3), dane z poprzedniego zamówienia.
+- **Kod zniżkowy dla kupującego** – po każdym opłaconym zamówieniu kod `ZNIZKA-…` na 10 zł (90 dni), zapowiadany przed zakupem (cennik, kreator, FAQ).
 - **Usuwanie danych po 30 dniach** – automatycznie co godzinę (`deleteOlderThan` w `lib/store.js`).
 - **Podstrony SEO** – `/cv/:zawod`, `/poradnik/:artykul`, `/sitemap.xml`, `/robots.txt`; treści w `lib/content.js`.
 - Model AI: `claude-opus-5-5` (zmiana przez `ANTHROPIC_MODEL`), z automatycznym przejściem na model zapasowy przy odmowie.

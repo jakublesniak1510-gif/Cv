@@ -1,17 +1,17 @@
 // Atrapa API dla podglądu statycznego: ta sama strona, ale bez serwera, płatności i AI.
 (() => {
   const orders = {};
-  const P = { cv: 3900, cv_letter: 4900, extraAd: 2000, interview: 1500, messages: 900, extraLang: 500 };
+  const P = { cv: 3900, cv_letter: 4900, pack3: 7900, interview: 1500, messages: 900, extraLang: 500 };
   const MAXREV = 10;
   const json = (b, status = 200) => new Response(JSON.stringify(b), { status, headers: { 'Content-Type': 'application/json' } });
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-  const total = (pkg, n, a, fu, langs = [], disc = 0) => (fu ? P.extraAd * n : P[pkg] + P.extraAd * (n - 1)) + (a.interview ? P.interview : 0) + (a.messages ? P.messages : 0) + P.extraLang * langs.length - disc;
+  const total = (pkg, n, a, fu, langs = [], disc = 0) => P[pkg] + (a.interview ? P.interview : 0) + (a.messages ? P.messages : 0) + P.extraLang * langs.length - disc;
   const score = (m) => ({ ...m, score: m.found.length + m.missing.length ? Math.round((100 * m.found.length) / (m.found.length + m.missing.length)) : null });
-  const view = (o) => ({ referral: o.status === 'done' ? { code: 'POLEC-' + o.id.slice(-6).toUpperCase(), discount: 10, uses: 0, rewards: [] } : null, extraLangs: o.extraLangs, id: o.id, pkg: o.pkg, addons: o.addons, total: o.total, status: o.status, results: o.results, mail: o.mail, design: o.design, photo: o.profile.photo || '', parentId: o.parentId || null, revisionsLeft: MAXREV - o.revisions, expires: o.created + 30 * 864e5 });
+  const view = (o) => ({ buyerCoupon: o.status === 'done' ? { code: 'ZNIZKA-' + o.id.slice(-6).toUpperCase(), discount: 10, expires: o.created + 90 * 864e5 } : null, referral: o.status === 'done' ? { code: 'POLEC-' + o.id.slice(-6).toUpperCase(), discount: 10, uses: 0, rewards: [] } : null, extraLangs: o.extraLangs, id: o.id, pkg: o.pkg, addons: o.addons, total: o.total, status: o.status, results: o.results, mail: o.mail, design: o.design, photo: o.profile.photo || '', parentId: o.parentId || null, revisionsLeft: MAXREV - o.revisions, expires: o.created + 30 * 864e5 });
   const make = (fields) => { const id = 'preview-' + Math.random().toString(36).slice(2); orders[id] = { id, status: 'pending', revisions: 0, created: Date.now(), ...fields }; return orders[id]; };
   window.fetch = async (url, opts = {}) => {
     const m = (opts.method || 'GET').toUpperCase(), body = opts.body ? JSON.parse(opts.body) : {};
-    if (url === '/api/config') return json({ demo: true, preview: true, ai: false, maxAds: 5, noPrint: true, fakeFetch: true, maxRevisions: MAXREV, prices: Object.fromEntries(Object.entries(P).map(([k, v]) => [k, v / 100])) });
+    if (url === '/api/config') return json({ demo: true, preview: true, ai: false, maxAds: 3, noPrint: true, fakeFetch: true, maxRevisions: MAXREV, prices: Object.fromEntries(Object.entries(P).map(([k, v]) => [k, v / 100])) });
     if (url === '/content.json') return json({ INDEX: PROFESSIONS.map(({ slug, name, category, keywords }) => ({ slug, name, category, keywords })), POPULAR: PROFESSIONS.filter((p) => POPULAR_SLUGS.includes(p.slug)), ARTICLES });
     { const c = /^\/content\/cv\/([\w-]+)\.json$/.exec(url); if (c) { const p = PROFESSIONS.find((x) => x.slug === c[1]); return p ? json(p) : json({}, 404); } }
     if (url === '/api/assistant' && m === 'POST') { await wait(600); return json({ answer: assistantFallback(body.messages[body.messages.length - 1].content) }); }
@@ -22,7 +22,7 @@
       const found = r.found, missing = r.missing;
       return json({ position: '', found, missing, tips: ['Przenieś na górę doświadczenie najbliższe temu stanowisku.', 'Użyj słów kluczowych z ogłoszenia w takim samym brzmieniu, jeśli to prawda o Tobie.', 'Dopisz konkretne liczby i efekty pracy, np. liczbę zamówień dziennie.'], score: found.length + missing.length ? Math.round(100 * found.length / (found.length + missing.length)) : 0 });
     }
-    { const c = /^\/api\/code\/([^?]+)/.exec(url); if (c) { const code = decodeURIComponent(c[1]).toUpperCase(); return /^(POLEC|NAGRODA)-/.test(code) ? json({ code, discount: 10, label: code.startsWith('POLEC') ? 'Kod polecający' : 'Kod rabatowy' }) : json({ error: 'Ten kod nie istnieje albo wygasł.' }, 404); } }
+    { const c = /^\/api\/code\/([^?]+)/.exec(url); if (c) { const code = decodeURIComponent(c[1]).toUpperCase(); return /^(POLEC|NAGRODA|ZNIZKA)-/.test(code) ? json({ code, discount: 10, label: code.startsWith('POLEC') ? 'Kod polecający' : 'Kod zniżkowy' }) : json({ error: 'Ten kod nie istnieje albo wygasł.' }, 404); } }
     if (url === '/api/fetch-ad' && m === 'POST') {
       const u = (body.url || '').trim();
       await wait(700);
@@ -40,7 +40,7 @@
       if (!body.consent) return json({ error: 'Wymagana zgoda na przetwarzanie danych.' }, 400);
       if (!ads.length) return json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' }, 400);
       const a = body.addons || {};
-      const disc = /^(POLEC|NAGRODA)-/.test(body.code || '') ? 1000 : 0;
+      const disc = /^(POLEC|NAGRODA|ZNIZKA)-/.test(body.code || '') ? 1000 : 0;
       const o = make({ design: body.design, pkg: body.pkg, addons: a, extraLangs: body.extraLangs || [], profile: body.profile, ads, total: total(body.pkg, ads.length, a, false, body.extraLangs || [], disc) });
       return json({ id: o.id, demo: true });
     }
@@ -48,13 +48,14 @@
     if ((r = /^\/api\/orders\/([^/]+)\/followup$/.exec(url)) && m === 'POST') {
       const p = orders[r[1]], ads = (body.ads || []).filter((a) => a.text && a.text.length >= 80);
       if (!ads.length) return json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' }, 400);
-      const disc = /^(POLEC|NAGRODA)-/.test(body.code || '') ? 1000 : 0;
-      const o = make({ parentId: p.id, design: p.design, pkg: p.pkg, addons: {}, extraLangs: [], profile: p.profile, ads, total: total(p.pkg, ads.length, {}, true, [], disc) });
+      const disc = /^(POLEC|NAGRODA|ZNIZKA)-/.test(body.code || '') ? 1000 : 0;
+      const pk = ['cv', 'cv_letter', 'pack3'].includes(body.pkg) ? body.pkg : p.pkg;
+      const o = make({ parentId: p.id, design: p.design, pkg: pk, addons: {}, extraLangs: [], profile: p.profile, ads, total: total(pk, ads.length, {}, true, [], disc) });
       return json({ id: o.id, demo: true });
     }
     if ((r = /^\/api\/orders\/([^/]+)\/demo-pay$/.exec(url)) && m === 'POST') {
       const o = orders[r[1]]; o.status = 'generating';
-      setTimeout(() => { o.results = o.ads.map((ad) => { const x = tailor({ profile: o.profile, ad, withLetter: o.pkg === 'cv_letter', addons: o.addons }); const r = { ...x, match: score(x.match) }; const langs = (o.extraLangs || []).filter((l) => l !== r.lang); if (langs.length) r.variants = Object.fromEntries(langs.map((l) => [l, translateFallback(r, l)])); return r; }); o.status = 'done'; o.mail = { status: 'sent', to: o.profile.email }; }, 2200);
+      setTimeout(() => { o.results = o.ads.map((ad) => { const x = tailor({ profile: o.profile, ad, withLetter: o.pkg !== 'cv', addons: o.addons }); const r = { ...x, match: score(x.match) }; const langs = (o.extraLangs || []).filter((l) => l !== r.lang); if (langs.length) r.variants = Object.fromEntries(langs.map((l) => [l, translateFallback(r, l)])); return r; }); o.status = 'done'; o.mail = { status: 'sent', to: o.profile.email }; }, 2200);
       return json({ ok: true });
     }
     if ((r = /^\/api\/orders\/([^/]+)\/design$/.exec(url)) && m === 'POST') { const o = orders[r[1]]; if (o) o.design = body; return json({ design: body }); }
