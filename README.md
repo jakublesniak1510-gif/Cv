@@ -68,3 +68,13 @@ Kup domenę (np. w OVH, home.pl, nazwa.pl), w panelu Render dodaj ją w Settings
 - **Przypomnienie po 7 dniach** – jednorazowy e-mail tylko za zgodą zaznaczoną w zamówieniu.
 - **Języki** – główny język (pl/en/de/uk/es/fr) w cenie; dodatkowe wersje po 5 zł za język (tłumaczenie gotowych dokumentów, warianty w `result.variants`).
 - **Asystent** – `POST /api/assistant`, krótkie odpowiedzi o CV (limit 30 pytań/godz. na IP); bez klucza AI odpowiada z małej bazy wiedzy.
+
+## Panel administratora (`/admin`)
+Włącza się po ustawieniu `ADMIN_PASSWORD`. Zalecane drugie zabezpieczenie: kod z aplikacji (Google Authenticator / Authy) – uruchom `node scripts/admin-secret.mjs`, dodaj wypisany sekret do aplikacji i ustaw `ADMIN_TOTP_SECRET` oraz `ADMIN_SESSION_SECRET`. Sesja trwa 12 godzin (ciasteczko httpOnly), po 5 błędnych próbach logowanie blokuje się na 15 minut.
+- **Pulpit** – przychód dziś / 7 / 30 dni, średnie zamówienie, wykres dzienny, udział pakietów, dodatków i kodów, zwroty, koszt AI w bieżącym miesiącu.
+- **Zamówienia** – wyszukiwanie (e-mail, numer, kod), filtr statusu, szczegóły oraz działania: ponowna wysyłka e-maila, ponowne generowanie, zwrot pieniędzy przez Stripe, usunięcie danych na żądanie klienta (RODO), link do strony klienta.
+- **Kody rabatowe** – kody na akcje (kwotowe 1–70 zł albo procentowe 1–90%, ważność, limit użyć, notatka) i podgląd kodów klientów `KOD-…`.
+- **Problemy** – zamówienia z błędem generowania lub niedoręczonym e-mailem oraz dziennik błędów (pobieranie ogłoszeń, import, skaner, e-mail) bez danych osobowych, przechowywany 30 dni.
+- **Eksport** – CSV sprzedaży dla księgowej (separator `;`). Dane zamówień znikają po 30 dniach, więc pobieraj zestawienie co miesiąc.
+
+Przykładowe dane do obejrzenia panelu lokalnie: `DATA_DIR=/tmp/cvpo-demo node scripts/admin-seed.mjs`, potem `DATA_DIR=/tmp/cvpo-demo ADMIN_PASSWORD=test npm start` i http://localhost:3000/admin.

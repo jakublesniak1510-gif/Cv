@@ -338,7 +338,7 @@ const nAds = () => Math.max(1, $('#ads').children.length);
 const addons = () => ({ interview: $('#adInterview').checked, messages: $('#adMessages').checked });
 const extraLangs = () => $$('#langPick input:checked').map((i) => i.value);
 const addonsTotal = () => (addons().interview ? PRICE.interview : 0) + (addons().messages ? PRICE.messages : 0) + PRICE.extraLang * extraLangs().length;
-const discount = () => (promo ? Math.min(promo.discount, PRICE[pkg()] - 2) : 0);
+const discount = () => (promo ? Math.min(promo.percent ? Math.round((PRICE[pkg()] + addonsTotal()) * promo.percent) / 100 : promo.discount, PRICE[pkg()] - 2) : 0);
 const total = () => PRICE[pkg()] + addonsTotal() - discount();
 
 const DKEY = 'cvpo-draft-v1', FIELDS = ['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'];
@@ -385,7 +385,7 @@ async function applyCode(raw, quiet) {
   try {
     const r = await fetch(`/api/code/${encodeURIComponent(code)}?email=${encodeURIComponent($('#email').value)}`);
     const j = await r.json(); if (!r.ok) throw new Error(j.error);
-    promo = j; st.className = 'fstatus good'; st.textContent = `${j.label}: −${j.discount} zł`;
+    promo = j; st.className = 'fstatus good'; st.textContent = `${j.label}: −${j.percent ? j.percent + '%' : j.discount + ' zł'}`;
   } catch (x) { promo = null; if (!quiet) { st.className = 'fstatus bad'; st.textContent = x.message; } }
   refresh(); if (step === 6) drawSummary();
 }

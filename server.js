@@ -11,6 +11,8 @@ import { importCv, extractText, ImportError } from './lib/importCv.js';
 import { mailEnabled, sendOrderMail, sendReminder } from './lib/mail.js';
 import { cleanDesign } from './lib/designs.js';
 import { seoRoutes } from './lib/seo.js';
+import { adminRoutes } from './lib/admin.js';
+import { logEvent, cleanupEvents } from './lib/events.js';
 
 const PORT = process.env.PORT || 3000;
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
@@ -46,7 +48,7 @@ app.post('/api/import', express.json({ limit: '8mb' }), async (req, res) => {
   const buf = Buffer.from(b64, 'base64');
   if (!buf.length || buf.length > 5 * 1024 * 1024) return res.status(400).json({ error: 'Plik musi mieć do 5 MB.' });
   try { res.json(await importCv(buf)); }
-  catch (e) { console.error('Import CV', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się odczytać pliku. Wpisz dane ręcznie.' }); }
+  catch (e) { console.error('Import CV', e.message); logEvent('import', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się odczytać pliku. Wpisz dane ręcznie.' }); }
 });
 
 // --- Darmowy skaner CV: plik CV + treść ogłoszenia -> raport dopasowania (bez zapisywania) ---
@@ -63,7 +65,7 @@ app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
     }
     if (cvText.length < 60) return res.status(400).json({ error: 'CV jest za krótkie, żeby je ocenić.' });
     res.json(await scanCv({ cvText, adText }));
-  } catch (e) { console.error('Skaner', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się ocenić CV. Spróbuj ponownie.' }); }
+  } catch (e) { console.error('Skaner', e.message); logEvent('skaner', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się ocenić CV. Spróbuj ponownie.' }); }
 });
 
 app.use(express.json({ limit: '700kb' }));
@@ -105,8 +107,11 @@ async function checkCode(raw, email) {
   const c = await codes.get(code);
   if (!c || Date.now() > c.expires) return { error: 'Ten kod nie istnieje albo wygasł.' };
   if (email && (c.usedBy || []).includes(emailHash(email))) return { error: 'Ten kod został już przez Ciebie wykorzystany.' };
-  return { code, discount: c.amount };
+  if (c.maxUses && (c.usedBy || []).length >= c.maxUses) return { error: 'Limit użyć tego kodu został wyczerpany.' };
+  return { code, discount: c.amount || 0, percent: c.percent || 0 };
 }
+// Rabat w groszach: kwotowy albo procentowy (kody akcji promocyjnych z panelu).
+const discountFor = (c, pkg, n, ad, returning, langs) => (c.percent ? Math.round((calcTotal(pkg, n, ad, returning, langs, 0) * c.percent) / 100) : c.discount || 0);
 const newCode = (prefix) => `${prefix}-${crypto.randomBytes(4).toString('hex').toUpperCase().slice(0, 6)}`;
 const cleanAddons = (a = {}) => ({ interview: !!a.interview, messages: !!a.messages });
 // Edytowane przez klienta CV: ten sam kształt co z generatora, przycięte długości.
@@ -127,7 +132,7 @@ app.get('/api/config', (_req, res) => res.json({
 app.get('/api/code/:code', async (req, res) => {
   const r = await checkCode(req.params.code, req.query.email);
   if (r.error) return res.status(404).json({ error: r.error });
-  res.json({ code: r.code, discount: r.discount / 100, label: 'Kod rabatowy' });
+  res.json({ code: r.code, discount: r.discount / 100, percent: r.percent || 0, label: 'Kod rabatowy' });
 });
 
 // Asystent: krótkie odpowiedzi na pytania o CV (limit na IP).
@@ -136,13 +141,17 @@ app.post('/api/assistant', async (req, res) => {
   const history = arr(req.body?.messages, 12).map((m) => ({ role: m?.role === 'assistant' ? 'assistant' : 'user', content: str(m?.content, 1000) })).filter((m) => m.content);
   if (!history.length || history[history.length - 1].role !== 'user') return res.status(400).json({ error: 'Zadaj pytanie.' });
   try { res.json({ answer: await assistant(history) }); }
-  catch (e) { console.error('Asystent', e.message); res.status(502).json({ error: 'Asystent jest chwilowo niedostępny. Zajrzyj do FAQ albo poradnika.' }); }
+  catch (e) { console.error('Asystent', e.message); logEvent('asystent', e.message); res.status(502).json({ error: 'Asystent jest chwilowo niedostępny. Zajrzyj do FAQ albo poradnika.' }); }
 });
 
 app.post('/api/fetch-ad', async (req, res) => {
   if (!fetchLimit(req)) return res.status(429).json({ error: 'Zbyt wiele prób. Spróbuj za kilka minut lub wklej treść ogłoszenia.' });
   try { res.json(await fetchAd(req.body?.url)); }
-  catch (e) { res.status(422).json({ error: e instanceof AdError ? e.message : 'Nie udało się odczytać ogłoszenia.' }); }
+  catch (e) {
+    let host = ''; try { host = new URL(req.body?.url).hostname; } catch {}
+    logEvent('ogłoszenie', e.message, { host });
+    res.status(422).json({ error: e instanceof AdError ? e.message : 'Nie udało się odczytać ogłoszenia.' });
+  }
 });
 
 async function checkout(order) {
@@ -171,7 +180,8 @@ app.post('/api/orders', async (req, res) => {
     const ad = cleanAddons(addons), langs = cleanLangs(extraLangs);
     const c = await checkCode(code, p.email);
     if (c.error) return res.status(400).json({ error: c.error });
-    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: c.discount || 0, total: calcTotal(pkg, a.length, ad, false, langs, c.discount || 0), profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const disc = discountFor(c, pkg, a.length, ad, false, langs);
+    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, false, langs, disc), profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -188,7 +198,8 @@ app.post('/api/orders/:id/followup', async (req, res) => {
     const c = await checkCode(req.body?.code, parent.profile.email);
     if (c.error) return res.status(400).json({ error: c.error });
     const pkg = ['cv', 'cv_letter', 'pack3'].includes(req.body?.pkg) ? req.body.pkg : parent.pkg;
-    const order = { id: crypto.randomUUID(), parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: c.discount || 0, total: calcTotal(pkg, a.length, ad, true, langs, c.discount || 0), profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const disc = discountFor(c, pkg, a.length, ad, true, langs);
+    const order = { id: crypto.randomUUID(), parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, true, langs, disc), profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -231,7 +242,7 @@ async function trySend(order) {
   const to = order.profile.email;
   if (!mailEnabled()) return { status: 'skipped', to };
   try { await sendOrderMail(order, BASE_URL); return { status: 'sent', to, at: Date.now() }; }
-  catch (e) { console.error('Wysyłka e-mail nie powiodła się', order.id, e.message); return { status: 'failed', to, at: Date.now() }; }
+  catch (e) { console.error('Wysyłka e-mail nie powiodła się', order.id, e.message); logEvent('e-mail', e.message, { orderId: order.id }); return { status: 'failed', to, at: Date.now() }; }
 }
 
 // Po opłaceniu: zapisujemy użycie kodu i dajemy klientowi jego kod (jeden na klienta, także przy kolejnych zamówieniach).
@@ -253,7 +264,7 @@ async function markPaidAndGenerate(id) {
   if (!o || o.status !== 'pending' || inFlight.has(id)) return;
   inFlight.add(id);
   try {
-    await updateOrder(id, { status: 'generating' });
+    await updateOrder(id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
     const withLetter = hasLetter(o.pkg);
     const results = await Promise.all(o.ads.map(async (ad) => {
       const r = await generateForAd({ profile: o.profile, ad, withLetter, addons: o.addons });
@@ -266,6 +277,7 @@ async function markPaidAndGenerate(id) {
     await updateOrder(id, { status: 'done', results, mail, myCode });
   } catch (e) {
     console.error('Generowanie nie powiodło się', id, e);
+    logEvent('generowanie', e.message, { orderId: id });
     await updateOrder(id, { status: 'paid', error: 'Generowanie nie powiodło się. Spróbuj ponownie.' });
   } finally { inFlight.delete(id); }
 }
@@ -345,6 +357,8 @@ app.post('/api/orders/:id/retry', async (req, res) => {
   res.json({ ok: true });
 });
 
+adminRoutes(app, { stripe, DEMO, BASE_URL, markPaidAndGenerate, trySend, retentionMs: RETENTION_MS });
+
 // Dane zamówień (w tym zdjęcia) kasujemy po 30 dniach.
 // Co godzinę: kasowanie starych zamówień i kodów oraz jednorazowe przypomnienie po 7 dniach (tylko za zgodą klienta).
 async function hourly() {
@@ -352,6 +366,7 @@ async function hourly() {
     const n = await deleteOlderThan(RETENTION_MS);
     if (n) console.log(`Usunięto ${n} zamówień starszych niż 30 dni`);
     await codes.deleteWhere((c) => Date.now() > c.expires);
+    await cleanupEvents(RETENTION_MS);
     if (!mailEnabled()) return;
     for (const o of Object.values(await allOrders())) {
       if (o.status !== 'done' || !o.reminder?.consent || o.reminder.sent || Date.now() - o.created < REMINDER_AFTER) continue;

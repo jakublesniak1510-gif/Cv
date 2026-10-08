@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel administratora</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%232548E8%22/%3E%3Crect x=%229%22 y=%228%22 width=%2214%22 height=%2216%22 rx=%222%22 fill=%22%23fff%22/%3E%3Crect x=%2212%22 y=%2213%22 width=%228%22 height=%222.4%22 fill=%22%23FFE45C%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/admin.css"></head>
+<body>
+
+<div id="loginView" class="login" hidden>
+  <form id="loginForm" autocomplete="on">
+    <a class="brand" href="/"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--brand)"/><path d="M10 6.5h8.5l5.5 5.5v13.5a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-17a2 2 0 0 1 2-2z" fill="#fff"/><rect x="10.5" y="14.5" width="11" height="3.2" rx="1" fill="#FFE45C"/></svg><span class="wm">CV<span>Pod</span>Ogłoszenie</span></a>
+    <h1>Panel administratora</h1>
+    <label class="f">Hasło<input id="lPass" type="password" autocomplete="current-password" required></label>
+    <label class="f" id="lCodeWrap" hidden>Kod z aplikacji (6 cyfr)<input id="lCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="\d{6}"></label>
+    <button class="btn" type="submit">Zaloguj</button>
+    <p class="msg bad" id="lMsg" role="alert"></p>
+  </form>
+</div>
+
+<div id="appView" class="app" hidden>
+  <aside class="side">
+    <a class="brand" href="/" title="Strona sklepu"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--brand)"/><path d="M10 6.5h8.5l5.5 5.5v13.5a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-17a2 2 0 0 1 2-2z" fill="#fff"/><rect x="10.5" y="14.5" width="11" height="3.2" rx="1" fill="#FFE45C"/></svg><span class="wm">CV<span>Pod</span>Ogłoszenie</span></a>
+    <nav id="nav" aria-label="Sekcje panelu">
+      <button data-v="dash"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Pulpit</button>
+      <button data-v="orders"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg>Zamówienia</button>
+      <button data-v="codes"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/></svg>Kody rabatowe</button>
+      <button data-v="problems"><svg viewBox="0 0 24 24"><path d="M12 3 2 21h20z"/><path d="M12 10v5M12 18v.01"/></svg>Problemy<span class="badge" id="probBadge" hidden></span></button>
+      <button data-v="export"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>Eksport</button>
+    </nav>
+    <div class="foot"><span class="who mute">Zalogowano jako administrator</span><button class="btn ghost sm" id="logout">Wyloguj</button></div>
+  </aside>
+
+  <main>
+    <div class="demo" id="demoNote" hidden>Tryb DEMO: brak klucza Stripe, więc płatności i zwroty są symulowane.</div>
+
+    <!-- Pulpit -->
+    <section data-view="dash">
+      <div class="head"><h1>Pulpit</h1><span class="mute" id="dashUpd"></span><button class="btn ghost sm" id="dashRefresh">Odśwież</button></div>
+      <div class="tiles" id="tiles"></div>
+      <div class="grid2">
+        <div class="card">
+          <h2>Przychód dziennie, ostatnie 30 dni <button class="link r" id="chartToggle" aria-pressed="false">Pokaż tabelę</button></h2>
+          <div class="chart" id="chart"></div>
+          <div class="tbl-wrap" id="chartTable" hidden></div>
+        </div>
+        <div class="card"><h2>Ostatnie 30 dni</h2><dl class="facts" id="facts"></dl></div>
+      </div>
+      <div class="card"><h2>Ostatnie zamówienia <button class="link r" data-go="orders">Wszystkie</button></h2><div class="tbl-wrap" id="recent"></div></div>
+    </section>
+
+    <!-- Zamówienia -->
+    <section data-view="orders" hidden>
+      <div class="head"><h1>Zamówienia</h1><span class="mute num" id="ordCount"></span></div>
+      <div class="filters">
+        <input id="q" type="search" placeholder="Szukaj: e-mail, numer zamówienia, kod" aria-label="Szukaj zamówień">
+        <select id="stFilter" aria-label="Status">
+          <option value="">Wszystkie statusy</option><option value="done">Gotowe</option><option value="pending">Czeka na płatność</option>
+          <option value="generating">Generuje się</option><option value="problem">Wymaga uwagi</option><option value="refunded">Zwrócone</option>
+        </select>
+      </div>
+      <div class="tbl-wrap" id="ordTable"></div>
+      <div class="pager"><span id="pgInfo" class="num"></span><button class="btn ghost sm" id="pgPrev">Poprzednie</button><button class="btn ghost sm" id="pgNext">Następne</button></div>
+    </section>
+
+    <!-- Kody -->
+    <section data-view="codes" hidden>
+      <div class="head"><h1>Kody rabatowe</h1></div>
+      <div class="card" style="margin-bottom:14px">
+        <h2>Nowy kod na akcję promocyjną</h2>
+        <form id="codeForm" class="codeform">
+          <label class="f">Kod<input id="cCode" required maxlength="20" placeholder="np. JESIEN20" autocapitalize="characters"></label>
+          <div class="f" style="display:grid;gap:4px;font-size:13px;font-weight:600;color:var(--ink2)">Rodzaj rabatu<div class="seg" id="cKind"><button type="button" data-k="amount" aria-pressed="true">zł</button><button type="button" data-k="percent" aria-pressed="false">%</button></div></div>
+          <label class="f"><span id="cValLbl">Rabat (zł)</span><input id="cVal" type="number" min="1" max="70" step="1" required value="10"></label>
+          <label class="f">Ważny (dni)<input id="cDays" type="number" min="1" max="365" value="30" required></label>
+          <label class="f">Limit użyć<input id="cMax" type="number" min="0" placeholder="bez limitu"></label>
+          <label class="f">Notatka<input id="cNote" maxlength="100" placeholder="np. post na FB"></label>
+          <div class="wide"><button class="btn" type="submit">Utwórz kod</button> <span class="msg" id="cMsg"></span></div>
+        </form>
+        <p class="help">Każda osoba (adres e-mail) może użyć danego kodu raz. Kody klientów (KOD-…) powstają automatycznie po zakupie i dają −10 zł.</p>
+      </div>
+      <div class="filters"><div class="seg" id="codeKind"><button type="button" data-k="" aria-pressed="true">Wszystkie</button><button type="button" data-k="akcja" aria-pressed="false">Akcje</button><button type="button" data-k="klient" aria-pressed="false">Kody klientów</button></div></div>
+      <div class="tbl-wrap" id="codeTable"></div>
+    </section>
+
+    <!-- Problemy -->
+    <section data-view="problems" hidden>
+      <div class="head"><h1>Problemy</h1></div>
+      <div class="card" style="margin-bottom:14px"><h2>Zamówienia wymagające uwagi</h2><p class="help" style="margin:-6px 0 12px">Opłacone, ale dokumenty się nie wygenerowały, albo e-mail nie doszedł. Otwórz zamówienie i użyj „Generuj ponownie” lub „Wyślij e-mail ponownie”.</p><div class="tbl-wrap" id="probOrders"></div></div>
+      <div class="card"><h2>Dziennik błędów <span class="mute" style="font:400 13px var(--f-b)">ostatnie 30 dni, bez danych osobowych</span></h2><div class="tbl-wrap" id="probEvents"></div></div>
+    </section>
+
+    <!-- Eksport -->
+    <section data-view="export" hidden>
+      <div class="head"><h1>Eksport sprzedaży</h1></div>
+      <div class="card" style="max-width:560px">
+        <h2>Plik CSV dla księgowej</h2>
+        <form id="expForm" class="filters" style="align-items:end">
+          <label class="f">Od<input id="eFrom" type="date" required></label>
+          <label class="f">Do<input id="eTo" type="date" required></label>
+          <button class="btn" type="submit">Pobierz CSV</button>
+        </form>
+        <div class="actions"><button class="btn ghost sm" data-range="this">Ten miesiąc</button><button class="btn ghost sm" data-range="prev">Poprzedni miesiąc</button></div>
+        <p class="help">Opłacone zamówienia z datą płatności, kwotą, rabatem, kodem i zwrotem. Separator „;”, otwiera się poprawnie w polskim Excelu. Pamiętaj: dane zamówień są kasowane po 30 dniach, więc pobieraj zestawienie co miesiąc.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="drawer" id="drawer" hidden><div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="dTitle"></div></div>
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="/admin.js"></script>
+</body></html>
