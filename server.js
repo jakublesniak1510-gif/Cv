@@ -173,7 +173,7 @@ async function checkout(order) {
 
 app.post('/api/orders', async (req, res) => {
   try {
-    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, reviewAsk } = req.body || {};
+    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, reviewAsk, uiLang } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
     const a = cleanAds(ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
@@ -184,7 +184,7 @@ app.post('/api/orders', async (req, res) => {
     const c = await checkCode(code, p.email);
     if (c.error) return res.status(400).json({ error: c.error });
     const disc = discountFor(c, pkg, a.length, ad, false, langs);
-    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, false, langs, disc), profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, reviewAsk: { consent: !!reviewAsk, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, false, langs, disc), profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, reviewAsk: { consent: !!reviewAsk, sent: false }, uiLang: ['en', 'uk'].includes(uiLang) ? uiLang : 'pl', status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -202,7 +202,7 @@ app.post('/api/orders/:id/followup', async (req, res) => {
     if (c.error) return res.status(400).json({ error: c.error });
     const pkg = ['cv', 'cv_letter', 'pack3'].includes(req.body?.pkg) ? req.body.pkg : parent.pkg;
     const disc = discountFor(c, pkg, a.length, ad, true, langs);
-    const order = { id: crypto.randomUUID(), parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, true, langs, disc), profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const order = { id: crypto.randomUUID(), uiLang: parent.uiLang, parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, true, langs, disc), profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }

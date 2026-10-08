@@ -82,3 +82,14 @@ Przykładowe dane do obejrzenia panelu lokalnie: `DATA_DIR=/tmp/cvpo-demo node s
 ## Opinie, przygotowanie do rozmowy
 - **Opinie** – klient ocenia dokumenty (1–5 gwiazdek, komentarz, zgoda na publikację) na stronie zamówienia. Na stronie głównej sekcja „Opinie klientów” pojawia się dopiero, gdy zatwierdzisz w panelu (zakładka Opinie) pierwszą opinię z treścią. Średnia liczy wszystkie oceny oprócz spamu. Dane w `data/reviews.json`.
 - **Przygotowanie do rozmowy (50 zł)** – 12 pytań w kategoriach z celem pytania i przykładową odpowiedzią (STAR), „Opowiedz o sobie”, mocne strony, braki, pytania do pracodawcy, wynagrodzenie, lista kontrolna; na stronie i w PDF.
+
+## Treści SEO, narzędzia, konto, statystyki, wersje językowe
+- **Strony miast** – `/cv/:zawód/:miasto` dla 10 popularnych zawodów × 18 miast (`lib/cities.js`), w mapie strony.
+- **Poradnik** – 15 artykułów (`lib/content.js` + `lib/content-articles.js`).
+- **Darmowe narzędzia** – `/narzedzia/klauzula-rodo`, `/narzedzia/kalkulator-wynagrodzen` (umowa o pracę, wynik szacunkowy), `/narzedzia/podziekowanie-po-rozmowie`. Opisy w `lib/tools.js`, działanie w `public/app.js`.
+- **Prośba o opinię** – jeden e-mail po 4 dniach, tylko gdy klient zaznaczy zgodę w zamówieniu.
+- **Dodatki** – profil LinkedIn (19 zł) i wersja Word .docx (9 zł, `lib/docx.js`, pobieranie `GET /api/orders/:id/docx/:i?doc=cv|letter`, także w e-mailu).
+- **Licznik CV** – trwały licznik w `data/stats.json`; na stronie głównej pokazuje się dopiero od 1000 przygotowanych CV.
+- **Konto klienta** – `/konto`, logowanie jednorazowym linkiem z e-maila (20 min), sesja 30 dni w ciasteczku httpOnly. Lista zamówień z 30 dni i lista aplikacji (status, termin rozmowy, przypomnienie e-mailem dzień wcześniej). Konta nieużywane przez 12 miesięcy są usuwane. Opcjonalnie `ACCOUNT_SECRET` (inaczej używany jest `ADMIN_SESSION_SECRET`).
+- **Statystyki bez cookies** – `POST /api/t` (odsłony, źródła, kroki kreatora), w panelu zakładka „Ruch”. Bez IP i identyfikatorów; DNT/GPC respektowane. Linki kampanii: `?utm_source=nazwa`.
+- **Wersje EN i UK** – `/en`, `/uk` i przełącznik w menu. `public/i18n.js` tłumaczy interfejs według słowników `public/i18n/en.json` i `uk.json` (klucz = polski tekst, `{0}` = wstawiana wartość). Dokumenty klienta, poradnik, strony zawodów i dokumenty prawne zostają po polsku. E-maile z zamówieniem i link logowania wysyłamy w języku strony. Po zmianie polskich tekstów uruchom ponownie zbieranie tekstów i uzupełnij słowniki (brakujące teksty po prostu zostają po polsku).

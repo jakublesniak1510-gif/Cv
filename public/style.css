@@ -544,3 +544,12 @@ textarea{min-height:88px;resize:vertical}
 
 @media(max-width:1180px){.nav nav a.nav-x{display:none}}
 .adlang select{width:auto;margin-top:0}
+/* wersje językowe */
+.i18n-wait body{visibility:hidden}
+.langsw{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none}
+.langsw a{padding:5px 8px;font:600 12.5px var(--f-b);color:var(--mute);text-decoration:none}
+.langsw a.on{background:var(--brand);color:var(--on-brand)}
+html[lang="pl"] .i18n-only{display:none}
+.i18n-note{max-width:1080px;margin:16px auto 0;padding:10px 16px;background:var(--soft-b);border-radius:10px;font-size:14px}
+.legal-note{background:var(--soft-b);border-radius:10px;padding:10px 14px}
+@media(max-width:760px){.langsw a{padding:4px 6px}}

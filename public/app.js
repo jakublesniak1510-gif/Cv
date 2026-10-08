@@ -470,7 +470,7 @@ $('#wizForm').onsubmit = async (e) => {
   if (step < 6) return go(step + 1);
   const v = (id) => $('#' + id).value;
   const body = {
-    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, reviewAsk: $('#reviewAsk').checked, pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, reviewAsk: $('#reviewAsk').checked, uiLang: window.I18N?.lang || 'pl', pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   $('#next').disabled = true;
@@ -1118,7 +1118,7 @@ async function showPage(r, push = true) {
   else if (kind === 'narzedzia' && C.TOOLS?.[slug]) { item = C.TOOLS[slug]; node = () => toolPage(slug, C); }
   if (!item) return showHome(push);
   $('#landing').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#account').hidden = true;
-  $('#page').hidden = false;
+  $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl';
   $('#page').replaceChildren(node());
   try { document.title = `${item.title} | CV Pod Ogłoszenie`; } catch {}
   setMeta(item.metaDescription);
@@ -1126,7 +1126,7 @@ async function showPage(r, push = true) {
   window.scrollTo(0, 0);
 }
 function showHome(push) {
-  $('#page').hidden = true; $('#account').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#landing').hidden = false;
+  $('#page').hidden = $('#pageNote').hidden = true; $('#account').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#landing').hidden = false;
   try { document.title = 'CV Pod Ogłoszenie'; } catch {}
   if (push) navTo('');
   window.scrollTo(0, 0);
@@ -1154,7 +1154,7 @@ const accApi = async (path = '', opts = {}) => {
 const STATUS_CLS = { 'wysłane': 'st-sent', rozmowa: 'st-int', oferta: 'st-ok', odmowa: 'st-no', 'brak odpowiedzi': 'st-none' };
 const dtLocal = (t) => (t ? new Date(t - new Date(t).getTimezoneOffset() * 60e3).toISOString().slice(0, 16) : '');
 async function showAccount() {
-  $('#landing').hidden = true; $('#page').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true));
+  $('#landing').hidden = true; $('#page').hidden = $('#pageNote').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true));
   const box = $('#account'); box.hidden = false; window.scrollTo(0, 0);
   try { document.title = 'Moje konto – CV Pod Ogłoszenie'; } catch {}
   const t = new URLSearchParams(location.search).get('t');
@@ -1173,7 +1173,7 @@ function accLogin(err) {
   form.onsubmit = async (e) => {
     e.preventDefault(); btn.disabled = true; msg.className = 'hint'; msg.textContent = '';
     try {
-      const r = await accApi('/link', { method: 'POST', body: JSON.stringify({ email: email.value }) });
+      const r = await accApi('/link', { method: 'POST', body: JSON.stringify({ email: email.value, lang: window.I18N?.lang || 'pl' }) });
       msg.replaceChildren(`Wysłaliśmy link na ${email.value}. Sprawdź skrzynkę (także folder Oferty i Spam). Link działa 20 minut.`);
       if (r.demoLink) msg.append(' ', el('a', { href: r.demoLink, textContent: 'Tryb DEMO: zaloguj się tym linkiem', onclick: cfg.preview ? async (ev) => { ev.preventDefault(); await accApi('/login', { method: 'POST', body: JSON.stringify({ token: new URL(r.demoLink).searchParams.get('t') }) }); showAccount(); } : null }));
     } catch (x) { msg.className = 'err'; msg.textContent = x.message; } finally { btn.disabled = false; }
@@ -1239,6 +1239,12 @@ function accDash(d) {
   return wrap;
 }
 
+// Przełącznik języka strony (PL / EN / UA).
+$$('.langsw a').forEach((a) => {
+  a.classList.toggle('on', a.dataset.lang === (window.I18N?.lang || 'pl'));
+  a.onclick = (e) => { e.preventDefault(); window.I18N?.set(a.dataset.lang); if (cfg.preview) location.reload(); else location.href = a.getAttribute('href'); };
+});
+
 const LEGAL = { '#regulamin': 'legal-regulamin', '#prywatnosc': 'legal-prywatnosc' };
 function route() {
   if (!$('#result').hidden || !$('#gen').hidden) return;
@@ -1248,7 +1254,7 @@ function route() {
   if (hm) return showPage(hm[1], false);
   const anchor = h.length > 1 && document.getElementById(h.slice(1));
   if (pm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage(pm[1], false);
-  $('#page').hidden = true;
+  $('#page').hidden = $('#pageNote').hidden = true;
   const id = LEGAL[h];
   $('#landing').hidden = !!id;
   Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = l !== id));
