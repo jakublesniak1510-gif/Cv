@@ -65,6 +65,8 @@ loaders.dash = async () => {
     ...Object.entries(s.byPkg).map(([k, n]) => [PK[k] || k, `${n} (${Math.round((100 * n) / total)}%)`]),
     ['Z dodatkami', `${s.addonsShare}%`], ['Z kodem rabatowym', `${s.codesShare}%`],
     ['Czeka na płatność', String(s.pending)],
+    ['Przygotowane CV (od startu)', `${s.totals.cvs}${s.totals.cvs < 1000 ? ` · licznik na stronie od 1000` : ' · licznik widoczny na stronie'}`],
+    ['Konta klientów', String(s.accounts)],
     ['Ocena klientów', s.reviews.count ? `${String(s.reviews.avg).replace('.', ',')} / 5 (${s.reviews.count})` : 'brak ocen'], [`Koszt AI (${s.ai.month})`, `$${s.ai.usd.toFixed(2)} · ${s.ai.calls} wywołań`],
   ].map(([k, v]) => el('div', {}, el('dt', { textContent: k }), el('dd', { textContent: v }))));
   drawChart(s.byDay);
@@ -83,33 +85,38 @@ const sv = (tag, a = {}) => { const n = document.createElementNS(SVGNS, tag); fo
 function niceMax(v) { if (v <= 0) return 100; const p = 10 ** Math.floor(Math.log10(v)); return [1, 1.2, 1.6, 2, 2.4, 3, 4, 5, 6, 8, 10].find((m) => m * p >= v) * p; }
 const shortDay = (d) => { const [, m, day] = d.split('-'); return `${+day}.${m}`; };
 const longDay = (d) => new Date(d + 'T12:00').toLocaleDateString('pl-PL', { weekday: 'short', day: 'numeric', month: 'long' });
-function drawChart(days) {
-  const box = $('#chart'), W = Math.max(box.clientWidth, 300), H = 240, L = 52, R = 4, T = 10, B = 26;
-  const max = niceMax(Math.max(...days.map((d) => d.revenue))), iw = W - L - R, ih = H - T - B, step = iw / days.length, bw = Math.max(2, step - 2);
-  const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `Przychód dziennie z ostatnich 30 dni, maksymalnie ${zl(Math.max(...days.map((d) => d.revenue)))}` });
+// Wykres słupkowy dzienny (jedna seria): używany dla przychodu i dla odwiedzin.
+function barChart(box, days, o) {
+  const W = Math.max(box.clientWidth, 300), H = 240, L = 52, R = 4, T = 10, B = 26, vals = days.map(o.val);
+  const max = niceMax(Math.max(...vals)), iw = W - L - R, ih = H - T - B, step = iw / days.length, bw = Math.max(2, step - 2);
+  const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `${o.label}, maksymalnie ${o.fmt(Math.max(...vals))}` });
   for (let i = 0; i <= 4; i++) {
     const v = (max / 4) * i, y = T + ih - (v / max) * ih;
     svg.append(sv('line', { class: 'gl', x1: L, x2: W - R, y1: y, y2: y }));
-    const t = sv('text', { class: 'ax', x: L - 8, y: y + 4, 'text-anchor': 'end' }); t.textContent = `${Math.round(v)} zł`; svg.append(t);
+    const t = sv('text', { class: 'ax', x: L - 8, y: y + 4, 'text-anchor': 'end' }); t.textContent = o.axis(v); svg.append(t);
   }
   const tip = el('div', { className: 'tip', hidden: true });
   days.forEach((d, i) => {
-    const x = L + i * step + (step - bw) / 2, h = (d.revenue / max) * ih, y = T + ih - h, r = Math.min(4, bw / 2, h);
+    const x = L + i * step + (step - bw) / 2, h = (vals[i] / max) * ih, y = T + ih - h, r = Math.min(4, bw / 2, h);
     const bar = h > 0 ? sv('path', { class: 'bar', d: `M${x},${T + ih}V${y + r}Q${x},${y} ${x + r},${y}H${x + bw - r}Q${x + bw},${y} ${x + bw},${y + r}V${T + ih}Z` }) : null;
     if (bar) svg.append(bar);
     const hit = sv('rect', { class: 'hit', x: L + i * step, y: T, width: step, height: ih });
     hit.addEventListener('pointerenter', () => {
       bar?.classList.add('on');
-      tip.replaceChildren(el('div', { textContent: longDay(d.day) }), el('b', { textContent: zl(d.revenue) }), document.createTextNode(` · ${ords(d.orders)}`));
+      tip.replaceChildren(el('div', { textContent: longDay(d.day) }), el('b', { textContent: o.fmt(vals[i]) }), document.createTextNode(` · ${o.sub(d)}`));
       tip.hidden = false;
       const px = ((x + bw / 2) / W) * box.clientWidth, py = (Math.min(y, T + ih - 2) / H) * 240;
       tip.style.left = `${Math.min(Math.max(px, 80), box.clientWidth - 80)}px`; tip.style.top = `${py}px`;
     });
     hit.addEventListener('pointerleave', () => { bar?.classList.remove('on'); tip.hidden = true; });
     svg.append(hit);
-    if (i % 5 === 4 || i === 0) { const t = sv('text', { class: 'ax', x: x + bw / 2, y: H - 6, 'text-anchor': 'middle' }); t.textContent = shortDay(d.day); svg.append(t); }
+    const every = days.length > 45 ? 15 : 5;
+    if (i % every === every - 1 || i === 0) { const t = sv('text', { class: 'ax', x: x + bw / 2, y: H - 6, 'text-anchor': 'middle' }); t.textContent = shortDay(d.day); svg.append(t); }
   });
   box.replaceChildren(svg, tip);
+}
+function drawChart(days) {
+  barChart($('#chart'), days, { val: (d) => d.revenue, fmt: zl, axis: (v) => `${Math.round(v)} zł`, sub: (d) => ords(d.orders), label: 'Przychód dziennie z ostatnich 30 dni' });
   $('#chartTable').replaceChildren(el('table', {},
     el('thead', {}, el('tr', {}, el('th', { textContent: 'Dzień' }), el('th', { className: 'r', textContent: 'Zamówienia' }), el('th', { className: 'r', textContent: 'Przychód' }))),
     el('tbody', {}, [...days].reverse().map((d) => el('tr', {}, el('td', { textContent: longDay(d.day) }), el('td', { className: 'r', textContent: d.orders }), el('td', { className: 'r', textContent: zl(d.revenue) }))))));
@@ -121,7 +128,7 @@ $('#chartToggle').addEventListener('click', (e) => {
   e.target.setAttribute('aria-pressed', on); e.target.textContent = on ? 'Pokaż wykres' : 'Pokaż tabelę';
   $('#chart').hidden = on; $('#chartTable').hidden = !on;
 });
-let rT; addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => lastDays && !$('#chart').hidden && drawChart(lastDays), 150); });
+let rT; addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => { if (lastDays && !$('#chart').hidden) drawChart(lastDays); if (lastTraffic && current() === 'traffic') drawTraffic(lastTraffic); }, 150); });
 
 // --- zamówienia ---
 function orderTable(rows, compact = false) {
@@ -166,7 +173,7 @@ async function openOrder(id) {
   lastFocus = document.activeElement;
   const p = $('#panel'); p.replaceChildren(el('p', { className: 'mute', textContent: 'Wczytuję…' })); $('#drawer').hidden = false;
   let o; try { o = await api('/orders/' + id); } catch (x) { p.replaceChildren(el('p', { className: 'msg bad', textContent: x.message })); return; }
-  const addons = [o.addons.interview && 'przygotowanie do rozmowy', o.addons.messages && 'wiadomości do rekrutera', ...o.extraLangs.map((l) => `wersja: ${l}`)].filter(Boolean);
+  const addons = [o.addons.interview && 'przygotowanie do rozmowy', o.addons.messages && 'wiadomości do rekrutera', o.addons.linkedin && 'profil LinkedIn', o.addons.docx && 'wersja Word', ...o.extraLangs.map((l) => `wersja: ${l}`)].filter(Boolean);
   const act = el('div', { className: 'confirm', hidden: true });
   const reload = () => { openOrder(id); loaders[current()]?.(); };
   const run = async (b, fn, ok) => { b.disabled = true; try { await fn(); toast(ok); reload(); } catch (x) { toast(x.message); b.disabled = false; } };
@@ -268,6 +275,29 @@ loaders.reviews = async () => {
       el('div', { className: 'actions' }, r.publish && r.status !== 'approved' ? act('approved', 'Opublikuj', '') : null, r.status !== 'hidden' ? act('hidden', 'Ukryj') : null, r.status !== 'spam' ? act('spam', 'Spam', 'danger') : act('new', 'To nie spam')));
   }));
 };
+
+// --- ruch ---
+let lastTraffic = null, trDays = 30;
+const num = (n) => Number(n || 0).toLocaleString('pl-PL');
+const visits = (n) => plural(n, 'odwiedzający', 'odwiedzających', 'odwiedzających');
+function topTable(rows, head) {
+  if (!rows.length) return el('div', { className: 'empty', textContent: 'Brak danych.' });
+  const total = rows.reduce((s, [, n]) => s + n, 0) || 1;
+  return el('table', {}, el('thead', {}, el('tr', {}, el('th', { textContent: head }), el('th', { className: 'r', textContent: 'Liczba' }), el('th', { className: 'r', textContent: 'Udział' }))),
+    el('tbody', {}, rows.map(([k, n]) => el('tr', {}, el('td', { className: 'ell', textContent: k, title: k }), el('td', { className: 'r', textContent: num(n) }), el('td', { className: 'r', textContent: `${Math.round((100 * n) / total)}%` })))));
+}
+function drawTraffic(t) {
+  lastTraffic = t;
+  $('#trTiles').replaceChildren(tile('Odwiedzający', num(t.visitors), `ostatnie ${t.days} dni`), tile('Odsłony', num(t.views), `${t.visitors ? (t.views / t.visitors).toFixed(1).replace('.', ',') : 0} na osobę`), tile('Opłacone zamówienia', num(t.paid), `ostatnie ${t.days} dni`), tile('Konwersja', `${String(t.conversion).replace('.', ',')}%`, 'zamówienia / odwiedzający'));
+  barChart($('#trChart'), t.byDay, { val: (d) => d.visitors, fmt: (v) => visits(Math.round(v)), axis: (v) => num(Math.round(v)), sub: (d) => `${num(d.views)} odsłon`, label: `Odwiedzający dziennie, ostatnie ${t.days} dni` });
+  const top = t.funnel[0][1] || 1;
+  $('#trFunnel').replaceChildren(...t.funnel.map(([k, n], i) => el('div', { className: 'fn-row' }, el('span', { textContent: k }), el('div', { className: 'fn-bar' }, el('i', { style: `width:${Math.max(n ? 2 : 0, (100 * n) / top)}%` })), el('b', { className: 'num', textContent: num(n) }), el('small', { className: 'mute', textContent: i ? `${Math.round((100 * n) / top)}%` : '' }))));
+  $('#trRefs').replaceChildren(topTable(t.refs, 'Źródło'));
+  $('#trPages').replaceChildren(topTable(t.pages, 'Strona'));
+  $('#trDevices').textContent = t.devices.map(([k, n]) => `${k}: ${num(n)}`).join(' · ') || '';
+}
+loaders.traffic = async () => drawTraffic(await api('/traffic?days=' + trDays));
+$('#trRange').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; trDays = +b.dataset.k; $$('#trRange button').forEach((x) => x.setAttribute('aria-pressed', x === b)); loaders.traffic(); });
 
 // --- problemy ---
 const EV = { 'ogłoszenie': 'Pobieranie ogłoszenia', import: 'Import CV', skaner: 'Skaner CV', asystent: 'Asystent', 'e-mail': 'Wysyłka e-mail', generowanie: 'Generowanie' };

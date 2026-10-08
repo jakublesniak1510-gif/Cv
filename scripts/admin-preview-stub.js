@@ -39,6 +39,7 @@
       return json({ ok: true });
     }
     x = /^\/codes\/(.+)$/.exec(p); if (x && m === 'DELETE') { S.codes = S.codes.filter((c) => c.code !== decodeURIComponent(x[1])); return json({ ok: true }); }
+    if (p === '/traffic') return json(S.traffic[u.searchParams.get('days')] || S.traffic[30]);
     if (p === '/reviews') return json(S.reviews);
     x = /^\/reviews\/(.+)$/.exec(p); if (x && m === 'POST') { const r = S.reviews.find((v) => v.id === x[1]); if (r) r.status = body.status; return json({ ok: !!r }); }
     if (p === '/problems') return json({ ...S.problems, orders: S.rows.filter((o) => o.status === 'paid' || o.mail === 'failed') });

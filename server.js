@@ -2,16 +2,19 @@ import 'dotenv/config';
 import express from 'express';
 import crypto from 'node:crypto';
 import Stripe from 'stripe';
-import { lineItems, calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, withLetter as hasLetter } from './lib/pricing.js';
-import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews } from './lib/store.js';
+import { lineItems, calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, withLetter as hasLetter } from './lib/pricing.js';
+import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats } from './lib/store.js';
 import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
 import { fetchAd, AdError } from './lib/fetchAd.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
-import { mailEnabled, sendOrderMail, sendReminder } from './lib/mail.js';
+import { mailEnabled, sendOrderMail, sendReminder, sendReviewAsk } from './lib/mail.js';
 import { cleanDesign } from './lib/designs.js';
 import { seoRoutes } from './lib/seo.js';
+import { renderDocx } from './lib/docx.js';
 import { adminRoutes } from './lib/admin.js';
+import { accountRoutes, accountHourly } from './lib/account.js';
+import { analyticsRoutes, cleanupAnalytics } from './lib/analytics.js';
 import { logEvent, cleanupEvents } from './lib/events.js';
 
 const PORT = process.env.PORT || 3000;
@@ -39,7 +42,7 @@ app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async
 // Prosty limit zapytań na adres IP.
 const limiter = (max, windowMs) => { const hits = new Map(); return (req) => { const now = Date.now(), h = (hits.get(req.ip) || []).filter((t) => now - t < windowMs); if (h.length >= max) return false; hits.set(req.ip, [...h, now]); return true; }; };
 const importLimit = limiter(10, 600_000), fetchLimit = limiter(20, 600_000), scanLimit = limiter(6, 3600_000), chatLimit = limiter(30, 3600_000);
-const CODE_TTL = 90 * 24 * 3600 * 1000, REMINDER_AFTER = 7 * 24 * 3600 * 1000;
+const CODE_TTL = 90 * 24 * 3600 * 1000, REMINDER_AFTER = 7 * 24 * 3600 * 1000, REVIEW_AFTER = 4 * 24 * 3600 * 1000;
 
 // --- Import starego CV (większy limit body, więc przed globalnym parserem) ---
 app.post('/api/import', express.json({ limit: '8mb' }), async (req, res) => {
@@ -113,7 +116,7 @@ async function checkCode(raw, email) {
 // Rabat w groszach: kwotowy albo procentowy (kody akcji promocyjnych z panelu).
 const discountFor = (c, pkg, n, ad, returning, langs) => (c.percent ? Math.round((calcTotal(pkg, n, ad, returning, langs, 0) * c.percent) / 100) : c.discount || 0);
 const newCode = (prefix) => `${prefix}-${crypto.randomBytes(4).toString('hex').toUpperCase().slice(0, 6)}`;
-const cleanAddons = (a = {}) => ({ interview: !!a.interview, messages: !!a.messages });
+const cleanAddons = (a = {}) => Object.fromEntries(Object.keys(ADDONS).map((k) => [k, !!a[k]]));
 // Edytowane przez klienta CV: ten sam kształt co z generatora, przycięte długości.
 const cleanCv = (c = {}) => ({
   name: str(c.name, 100), headline: str(c.headline, 140), contact: arr(c.contact, 6).map((x) => str(x, 200)).filter(Boolean),
@@ -170,7 +173,7 @@ async function checkout(order) {
 
 app.post('/api/orders', async (req, res) => {
   try {
-    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder } = req.body || {};
+    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, reviewAsk } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
     const a = cleanAds(ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
@@ -181,7 +184,7 @@ app.post('/api/orders', async (req, res) => {
     const c = await checkCode(code, p.email);
     if (c.error) return res.status(400).json({ error: c.error });
     const disc = discountFor(c, pkg, a.length, ad, false, langs);
-    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, false, langs, disc), profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, false, langs, disc), profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, reviewAsk: { consent: !!reviewAsk, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -251,6 +254,13 @@ app.get('/api/reviews', async (_req, res) => {
   });
 });
 
+// Licznik na stronę główną: pokazujemy go dopiero od 1000 przygotowanych CV.
+const COUNTER_FROM = 1000;
+app.get('/api/public-stats', async (_req, res) => {
+  const t = (await stats.get('totals')) || {};
+  res.set('Cache-Control', 'public, max-age=600').json({ cvs: (t.cvs || 0) >= COUNTER_FROM ? t.cvs : null });
+});
+
 // Tylko tryb DEMO: symulacja płatności.
 app.post('/api/orders/:id/demo-pay', async (req, res) => {
   if (!DEMO) return res.sendStatus(404);
@@ -298,6 +308,7 @@ async function markPaidAndGenerate(id) {
     const myCode = await afterPaid(o);
     const mail = await trySend({ ...o, results, myCode });
     await updateOrder(id, { status: 'done', results, mail, myCode });
+    stats.upsert('totals', (p = {}) => ({ cvs: (p.cvs || 0) + results.length, orders: (p.orders || 0) + 1 })).catch(() => {});
   } catch (e) {
     console.error('Generowanie nie powiodło się', id, e);
     logEvent('generowanie', e.message, { orderId: id });
@@ -312,6 +323,15 @@ const doneOrder = async (req, res) => {
   if (!(i >= 0 && i < o.results.length)) { res.status(400).json({ error: 'Nieznany dokument.' }); return null; }
   return { o, i };
 };
+
+// Dodatek „Word”: edytowalne CV lub list (.docx) dla wybranego dokumentu i wersji językowej.
+app.get('/api/orders/:id/docx/:i', async (req, res) => {
+  const d = await doneOrder(req, res); if (!d) return;
+  if (!d.o.addons?.docx) return res.status(403).json({ error: 'Wersja Word nie była zamówiona.' });
+  const base = d.o.results[d.i], r = base.variants?.[str(req.query.lang, 5)] || base, doc = req.query.doc === 'letter' && hasLetter(d.o.pkg) ? 'letter' : 'cv';
+  const name = `${doc === 'letter' ? 'List-motywacyjny' : 'CV'}-${(r.cv?.name || 'dokument').normalize('NFD').replace(/[^\w ]/g, '').trim().replace(/\s+/g, '-')}${r.lang && r.lang !== 'pl' ? '-' + r.lang.toUpperCase() : ''}.docx`;
+  res.set({ 'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'Content-Disposition': `attachment; filename="${name}"` }).send(await renderDocx(r, doc, d.o.design));
+});
 
 // Ręczna edycja treści przez klienta.
 app.put('/api/orders/:id/results/:i', async (req, res) => {
@@ -380,6 +400,8 @@ app.post('/api/orders/:id/retry', async (req, res) => {
   res.json({ ok: true });
 });
 
+accountRoutes(app, { BASE_URL, DEMO });
+analyticsRoutes(app, BASE_URL);
 adminRoutes(app, { DEMO, BASE_URL, markPaidAndGenerate, trySend, retentionMs: RETENTION_MS });
 
 // Dane zamówień (w tym zdjęcia) kasujemy po 30 dniach.
@@ -390,11 +412,18 @@ async function hourly() {
     if (n) console.log(`Usunięto ${n} zamówień starszych niż 30 dni`);
     await codes.deleteWhere((c) => Date.now() > c.expires);
     await cleanupEvents(RETENTION_MS);
+    await cleanupAnalytics().catch(() => {});
+    await accountHourly(BASE_URL).catch((e) => console.error('Konta', e.message));
     if (!mailEnabled()) return;
     for (const o of Object.values(await allOrders())) {
       if (o.status !== 'done' || !o.reminder?.consent || o.reminder.sent || Date.now() - o.created < REMINDER_AFTER) continue;
       try { await sendReminder(o, BASE_URL); await updateOrder(o.id, (x) => ({ ...x, reminder: { ...x.reminder, sent: true, at: Date.now() } })); }
       catch (e) { console.error('Przypomnienie', o.id, e.message); }
+    }
+    for (const o of Object.values(await allOrders())) {
+      if (o.status !== 'done' || !o.reviewAsk?.consent || o.reviewAsk.sent || Date.now() - o.created < REVIEW_AFTER || (await reviews.get(o.id))) continue;
+      try { await sendReviewAsk(o, BASE_URL); await updateOrder(o.id, (x) => ({ ...x, reviewAsk: { ...x.reviewAsk, sent: true, at: Date.now() } })); }
+      catch (e) { console.error('Prośba o opinię', o.id, e.message); }
     }
   } catch (e) { console.error('Zadanie cogodzinne', e); }
 }

@@ -24,6 +24,7 @@
     <a class="brand" href="/" title="Strona sklepu"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--brand)"/><path d="M10 6.5h8.5l5.5 5.5v13.5a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-17a2 2 0 0 1 2-2z" fill="#fff"/><rect x="10.5" y="14.5" width="11" height="3.2" rx="1" fill="#FFE45C"/></svg><span class="wm">CV<span>Pod</span>Ogłoszenie</span></a>
     <nav id="nav" aria-label="Sekcje panelu">
       <button data-v="dash"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Pulpit</button>
+      <button data-v="traffic"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-8"/><path d="M15 8h5v5"/></svg>Ruch</button>
       <button data-v="orders"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg>Zamówienia</button>
       <button data-v="codes"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/></svg>Kody rabatowe</button>
       <button data-v="reviews"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Opinie<span class="badge info" id="rvBadge" hidden></span></button>
@@ -49,6 +50,16 @@
         <div class="card"><h2>Ostatnie 30 dni</h2><dl class="facts" id="facts"></dl></div>
       </div>
       <div class="card"><h2>Ostatnie zamówienia <button class="link r" data-go="orders">Wszystkie</button></h2><div class="tbl-wrap" id="recent"></div></div>
+    </section>
+
+    <!-- Ruch -->
+    <section data-view="traffic" hidden>
+      <div class="head"><h1>Ruch na stronie</h1><div class="seg" id="trRange"><button type="button" data-k="7" aria-pressed="false">7 dni</button><button type="button" data-k="30" aria-pressed="true">30 dni</button><button type="button" data-k="90" aria-pressed="false">90 dni</button></div></div>
+      <div class="tiles" id="trTiles"></div>
+      <div class="card" style="margin-bottom:12px"><h2>Odwiedzający dziennie</h2><div class="chart" id="trChart"></div><p class="help" id="trDevices"></p></div>
+      <div class="card" style="margin-bottom:12px"><h2>Lejek zamówienia</h2><p class="help" style="margin:-6px 0 12px">Ile osób doszło do każdego kroku kreatora. Duży spadek między krokami pokazuje, gdzie ludzie rezygnują.</p><div id="trFunnel" class="funnel"></div></div>
+      <div class="grid2" style="grid-template-columns:1fr 1fr"><div class="card"><h2>Skąd przychodzą</h2><div class="tbl-wrap" id="trRefs"></div></div><div class="card"><h2>Najczęściej oglądane strony</h2><div class="tbl-wrap" id="trPages"></div></div></div>
+      <p class="help">Statystyki bez plików cookie i bez zapisywania adresów IP. Linki z kampanii oznaczaj parametrem <code>?utm_source=nazwa</code>, np. <code>?utm_source=facebook</code>.</p>
     </section>
 
     <!-- Zamówienia -->

@@ -1,20 +1,34 @@
 // Atrapa API dla podglądu statycznego: ta sama strona, ale bez serwera, płatności i AI.
 (() => {
   const orders = {};
-  const P = { cv: 3900, cv_letter: 4900, pack3: 7900, interview: 5000, messages: 900, extraLang: 500 };
+  const P = { cv: 3900, cv_letter: 4900, pack3: 7900, interview: 5000, messages: 900, linkedin: 1900, docx: 900, extraLang: 500 };
   const MAXREV = 10;
   const json = (b, status = 200) => new Response(JSON.stringify(b), { status, headers: { 'Content-Type': 'application/json' } });
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-  const total = (pkg, n, a, fu, langs = [], disc = 0) => P[pkg] + (a.interview ? P.interview : 0) + (a.messages ? P.messages : 0) + P.extraLang * langs.length - disc;
+  const total = (pkg, n, a, fu, langs = [], disc = 0) => P[pkg] + ['interview', 'messages', 'linkedin', 'docx'].reduce((t, k) => t + (a[k] ? P[k] : 0), 0) + P.extraLang * langs.length - disc;
   const score = (m) => ({ ...m, score: m.found.length + m.missing.length ? Math.round((100 * m.found.length) / (m.found.length + m.missing.length)) : null });
   const view = (o) => ({ review: o.review || null, myCode: o.status === 'done' ? { code: 'KOD-' + (o.parentId || o.id).slice(-6).toUpperCase(), discount: 10, expires: o.created + 90 * 864e5, uses: 0, usedByMe: !!o.parentId && /^KOD-/.test(o.code || '') } : null, extraLangs: o.extraLangs, id: o.id, pkg: o.pkg, addons: o.addons, total: o.total, status: o.status, results: o.results, mail: o.mail, design: o.design, photo: o.profile.photo || '', parentId: o.parentId || null, revisionsLeft: MAXREV - o.revisions, expires: o.created + 30 * 864e5 });
   const make = (fields) => { const id = 'preview-' + Math.random().toString(36).slice(2); orders[id] = { id, status: 'pending', revisions: 0, created: Date.now(), ...fields }; return orders[id]; };
   window.fetch = async (url, opts = {}) => {
     const m = (opts.method || 'GET').toUpperCase(), body = opts.body ? JSON.parse(opts.body) : {};
     if (url === '/api/config') return json({ demo: true, preview: true, ai: false, maxAds: 3, noPrint: true, fakeFetch: true, maxRevisions: MAXREV, prices: Object.fromEntries(Object.entries(P).map(([k, v]) => [k, v / 100])) });
-    if (url === '/content.json') return json({ INDEX: PROFESSIONS.map(({ slug, name, category, keywords }) => ({ slug, name, category, keywords })), POPULAR: PROFESSIONS.filter((p) => POPULAR_SLUGS.includes(p.slug)), ARTICLES });
+    if (url === '/content.json') return json({ INDEX: PROFESSIONS.map(({ slug, name, category, keywords }) => ({ slug, name, category, keywords })), POPULAR: PROFESSIONS.filter((p) => POPULAR_SLUGS.includes(p.slug)), ARTICLES, CITIES, TOOLS });
     { const c = /^\/content\/cv\/([\w-]+)\.json$/.exec(url); if (c) { const p = PROFESSIONS.find((x) => x.slug === c[1]); return p ? json(p) : json({}, 404); } }
     // Podgląd nie pokazuje żadnych opinii: na prawdziwej stronie pojawią się dopiero opinie prawdziwych klientów.
+    // Konto w podglądzie: logowanie bez e-maila, wszystko w pamięci przeglądarki.
+    if (url.startsWith('/api/account')) {
+      const p = url.replace('/api/account', ''), A = (window.__acc ||= { logged: false, email: '', apps: [] });
+      if (p === '/link') { if (!/^\S+@\S+\.\S+$/.test(body.email || '')) return json({ error: 'Podaj poprawny adres e-mail.' }, 400); A.pending = body.email.toLowerCase(); return json({ ok: true, demoLink: 'https://twojadomena.pl/konto?t=podglad' }); }
+      if (p === '/login') { if (!A.pending) return json({ error: 'Link wygasł albo został już użyty. Poproś o nowy.' }, 401); A.logged = true; A.email = A.pending; return json({ ok: true }); }
+      if (!A.logged) return json({ error: 'Zaloguj się.' }, 401);
+      if (p === '' && m === 'GET') return json({ email: A.email, apps: A.apps, statuses: ['wysłane', 'rozmowa', 'oferta', 'odmowa', 'brak odpowiedzi'], orders: Object.values(orders).filter((o) => o.status === 'done').map((o) => ({ id: o.id, created: o.created, pkg: { cv: 'CV', cv_letter: 'CV + list motywacyjny', pack3: 'Pakiet 3 CV + listy motywacyjne' }[o.pkg], status: o.status, positions: o.results.map((r) => ({ position: r.position, company: r.company || '' })) })) });
+      if (p === '/logout' || (p === '' && m === 'DELETE')) { A.logged = false; if (m === 'DELETE') A.apps = []; return json({ ok: true }); }
+      if (p === '/apps' && m === 'POST') { if (!body.company && !body.position) return json({ error: 'Podaj firmę lub stanowisko.' }, 400); const a = { id: Math.random().toString(36).slice(2), status: 'wysłane', remind: false, interviewAt: null, ...body, created: Date.now() }; A.apps.unshift(a); return json(a); }
+      const am = /^\/apps\/(\w+)$/.exec(p);
+      if (am && m === 'PUT') { const a = A.apps.find((x) => x.id === am[1]); if (!a) return json({ error: 'Nie ma takiej aplikacji.' }, 404); const t = body.interviewAt === undefined ? a.interviewAt : Date.parse(body.interviewAt) || null; Object.assign(a, body, { interviewAt: t, remind: !!(body.remind ?? a.remind) && !!t }); return json(a); }
+      if (am && m === 'DELETE') { A.apps = A.apps.filter((x) => x.id !== am[1]); return json({ ok: true }); }
+    }
+    if (url === '/api/public-stats') return json({ cvs: null });
     if (url === '/api/reviews') return json({ count: 0, avg: null, list: [] });
     { const c = /^\/api\/orders\/([\w-]+)\/review$/.exec(url); if (c && m === 'POST') { const o = orders[c[1]]; if (!o) return json({}, 404); if (!(body.rating >= 1 && body.rating <= 5)) return json({ error: 'Wybierz ocenę od 1 do 5 gwiazdek.' }, 400); o.review = { rating: body.rating, text: body.text || '' }; return json({ ok: true }); } }
     if (url === '/api/assistant' && m === 'POST') { await wait(600); return json({ answer: assistantFallback(body.messages[body.messages.length - 1].content) }); }

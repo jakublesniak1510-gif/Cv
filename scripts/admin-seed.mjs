@@ -52,9 +52,19 @@ const done = Object.values(orders).filter((o) => o.status === 'done');
 const reviews = {};
 const RV = [[5, 'Szybko i konkretnie. CV pod ogłoszenie wygląda o niebo lepiej niż moje stare.', 'Anna, księgowa'], [5, 'Pytania na rozmowę naprawdę padły, odpowiedzi miałam przygotowane.', 'Kasia z Krakowa'], [4, 'Dobre CV, raz poprawiłem nagłówek darmową poprawką.', 'Tomek'], [3, '', 'Klient'], [5, 'Pakiet 3 się opłacił, każde CV inne.', 'Paweł, kierowca'], [2, 'Chciałbym więcej szablonów.', 'Marcin']];
 done.slice(5, 11).forEach((o, k) => { const [rating, text, name] = RV[k]; reviews[o.id] = { id: o.id, rating, text, name, publish: !!text && k !== 5, pkg: o.pkg, status: k < 2 ? 'approved' : 'new', created: o.created + 4 * 3600e3 }; });
+// Ruch (przykładowy).
+const analytics = {};
+for (let i = 0; i < 95; i++) {
+  const d = new Date(now - i * day).toLocaleDateString('sv-SE', { timeZone: 'Europe/Warsaw' }), v = Math.round(60 + rnd() * 90 + (95 - i) * 1.4);
+  const st = (f) => Math.round(v * f * (0.85 + rnd() * 0.3));
+  analytics[d] = { id: d, visitors: v, views: Math.round(v * (1.8 + rnd())), devices: { telefon: Math.round(v * 0.64), komputer: v - Math.round(v * 0.64) },
+    refs: { 'google.com': Math.round(v * 0.46), bezpośrednio: Math.round(v * 0.22), 'facebook.com': Math.round(v * 0.14), 'kampania: tiktok': Math.round(v * 0.09), 'olx.pl': Math.round(v * 0.05), 'bing.com': Math.round(v * 0.04) },
+    pages: { '/': Math.round(v * 0.7), '/cv/magazynier': Math.round(v * 0.12), '/narzedzia/kalkulator-wynagrodzen': Math.round(v * 0.11), '/poradnik/cv-bez-doswiadczenia': Math.round(v * 0.08), '/cv/magazynier/poznan': Math.round(v * 0.05), '/konto': Math.round(v * 0.03) },
+    steps: { start: st(0.2), 1: st(0.19), 2: st(0.15), 3: st(0.12), 4: st(0.1), 5: st(0.085), 6: st(0.06) } };
+}
 const month = new Date().toISOString().slice(0, 7);
 const usage = { [month]: { id: month, calls: 214, input: 2_100_000, output: 610_000, cacheRead: 1_400_000, cacheWrite: 90_000 } };
 
 fs.mkdirSync(DIR, { recursive: true });
-for (const [f, v] of Object.entries({ 'orders.json': orders, 'codes.json': codes, 'events.json': events, 'usage.json': usage, 'reviews.json': reviews })) fs.writeFileSync(path.join(DIR, f), JSON.stringify(v, null, 2));
+for (const [f, v] of Object.entries({ 'orders.json': orders, 'codes.json': codes, 'events.json': events, 'usage.json': usage, 'reviews.json': reviews, 'analytics.json': analytics, 'stats.json': { totals: { id: 'totals', cvs: 412, orders: 301 } } })) fs.writeFileSync(path.join(DIR, f), JSON.stringify(v, null, 2));
 console.log(`Zapisano ${Object.keys(orders).length} zamówień do ${DIR}`);

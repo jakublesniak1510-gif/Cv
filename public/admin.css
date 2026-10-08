@@ -124,3 +124,9 @@ tbody tr.click{cursor:pointer}tbody tr.click:hover{background:var(--alt)}
 .rv-item .meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--mute)}
 .rv-item p{margin:0}
 .stars{color:#C98A00;letter-spacing:1px;font-size:15px}
+.funnel{display:grid;gap:8px}
+.fn-row{display:grid;grid-template-columns:170px 1fr 60px 44px;gap:10px;align-items:center;font-size:14px}
+.fn-bar{height:14px;background:var(--alt);border-radius:4px;overflow:hidden}.fn-bar i{display:block;height:100%;background:var(--bar);border-radius:0 4px 4px 0}
+.fn-row b{text-align:right}
+@media(max-width:600px){.fn-row{grid-template-columns:110px 1fr 50px}.fn-row small{display:none}}
+@media(max-width:1000px){[data-view=traffic] .grid2{grid-template-columns:1fr!important}}

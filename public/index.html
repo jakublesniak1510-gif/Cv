@@ -14,7 +14,7 @@
 
 <header class="nav" id="nav"><div class="inner">
   <a class="logo" href="/" data-page=""><svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--brand)"/><path d="M10 6.5h8.5l5.5 5.5v13.5a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-17a2 2 0 0 1 2-2z" fill="#fff"/><rect x="10.5" y="14.5" width="11" height="3.2" rx="1" fill="#FFE45C"/><rect x="10.5" y="20" width="8" height="1.8" rx=".9" fill="#2548E8" opacity=".55"/><rect x="10.5" y="10" width="5" height="1.8" rx=".9" fill="#2548E8" opacity=".55"/></svg><span class="wm">CV<span>Pod</span>Ogłoszenie</span></a>
-  <nav><a href="#skaner">Darmowy skaner</a><a href="#jak">Jak to działa</a><a href="#szablony">Szablony</a><a href="#cennik">Cennik</a><a href="#zawody">Zawody</a><a href="#poradnik">Poradnik</a><a href="#faq">FAQ</a></nav>
+  <nav><a href="#skaner">Darmowy skaner</a><a href="#jak" class="nav-x">Jak to działa</a><a href="#szablony" class="nav-x">Szablony</a><a href="#cennik">Cennik</a><a href="#zawody">Zawody</a><a href="#poradnik">Poradnik</a><a href="#faq">FAQ</a><a href="/konto" data-acct>Moje konto</a></nav>
   <button class="btn sm" data-open>Zamów CV</button>
 </div></header>
 
@@ -25,6 +25,7 @@
     <h1>Jedno ogłoszenie. Jedno CV pisane właśnie pod nie.</h1>
     <p class="lead">Podajesz swoje doświadczenie raz. Wklejasz ogłoszenia, a my przygotowujemy osobne CV i list dla każdego stanowiska, z tymi słowami kluczowymi, których szuka rekruter.</p>
     <div class="cta"><button class="btn lg" data-open>Zamów CV od 39 zł</button><button class="btn ghost lg" data-example>Zobacz przykład</button></div>
+    <p class="counter" id="cvCounter" hidden></p>
     <ul class="ticks"><li>Raport dopasowania do ogłoszenia</li><li>Darmowa poprawka</li><li>Dane usuwane po 30 dniach</li></ul>
   </div>
   <div class="demo" id="demo" aria-label="Animacja: ogłoszenie zamienia się w dopasowane CV">
@@ -112,7 +113,7 @@
     <div class="price-card feat"><span class="badge">Najczęściej wybierany</span><h3>CV + list motywacyjny</h3><div class="amt">49 zł</div><ul><li>CV i list pod to samo ogłoszenie</li><li>List na jedną stronę A4, bez ogólników</li><li>PDF na stronie i w e-mailu</li></ul><button class="btn" data-open data-pkg="cv_letter">Wybierz komplet</button></div>
     <div class="price-card"><span class="badge alt">Najlepsza cena</span><h3>Pakiet 3 CV + listy</h3><div class="amt">79 zł</div><ul><li>3 CV pod ten sam zawód, każde pod inne ogłoszenie</li><li>List motywacyjny do każdego CV</li><li>Dane wpisujesz tylko raz</li></ul><button class="btn ghost" data-open data-pkg="pack3">Wybierz pakiet</button></div>
   </div>
-  <div class="addons-row"><b>Dodatki:</b><span>Przygotowanie do rozmowy <b>+50 zł</b></span><span>Wiadomość do rekrutera i e-mail z aplikacją <b>+9 zł</b></span><span>Dodatkowy język <b>+5 zł</b></span><span>Główny język (np. angielski) <b>w cenie</b></span></div>
+  <div class="addons-row"><b>Dodatki:</b><span>Przygotowanie do rozmowy <b>+50 zł</b></span><span>Wiadomość do rekrutera i e-mail z aplikacją <b>+9 zł</b></span><span>Profil LinkedIn <b>+19 zł</b></span><span>Wersja Word (.docx) <b>+9 zł</b></span><span>Dodatkowy język <b>+5 zł</b></span><span>Główny język (np. angielski) <b>w cenie</b></span></div>
   <p class="sub2 small">W każdym pakiecie: raport dopasowania, darmowa poprawka, edycja tekstu, 6 szablonów i PDF w e-mailu.</p>
   <div class="paychips" aria-label="Metody płatności"><span>Bezpieczna płatność Stripe</span><span>BLIK</span><span>Karta</span><span>Apple Pay</span><span>Google Pay</span><span>Bez abonamentu</span></div>
   <div class="perk"><b>Po zakupie dostajesz swój kod −10 zł.</b> Użyj go przy kolejnym zamówieniu i podaj znajomym: każdy, kto go wpisze, zapłaci 10 zł mniej. Kod jest ważny 90 dni.</div>
@@ -166,6 +167,14 @@
   <h2>Poradnik</h2>
   <p class="sub2">Krótkie, praktyczne teksty o pisaniu CV i listów pod konkretne ogłoszenie.</p>
   <div class="art-grid" id="artGrid"></div>
+  <details class="allprof"><summary>Wszystkie artykuły</summary><div class="more" id="artAll"></div></details>
+  <h3 class="tools-h">Darmowe narzędzia</h3>
+  <div class="tools-grid">
+    <a class="tool-card" href="/#skaner"><b>Skaner CV</b><span>Sprawdź, jak Twoje obecne CV pasuje do ogłoszenia.</span></a>
+    <a class="tool-card" href="/narzedzia/klauzula-rodo" data-page="narzedzia/klauzula-rodo"><b>Klauzula RODO</b><span>Gotowe brzmienie zgody do CV, także po angielsku i niemiecku.</span></a>
+    <a class="tool-card" href="/narzedzia/kalkulator-wynagrodzen" data-page="narzedzia/kalkulator-wynagrodzen"><b>Kalkulator brutto netto</b><span>Ile dostaniesz na rękę z oferty na umowie o pracę.</span></a>
+    <a class="tool-card" href="/narzedzia/podziekowanie-po-rozmowie" data-page="narzedzia/podziekowanie-po-rozmowie"><b>Podziękowanie po rozmowie</b><span>Krótki e-mail do rekrutera, gotowy do wysłania.</span></a>
+  </div>
 </div></section>
 
 <section class="sec" id="faq"><div class="inner narrow">
@@ -187,11 +196,12 @@
 </main>
 
 <section class="page" id="page" hidden></section>
+<section class="page acct" id="account" hidden></section>
 <div class="mcta" id="mcta" hidden><div><b>CV pod ogłoszenie</b><span>od 39 zł · bez abonamentu</span></div><button class="btn sm" data-open>Zacznij</button></div>
 
 <footer class="foot" id="foot"><div class="inner">
   <div class="foot-brand"><a class="logo" href="/" data-page=""><svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--brand)"/><path d="M10 6.5h8.5l5.5 5.5v13.5a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-17a2 2 0 0 1 2-2z" fill="#fff"/><rect x="10.5" y="14.5" width="11" height="3.2" rx="1" fill="#FFE45C"/><rect x="10.5" y="20" width="8" height="1.8" rx=".9" fill="#2548E8" opacity=".55"/><rect x="10.5" y="10" width="5" height="1.8" rx=".9" fill="#2548E8" opacity=".55"/></svg><span class="wm">CV<span>Pod</span>Ogłoszenie</span></a><p>CV i listy motywacyjne pisane pod konkretne ogłoszenie. Darmowa poprawka, dane usuwane po 30 dniach.</p></div>
-  <div class="foot-cols"><div><b>Usługa</b><a href="#cennik">Cennik</a><a href="#szablony">Szablony</a><a href="#faq">FAQ</a></div><div><b>Zawody</b><span id="footProf"></span></div><div><b>Informacje</b><a href="#regulamin">Regulamin</a><a href="#prywatnosc">Polityka prywatności</a><span>[E-MAIL KONTAKTOWY]</span></div></div>
+  <div class="foot-cols"><div><b>Usługa</b><a href="/konto" data-acct>Moje konto</a><a href="#cennik">Cennik</a><a href="#szablony">Szablony</a><a href="#faq">FAQ</a></div><div><b>Zawody</b><span id="footProf"></span></div><div><b>Informacje</b><a href="#regulamin">Regulamin</a><a href="#prywatnosc">Polityka prywatności</a><span>[E-MAIL KONTAKTOWY]</span></div></div>
 </div></footer>
 
 
@@ -214,7 +224,7 @@
 <li><b>Jeżeli Serwis nie przetworzy ogłoszenia z linku albo pobierze je niekompletnie, Klient musi wkleić treść ogłoszenia samodzielnie.</b> Bez treści ogłoszenia zamówienia nie można opłacić.</li>
 <li>Klient odpowiada za to, że treść ogłoszenia, którą wkleił lub zatwierdził, jest właściwa i że ma prawo jej użyć w tym celu.</li></ol>
 <h2>§4 Ceny i płatności</h2>
-<ol><li>Ceny są podane w złotych i zawierają podatek VAT, o ile Usługodawca jest jego płatnikiem: CV pod jedno ogłoszenie – 39 zł, CV z listem motywacyjnym pod jedno ogłoszenie – 49 zł, Pakiet 3 (trzy CV pod ten sam zawód, każde pod inne ogłoszenie, z listem motywacyjnym do każdego) – 79 zł. Dodatki: przygotowanie do rozmowy – 50 zł, wiadomość do rekrutera i e-mail z aplikacją – 9 zł; dodatek obejmuje wszystkie ogłoszenia w zamówieniu. Główny język dokumentów (polski, angielski, niemiecki, ukraiński, hiszpański lub francuski) nie wymaga dopłaty; każda dodatkowa wersja językowa tych samych dokumentów kosztuje 5 zł.</li>
+<ol><li>Ceny są podane w złotych i zawierają podatek VAT, o ile Usługodawca jest jego płatnikiem: CV pod jedno ogłoszenie – 39 zł, CV z listem motywacyjnym pod jedno ogłoszenie – 49 zł, Pakiet 3 (trzy CV pod ten sam zawód, każde pod inne ogłoszenie, z listem motywacyjnym do każdego) – 79 zł. Dodatki: przygotowanie do rozmowy – 50 zł, wiadomość do rekrutera i e-mail z aplikacją – 9 zł, profil LinkedIn – 19 zł, CV i list w formacie Word – 9 zł; dodatek obejmuje wszystkie ogłoszenia w zamówieniu. Główny język dokumentów (polski, angielski, niemiecki, ukraiński, hiszpański lub francuski) nie wymaga dopłaty; każda dodatkowa wersja językowa tych samych dokumentów kosztuje 5 zł.</li>
 <li>Kody rabatowe obniżają cenę zgodnie z §5b. Rabat nie podlega wymianie na gotówkę.</li>
 <li>Płatności obsługuje Stripe (m.in. BLIK, karta, Apple Pay, Google Pay). Płatność następuje z góry, przed wykonaniem usługi.</li></ol>
 <h2>§5 Realizacja</h2>
@@ -232,7 +242,9 @@
 <li>W jednym zamówieniu można użyć jednego kodu.</li></ol>
 <h2>§5c Usługi bezpłatne</h2>
 <ol><li>Darmowy skaner CV ocenia, jak przesłane CV pasuje do wskazanego ogłoszenia. Wynik ma charakter pomocniczy.</li>
-<li>Asystent na stronie udziela ogólnych wskazówek dotyczących CV i rekrutacji. Odpowiedzi są generowane automatycznie i nie stanowią porady prawnej.</li></ol>
+<li>Asystent na stronie udziela ogólnych wskazówek dotyczących CV i rekrutacji. Odpowiedzi są generowane automatycznie i nie stanowią porady prawnej.</li>
+<li>Darmowe narzędzia (generator klauzuli RODO, kalkulator wynagrodzeń, generator podziękowania) działają w przeglądarce. Wyniki kalkulatora są szacunkowe.</li>
+<li>Konto klienta jest bezpłatne. Logowanie odbywa się jednorazowym linkiem wysyłanym na e-mail. Klient może w każdej chwili usunąć konto. Konto nieużywane przez 12 miesięcy jest usuwane automatycznie.</li></ol>
 <h2>§6 Odstąpienie od umowy</h2>
 <ol><li>Usługa jest treścią cyfrową dostarczaną na wyraźne żądanie Klienta. Klient, który przed złożeniem zamówienia zaznaczył zgodę na rozpoczęcie wykonania usługi i przyjął do wiadomości utratę prawa odstąpienia, traci to prawo po pełnym wykonaniu usługi (art. 38 pkt 13 ustawy o prawach konsumenta).</li>
 <li>Przed wykonaniem usługi Klient może zrezygnować z zamówienia, pisząc na adres [E-MAIL].</li></ol>
@@ -256,14 +268,16 @@
 <h2>1. Administrator danych</h2>
 <p>Administratorem Twoich danych jest [NAZWA FIRMY / IMIĘ I NAZWISKO], [ADRES], NIP [NIP]. Kontakt w sprawach danych: [E-MAIL].</p>
 <h2>2. Jakie dane przetwarzamy</h2>
-<p>Dane z formularza zamówienia: imię i nazwisko, e-mail, telefon, miasto, link do profilu, przebieg pracy i nauki, umiejętności oraz inne informacje, które sam wpiszesz. Zdjęcie, jeśli je dodasz (nie trafia do dostawcy AI). Gdy wgrywasz stare CV, odczytujemy z niego tekst, przekazujemy go dostawcy AI w celu uzupełnienia formularza, a samego pliku nie zapisujemy. Treść ogłoszeń, które podasz (wklejoną lub pobraną z linku). Dane transakcji (kwota, status płatności). Jeśli wystawisz opinię: ocena, treść i podpis, który sam wpiszesz. Dane płatnicze (np. numer karty) trafiają bezpośrednio do Stripe i nie są dostępne dla nas.</p>
+<p>Dane z formularza zamówienia: imię i nazwisko, e-mail, telefon, miasto, link do profilu, przebieg pracy i nauki, umiejętności oraz inne informacje, które sam wpiszesz. Zdjęcie, jeśli je dodasz (nie trafia do dostawcy AI). Gdy wgrywasz stare CV, odczytujemy z niego tekst, przekazujemy go dostawcy AI w celu uzupełnienia formularza, a samego pliku nie zapisujemy. Treść ogłoszeń, które podasz (wklejoną lub pobraną z linku). Dane transakcji (kwota, status płatności). Jeśli wystawisz opinię: ocena, treść i podpis, który sam wpiszesz. Jeśli założysz konto: adres e-mail i lista aplikacji, którą sam prowadzisz (firma, stanowisko, link, status, termin rozmowy, notatka). Dane płatnicze (np. numer karty) trafiają bezpośrednio do Stripe i nie są dostępne dla nas.</p>
 <p>Gdy korzystasz z darmowego skanera, przetwarzamy tekst Twojego CV i ogłoszenia tylko na czas oceny; nie zapisujemy ich. Pytania zadane asystentowi przekazujemy dostawcy AI w celu udzielenia odpowiedzi i nie zapisujemy ich na naszym serwerze.</p>
 <h2>3. Cele i podstawy prawne</h2>
 <ul><li>Wykonanie zamówienia i obsługa płatności – art. 6 ust. 1 lit. b RODO (umowa).</li>
 <li>Rozliczenia i księgowość – art. 6 ust. 1 lit. c RODO (obowiązek prawny).</li>
 <li>Bezpieczeństwo, obrona przed nadużyciami i dochodzenie roszczeń – art. 6 ust. 1 lit. f RODO (uzasadniony interes).</li>
+<li>Jednorazowa prośba o ocenę dokumentów (e-mail po 4 dniach) – art. 6 ust. 1 lit. a RODO (Twoja zgoda zaznaczona w zamówieniu).</li>
 <li>Jednorazowe przypomnienie e-mail po 7 dniach – art. 6 ust. 1 lit. a RODO (Twoja zgoda, którą możesz wycofać, pisząc na [E-MAIL]).</li>
 <li>Kod rabatowy – art. 6 ust. 1 lit. b RODO.</li>
+<li>Konto klienta, lista aplikacji i przypomnienie dzień przed rozmową (tylko gdy je włączysz) – art. 6 ust. 1 lit. b RODO (umowa o świadczenie usługi konta).</li>
 <li>Publikacja opinii na stronie – art. 6 ust. 1 lit. a RODO (Twoja zgoda zaznaczona przy opinii, którą możesz wycofać, pisząc na [E-MAIL]); sama ocena bez publikacji treści – art. 6 ust. 1 lit. f RODO (ocena jakości usługi).</li></ul>
 <h2>4. Odbiorcy danych</h2>
 <ul><li>Stripe – obsługa płatności.</li>
@@ -271,13 +285,14 @@
 <li>Dostawca poczty e-mail ([DOSTAWCA SMTP]) – wysyła Ci gotowe dokumenty na podany adres.</li>
 <li>Dostawca hostingu: [HOSTING]. Biuro rachunkowe: [BIURO].</li></ul>
 <h2>5. Jak długo przechowujemy dane</h2>
-<p>Dane zamówienia, w tym dokumenty i zdjęcie: 30 dni od złożenia zamówienia, potem są automatycznie usuwane. Szkic formularza zapisuje się tylko w Twojej przeglądarce i znika po złożeniu zamówienia. Kody rabatowe: 90 dni, potem są automatycznie usuwane. Przy kodzie nie zapisujemy adresów e-mail, tylko ich nieodwracalny skrót, żeby każda osoba mogła użyć kodu raz. Opinie: do czasu wycofania zgody lub usunięcia opinii; nie zawierają adresu e-mail ani danych z zamówienia, tylko podpis, który sam wpiszesz. Dokumenty księgowe: 5 lat od końca roku podatkowego.</p>
+<p>Dane zamówienia, w tym dokumenty i zdjęcie: 30 dni od złożenia zamówienia, potem są automatycznie usuwane. Szkic formularza zapisuje się tylko w Twojej przeglądarce i znika po złożeniu zamówienia. Kody rabatowe: 90 dni, potem są automatycznie usuwane. Przy kodzie nie zapisujemy adresów e-mail, tylko ich nieodwracalny skrót, żeby każda osoba mogła użyć kodu raz. Konto i lista aplikacji: do czasu usunięcia konta przez Ciebie (przycisk na stronie konta) albo automatycznie po 12 miesiącach bez logowania. Opinie: do czasu wycofania zgody lub usunięcia opinii; nie zawierają adresu e-mail ani danych z zamówienia, tylko podpis, który sam wpiszesz. Dokumenty księgowe: 5 lat od końca roku podatkowego.</p>
 <h2>6. Twoje prawa</h2>
 <p>Masz prawo dostępu do danych, ich sprostowania, usunięcia, ograniczenia przetwarzania, przenoszenia oraz sprzeciwu wobec przetwarzania opartego na uzasadnionym interesie. Napisz na [E-MAIL]. Możesz też złożyć skargę do Prezesa Urzędu Ochrony Danych Osobowych (uodo.gov.pl).</p>
 <h2>7. Dobrowolność i zautomatyzowane decyzje</h2>
 <p>Podanie danych jest dobrowolne, ale niezbędne do przygotowania dokumentów. Nie podejmujemy wobec Ciebie decyzji wywołujących skutki prawne wyłącznie w sposób zautomatyzowany. Narzędzia AI służą do napisania Twoich dokumentów, które sam sprawdzasz i wysyłasz.</p>
 <h2>8. Pliki cookie</h2>
-<p>Serwis nie używa plików cookie do analityki ani reklam. Strona płatności Stripe może używać własnych plików cookie zgodnie z polityką Stripe.</p>
+<p>Serwis nie używa plików cookie do analityki ani reklam. Po zalogowaniu na konto używamy jednego niezbędnego pliku cookie sesji (30 dni), który pozwala Ci pozostać zalogowanym. Strona płatności Stripe może używać własnych plików cookie zgodnie z polityką Stripe.</p>
+<p>Statystyki odwiedzin prowadzimy bez plików cookie i bez zapisywania adresu IP: zliczamy zbiorczo odsłony, źródła wejść i kroki formularza zamówienia. Do policzenia unikalnych odwiedzin w danym dniu używamy jednodniowego, nieodwracalnego skrótu, który nie pozwala Cię rozpoznać następnego dnia. Jeśli Twoja przeglądarka wysyła sygnał „Do Not Track” lub „Global Privacy Control”, nie liczymy Twojej wizyty (podstawa: art. 6 ust. 1 lit. f RODO, ulepszanie serwisu).</p>
 <p>Polityka obowiązuje od [DATA].</p>
 </div></section>
 
@@ -298,6 +313,8 @@
       <div class="opts addons">
         <label class="opt"><input type="checkbox" id="adInterview"><span class="o-t">Przygotowanie do rozmowy<b data-price="interview">+50 zł</b></span><span class="o-d">12 pytań do tego ogłoszenia z przykładowymi odpowiedziami z Twojego doświadczenia, gotowe „Opowiedz o sobie”, pytania do pracodawcy, rozmowa o pieniądzach i lista kontrolna. PDF.</span></label>
         <label class="opt"><input type="checkbox" id="adMessages"><span class="o-t">Wiadomość do rekrutera<b data-price="messages">+9 zł</b></span><span class="o-d">Krótka wiadomość na LinkedIn i gotowy e-mail z aplikacją</span></label>
+        <label class="opt"><input type="checkbox" id="adLinkedin"><span class="o-t">Profil LinkedIn<b data-price="linkedin">+19 zł</b></span><span class="o-d">Nagłówek, sekcja „Informacje”, 15 umiejętności i opisy stanowisk pod to ogłoszenie, do skopiowania</span></label>
+        <label class="opt"><input type="checkbox" id="adDocx"><span class="o-t">Wersja Word (.docx)<b data-price="docx">+9 zł</b></span><span class="o-d">CV i list w edytowalnym pliku Word, gdy pracodawca prosi o .doc/.docx</span></label>
       </div>
       <h3 class="sh">Dodatkowe wersje językowe <span class="h">(+5 zł za każdy język, dla wszystkich ogłoszeń)</span></h3>
       <p class="hint">Główny język wybierasz przy ogłoszeniu i jest w cenie. Tutaj zamówisz dodatkowe tłumaczenia CV i listu, np. po niemiecku do pracy za granicą.</p>
@@ -346,6 +363,7 @@
     <section data-step="6" hidden>
       <div id="sum"></div>
       <div class="codebox"><label class="f">Kod rabatowy<span class="urlrow"><input type="text" id="codeInput" autocomplete="off" placeholder="np. KOD-AB12CD"><button type="button" class="btn ghost sm" id="codeApply">Zastosuj</button></span></label><p class="fstatus" id="codeMsg" role="status"></p></div>
+      <label class="check"><input type="checkbox" id="reviewAsk"> <span>Poproś mnie raz o ocenę dokumentów (jeden e-mail po 4 dniach, opcjonalnie).</span></label>
       <label class="check"><input type="checkbox" id="reminder"> <span>Przypomnij mi raz po 7 dniach o możliwości zamówienia CV pod kolejne ogłoszenie (opcjonalnie, jedna wiadomość e-mail).</span></label>
       <p class="perk small">Po opłaceniu dostaniesz <b>swój kod −10 zł</b> (ważny 90 dni): na kolejne zamówienie dla Ciebie i dla Twoich znajomych.</p>
       <p class="hint trust-mini">W cenie: raport dopasowania, darmowa poprawka i edycja tekstu. Dane usuwamy automatycznie po 30 dniach.</p>
@@ -392,6 +410,7 @@
     <div class="res-design" id="resDesign"></div>
     <label class="tog"><input type="checkbox" id="hlTog" checked> Pokaż dopasowane słowa kluczowe</label>
     <button class="btn" id="print">Pobierz PDF</button>
+    <a class="btn ghost" id="docxBtn" hidden download>Pobierz Word</a>
   </div>
   <p class="mailnote noprint" id="mailNote" hidden></p>
   <p class="note noprint" id="printNote" hidden>W podglądzie nie można pobierać plików. Na działającej stronie ten przycisk zapisuje dokument jako PDF.</p>

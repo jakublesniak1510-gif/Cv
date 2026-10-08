@@ -2,13 +2,19 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const el = (t, p = {}, ...k) => { const e = Object.assign(document.createElement(t), p); e.append(...k.filter((x) => x != null && x !== false)); return e; };
-let PRICE = { cv: 39, cv_letter: 49, pack3: 79, interview: 50, messages: 9, extraLang: 5 };
+let PRICE = { cv: 39, cv_letter: 49, pack3: 79, interview: 50, messages: 9, linkedin: 19, docx: 9, extraLang: 5 };
+const ADDON_KEYS = { interview: ['#adInterview', 'Przygotowanie do rozmowy'], messages: ['#adMessages', 'Wiadomość do rekrutera i e-mail z aplikacją'], linkedin: ['#adLinkedin', 'Profil LinkedIn'], docx: ['#adDocx', 'Wersja Word (.docx)'] };
 const PKG_ADS = { cv: 1, cv_letter: 1, pack3: 3 };
 const PKG_NAME = { cv: 'CV', cv_letter: 'CV + list motywacyjny', pack3: 'Pakiet 3 CV + listy motywacyjne' };
 let promo = null; // zastosowany kod rabatowy: { code, discount, label }
 let data; // bieżące zamówienie na stronie wyniku
 const STEPS = ['Pakiet i wygląd CV', 'Twoje dane', 'Doświadczenie', 'Wykształcenie i umiejętności', 'Ogłoszenia', 'Podsumowanie'];
-let cfg = { demo: false, maxAds: 5, noPrint: false, maxRevisions: 10 };
+let cfg = { demo: false, maxAds: 5, noPrint: false, maxRevisions: 10, loading: true };
+// Statystyki bez cookies: zbiorcze odsłony i kroki kreatora (serwer nie zapisuje IP ani identyfikatorów).
+function track(e, x = {}) {
+  if (cfg.loading || cfg.preview || !navigator.sendBeacon) return;
+  try { navigator.sendBeacon('/api/t', JSON.stringify({ e, p: location.pathname, r: document.referrer, u: new URLSearchParams(location.search).get('utm_source') || '', ...x })); } catch {}
+}
 // Szablony i kolory: muszą zgadzać się z lib/designs.js.
 const TPLS = [
   ['nowoczesny', 'Nowoczesny', 'Kolorowy pasek boczny z monogramem, kontaktem i umiejętnościami.'],
@@ -125,7 +131,7 @@ function hl(text, kws) {
 }
 
 fetch('/api/config').then((r) => r.json()).then((c) => {
-  cfg = c; drawLists(); if (c.prices) PRICE = { cv: c.prices.cv, cv_letter: c.prices.cv_letter, pack3: c.prices.pack3, interview: c.prices.interview, messages: c.prices.messages, extraLang: c.prices.extraLang }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
+  cfg = c; track('pv'); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
 });
 
 /* ---------- Przykład dopasowania ---------- */
@@ -335,9 +341,9 @@ function renum(box) {
 const rows = (box) => $$('#' + box + ' .entry').map((e) => Object.fromEntries($$('[data-k]', e).map((i) => [i.dataset.k, i.value.trim()])));
 const pkg = () => $('input[name=pkg]:checked').value;
 const nAds = () => Math.max(1, $('#ads').children.length);
-const addons = () => ({ interview: $('#adInterview').checked, messages: $('#adMessages').checked });
+const addons = () => Object.fromEntries(Object.entries(ADDON_KEYS).map(([k, [sel]]) => [k, $(sel).checked]));
 const extraLangs = () => $$('#langPick input:checked').map((i) => i.value);
-const addonsTotal = () => (addons().interview ? PRICE.interview : 0) + (addons().messages ? PRICE.messages : 0) + PRICE.extraLang * extraLangs().length;
+const addonsTotal = () => Object.entries(addons()).reduce((s, [k, on]) => s + (on ? PRICE[k] : 0), 0) + PRICE.extraLang * extraLangs().length;
 const discount = () => (promo ? Math.min(promo.percent ? Math.round((PRICE[pkg()] + addonsTotal()) * promo.percent) / 100 : promo.discount, PRICE[pkg()] - 2) : 0);
 const total = () => PRICE[pkg()] + addonsTotal() - discount();
 
@@ -357,7 +363,7 @@ function restoreDraft() {
   if (d.design && LEGACY[d.design.tpl]) d.design.tpl = LEGACY[d.design.tpl];
   if (d.design && COLORS[d.design.color] && TPLS.some((t) => t[0] === d.design.tpl)) design = { ...d.design };
   FIELDS.forEach((k) => ($('#' + k).value = d.f[k] || ''));
-  if (d.addons) { $('#adInterview').checked = !!d.addons.interview; $('#adMessages').checked = !!d.addons.messages; }
+  if (d.addons) Object.entries(ADDON_KEYS).forEach(([k, [sel]]) => ($(sel).checked = !!d.addons[k]));
   (d.langs || []).forEach((l) => { const i = $(`#langPick input[value="${l}"]`); if (i) i.checked = true; });
   setPhoto(d.photo || '');
   ['exp', 'edu', 'ads'].forEach((b) => { $('#' + b).replaceChildren(); (d[b]?.length ? d[b] : [{}]).forEach((v) => addRow(b, v)); });
@@ -403,7 +409,7 @@ $('#addEdu').onclick = () => addRow('edu');
 $('#addAd').onclick = () => addRow('ads');
 
 function go(n) {
-  step = n;
+  step = n; if (!$('#wiz').hidden) track('step', { s: n });
   $$('#wiz section[data-step]').forEach((s) => (s.hidden = +s.dataset.step !== n));
   $('#stepper').replaceChildren(...STEPS.map((_, i) => el('li', { className: i + 1 < n ? 'done' : i + 1 === n ? 'cur' : '' })));
   $('#wizKicker').textContent = n <= 6 ? `Krok ${n} z 6` : 'Płatność';
@@ -421,8 +427,7 @@ function drawSummary() {
     el('div', { className: 'sumrow' }, el('span', { textContent: PKG_NAME[pkg()] }), el('span', { textContent: PRICE[pkg()] + ' zł' })),
     el('div', { className: 'sumrow' }, el('span', { textContent: `Wygląd: ${tplName(design.tpl)}, kolor ${COLOR_NAMES[design.color]}` }), el('span', { textContent: 'w cenie' })),
     ...ads.map((a, i) => el('div', { className: 'sumrow' }, el('span', { textContent: `Ogłoszenie ${i + 1}: ${a.title}${a.lang === 'en' ? ' (po angielsku)' : ''}` }), el('span', { textContent: 'w cenie' }))),
-    ...(addons().interview ? [el('div', { className: 'sumrow' }, el('span', { textContent: 'Przygotowanie do rozmowy' }), el('span', { textContent: '+' + PRICE.interview + ' zł' }))] : []),
-    ...(addons().messages ? [el('div', { className: 'sumrow' }, el('span', { textContent: 'Wiadomość do rekrutera i e-mail z aplikacją' }), el('span', { textContent: '+' + PRICE.messages + ' zł' }))] : []),
+    ...Object.entries(addons()).filter(([, on]) => on).map(([k]) => el('div', { className: 'sumrow' }, el('span', { textContent: ADDON_KEYS[k][1] }), el('span', { textContent: '+' + PRICE[k] + ' zł' }))),
     ...extraLangs().map((l) => el('div', { className: 'sumrow' }, el('span', { textContent: `Dodatkowa wersja: ${LANGS[l]}` }), el('span', { textContent: '+' + PRICE.extraLang + ' zł' }))),
     ...(discount() ? [el('div', { className: 'sumrow' }, el('span', { textContent: `${promo.label} ${promo.code}` }), el('span', { textContent: '−' + discount() + ' zł' }))] : []),
     el('div', { className: 'sumrow' }, el('span', { textContent: 'Razem' }), el('span', { textContent: total() + ' zł' })));
@@ -449,7 +454,7 @@ const modal = (open) => {
 };
 const openWiz = (p) => {
   if (p) { $(`input[name=pkg][value=${p}]`).checked = true; refresh(); }
-  modal(true); $('#wiz').hidden = false; $('#mcta').hidden = true; document.body.classList.remove('mcta-on'); go(step === 7 ? 6 : step);
+  track('start'); modal(true); $('#wiz').hidden = false; $('#mcta').hidden = true; document.body.classList.remove('mcta-on'); go(step === 7 ? 6 : step);
   setTimeout(() => $('#wizClose').focus(), 0);
 };
 const closeWiz = () => { $('#wiz').hidden = true; modal(false); };
@@ -465,7 +470,7 @@ $('#wizForm').onsubmit = async (e) => {
   if (step < 6) return go(step + 1);
   const v = (id) => $('#' + id).value;
   const body = {
-    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, reviewAsk: $('#reviewAsk').checked, pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   $('#next').disabled = true;
@@ -632,8 +637,8 @@ function drawMail() {
       if (j.mail) data.mail = j.mail; drawMail();
     } }));
 }
-const DOCS = { cv: 'CV', letter: 'List motywacyjny', interview: 'Rozmowa', messages: 'Wiadomości' };
-const docsOf = (r) => ['cv', ...(data.pkg !== 'cv' ? ['letter'] : []), ...(r.interview?.length ? ['interview'] : []), ...(r.messages ? ['messages'] : [])];
+const DOCS = { cv: 'CV', letter: 'List motywacyjny', interview: 'Rozmowa', messages: 'Wiadomości', linkedin: 'LinkedIn' };
+const docsOf = (r) => ['cv', ...(data.pkg !== 'cv' ? ['letter'] : []), ...(r.interview?.length ? ['interview'] : []), ...(r.messages ? ['messages'] : []), ...(r.linkedin ? ['linkedin'] : [])];
 let editing = null; // kopia dokumentu w trakcie ręcznej edycji
 let curLang = null; // aktywna dodatkowa wersja językowa (null = główny język)
 const cur = () => { const b = data.results[curAd]; return (curLang && b.variants?.[curLang]) || b; };
@@ -661,6 +666,15 @@ function copyBtn(text) {
   return el('button', { type: 'button', className: 'link copy noprint', textContent: 'Kopiuj', onclick: async (e) => {
     try { await navigator.clipboard.writeText(text); e.target.textContent = 'Skopiowano'; } catch { e.target.textContent = 'Zaznacz tekst i skopiuj'; }
   } });
+}
+function linkedinNode(r, d) {
+  const l = r.linkedin, p = paperEl('extra', { tpl: 'klasyczny', color: d.color });
+  const block = (title, text) => [el('h3', { textContent: title }), copyBtn(text), el('div', { className: 'msgbox', textContent: text })];
+  p.append(el('div', { className: 'pg' }, el('header', { className: 'top lhead' }, el('h1', { textContent: 'Profil LinkedIn' }), el('div', { className: 'ct', textContent: r.position }), el('div', { className: 'rule' })),
+    ...block('Nagłówek', l.headline), ...block('Informacje', l.about), ...block('Umiejętności (w tej kolejności)', (l.skills || []).join(', ')),
+    ...(l.experience || []).flatMap((e) => block(`Doświadczenie: ${e.title}${e.company ? ', ' + e.company : ''}`, e.text)),
+    ...(l.tips?.length ? [el('h3', { textContent: 'Ustawienia profilu' }), el('ul', { className: 'iv-list' }, ...l.tips.map((t) => el('li', { textContent: t })))] : [])));
+  return p;
 }
 function messagesNode(r, d) {
   const m = r.messages, p = paperEl('extra', { tpl: 'klasyczny', color: d.color });
@@ -749,7 +763,7 @@ function openEditor() {
 
 function drawPaper() {
   const base = cur(), r = editing ? { ...base, cv: editing.cv, letter: editing.letter } : base, d = data.design;
-  const node = { cv: () => cvNode(r, undefined, d), letter: () => letterNode(r, d), interview: () => interviewNode(r, d), messages: () => messagesNode(r, d) }[curDoc];
+  const node = { cv: () => cvNode(r, undefined, d), letter: () => letterNode(r, d), interview: () => interviewNode(r, d), messages: () => messagesNode(r, d), linkedin: () => linkedinNode(r, d) }[curDoc];
   $('#paper').replaceChildren(node());
 }
 
@@ -843,8 +857,11 @@ function showResult() {
     $('#docTabs').replaceChildren(...docs.map((k) => el('button', { type: 'button', role: 'tab', textContent: DOCS[k], onclick: () => { curDoc = k; editing = null; $('#editor').hidden = $('#reviseBox').hidden = true; draw(); } })));
     $$('#docTabs button').forEach((b, i) => b.setAttribute('aria-selected', docs[i] === curDoc));
     $('#docTabs').hidden = docs.length < 2;
-    $('#print').textContent = `Pobierz PDF: ${{ cv: 'CV', letter: 'list', interview: 'pytania', messages: 'wiadomości' }[curDoc]}`;
+    $('#print').textContent = `Pobierz PDF: ${{ cv: 'CV', letter: 'list', interview: 'pytania', messages: 'wiadomości', linkedin: 'profil LinkedIn' }[curDoc]}`;
     const editable = curDoc === 'cv' || curDoc === 'letter';
+    $('#docxBtn').hidden = !(data.addons?.docx && editable);
+    $('#docxBtn').href = `/api/orders/${orderId}/docx/${curAd}?doc=${curDoc}${curLang ? '&lang=' + curLang : ''}`;
+    $('#docxBtn').onclick = cfg.preview ? (e) => { e.preventDefault(); flash('W podglądzie pobieranie pliku Word jest wyłączone. Na działającej stronie pobierzesz edytowalny plik .docx.'); } : null;
     $('#resActions').hidden = !editable;
     $('#revLeft').textContent = `Pozostało poprawek: ${data.revisionsLeft ?? cfg.maxRevisions}`;
     $('#hlTog').parentElement.hidden = curDoc !== 'cv';
@@ -863,6 +880,7 @@ function showResult() {
   if (data.expires) $('#retention').textContent = `Dane tego zamówienia, w tym dokumenty${data.photo ? ' i zdjęcie' : ''}, usuniemy automatycznie ${new Date(data.expires).toLocaleDateString('pl-PL')}. Zapisz PDF-y u siebie.`;
   drawFollowup(); drawMyCode(); drawRate();
   draw();
+  if (location.hash === '#ocena') setTimeout(() => $('#rate').scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
 }
 $('#newOrder').onclick = () => {
   try { history.replaceState(null, '', location.pathname); } catch {}
@@ -915,12 +933,13 @@ async function loadReviews() {
   } catch {}
 }
 loadReviews();
+(async () => { try { const s = await (await fetch('/api/public-stats')).json(); if (s.cvs) { $('#cvCounter').replaceChildren(el('b', { textContent: s.cvs.toLocaleString('pl-PL') }), ' CV przygotowanych pod konkretne ogłoszenia'); $('#cvCounter').hidden = false; } } catch {} })();
 
 // Pasek „Zacznij” na telefonie: po przewinięciu strony, gdy nie jest otwarte okno ani wynik.
 addEventListener('scroll', () => { const show = scrollY > 600 && !$('#landing')?.hidden && $('#result').hidden && $('#wiz').hidden && document.body.style.overflow !== 'hidden'; $('#mcta').hidden = !show; document.body.classList.toggle('mcta-on', show); }, { passive: true });
 
 async function loadContent() {
-  if (!CONTENT) { try { CONTENT = await (await fetch('/content.json')).json(); } catch { CONTENT = { INDEX: [], POPULAR: [], ARTICLES: [] }; } }
+  if (!CONTENT) { try { CONTENT = await (await fetch('/content.json')).json(); } catch { CONTENT = { INDEX: [], POPULAR: [], ARTICLES: [], CITIES: [] }; } }
   return CONTENT;
 }
 async function loadProf(slug) {
@@ -934,7 +953,7 @@ const profResult = (p) => ({ position: p.sample.headline, lang: 'pl', keywords: 
   name: p.sample.name, headline: p.sample.headline, contact: p.sample.contact, summary: p.sample.summary,
   experience: p.sample.jobs.map((j) => ({ title: j.title, company: j.company, period: j.period, bullets: j.bullets })),
   education: [p.sample.education], skills: p.sample.skills, languages: p.sample.languages || [], certificates: [], interests: '', clause: CLAUSE } });
-const pageHref = (r) => (cfg.preview ? '#' + (r ? r.replace('/', '-') : 'top') : '/' + r);
+const pageHref = (r) => (cfg.preview ? (r ? '#/' + r : '#top') : '/' + r);
 const pageLink = (r, props, ...kids) => { const a = el('a', { href: pageHref(r), ...props }, ...kids); a.dataset.page = r; return a; };
 const openBtn = (t, cls = 'btn') => { const b = el('button', { type: 'button', className: cls, textContent: t }); b.dataset.open = ''; return b; };
 
@@ -942,7 +961,9 @@ async function drawLists() {
   const C = await loadContent();
   $('#profGrid').replaceChildren(...C.POPULAR.map((p, k) => pageLink(`cv/${p.slug}`, { className: 'prof-card' },
     thumb(profResult(p), { tpl: TPLS[k % TPLS.length][0], color: Object.keys(COLORS)[k % 6] }), el('b', { textContent: p.name }))));
-  $('#artGrid').replaceChildren(...C.ARTICLES.map((a) => pageLink(`poradnik/${a.slug}`, { className: 'art-card' }, el('small', { textContent: `${a.readMinutes} min czytania` }), el('b', { textContent: a.title }), el('span', { textContent: a.lead }))));
+  $('#artAll').replaceChildren(...C.ARTICLES.map((a) => pageLink(`poradnik/${a.slug}`, { textContent: a.title })));
+  $$('.tool-card[data-page]').forEach((a) => (a.href = pageHref(a.dataset.page)));
+  $('#artGrid').replaceChildren(...C.ARTICLES.slice(0, 6).map((a) => pageLink(`poradnik/${a.slug}`, { className: 'art-card' }, el('small', { textContent: `${a.readMinutes} min czytania` }), el('b', { textContent: a.title }), el('span', { textContent: a.lead }))));
   $('#footProf').replaceChildren(...C.POPULAR.slice(0, 6).map((p) => pageLink(`cv/${p.slug}`, { textContent: p.name })));
   const cats = [...new Set(C.INDEX.map((p) => p.category))];
   $('#profAll').replaceChildren(...cats.map((c) => el('div', { className: 'cat' }, el('b', { textContent: c }), el('div', {}, ...C.INDEX.filter((p) => p.category === c).map((p) => pageLink(`cv/${p.slug}`, { textContent: p.name }))))));
@@ -981,8 +1002,95 @@ function profPage(p, C) {
         el('h2', { textContent: 'Przykładowe CV' }), el('p', { className: 'hint', textContent: 'Dane w przykładzie są fikcyjne. Szablon i kolor zmienisz w panelu obok.' }), full,
         el('h2', { textContent: 'Pytania' }), ...p.faq.map((f) => el('details', {}, el('summary', { textContent: f.q }), el('p', { textContent: f.a }))),
         el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Masz konkretne ogłoszenie?' }), el('p', { className: 'hint', textContent: 'Wklej link, a przygotujemy CV pisane pod nie. Od 39 zł, z darmową poprawką.' })), openBtn('Zamów CV')),
+        ...(C.POPULAR.some((x) => x.slug === p.slug) && C.CITIES?.length ? [el('h2', { textContent: `${p.name} w Twoim mieście` }), el('div', { className: 'more' }, ...C.CITIES.map((x) => pageLink(`cv/${p.slug}/${x.slug}`, { textContent: x.name })))] : []),
         el('h2', { textContent: 'Podobne zawody' }), el('div', { className: 'more' }, ...C.INDEX.filter((x) => x.slug !== p.slug && x.category === p.category).slice(0, 10).map((x) => pageLink(`cv/${x.slug}`, { textContent: x.name })), el('a', { href: '#zawody', textContent: 'Wszystkie zawody' }))),
       el('aside', { className: 'side-card' }, el('b', { textContent: `Przykład: ${p.sample.name}` }), side, picker, openBtn('Zamów CV pod swoje ogłoszenie'), el('p', { className: 'hint', textContent: 'Raport dopasowania, darmowa poprawka, PDF w e-mailu.' }))));
+}
+// --- Darmowe narzędzia ---
+const CLAUSES = {
+  pl: ['Wyrażam zgodę na przetwarzanie moich danych osobowych dla potrzeb niezbędnych do realizacji procesu rekrutacji{FIRMA} zgodnie z art. 6 ust. 1 lit. a Rozporządzenia Parlamentu Europejskiego i Rady (UE) 2016/679.', 'Wyrażam również zgodę na przetwarzanie moich danych osobowych{FIRMA} w celu przyszłych procesów rekrutacyjnych.', ' przez {X}'],
+  en: ['I hereby consent to the processing of my personal data{FIRMA} for the purposes of the recruitment process in accordance with Art. 6(1)(a) of Regulation (EU) 2016/679 (GDPR).', 'I also consent to the processing of my personal data{FIRMA} for the purposes of future recruitment processes.', ' by {X}'],
+  de: ['Ich willige in die Verarbeitung meiner personenbezogenen Daten{FIRMA} für die Zwecke des Bewerbungsverfahrens gemäß Art. 6 Abs. 1 lit. a der Verordnung (EU) 2016/679 (DSGVO) ein.', 'Ich willige außerdem in die Verarbeitung meiner personenbezogenen Daten{FIRMA} für zukünftige Bewerbungsverfahren ein.', ' durch {X}'],
+};
+const money = (v) => v.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' zł';
+// Umowa o pracę, zasady od 2022 r.: składki pracownika 13,71%, zdrowotna 9% (bez odliczenia), PIT 12% minus 300 zł/mies., koszty 250 lub 300 zł.
+function netOf(gross, { young = false, commute = false } = {}) {
+  const r = (x) => Math.round(x * 100) / 100;
+  const zus = { em: r(gross * 0.0976), re: r(gross * 0.015), ch: r(gross * 0.0245) }, zusSum = r(zus.em + zus.re + zus.ch);
+  const health = r((gross - zusSum) * 0.09), base = Math.max(0, Math.round(gross - zusSum - (commute ? 300 : 250)));
+  const pit = young ? 0 : Math.max(0, Math.round(base * 0.12 - 300));
+  return { zus, zusSum, health, pit, net: r(gross - zusSum - health - pit), yearly: gross * 12 };
+}
+function toolPage(slug, C) {
+  const t = C.TOOLS[slug], box = el('div', { className: 'tool-box' });
+  const out = el('div', { className: 'msgbox tool-out' });
+  const field = (label, input) => el('label', { className: 'f' }, label, input);
+  if (slug === 'klauzula-rodo') {
+    const firm = el('input', { type: 'text', placeholder: 'np. ABC Sp. z o.o. (opcjonalnie)' }), lang = el('select', {}, ...[['pl', 'polski'], ['en', 'angielski'], ['de', 'niemiecki']].map(([v, n]) => el('option', { value: v, textContent: n })));
+    const future = el('input', { type: 'checkbox' });
+    const draw = () => { const c = CLAUSES[lang.value], f = firm.value.trim() ? c[2].replace('{X}', firm.value.trim()) : ''; out.textContent = c[0].replace('{FIRMA}', f) + (future.checked ? ' ' + c[1].replace('{FIRMA}', f) : ''); };
+    [firm, lang, future].forEach((i) => i.addEventListener('input', draw)); draw();
+    box.append(el('div', { className: 'tool-form' }, field('Nazwa firmy', firm), field('Język', lang)), el('label', { className: 'check' }, future, el('span', { textContent: 'Dodaj zgodę na udział w przyszłych rekrutacjach tej firmy' })), out, copyBtn2(out),
+      el('p', { className: 'hint', textContent: 'Klauzulę umieść na samym dole CV, małą czcionką. Jeśli ogłoszenie podaje inne brzmienie, skopiuj to z ogłoszenia.' }));
+  } else if (slug === 'kalkulator-wynagrodzen') {
+    const gross = el('input', { type: 'number', min: 0, step: 100, value: 6000, inputMode: 'decimal' }), young = el('input', { type: 'checkbox' }), commute = el('input', { type: 'checkbox' });
+    const draw = () => {
+      const g = Math.max(0, +gross.value || 0), x = netOf(g, { young: young.checked, commute: commute.checked });
+      out.replaceChildren(...[el('div', { className: 'net-big' }, el('small', { textContent: 'Na rękę (netto) miesięcznie' }), el('b', { textContent: money(x.net) })),
+        el('dl', { className: 'net-rows' }, ...[['Brutto', g], ['Emerytalna 9,76%', -x.zus.em], ['Rentowa 1,5%', -x.zus.re], ['Chorobowa 2,45%', -x.zus.ch], ['Zdrowotna 9%', -x.health], ['Zaliczka na PIT', -x.pit]].flatMap(([k, v]) => [el('dt', { textContent: k }), el('dd', { textContent: money(v) })])),
+        x.yearly > 120000 && !young.checked ? el('p', { className: 'hint', textContent: 'Po przekroczeniu 120 000 zł dochodu w roku nadwyżkę obejmuje stawka 32%, więc w ostatnich miesiącach roku netto będzie niższe.' }) : null].filter(Boolean));
+    };
+    [gross, young, commute].forEach((i) => i.addEventListener('input', draw)); draw();
+    box.append(el('div', { className: 'tool-form' }, field('Wynagrodzenie brutto miesięcznie (zł)', gross)),
+      el('label', { className: 'check' }, young, el('span', { textContent: 'Mam mniej niż 26 lat (ulga dla młodych, bez PIT do limitu rocznego)' })),
+      el('label', { className: 'check' }, commute, el('span', { textContent: 'Dojeżdżam z innej miejscowości (koszty 300 zł zamiast 250 zł)' })), out,
+      el('p', { className: 'hint', textContent: 'Wynik szacunkowy dla umowy o pracę, według zasad podatkowych obowiązujących od 2022 r. (skala 12% i 32%, kwota wolna 30 000 zł). Nie uwzględnia PPK, limitu składek ZUS przy bardzo wysokich zarobkach ani innych ulg. Przed decyzją sprawdź aktualne przepisy lub zapytaj pracodawcę.' }));
+  } else {
+    const name = el('input', { type: 'text', placeholder: 'Anna Kowalska' }), pos = el('input', { type: 'text', placeholder: 'Specjalista ds. obsługi klienta' }), firm = el('input', { type: 'text', placeholder: 'ABC Sp. z o.o.' }), who = el('input', { type: 'text', placeholder: 'np. Pani Magdaleno (opcjonalnie)' }), topic = el('input', { type: 'text', placeholder: 'np. wdrożeniu nowego systemu CRM (opcjonalnie)' });
+    const draw = () => {
+      const p = pos.value.trim() || '[stanowisko]', f = firm.value.trim() || '[firma]', n = name.value.trim() || '[imię i nazwisko]';
+      out.textContent = `Temat: Podziękowanie za rozmowę – ${p}
+
+${who.value.trim() ? 'Szanowna ' + who.value.trim().replace(/^szanown[ya]\s+/i, '') + ',' : 'Dzień dobry,'}
+
+dziękuję za dzisiejszą rozmowę i czas poświęcony na przedstawienie stanowiska ${p} w ${f}.${topic.value.trim() ? ` Szczególnie zainteresowała mnie rozmowa o ${topic.value.trim()}.` : ''} Po spotkaniu jestem jeszcze bardziej przekonany/a, że chciałbym/chciałabym dołączyć do Państwa zespołu.
+
+Jeśli potrzebują Państwo dodatkowych informacji lub dokumentów, chętnie je prześlę.
+
+Z poważaniem,
+${n}`;
+    };
+    [name, pos, firm, who, topic].forEach((i) => i.addEventListener('input', draw)); draw();
+    box.append(el('div', { className: 'tool-form' }, field('Twoje imię i nazwisko', name), field('Stanowisko', pos), field('Firma', firm), field('Zwrot do rekrutera', who), field('Temat z rozmowy, który zapamiętałeś', topic)), out, copyBtn2(out),
+      el('p', { className: 'hint', textContent: 'Wyślij wiadomość w ciągu doby od rozmowy. Usuń formę, która Cię nie dotyczy (przekonany/a). Nie dopisuj nowych argumentów, tylko krótko podziękuj.' }));
+  }
+  return el('div', { className: 'inner narrow' },
+    el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', el('a', { href: '#poradnik', textContent: 'Darmowe narzędzia' }), '›', el('span', { textContent: t.title })),
+    el('h1', { textContent: t.title }), el('p', { className: 'lead', textContent: t.lead }), box,
+    el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Masz już ogłoszenie?' }), el('p', { className: 'hint', textContent: 'Przygotujemy CV i list pisane pod nie, z raportem dopasowania. Od 39 zł, bez abonamentu.' })), openBtn('Zamów CV')),
+    el('h2', { textContent: 'Inne darmowe narzędzia' }), el('div', { className: 'more' }, ...Object.entries(C.TOOLS).filter(([k]) => k !== slug).map(([k, x]) => pageLink(`narzedzia/${k}`, { textContent: x.title })), el('a', { href: '#skaner', textContent: 'Skaner CV' })));
+}
+const copyBtn2 = (node) => el('button', { type: 'button', className: 'btn sm', textContent: 'Kopiuj', onclick: async (e) => { try { await navigator.clipboard.writeText(node.textContent); e.target.textContent = 'Skopiowano'; } catch { e.target.textContent = 'Zaznacz tekst i skopiuj'; } } });
+
+// Strona zawodu w konkretnym mieście: dane zawodu + lokalny rynek pracy.
+const cityMeta = (p, c) => ({ title: `${p.name} ${c.loc}: CV pod lokalne ogłoszenia`, metaDescription: `Jak napisać CV na stanowisko ${p.name.toLowerCase()} ${c.loc}: słowa kluczowe z ogłoszeń, wskazówki dla rynku pracy ${c.gen} i przykładowe CV. CV pod ogłoszenie od 39 zł.` });
+function cityPage(p, c, C) {
+  const d = { tpl: 'nowoczesny', color: 'niebieski' }, r = profResult(p), m = cityMeta(p, c);
+  return el('div', { className: 'inner' },
+    el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', pageLink(`cv/${p.slug}`, { textContent: p.name }), '›', el('span', { textContent: c.name })),
+    el('h1', { textContent: m.title }), el('p', { className: 'lead', textContent: `${c.intro}` }),
+    el('div', { className: 'page-grid' },
+      el('div', {},
+        el('h2', { textContent: `Szukasz pracy jako ${p.name.toLowerCase()} ${c.loc}?` }), el('p', { textContent: p.intro }),
+        el('h2', { textContent: `Wskazówki dla rynku pracy ${c.gen}` }), el('ol', { className: 'tips' }, ...c.tips.map((t) => el('li', { textContent: t }))),
+        c.near?.length ? el('p', { className: 'hint', textContent: `Szukając ofert, sprawdź też okolice: ${c.near.join(', ')}. Jeśli możesz dojeżdżać, napisz to w CV.` }) : null,
+        el('h2', { textContent: 'Słowa kluczowe z ogłoszeń' }), el('div', { className: 'kw' }, ...p.keywords.map((k) => el('span', { textContent: k }))),
+        el('h2', { textContent: 'Wskazówki do CV' }), el('ol', { className: 'tips' }, ...p.tips.map((t) => el('li', { textContent: t }))),
+        el('h2', { textContent: 'Przykładowe CV' }), el('p', { className: 'hint', textContent: 'Dane w przykładzie są fikcyjne.' }), cvNode(r, false, d, ''),
+        el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: `Masz ogłoszenie ${c.loc}?` }), el('p', { className: 'hint', textContent: 'Wklej link, a przygotujemy CV pisane pod nie. Od 39 zł, z darmową poprawką.' })), openBtn('Zamów CV')),
+        el('h2', { textContent: `${p.name} w innych miastach` }), el('div', { className: 'more' }, ...(C.CITIES || []).filter((x) => x.slug !== c.slug).map((x) => pageLink(`cv/${p.slug}/${x.slug}`, { textContent: x.name }))),
+        el('h2', { textContent: `Inne zawody ${c.loc}` }), el('div', { className: 'more' }, ...C.POPULAR.filter((x) => x.slug !== p.slug).map((x) => pageLink(`cv/${x.slug}/${c.slug}`, { textContent: x.name })))),
+      el('aside', { className: 'side-card' }, el('b', { textContent: `CV: ${p.name}, ${c.name}` }), el('div', { className: 'side-thumb' }, thumb(r, d, false, '')), openBtn('Zamów CV pod swoje ogłoszenie'), el('p', { className: 'hint', textContent: 'Raport dopasowania, darmowa poprawka, PDF w e-mailu.' }))));
 }
 function articlePage(a, C) {
   return el('div', { className: 'inner narrow article' },
@@ -995,24 +1103,30 @@ function articlePage(a, C) {
 function setMeta(desc) { let m = document.querySelector('meta[name=description]'); if (!m) { m = el('meta', { name: 'description' }); document.head.append(m); } m.content = desc; }
 function navTo(r) {
   try {
-    if (cfg.preview) history.pushState(null, '', r ? '#' + r.replace('/', '-') : '#top');
+    if (cfg.preview) history.pushState(null, '', r ? '#/' + r : '#top');
     else history.pushState(null, '', '/' + r);
   } catch {}
 }
 async function showPage(r, push = true) {
-  const C = await loadContent(), [kind, slug] = r.split('/');
-  const item = kind === 'cv' ? await loadProf(slug) : C.ARTICLES.find((a) => a.slug === slug);
+  const C = await loadContent(), [kind, slug, sub] = r.split('/');
+  let item = null, node = null;
+  if (kind === 'cv') {
+    const p = await loadProf(slug), city = sub && (C.CITIES || []).find((c) => c.slug === sub);
+    if (p && sub && city && C.POPULAR.some((x) => x.slug === p.slug)) { item = cityMeta(p, city); node = () => cityPage(p, city, C); }
+    else if (p && !sub) { item = p; node = () => profPage(p, C); }
+  } else if (kind === 'poradnik') { item = C.ARTICLES.find((a) => a.slug === slug); node = () => articlePage(item, C); }
+  else if (kind === 'narzedzia' && C.TOOLS?.[slug]) { item = C.TOOLS[slug]; node = () => toolPage(slug, C); }
   if (!item) return showHome(push);
-  $('#landing').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true));
+  $('#landing').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#account').hidden = true;
   $('#page').hidden = false;
-  $('#page').replaceChildren(kind === 'cv' ? profPage(item, C) : articlePage(item, C));
+  $('#page').replaceChildren(node());
   try { document.title = `${item.title} | CV Pod Ogłoszenie`; } catch {}
   setMeta(item.metaDescription);
-  if (push) navTo(r);
+  if (push) { navTo(r); track('pv'); }
   window.scrollTo(0, 0);
 }
 function showHome(push) {
-  $('#page').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#landing').hidden = false;
+  $('#page').hidden = true; $('#account').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#landing').hidden = false;
   try { document.title = 'CV Pod Ogłoszenie'; } catch {}
   if (push) navTo('');
   window.scrollTo(0, 0);
@@ -1026,13 +1140,114 @@ document.addEventListener('click', (e) => {
 });
 window.addEventListener('popstate', () => route());
 
+// --- Konto klienta: logowanie linkiem, zamówienia, lista aplikacji z przypomnieniem o rozmowie ---
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[data-acct]'); if (!a || e.metaKey || e.ctrlKey) return;
+  e.preventDefault(); try { history.pushState(null, '', cfg.preview ? '#konto' : '/konto'); } catch {} if ($('#result').hidden) showAccount(); else location.href = cfg.preview ? '#konto' : '/konto';
+});
+const accApi = async (path = '', opts = {}) => {
+  const r = await fetch('/api/account' + path, { ...opts, headers: { 'Content-Type': 'application/json', 'X-Acc': '1' }, credentials: 'same-origin' });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) { const e = new Error(j.error || 'Błąd'); e.status = r.status; throw e; }
+  return j;
+};
+const STATUS_CLS = { 'wysłane': 'st-sent', rozmowa: 'st-int', oferta: 'st-ok', odmowa: 'st-no', 'brak odpowiedzi': 'st-none' };
+const dtLocal = (t) => (t ? new Date(t - new Date(t).getTimezoneOffset() * 60e3).toISOString().slice(0, 16) : '');
+async function showAccount() {
+  $('#landing').hidden = true; $('#page').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true));
+  const box = $('#account'); box.hidden = false; window.scrollTo(0, 0);
+  try { document.title = 'Moje konto – CV Pod Ogłoszenie'; } catch {}
+  const t = new URLSearchParams(location.search).get('t');
+  if (t) {
+    try { await accApi('/login', { method: 'POST', body: JSON.stringify({ token: t }) }); } catch (x) { box.replaceChildren(accLogin(x.message)); return; }
+    try { history.replaceState(null, '', '/konto'); } catch {}
+  }
+  let d;
+  try { d = await accApi(); } catch (x) { box.replaceChildren(accLogin(x.status === 401 ? '' : x.message)); return; }
+  box.replaceChildren(accDash(d));
+}
+function accLogin(err) {
+  const email = el('input', { type: 'email', required: true, autocomplete: 'email', placeholder: 'adres z zamówienia' }), msg = el('p', { className: err ? 'err' : 'hint', role: 'status', textContent: err || '' });
+  const btn = el('button', { className: 'btn', type: 'submit', textContent: 'Wyślij link do logowania' });
+  const form = el('form', { className: 'acct-login' }, el('label', { className: 'f' }, 'E-mail', email), btn, msg);
+  form.onsubmit = async (e) => {
+    e.preventDefault(); btn.disabled = true; msg.className = 'hint'; msg.textContent = '';
+    try {
+      const r = await accApi('/link', { method: 'POST', body: JSON.stringify({ email: email.value }) });
+      msg.replaceChildren(`Wysłaliśmy link na ${email.value}. Sprawdź skrzynkę (także folder Oferty i Spam). Link działa 20 minut.`);
+      if (r.demoLink) msg.append(' ', el('a', { href: r.demoLink, textContent: 'Tryb DEMO: zaloguj się tym linkiem', onclick: cfg.preview ? async (ev) => { ev.preventDefault(); await accApi('/login', { method: 'POST', body: JSON.stringify({ token: new URL(r.demoLink).searchParams.get('t') }) }); showAccount(); } : null }));
+    } catch (x) { msg.className = 'err'; msg.textContent = x.message; } finally { btn.disabled = false; }
+  };
+  return el('div', { className: 'inner narrow' }, el('h1', { textContent: 'Moje konto' }),
+    el('p', { className: 'lead', textContent: 'Bez hasła: wpisz e-mail, a wyślemy Ci link do logowania. Na koncie zobaczysz swoje zamówienia i poprowadzisz listę aplikacji z przypomnieniem przed rozmową.' }), form);
+}
+function accDash(d) {
+  const wrap = el('div', { className: 'inner' });
+  const appsBox = el('div');
+  const reload = async () => { try { const n = await accApi(); d.apps = n.apps; drawApps(); } catch {} };
+  const counts = () => d.statuses.map((s) => [s, d.apps.filter((a) => a.status === s).length]).filter(([, n]) => n);
+  function appForm(pre = {}) {
+    const f = { company: el('input', { type: 'text', value: pre.company || '', placeholder: 'Firma' }), position: el('input', { type: 'text', value: pre.position || '', placeholder: 'Stanowisko' }), link: el('input', { type: 'url', placeholder: 'Link do ogłoszenia (opcjonalnie)' }), applied: el('input', { type: 'date', value: new Date().toISOString().slice(0, 10) }) };
+    const msg = el('span', { className: 'err' }), btn = el('button', { className: 'btn sm', type: 'submit', textContent: 'Dodaj aplikację' });
+    const form = el('form', { className: 'app-form' }, ...Object.entries(f).map(([k, i]) => el('label', { className: 'f' }, { company: 'Firma', position: 'Stanowisko', link: 'Link', applied: 'Wysłano' }[k], i)), el('div', {}, btn, msg));
+    form.onsubmit = async (e) => {
+      e.preventDefault(); btn.disabled = true; msg.textContent = '';
+      try { await accApi('/apps', { method: 'POST', body: JSON.stringify({ ...Object.fromEntries(Object.entries(f).map(([k, i]) => [k, i.value])), orderId: pre.orderId, resultIndex: pre.resultIndex }) }); f.company.value = f.position.value = f.link.value = ''; await reload(); flash('Dodano do Twoich aplikacji.'); }
+      catch (x) { msg.textContent = x.message; } finally { btn.disabled = false; }
+    };
+    return form;
+  }
+  function drawApps() {
+    const put = async (a, patch) => { try { Object.assign(a, await accApi('/apps/' + a.id, { method: 'PUT', body: JSON.stringify(patch) })); drawApps(); } catch (x) { flash(x.message, true); } };
+    const rows = d.apps.map((a) => {
+      const st = el('select', { ariaLabel: 'Status', className: STATUS_CLS[a.status] || '' }, ...d.statuses.map((s) => el('option', { value: s, textContent: s, selected: s === a.status })));
+      st.onchange = () => put(a, { status: st.value });
+      const when = el('input', { type: 'datetime-local', value: dtLocal(a.interviewAt), ariaLabel: 'Termin rozmowy' });
+      when.onchange = () => put(a, { interviewAt: when.value ? new Date(when.value).toISOString() : '', status: when.value && a.status === 'wysłane' ? 'rozmowa' : a.status });
+      const rem = el('input', { type: 'checkbox', checked: !!a.remind, disabled: !a.interviewAt });
+      rem.onchange = () => put(a, { remind: rem.checked, interviewAt: a.interviewAt ? new Date(a.interviewAt).toISOString() : '' });
+      const del = el('button', { className: 'link', type: 'button', textContent: 'Usuń' });
+      del.onclick = async () => { if (del.dataset.sure !== '1') { del.dataset.sure = '1'; del.textContent = 'Na pewno?'; return; } await accApi('/apps/' + a.id, { method: 'DELETE' }).catch(() => {}); reload(); };
+      return el('div', { className: 'app-row' },
+        el('div', { className: 'app-main' }, el('b', { textContent: a.position || '—' }), el('span', { textContent: a.company || '' }), a.link ? el('a', { href: a.link, target: '_blank', rel: 'noopener noreferrer', textContent: 'ogłoszenie ↗' }) : null, el('small', { textContent: `wysłano ${new Date(a.applied).toLocaleDateString('pl-PL')}` })),
+        el('label', { className: 'f' }, 'Status', st),
+        el('label', { className: 'f' }, 'Rozmowa', when),
+        el('label', { className: 'check' }, rem, el('span', { textContent: a.reminded ? 'Przypomnienie wysłane' : 'Przypomnij dzień wcześniej (e-mail)' })),
+        del);
+    });
+    appsBox.replaceChildren(
+      counts().length ? el('div', { className: 'app-stats' }, ...counts().map(([s, n]) => el('span', { className: STATUS_CLS[s], textContent: `${s}: ${n}` }))) : null,
+      ...(rows.length ? rows : [el('p', { className: 'hint', textContent: 'Nie masz jeszcze żadnych aplikacji. Dodaj pierwszą powyżej albo z listy zamówień.' })]));
+  }
+  const out = el('button', { className: 'btn ghost sm', type: 'button', textContent: 'Wyloguj' });
+  out.onclick = async () => { await accApi('/logout', { method: 'POST' }).catch(() => {}); showAccount(); };
+  const delAcc = el('button', { className: 'link', type: 'button', textContent: 'Usuń konto i listę aplikacji' });
+  delAcc.onclick = async () => { if (delAcc.dataset.sure !== '1') { delAcc.dataset.sure = '1'; delAcc.textContent = 'Kliknij jeszcze raz, aby usunąć na zawsze'; return; } await accApi('', { method: 'DELETE' }).catch(() => {}); showAccount(); };
+  const addBox = el('div', { className: 'acct-card' }, el('h2', { textContent: 'Dodaj aplikację' }), appForm());
+  wrap.append(
+    el('div', { className: 'acct-head' }, el('div', {}, el('h1', { textContent: 'Moje konto' }), el('p', { className: 'hint', textContent: d.email })), out),
+    el('div', { className: 'acct-card' }, el('h2', { textContent: 'Twoje zamówienia' }), el('p', { className: 'hint', textContent: 'Zamówienia z ostatnich 30 dni (starsze usuwamy automatycznie razem z dokumentami).' }),
+      ...(d.orders.length ? d.orders.map((o) => el('div', { className: 'acct-order' },
+        el('div', {}, el('b', { textContent: o.pkg }), el('small', { textContent: ` · ${new Date(o.created).toLocaleDateString('pl-PL')}` })),
+        el('div', { className: 'acct-pos' }, ...o.positions.map((p, i) => el('span', {}, p.position, ' ', el('button', { className: 'link', type: 'button', textContent: '+ do aplikacji', onclick: () => { addBox.replaceChildren(el('h2', { textContent: 'Dodaj aplikację' }), appForm({ position: p.position, company: p.company, orderId: o.id, resultIndex: i })); addBox.scrollIntoView({ behavior: 'smooth', block: 'center' }); } })))),
+        el('a', { className: 'btn ghost sm', href: `/?id=${o.id}`, textContent: 'Otwórz dokumenty', onclick: cfg.preview ? (ev) => { ev.preventDefault(); $('#account').hidden = true; startResult(o.id); } : null })))
+        : [el('p', { className: 'hint', textContent: 'Nie ma zamówień z ostatnich 30 dni na ten adres.' })])),
+    addBox,
+    el('div', { className: 'acct-card' }, el('h2', { textContent: 'Moje aplikacje' }), el('p', { className: 'hint', textContent: 'Zapisuj, gdzie wysłałeś CV. Gdy wpiszesz termin rozmowy i zaznaczysz przypomnienie, dzień wcześniej dostaniesz e-mail z krótką listą kontrolną (i linkiem do przygotowania do rozmowy, jeśli je zamówiłeś).' }), appsBox),
+    el('p', { className: 'hint' }, 'Konto nieużywane przez 12 miesięcy usuwamy automatycznie. ', delAcc));
+  drawApps();
+  return wrap;
+}
+
 const LEGAL = { '#regulamin': 'legal-regulamin', '#prywatnosc': 'legal-prywatnosc' };
 function route() {
   if (!$('#result').hidden || !$('#gen').hidden) return;
-  const h = location.hash, hm = /^#(cv|poradnik)-([\w-]+)$/.exec(h), pm = /^\/(cv|poradnik)\/([\w-]+)\/?$/.exec(location.pathname);
-  if (hm) return showPage(`${hm[1]}/${hm[2]}`, false);
+  if (location.pathname === '/konto' || location.hash === '#konto') return showAccount();
+  $('#account').hidden = true;
+  const h = location.hash, hm = /^#\/((?:cv|poradnik|narzedzia)\/[\w-]+(?:\/[\w-]+)?)$/.exec(h), pm = /^\/((?:cv|poradnik|narzedzia)\/[\w-]+(?:\/[\w-]+)?)\/?$/.exec(location.pathname);
+  if (hm) return showPage(hm[1], false);
   const anchor = h.length > 1 && document.getElementById(h.slice(1));
-  if (pm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage(`${pm[1]}/${pm[2]}`, false);
+  if (pm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage(pm[1], false);
   $('#page').hidden = true;
   const id = LEGAL[h];
   $('#landing').hidden = !!id;

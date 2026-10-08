@@ -9,4 +9,7 @@ const fonts = [...html.matchAll(/<link rel="stylesheet" href="(https:\/\/fonts[^
 const body = /<body>([\s\S]*)<\/body>/.exec(html)[1].replace(/<script src="\/app.js"><\/script>/, '');
 fs.writeFileSync(out, `<title>${title}</title>\n${fonts}\n<style>\n${r('public/style.css')}\n</style>\n${body}\n<script>\n${strip(r('lib/content-a.js'))}
 ${strip(r('lib/content-b.js'))}
+${strip(r('lib/cities.js'))}
+${strip(r('lib/tools.js'))}
+${strip(r('lib/content-articles.js'))}
 ${strip(r('lib/content.js'))}\n${strip(r('lib/tailor.js'))}\n${r('scripts/preview-stub.js')}\n${r('public/app.js')}\n</script>\n`);
