@@ -6,13 +6,84 @@ const PRICE = { cv: 39, cv_letter: 49, extra: 20 };
 const STEPS = ['Pakiet i wygląd CV', 'Twoje dane', 'Doświadczenie', 'Wykształcenie i umiejętności', 'Ogłoszenia', 'Podsumowanie'];
 let cfg = { demo: false, maxAds: 5, noPrint: false };
 // Szablony i kolory: muszą zgadzać się z lib/designs.js.
-const TPLS = [['nowoczesny', 'Nowoczesny', 'Kolorowy pasek boczny z kontaktem i umiejętnościami.'], ['wyrazisty', 'Wyrazisty', 'Mocny kolorowy nagłówek, który przyciąga wzrok.'], ['klasyczny', 'Klasyczny', 'Przejrzysty układ, pewny wybór w każdej branży.'], ['elegancki', 'Elegancki', 'Szeryfowa typografia na stanowiska biurowe i kierownicze.']];
+const TPLS = [
+  ['nowoczesny', 'Nowoczesny', 'Kolorowy pasek boczny z monogramem, kontaktem i umiejętnościami.'],
+  ['os', 'Oś czasu', 'Doświadczenie na osi czasu. Rekruter od razu widzi Twoją ścieżkę.'],
+  ['szwajcarski', 'Szwajcarski', 'Siatka jak w magazynie: duże nazwisko, równe kolumny, zero ozdobników.'],
+  ['geometria', 'Geometria', 'Skośny kolorowy nagłówek i panel boczny. Wyróżnia się w stosie CV.'],
+  ['elegancki', 'Elegancki', 'Szeryfowa typografia i monogram. Na stanowiska biurowe i kierownicze.'],
+  ['klasyczny', 'Klasyczny ATS', 'Jedna kolumna, którą najlepiej odczytują systemy rekrutacyjne.'],
+];
+const LEGACY = { wyrazisty: 'geometria' };
 const COLORS = { niebieski: '#2548E8', granat: '#1E3A5F', morski: '#0F766E', bordo: '#9F1239', fiolet: '#6D28D9', grafit: '#374151' };
 const COLOR_NAMES = { niebieski: 'niebieski', granat: 'granatowy', morski: 'morski', bordo: 'bordowy', fiolet: 'fioletowy', grafit: 'grafitowy' };
 let design = { tpl: 'nowoczesny', color: 'niebieski' };
 const tplName = (t) => (TPLS.find((x) => x[0] === t) || TPLS[0])[1];
 const ro = new ResizeObserver((es) => es.forEach((e) => e.target.style.setProperty('--s', e.contentRect.width / 794)));
 const thumb = (r, d, on = false) => { const t = el('div', { className: 'thumb' }, cvNode(r, on, d)); ro.observe(t); return t; };
+function initials(n) { return String(n || '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join(''); }
+function paperEl(cls, d) { const p = el('div', { className: `paper t-${d.tpl} ${cls}` }); p.style.setProperty('--acc', COLORS[d.color] || COLORS.niebieski); return p; }
+// Wspólne klocki dokumentu; każdy szablon składa je po swojemu (węzeł DOM można wstawić tylko raz).
+function parts(c, kw) {
+  const contact = (c.contact || []).filter(Boolean);
+  const [first = '', ...rest] = String(c.name || '').split(/\s+/);
+  const sec = (t, ...k) => el('section', {}, el('h3', { textContent: t }), el('div', { className: 'cnt' }, ...k));
+  const job = (title, period, org, orgCls, bullets) => el('div', { className: 'job' },
+    el('div', { className: 'when' }, el('b', { textContent: period || '' }), org ? el('span', { textContent: org }) : null),
+    el('div', { className: 'what' }, el('div', { className: 'role' }, el('span', { textContent: title }), el('em', { textContent: period || '' })),
+      org ? el('div', { className: orgCls, textContent: org }) : null,
+      bullets?.length ? el('ul', {}, ...bullets.map((b) => el('li', {}, hl(b, kw)))) : null));
+  return {
+    name: () => el('h1', {}, el('span', { textContent: first }), ' ', el('span', { textContent: rest.join(' ') })),
+    head: () => (c.headline ? el('div', { className: 'hl', textContent: c.headline }) : null),
+    ct: () => el('div', { className: 'ct', textContent: contact.join('  ·  ') }),
+    clist: () => el('ul', { className: 'clist' }, ...contact.map((x) => el('li', { textContent: x }))),
+    mono: () => el('div', { className: 'ini', textContent: initials(c.name) }),
+    rule: () => el('div', { className: 'rule' }),
+    summary: () => (c.summary ? sec('Profil zawodowy', el('div', { className: 'lead' }, hl(c.summary, kw))) : null),
+    exp: () => (c.experience?.length ? sec('Doświadczenie zawodowe', ...c.experience.map((e) => job(e.title, e.period, e.company, 'co', e.bullets))) : null),
+    edu: () => (c.education?.length ? sec('Wykształcenie', ...c.education.map((e) => job(e.school, e.period, e.degree, 'deg'))) : null),
+    skills: () => (c.skills?.length ? sec('Umiejętności', el('div', { className: 'chips' }, ...c.skills.map((x) => el('span', {}, hl(x, kw))))) : null),
+    langs: () => (c.languages?.length ? sec('Języki', el('div', { textContent: c.languages.join(' · ') })) : null),
+    certs: () => (c.certificates?.length ? sec('Certyfikaty i kursy', el('div', { textContent: c.certificates.join(' · ') })) : null),
+    intr: () => (c.interests ? sec('Zainteresowania', el('div', { textContent: c.interests })) : null),
+    clause: () => (c.clause ? el('div', { className: 'clause', textContent: c.clause }) : null),
+    contactSec: () => sec('Kontakt', el('ul', { className: 'clist' }, ...contact.map((x) => el('li', { textContent: x })))),
+  };
+}
+const CV_LAYOUT = {
+  nowoczesny: (k) => [el('aside', { className: 'side' }, k.mono(), k.contactSec(), k.skills(), k.langs(), k.certs(), k.intr()),
+    el('div', { className: 'mainc' }, el('header', { className: 'top' }, k.name(), k.head()), k.summary(), k.exp(), k.edu(), k.clause())],
+  os: (k) => [el('header', { className: 'top' }, el('div', {}, k.name(), k.head()), k.clist()), k.summary(), k.exp(), k.edu(),
+    el('div', { className: 'grid3' }, k.skills(), k.langs(), k.certs()), k.intr(), k.clause()],
+  szwajcarski: (k) => [el('header', { className: 'top' }, el('div', { className: 'sq' }), el('div', { className: 'split' }, el('div', {}, k.name(), k.head()), k.clist())),
+    k.summary(), k.exp(), k.edu(), k.skills(), k.langs(), k.certs(), k.intr(), k.clause()],
+  geometria: (k) => [el('header', { className: 'band' }, el('div', {}, k.name(), k.head()), k.mono()),
+    el('div', { className: 'body' }, el('div', { className: 'mainc' }, k.summary(), k.exp(), k.edu(), k.clause()),
+      el('aside', { className: 'panel' }, k.contactSec(), k.skills(), k.langs(), k.certs(), k.intr()))],
+  elegancki: (k) => [el('header', { className: 'top' }, k.mono(), k.name(), k.head(), k.ct(), k.rule()), k.summary(), k.exp(), k.edu(), k.skills(), k.langs(), k.certs(), k.intr(), k.clause()],
+  klasyczny: (k) => [el('header', { className: 'top' }, k.name(), k.head(), k.ct()), k.summary(), k.exp(), k.edu(), k.skills(), k.langs(), k.certs(), k.intr(), k.clause()],
+};
+const LETTER_HEAD = {
+  geometria: (k) => el('header', { className: 'band' }, el('div', {}, k.name(), k.ct()), k.mono()),
+  elegancki: (k) => el('header', { className: 'top lhead' }, k.mono(), k.name(), k.ct(), k.rule()),
+  szwajcarski: (k) => el('header', { className: 'top lhead' }, el('div', { className: 'sq' }), k.name(), k.ct(), k.rule()),
+  os: (k) => el('header', { className: 'top lhead' }, el('div', { className: 'split' }, k.name(), k.clist()), k.rule()),
+};
+function cvNode(r, on, d) {
+  d = d || (data && data.design) || design;
+  const p = paperEl((on ?? $('#hlTog').checked) ? '' : 'nohl', d);
+  p.append(el('div', { className: 'pg' }, ...(CV_LAYOUT[d.tpl] || CV_LAYOUT.nowoczesny)(parts(r.cv, r.keywords || []))));
+  return p;
+}
+function letterNode(r, d) {
+  d = d || (data && data.design) || design;
+  const c = r.cv, p = paperEl('letter', d), k = parts(c, []);
+  const date = el('div', { className: 'date', textContent: `${c.contact?.[2] ? c.contact[2] + ', ' : ''}${new Date().toLocaleDateString('pl-PL')}` });
+  const head = (LETTER_HEAD[d.tpl] || ((x) => el('header', { className: 'top lhead' }, x.name(), x.ct(), x.rule())))(k);
+  p.append(el('div', { className: 'pg' }, head, el('div', { className: 'body' }, date, ...(r.letter || '').split(/\n\n+/).map((x) => el('p', { textContent: x })))));
+  return p;
+}
 // Wybór szablonu i koloru; thumbs: miniatury z przykładowym CV.
 function designPicker(box, d, onChange, { thumbs = true } = {}) {
   const draw = () => {
@@ -237,6 +308,7 @@ function restoreDraft() {
   if (!d || !d.f || !(d.f.name || d.f.email || d.exp?.some((e) => e.title) || d.ads?.some((a) => a.text))) return false;
   restoring = true;
   const r = $(`input[name=pkg][value="${d.pkg}"]`); if (r) r.checked = true;
+  if (d.design && LEGACY[d.design.tpl]) d.design.tpl = LEGACY[d.design.tpl];
   if (d.design && COLORS[d.design.color] && TPLS.some((t) => t[0] === d.design.tpl)) design = { ...d.design };
   FIELDS.forEach((k) => ($('#' + k).value = d.f[k] || ''));
   ['exp', 'edu', 'ads'].forEach((b) => { $('#' + b).replaceChildren(); (d[b]?.length ? d[b] : [{}]).forEach((v) => addRow(b, v)); });
@@ -363,48 +435,6 @@ async function poll() {
 }
 $('#retry').onclick = async () => { await fetch(`/api/orders/${orderId}/retry`, { method: 'POST' }); startResult(orderId); };
 
-function initials(n) { return String(n || '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join(''); }
-function paperEl(cls, d) { const p = el('div', { className: `paper t-${d.tpl} ${cls}` }); p.style.setProperty('--acc', COLORS[d.color] || COLORS.niebieski); return p; }
-function cvNode(r, on, d) {
-  d = d || (data && data.design) || design;
-  const c = r.cv, kw = r.keywords || [], p = paperEl((on ?? $('#hlTog').checked) ? '' : 'nohl', d);
-  const contact = (c.contact || []).filter(Boolean);
-  const sec = (t, ...k) => el('section', {}, el('h3', { textContent: t }), ...k);
-  const name = el('h1', { textContent: c.name }), head = c.headline ? el('div', { className: 'hl', textContent: c.headline }) : null;
-  const ct = el('div', { className: 'ct', textContent: contact.join('  ·  ') });
-  const summary = c.summary ? sec('Profil zawodowy', el('div', {}, hl(c.summary, kw))) : null;
-  const exp = c.experience?.length ? sec('Doświadczenie zawodowe', ...c.experience.map((e) => el('div', { className: 'job' }, el('div', { className: 'role' }, el('span', { textContent: e.title }), el('em', { textContent: e.period })), e.company ? el('div', { className: 'co', textContent: e.company }) : null, el('ul', {}, ...(e.bullets || []).map((b) => el('li', {}, hl(b, kw))))))) : null;
-  const edu = c.education?.length ? sec('Wykształcenie', ...c.education.map((e) => el('div', { className: 'job' }, el('div', { className: 'role' }, el('span', { textContent: e.school }), el('em', { textContent: e.period })), e.degree ? el('div', { className: 'deg', textContent: e.degree }) : null))) : null;
-  const skills = c.skills?.length ? sec('Umiejętności', el('div', { className: 'chips' }, ...c.skills.map((x) => el('span', {}, hl(x, kw))))) : null;
-  const langs = c.languages?.length ? sec('Języki', el('div', { textContent: c.languages.join(' · ') })) : null;
-  const certs = c.certificates?.length ? sec('Certyfikaty i kursy', el('div', { textContent: c.certificates.join(' · ') })) : null;
-  const intr = c.interests ? sec('Zainteresowania', el('div', { textContent: c.interests })) : null;
-  const clause = c.clause ? el('div', { className: 'clause', textContent: c.clause }) : null;
-  let pg;
-  if (d.tpl === 'nowoczesny') {
-    pg = el('div', { className: 'pg' },
-      el('aside', { className: 'side' }, el('div', { className: 'ini', textContent: initials(c.name) }), sec('Kontakt', el('ul', { className: 'clist' }, ...contact.map((x) => el('li', { textContent: x })))), skills, langs, certs, intr),
-      el('div', { className: 'mainc' }, el('header', { className: 'top' }, name, head), summary, exp, edu, clause));
-  } else if (d.tpl === 'wyrazisty') {
-    pg = el('div', { className: 'pg' }, el('header', { className: 'band' }, name, head, ct),
-      el('div', { className: 'body' }, summary, exp, edu, el('div', { className: 'two' }, skills, el('div', {}, langs, certs)), intr, clause));
-  } else {
-    pg = el('div', { className: 'pg' }, el('header', { className: 'top' }, name, head, ct, d.tpl === 'elegancki' ? el('div', { className: 'rule' }) : null), summary, exp, edu, skills, langs, certs, intr, clause);
-  }
-  p.append(pg);
-  return p;
-}
-function letterNode(r, d) {
-  d = d || (data && data.design) || design;
-  const c = r.cv, p = paperEl('letter', d), contact = (c.contact || []).filter(Boolean).join('  ·  ');
-  const date = el('div', { className: 'date', textContent: `${c.contact?.[2] ? c.contact[2] + ', ' : ''}${new Date().toLocaleDateString('pl-PL')}` });
-  const paras = (r.letter || '').split(/\n\n+/).map((x) => el('p', { textContent: x }));
-  const head = d.tpl === 'wyrazisty'
-    ? el('header', { className: 'band' }, el('h1', { textContent: c.name }), el('div', { className: 'ct', textContent: contact }))
-    : el('header', { className: 'top lhead' }, el('h1', { textContent: c.name }), el('div', { className: 'ct', textContent: contact }), el('div', { className: 'rule' }));
-  p.append(el('div', { className: 'pg' }, head, el('div', { className: 'body' }, date, ...paras)));
-  return p;
-}
 function drawMail() {
   const m = data.mail, n = $('#mailNote');
   n.hidden = !m || m.status === 'skipped';
