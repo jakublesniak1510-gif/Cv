@@ -5,7 +5,7 @@ const el = (t, p = {}, ...k) => { const e = Object.assign(document.createElement
 let PRICE = { cv: 39, cv_letter: 49, pack3: 79, interview: 15, messages: 9, extraLang: 5 };
 const PKG_ADS = { cv: 1, cv_letter: 1, pack3: 3 };
 const PKG_NAME = { cv: 'CV', cv_letter: 'CV + list motywacyjny', pack3: 'Pakiet 3 CV + listy motywacyjne' };
-let promo = null; // zastosowany kod rabatowy/polecający: { code, discount, label }
+let promo = null; // zastosowany kod rabatowy: { code, discount, label }
 let data; // bieżące zamówienie na stronie wyniku
 const STEPS = ['Pakiet i wygląd CV', 'Twoje dane', 'Doświadczenie', 'Wykształcenie i umiejętności', 'Ogłoszenia', 'Podsumowanie'];
 let cfg = { demo: false, maxAds: 5, noPrint: false, maxRevisions: 10 };
@@ -377,7 +377,7 @@ $$('input[name=pkg]').forEach((r) => (r.onchange = refresh));
 $('#adInterview').onchange = $('#adMessages').onchange = refresh;
 $('#langPick').replaceChildren(...Object.entries(LANGS).map(([k, n]) => el('label', { className: 'chk' }, el('input', { type: 'checkbox', value: k, onchange: refresh }), ` ${n}`)));
 
-/* kod rabatowy lub polecający */
+/* kod rabatowy */
 const REF_KEY = 'cvpo-ref';
 async function applyCode(raw, quiet) {
   const code = String(raw || '').trim().toUpperCase(), st = $('#codeMsg');
@@ -754,10 +754,10 @@ function drawFollowup() {
     if ($('#fuPay')) $('#fuPay').textContent = `Zamów za ${PRICE[fpkg]} zł`;
   };
   box.replaceChildren(el('h3', { textContent: 'Masz kolejne ogłoszenia?' }),
-    el('p', { className: 'hint', textContent: 'Twoje dane już mamy, więc nie wpisujesz ich ponownie. Dokumenty powstaną w tym samym wyglądzie.' + (data.buyerCoupon ? ` Twój kod ${data.buyerCoupon.code} obniży cenę o ${data.buyerCoupon.discount} zł.` : '') }),
+    el('p', { className: 'hint', textContent: 'Twoje dane już mamy, więc nie wpisujesz ich ponownie. Dokumenty powstaną w tym samym wyglądzie.' + (data.myCode && !data.myCode.usedByMe ? ` Twój kod ${data.myCode.code} obniży cenę o ${data.myCode.discount} zł.` : '') }),
     pick, el('div', { id: 'fuAds' }),
     el('button', { type: 'button', className: 'btn ghost sm', id: 'fuAdd', textContent: '+ Dodaj ogłoszenie (w pakiecie do 3)', onclick: () => { addRow('fuAds'); drawPick(); } }),
-    el('label', { className: 'f fucode' }, 'Kod rabatowy ', el('input', { type: 'text', id: 'fuCode', placeholder: 'opcjonalnie', autocomplete: 'off', value: data.buyerCoupon?.code || '' })),
+    el('label', { className: 'f fucode' }, 'Kod rabatowy ', el('input', { type: 'text', id: 'fuCode', placeholder: 'opcjonalnie', autocomplete: 'off', value: data.myCode && !data.myCode.usedByMe ? data.myCode.code : '' })),
     el('p', {}, el('button', { type: 'button', className: 'btn', id: 'fuPay', textContent: '', onclick: async (e) => {
       const ads = rows('fuAds'), err = $('#fuErr'), code = $('#fuCode').value.trim();
       if (ads.length > PKG_ADS[fpkg]) { err.textContent = 'Ten pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe albo wybierz Pakiet 3.'; return; }
@@ -774,21 +774,17 @@ function drawFollowup() {
   addRow('fuAds'); drawPick();
 }
 
-function drawReferral() {
-  const box = $('#referral'), r = data.referral;
-  box.hidden = !r && !data.buyerCoupon;
-  if (box.hidden) return;
-  if (!r) { box.replaceChildren(el('div', { className: 'perk' }, el('b', { textContent: `Twój kod zniżkowy: ${data.buyerCoupon.code}` }), ` −${data.buyerCoupon.discount} zł na kolejne zamówienie.`)); return; }
-  const link = cfg.preview ? `https://twojadomena.pl/?ref=${r.code}` : `${location.origin}/?ref=${r.code}`;
-  const own = data.buyerCoupon;
-  box.replaceChildren(
-    ...(own ? [el('div', { className: 'perk' }, el('b', { textContent: `Twój kod zniżkowy: ${own.code}` }), ` −${own.discount} zł na kolejne zamówienie, ważny do ${new Date(own.expires).toLocaleDateString('pl-PL')}. Wpisaliśmy go już w formularzu kolejnego zamówienia poniżej.`)] : []),
-    el('h3', { textContent: `Poleć nas i zyskaj ${r.discount} zł` }),
-    el('p', { className: 'hint', textContent: `Znajomy z Twoim kodem zapłaci ${r.discount} zł mniej, a Ty dostaniesz kod na ${r.discount} zł rabatu za każde jego zamówienie.` }),
-    el('div', { className: 'refrow' }, el('code', { textContent: r.code }), el('input', { type: 'text', readOnly: true, value: link, ariaLabel: 'Link polecający', onfocus: (e) => e.target.select() }),
+// Kod klienta: −10 zł dla niego na kolejne zamówienie i dla znajomych (każda osoba raz).
+function drawMyCode() {
+  const box = $('#referral'), k = data.myCode;
+  box.hidden = !k;
+  if (!k) return;
+  const link = cfg.preview ? `https://twojadomena.pl/?ref=${k.code}` : `${location.origin}/?ref=${k.code}`;
+  box.replaceChildren(el('h3', { textContent: `Twój kod −${k.discount} zł` }),
+    el('p', { className: 'hint', textContent: `Użyj go przy kolejnym zamówieniu i podaj znajomym: każdy, kto go wpisze, zapłaci ${k.discount} zł mniej. Każda osoba może użyć kodu raz. Ważny do ${new Date(k.expires).toLocaleDateString('pl-PL')}.` }),
+    el('div', { className: 'refrow' }, el('code', { textContent: k.code }), el('input', { type: 'text', readOnly: true, value: link, ariaLabel: 'Link z kodem dla znajomych', onfocus: (e) => e.target.select() }),
       el('button', { type: 'button', className: 'btn sm', textContent: 'Kopiuj link', onclick: async (e) => { try { await navigator.clipboard.writeText(link); e.target.textContent = 'Skopiowano'; } catch { e.target.previousSibling.select(); e.target.textContent = 'Zaznaczono, skopiuj'; } } })),
-    el('p', { className: 'hint', textContent: r.uses ? `Z Twojego kodu skorzystało osób: ${r.uses}.` : 'Nikt jeszcze nie użył Twojego kodu.' }),
-    ...(r.rewards?.length ? [el('p', { className: 'rewards' }, el('b', { textContent: 'Twoje kody nagród: ' }), r.rewards.join(', '), ' (wpisz przy kolejnym ogłoszeniu poniżej)')] : []));
+    el('p', { className: 'hint', textContent: k.uses ? `Kod został użyty ${k.uses} ${k.uses === 1 ? 'raz' : 'razy'}.` : 'Kod nie był jeszcze używany.' }));
 }
 
 let redraw = () => {};
@@ -828,7 +824,7 @@ function showResult() {
   $('#reviseBtn').onclick = openRevise;
   $('#editor').hidden = $('#reviseBox').hidden = true; editing = null;
   if (data.expires) $('#retention').textContent = `Dane tego zamówienia, w tym dokumenty${data.photo ? ' i zdjęcie' : ''}, usuniemy automatycznie ${new Date(data.expires).toLocaleDateString('pl-PL')}. Zapisz PDF-y u siebie.`;
-  drawFollowup(); drawReferral();
+  drawFollowup(); drawMyCode();
   draw();
 }
 $('#newOrder').onclick = () => {

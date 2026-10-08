@@ -2,13 +2,13 @@ import 'dotenv/config';
 import express from 'express';
 import crypto from 'node:crypto';
 import Stripe from 'stripe';
-import { lineItems, calcTotal, MAX_ADS, PRICES, LANGS, REFERRAL_DISCOUNT, BUYER_COUPON, withLetter as hasLetter } from './lib/pricing.js';
+import { lineItems, calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, withLetter as hasLetter } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes } from './lib/store.js';
 import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
 import { fetchAd, AdError } from './lib/fetchAd.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
-import { mailEnabled, sendOrderMail, sendReminder, sendReward } from './lib/mail.js';
+import { mailEnabled, sendOrderMail, sendReminder } from './lib/mail.js';
 import { cleanDesign } from './lib/designs.js';
 import { seoRoutes } from './lib/seo.js';
 
@@ -96,15 +96,16 @@ const cleanAds = (ads) => arr(ads, MAX_ADS).map((a) => ({ title: str(a?.title, 1
 const cleanLangs = (l) => [...new Set(arr(l, 6).filter((x) => x in LANGS))];
 const normCode = (c) => str(c, 20).toUpperCase().replace(/[^A-Z0-9-]/g, '');
 
-// Sprawdza kod polecający lub rabatowy dla danego e-maila; zwraca rabat w groszach.
+// Kod klienta: −10 zł dla niego i dla znajomych, każda osoba (adres e-mail) może go użyć raz.
+// Zamiast adresów zapisujemy ich skróty, więc w pliku kodów nie ma danych osobowych.
+const emailHash = (e) => crypto.createHash('sha256').update(`${process.env.CODE_SALT || 'cvpo'}:${String(e || '').trim().toLowerCase()}`).digest('hex').slice(0, 32);
 async function checkCode(raw, email) {
   const code = normCode(raw);
   if (!code) return { discount: 0 };
   const c = await codes.get(code);
   if (!c || Date.now() > c.expires) return { error: 'Ten kod nie istnieje albo wygasł.' };
-  if (c.type === 'coupon' && c.used) return { error: 'Ten kod został już wykorzystany.' };
-  if (c.type === 'referral' && email && c.ownerEmail === String(email).toLowerCase()) return { error: 'Nie możesz użyć własnego kodu polecającego.' };
-  return { code, type: c.type, discount: c.amount };
+  if (email && (c.usedBy || []).includes(emailHash(email))) return { error: 'Ten kod został już przez Ciebie wykorzystany.' };
+  return { code, discount: c.amount };
 }
 const newCode = (prefix) => `${prefix}-${crypto.randomBytes(4).toString('hex').toUpperCase().slice(0, 6)}`;
 const cleanAddons = (a = {}) => ({ interview: !!a.interview, messages: !!a.messages });
@@ -119,14 +120,14 @@ const cleanCv = (c = {}) => ({
 });
 
 app.get('/api/config', (_req, res) => res.json({
-  demo: DEMO, ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, referral: REFERRAL_DISCOUNT / 100, buyerCoupon: BUYER_COUPON / 100,
+  demo: DEMO, ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
   prices: Object.fromEntries(Object.entries(PRICES).map(([k, v]) => [k, v / 100])),
 }));
 
 app.get('/api/code/:code', async (req, res) => {
   const r = await checkCode(req.params.code, req.query.email);
   if (r.error) return res.status(404).json({ error: r.error });
-  res.json({ code: r.code, discount: r.discount / 100, label: r.type === 'referral' ? 'Kod polecający' : 'Kod rabatowy' });
+  res.json({ code: r.code, discount: r.discount / 100, label: 'Kod rabatowy' });
 });
 
 // Asystent: krótkie odpowiedzi na pytania o CV (limit na IP).
@@ -207,15 +208,13 @@ app.get('/api/orders/:id', async (req, res) => {
     const s = await stripe.checkout.sessions.retrieve(o.stripeSession).catch(() => null);
     if (s?.payment_status === 'paid') { await markPaidAndGenerate(o.id); o = await getOrder(o.id); }
   }
-  // Kod polecający klienta i nagrody (kody rabatowe za poleconych znajomych).
-  let referral = null;
-  if (o.status === 'done' && o.referralCode) {
-    const r = await codes.get(o.referralCode), all = await codes.all();
-    referral = { code: o.referralCode, discount: REFERRAL_DISCOUNT / 100, uses: r?.uses || 0, rewards: Object.values(all).filter((x) => x.type === 'coupon' && x.ownerOrderId === (r?.ownerOrderId) && !x.used).map((x) => x.id) };
+  // Kod klienta (−10 zł dla niego i znajomych) z liczbą użyć.
+  let myCode = null;
+  if (o.status === 'done' && o.myCode) {
+    const c = await codes.get(o.myCode);
+    if (c && Date.now() < c.expires) myCode = { code: c.id, discount: c.amount / 100, expires: c.expires, uses: (c.usedBy || []).length, usedByMe: (c.usedBy || []).includes(emailHash(o.profile.email)) };
   }
-  let buyerCoupon = null;
-  if (o.buyerCoupon) { const c = await codes.get(o.buyerCoupon); if (c && !c.used && Date.now() < c.expires) buyerCoupon = { code: c.id, discount: c.amount / 100, expires: c.expires }; }
-  res.json(view(o, { referral, buyerCoupon }));
+  res.json(view(o, { myCode }));
 });
 
 // Tylko tryb DEMO: symulacja płatności.
@@ -235,29 +234,16 @@ async function trySend(order) {
   catch (e) { console.error('Wysyłka e-mail nie powiodła się', order.id, e.message); return { status: 'failed', to, at: Date.now() }; }
 }
 
-// Po opłaceniu: zużywamy kupon, nagradzamy polecającego i tworzymy kod polecający dla klienta.
+// Po opłaceniu: zapisujemy użycie kodu i dajemy klientowi jego kod (jeden na klienta, także przy kolejnych zamówieniach).
 async function afterPaid(o) {
   try {
-    if (o.code) {
-      const c = await codes.get(o.code);
-      if (c?.type === 'coupon') await codes.update(c.id, { used: true, usedBy: o.id });
-      if (c?.type === 'referral') {
-        await codes.update(c.id, (x) => ({ ...x, uses: (x.uses || 0) + 1 }));
-        const reward = { id: newCode('NAGRODA'), type: 'coupon', amount: REFERRAL_DISCOUNT, ownerEmail: c.ownerEmail, ownerOrderId: c.ownerOrderId, used: false, created: Date.now(), expires: Date.now() + CODE_TTL };
-        await codes.save(reward);
-        if (mailEnabled()) sendReward(c.ownerEmail, reward, BASE_URL, c.ownerOrderId).catch((e) => console.error('Mail nagrody', e.message));
-      }
-    }
-    // Każdy kupujący dostaje jednorazowy kod zniżkowy na kolejne zamówienie (zapowiadany przed zakupem).
-    const coupon = { id: newCode('ZNIZKA'), type: 'coupon', amount: BUYER_COUPON, ownerEmail: o.profile.email.toLowerCase(), ownerOrderId: o.id, used: false, created: Date.now(), expires: Date.now() + CODE_TTL };
-    await codes.save(coupon);
-    o.buyerCoupon = coupon.id;
+    if (o.code) await codes.update(o.code, (c) => ({ ...c, usedBy: [...new Set([...(c.usedBy || []), emailHash(o.profile.email)])] }));
     const root = o.rootId || o.parentId || o.id;
-    const existing = Object.values(await codes.all()).find((c) => c.type === 'referral' && c.ownerOrderId === root);
+    const existing = Object.values(await codes.all()).find((c) => c.ownerOrderId === root);
     if (existing) return existing.id;
-    const ref = { id: newCode('POLEC'), type: 'referral', amount: REFERRAL_DISCOUNT, ownerEmail: o.profile.email.toLowerCase(), ownerOrderId: root, uses: 0, created: Date.now(), expires: Date.now() + CODE_TTL };
-    await codes.save(ref);
-    return ref.id;
+    const mine = { id: newCode('KOD'), amount: CODE_DISCOUNT, ownerOrderId: root, usedBy: [], created: Date.now(), expires: Date.now() + CODE_TTL };
+    await codes.save(mine);
+    return mine.id;
   } catch (e) { console.error('Kody po płatności', o.id, e.message); return null; }
 }
 
@@ -275,9 +261,9 @@ async function markPaidAndGenerate(id) {
       if (langs.length) r.variants = Object.fromEntries(await Promise.all(langs.map(async (l) => [l, await translateResult(r, l)])));
       return r;
     }));
-    const referralCode = await afterPaid(o);
-    const mail = await trySend({ ...o, results, referralCode });
-    await updateOrder(id, { status: 'done', results, mail, referralCode, buyerCoupon: o.buyerCoupon || null });
+    const myCode = await afterPaid(o);
+    const mail = await trySend({ ...o, results, myCode });
+    await updateOrder(id, { status: 'done', results, mail, myCode });
   } catch (e) {
     console.error('Generowanie nie powiodło się', id, e);
     await updateOrder(id, { status: 'paid', error: 'Generowanie nie powiodło się. Spróbuj ponownie.' });

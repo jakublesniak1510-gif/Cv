@@ -7,7 +7,7 @@
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const total = (pkg, n, a, fu, langs = [], disc = 0) => P[pkg] + (a.interview ? P.interview : 0) + (a.messages ? P.messages : 0) + P.extraLang * langs.length - disc;
   const score = (m) => ({ ...m, score: m.found.length + m.missing.length ? Math.round((100 * m.found.length) / (m.found.length + m.missing.length)) : null });
-  const view = (o) => ({ buyerCoupon: o.status === 'done' ? { code: 'ZNIZKA-' + o.id.slice(-6).toUpperCase(), discount: 10, expires: o.created + 90 * 864e5 } : null, referral: o.status === 'done' ? { code: 'POLEC-' + o.id.slice(-6).toUpperCase(), discount: 10, uses: 0, rewards: [] } : null, extraLangs: o.extraLangs, id: o.id, pkg: o.pkg, addons: o.addons, total: o.total, status: o.status, results: o.results, mail: o.mail, design: o.design, photo: o.profile.photo || '', parentId: o.parentId || null, revisionsLeft: MAXREV - o.revisions, expires: o.created + 30 * 864e5 });
+  const view = (o) => ({ myCode: o.status === 'done' ? { code: 'KOD-' + (o.parentId || o.id).slice(-6).toUpperCase(), discount: 10, expires: o.created + 90 * 864e5, uses: 0, usedByMe: !!o.parentId && /^KOD-/.test(o.code || '') } : null, extraLangs: o.extraLangs, id: o.id, pkg: o.pkg, addons: o.addons, total: o.total, status: o.status, results: o.results, mail: o.mail, design: o.design, photo: o.profile.photo || '', parentId: o.parentId || null, revisionsLeft: MAXREV - o.revisions, expires: o.created + 30 * 864e5 });
   const make = (fields) => { const id = 'preview-' + Math.random().toString(36).slice(2); orders[id] = { id, status: 'pending', revisions: 0, created: Date.now(), ...fields }; return orders[id]; };
   window.fetch = async (url, opts = {}) => {
     const m = (opts.method || 'GET').toUpperCase(), body = opts.body ? JSON.parse(opts.body) : {};
@@ -22,7 +22,7 @@
       const found = r.found, missing = r.missing;
       return json({ position: '', found, missing, tips: ['Przenieś na górę doświadczenie najbliższe temu stanowisku.', 'Użyj słów kluczowych z ogłoszenia w takim samym brzmieniu, jeśli to prawda o Tobie.', 'Dopisz konkretne liczby i efekty pracy, np. liczbę zamówień dziennie.'], score: found.length + missing.length ? Math.round(100 * found.length / (found.length + missing.length)) : 0 });
     }
-    { const c = /^\/api\/code\/([^?]+)/.exec(url); if (c) { const code = decodeURIComponent(c[1]).toUpperCase(); return /^(POLEC|NAGRODA|ZNIZKA)-/.test(code) ? json({ code, discount: 10, label: code.startsWith('POLEC') ? 'Kod polecający' : 'Kod zniżkowy' }) : json({ error: 'Ten kod nie istnieje albo wygasł.' }, 404); } }
+    { const c = /^\/api\/code\/([^?]+)/.exec(url); if (c) { const code = decodeURIComponent(c[1]).toUpperCase(); return /^KOD-/.test(code) ? json({ code, discount: 10, label: 'Kod rabatowy' }) : json({ error: 'Ten kod nie istnieje albo wygasł.' }, 404); } }
     if (url === '/api/fetch-ad' && m === 'POST') {
       const u = (body.url || '').trim();
       await wait(700);
@@ -40,7 +40,7 @@
       if (!body.consent) return json({ error: 'Wymagana zgoda na przetwarzanie danych.' }, 400);
       if (!ads.length) return json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' }, 400);
       const a = body.addons || {};
-      const disc = /^(POLEC|NAGRODA|ZNIZKA)-/.test(body.code || '') ? 1000 : 0;
+      const disc = /^KOD-/.test(body.code || '') ? 1000 : 0;
       const o = make({ design: body.design, pkg: body.pkg, addons: a, extraLangs: body.extraLangs || [], profile: body.profile, ads, total: total(body.pkg, ads.length, a, false, body.extraLangs || [], disc) });
       return json({ id: o.id, demo: true });
     }
@@ -48,9 +48,9 @@
     if ((r = /^\/api\/orders\/([^/]+)\/followup$/.exec(url)) && m === 'POST') {
       const p = orders[r[1]], ads = (body.ads || []).filter((a) => a.text && a.text.length >= 80);
       if (!ads.length) return json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' }, 400);
-      const disc = /^(POLEC|NAGRODA|ZNIZKA)-/.test(body.code || '') ? 1000 : 0;
+      const disc = /^KOD-/.test(body.code || '') ? 1000 : 0;
       const pk = ['cv', 'cv_letter', 'pack3'].includes(body.pkg) ? body.pkg : p.pkg;
-      const o = make({ parentId: p.id, design: p.design, pkg: pk, addons: {}, extraLangs: [], profile: p.profile, ads, total: total(pk, ads.length, {}, true, [], disc) });
+      const o = make({ code: body.code, parentId: p.id, design: p.design, pkg: pk, addons: {}, extraLangs: [], profile: p.profile, ads, total: total(pk, ads.length, {}, true, [], disc) });
       return json({ id: o.id, demo: true });
     }
     if ((r = /^\/api\/orders\/([^/]+)\/demo-pay$/.exec(url)) && m === 'POST') {
