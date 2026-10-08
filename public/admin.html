@@ -26,6 +26,7 @@
       <button data-v="dash"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Pulpit</button>
       <button data-v="orders"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg>Zamówienia</button>
       <button data-v="codes"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/></svg>Kody rabatowe</button>
+      <button data-v="reviews"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Opinie<span class="badge info" id="rvBadge" hidden></span></button>
       <button data-v="problems"><svg viewBox="0 0 24 24"><path d="M12 3 2 21h20z"/><path d="M12 10v5M12 18v.01"/></svg>Problemy<span class="badge" id="probBadge" hidden></span></button>
       <button data-v="export"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>Eksport</button>
     </nav>
@@ -57,7 +58,7 @@
         <input id="q" type="search" placeholder="Szukaj: e-mail, numer zamówienia, kod" aria-label="Szukaj zamówień">
         <select id="stFilter" aria-label="Status">
           <option value="">Wszystkie statusy</option><option value="done">Gotowe</option><option value="pending">Czeka na płatność</option>
-          <option value="generating">Generuje się</option><option value="problem">Wymaga uwagi</option>
+          <option value="generating">Generuje się</option><option value="problem">Wymaga uwagi</option><option value="invoice">Faktura do wystawienia</option>
         </select>
       </div>
       <div class="tbl-wrap" id="ordTable"></div>
@@ -82,6 +83,14 @@
       </div>
       <div class="filters"><div class="seg" id="codeKind"><button type="button" data-k="" aria-pressed="true">Wszystkie</button><button type="button" data-k="akcja" aria-pressed="false">Akcje</button><button type="button" data-k="klient" aria-pressed="false">Kody klientów</button></div></div>
       <div class="tbl-wrap" id="codeTable"></div>
+    </section>
+
+    <!-- Opinie -->
+    <section data-view="reviews" hidden>
+      <div class="head"><h1>Opinie</h1><span class="mute" id="rvSum"></span></div>
+      <p class="help" style="margin:-8px 0 14px">Na stronie głównej pokazują się tylko opinie zatwierdzone, z treścią i zgodą autora na publikację. Średnia na stronie liczy wszystkie oceny oprócz oznaczonych jako spam, także negatywne.</p>
+      <div class="filters"><div class="seg" id="rvKind"><button type="button" data-k="new" aria-pressed="true">Do sprawdzenia</button><button type="button" data-k="approved" aria-pressed="false">Opublikowane</button><button type="button" data-k="" aria-pressed="false">Wszystkie</button></div></div>
+      <div id="rvList" class="rv-admin"></div>
     </section>
 
     <!-- Problemy -->

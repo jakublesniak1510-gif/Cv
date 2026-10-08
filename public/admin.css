@@ -117,3 +117,10 @@ tbody tr.click{cursor:pointer}tbody tr.click:hover{background:var(--alt)}
 .tbl-wrap td{white-space:nowrap}
 .codeform .seg{display:flex}.codeform .seg button{flex:1}
 .login .msg:empty{display:none}
+
+.side .badge.info{background:var(--brand);color:var(--on-brand)}
+.rv-admin{display:grid;gap:10px}
+.rv-item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:6px}
+.rv-item .meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--mute)}
+.rv-item p{margin:0}
+.stars{color:#C98A00;letter-spacing:1px;font-size:15px}

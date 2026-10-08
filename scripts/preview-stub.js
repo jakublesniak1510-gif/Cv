@@ -7,13 +7,16 @@
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const total = (pkg, n, a, fu, langs = [], disc = 0) => P[pkg] + (a.interview ? P.interview : 0) + (a.messages ? P.messages : 0) + P.extraLang * langs.length - disc;
   const score = (m) => ({ ...m, score: m.found.length + m.missing.length ? Math.round((100 * m.found.length) / (m.found.length + m.missing.length)) : null });
-  const view = (o) => ({ myCode: o.status === 'done' ? { code: 'KOD-' + (o.parentId || o.id).slice(-6).toUpperCase(), discount: 10, expires: o.created + 90 * 864e5, uses: 0, usedByMe: !!o.parentId && /^KOD-/.test(o.code || '') } : null, extraLangs: o.extraLangs, id: o.id, pkg: o.pkg, addons: o.addons, total: o.total, status: o.status, results: o.results, mail: o.mail, design: o.design, photo: o.profile.photo || '', parentId: o.parentId || null, revisionsLeft: MAXREV - o.revisions, expires: o.created + 30 * 864e5 });
+  const view = (o) => ({ review: o.review || null, myCode: o.status === 'done' ? { code: 'KOD-' + (o.parentId || o.id).slice(-6).toUpperCase(), discount: 10, expires: o.created + 90 * 864e5, uses: 0, usedByMe: !!o.parentId && /^KOD-/.test(o.code || '') } : null, extraLangs: o.extraLangs, id: o.id, pkg: o.pkg, addons: o.addons, total: o.total, status: o.status, results: o.results, mail: o.mail, design: o.design, photo: o.profile.photo || '', parentId: o.parentId || null, revisionsLeft: MAXREV - o.revisions, expires: o.created + 30 * 864e5 });
   const make = (fields) => { const id = 'preview-' + Math.random().toString(36).slice(2); orders[id] = { id, status: 'pending', revisions: 0, created: Date.now(), ...fields }; return orders[id]; };
   window.fetch = async (url, opts = {}) => {
     const m = (opts.method || 'GET').toUpperCase(), body = opts.body ? JSON.parse(opts.body) : {};
     if (url === '/api/config') return json({ demo: true, preview: true, ai: false, maxAds: 3, noPrint: true, fakeFetch: true, maxRevisions: MAXREV, prices: Object.fromEntries(Object.entries(P).map(([k, v]) => [k, v / 100])) });
     if (url === '/content.json') return json({ INDEX: PROFESSIONS.map(({ slug, name, category, keywords }) => ({ slug, name, category, keywords })), POPULAR: PROFESSIONS.filter((p) => POPULAR_SLUGS.includes(p.slug)), ARTICLES });
     { const c = /^\/content\/cv\/([\w-]+)\.json$/.exec(url); if (c) { const p = PROFESSIONS.find((x) => x.slug === c[1]); return p ? json(p) : json({}, 404); } }
+    // Podgląd nie pokazuje żadnych opinii: na prawdziwej stronie pojawią się dopiero opinie prawdziwych klientów.
+    if (url === '/api/reviews') return json({ count: 0, avg: null, list: [] });
+    { const c = /^\/api\/orders\/([\w-]+)\/review$/.exec(url); if (c && m === 'POST') { const o = orders[c[1]]; if (!o) return json({}, 404); if (!(body.rating >= 1 && body.rating <= 5)) return json({ error: 'Wybierz ocenę od 1 do 5 gwiazdek.' }, 400); o.review = { rating: body.rating, text: body.text || '' }; return json({ ok: true }); } }
     if (url === '/api/assistant' && m === 'POST') { await wait(600); return json({ answer: assistantFallback(body.messages[body.messages.length - 1].content) }); }
     if (url === '/api/scan' && m === 'POST') {
       await wait(1200);

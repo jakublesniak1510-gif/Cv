@@ -64,15 +64,17 @@ loaders.dash = async () => {
   $('#facts').replaceChildren(...[
     ...Object.entries(s.byPkg).map(([k, n]) => [PK[k] || k, `${n} (${Math.round((100 * n) / total)}%)`]),
     ['Z dodatkami', `${s.addonsShare}%`], ['Z kodem rabatowym', `${s.codesShare}%`],
-    ['Czeka na płatność', String(s.pending)], [`Koszt AI (${s.ai.month})`, `$${s.ai.usd.toFixed(2)} · ${s.ai.calls} wywołań`],
+    ['Czeka na płatność', String(s.pending)], ['Faktury do wystawienia', String(s.invoicesTodo)],
+    ['Ocena klientów', s.reviews.count ? `${String(s.reviews.avg).replace('.', ',')} / 5 (${s.reviews.count})` : 'brak ocen'], [`Koszt AI (${s.ai.month})`, `$${s.ai.usd.toFixed(2)} · ${s.ai.calls} wywołań`],
   ].map(([k, v]) => el('div', {}, el('dt', { textContent: k }), el('dd', { textContent: v }))));
   drawChart(s.byDay);
-  setBadge(s.problems);
+  setBadge(s.problems); setRvBadge(s.reviews.waiting);
   $('#dashUpd').textContent = 'Stan na ' + new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
   const r = await api('/orders?page=0');
   $('#recent').replaceChildren(orderTable(r.rows.slice(0, 6), true));
 };
 $('#dashRefresh').addEventListener('click', () => loaders.dash());
+function setRvBadge(n) { $('#rvBadge').hidden = !n; $('#rvBadge').textContent = n; }
 function setBadge(n) { $('#probBadge').hidden = !n; $('#probBadge').textContent = n; }
 
 // Wykres słupkowy: jedna seria, bez legendy (nazwa w tytule), zaokrąglone tylko górne rogi, dyskretna siatka.
@@ -130,7 +132,7 @@ function orderTable(rows, compact = false) {
     el('tbody', {}, rows.map((o) => {
       const tr = el('tr', { className: 'click', tabIndex: 0 },
         el('td', { className: 'num', textContent: dt(o.created) }), el('td', { className: 'ell', textContent: o.email, title: o.email }),
-        el('td', {}, o.pkgName, o.followup ? el('span', { className: 'tag', textContent: 'kolejne', style: 'margin-left:6px' }) : null),
+        el('td', {}, o.pkgName, o.followup ? el('span', { className: 'tag', textContent: 'kolejne', style: 'margin-left:6px' }) : null, o.invoice === 'todo' ? el('span', { className: 'tag', textContent: 'faktura', style: 'margin-left:6px' }) : null),
         compact ? null : el('td', { className: 'mono', textContent: o.code || '—' }), el('td', { className: 'r', textContent: zl(o.total) }),
         el('td', {}, status(o.status)), compact ? null : el('td', {}, mailSt(o.mail)));
       tr.addEventListener('click', () => openOrder(o.id));
@@ -198,6 +200,8 @@ async function openOrder(id) {
       o.code && ['Kod', `${o.code} (−${zl(o.discount)})`],
       ['Poprawki', `${o.revisions} z 10`], ['Kod klienta', o.myCode || '—'], ['Dane znikną', dd(o.expires)],
     ])),
+    o.invoiceData ? el('div', {}, el('h3', { textContent: 'Faktura' }), kv([['Firma', o.invoiceData.name], ['NIP', el('span', { className: 'mono', textContent: o.invoiceData.nip })], ['Adres', o.invoiceData.address],
+      ['Status', o.invoiceData.issued ? `wystawiona ${dt(o.invoiceData.issuedAt)}` : 'do wystawienia (w ciągu 3 dni roboczych)']]), invBtn(o)) : null,
     el('div', {}, el('h3', { textContent: 'Klient' }), kv([['E-mail', o.email], ['Telefon', o.phone || '—'], ['Zdjęcie', o.hasPhoto ? 'tak' : 'nie'],
       ['Przypomnienie', o.reminder?.consent ? (o.reminder.sent ? 'wysłane' : 'zgoda, jeszcze nie wysłane') : 'bez zgody'], ['Szablon', `${o.design?.tpl || '—'} / ${o.design?.color || '—'}`]])),
     el('div', {}, el('h3', { textContent: `Ogłoszenia (${o.adsList.length})` }), el('ul', { className: 'list' }, o.adsList.map((a, i) => {
@@ -207,6 +211,11 @@ async function openOrder(id) {
     o.mailInfo ? el('div', {}, el('h3', { textContent: 'E-mail' }), kv([['Do', o.mailInfo.to], ['Status', MAIL[o.mailInfo.status] || o.mailInfo.status], ['Kiedy', dt(o.mailInfo.at)]])) : null,
   ].filter(Boolean));
   x.focus();
+}
+function invBtn(o) {
+  const b = el('button', { className: 'btn ghost sm', style: 'margin-top:8px', textContent: o.invoiceData.issued ? 'Cofnij: niewystawiona' : 'Oznacz jako wystawioną' });
+  b.onclick = async () => { b.disabled = true; try { await post(`/orders/${o.id}/invoice`, { issued: !o.invoiceData.issued }); toast('Zapisano.'); openOrder(o.id); loaders[current()]?.(); } catch (x) { toast(x.message); b.disabled = false; } };
+  return b;
 }
 const current = () => $('#nav [aria-current]')?.dataset.v || 'dash';
 
@@ -245,6 +254,26 @@ loaders.codes = async () => {
         el('td', { className: 'r', textContent: c.maxUses ? `${c.uses} / ${c.maxUses}` : String(c.uses) }),
         el('td', { className: 'num', textContent: dd(c.expires) }), el('td', { className: 'ell mute', textContent: c.note || '—' }), el('td', { className: 'r' }, del));
     }))));
+};
+
+// --- opinie ---
+let rvFilter = 'new';
+const stars = (n) => el('span', { className: 'stars', textContent: '★'.repeat(n) + '☆'.repeat(5 - n), ariaLabel: `${n} na 5` });
+const RVST = { new: 'do sprawdzenia', approved: 'opublikowana', hidden: 'ukryta', spam: 'spam' };
+$('#rvKind').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; rvFilter = b.dataset.k; $$('#rvKind button').forEach((x) => x.setAttribute('aria-pressed', x === b)); loaders.reviews(); });
+loaders.reviews = async () => {
+  const all = await api('/reviews'), ok = all.filter((r) => r.status !== 'spam');
+  $('#rvSum').textContent = ok.length ? `średnia ${(ok.reduce((s, r) => s + r.rating, 0) / ok.length).toFixed(1).replace('.', ',')} z ${ok.length} ocen` : '';
+  setRvBadge(all.filter((r) => r.status === 'new' && r.publish).length);
+  const list = all.filter((r) => !rvFilter || r.status === rvFilter);
+  if (!list.length) return $('#rvList').replaceChildren(el('div', { className: 'card empty', textContent: rvFilter === 'new' ? 'Nie ma nowych opinii do sprawdzenia.' : 'Brak opinii.' }));
+  $('#rvList').replaceChildren(...list.map((r) => {
+    const act = (status, label, cls = 'ghost') => { const b = el('button', { className: `btn sm ${cls}`, textContent: label }); b.onclick = async () => { b.disabled = true; try { await post(`/reviews/${r.id}`, { status }); toast('Zapisano.'); loaders.reviews(); } catch (x) { toast(x.message); b.disabled = false; } }; return b; };
+    return el('div', { className: 'rv-item' },
+      el('div', { className: 'meta' }, stars(r.rating), el('b', { textContent: r.name, style: 'color:var(--ink)' }), el('span', { textContent: r.pkgName }), el('span', { textContent: dt(r.created) }), el('span', { className: 'tag', textContent: RVST[r.status] || r.status }), r.publish ? null : el('span', { className: 'tag', textContent: 'bez zgody na publikację' })),
+      r.text ? el('p', { textContent: r.text }) : el('p', { className: 'mute', textContent: 'Sama ocena, bez komentarza.' }),
+      el('div', { className: 'actions' }, r.publish && r.status !== 'approved' ? act('approved', 'Opublikuj', '') : null, r.status !== 'hidden' ? act('hidden', 'Ukryj') : null, r.status !== 'spam' ? act('spam', 'Spam', 'danger') : act('new', 'To nie spam')));
+  }));
 };
 
 // --- problemy ---

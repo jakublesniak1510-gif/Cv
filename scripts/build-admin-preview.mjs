@@ -6,7 +6,7 @@ const r = (p) => fs.readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const login = await fetch(`${base}/api/admin/login`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin': '1' }, body: JSON.stringify({ password }) });
 const cookie = login.headers.get('set-cookie').split(';')[0];
 const get = async (p) => (await fetch(`${base}/api/admin${p}`, { headers: { cookie } })).json();
-const snap = { stats: await get('/stats'), codes: await get('/codes'), problems: await get('/problems'), rows: [], details: {} };
+const snap = { stats: await get('/stats'), codes: await get('/codes'), problems: await get('/problems'), reviews: await get('/reviews'), rows: [], details: {} };
 for (let page = 0; ; page++) { const x = await get(`/orders?page=${page}`); snap.rows.push(...x.rows); if ((page + 1) * 50 >= x.total) break; }
 for (const o of snap.rows) snap.details[o.id] = await get(`/orders/${o.id}`);
 const html = r('public/admin.html');

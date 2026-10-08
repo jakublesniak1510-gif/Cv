@@ -437,10 +437,16 @@ function validate(n) {
     if (!a.title) return `Ogłoszenie ${i + 1}: podaj nazwę stanowiska.`;
     if (a.text.length < 80) return `Ogłoszenie ${i + 1}: wklej pełną treść oferty (min. 80 znaków).`;
   }
+  if (n === 6 && $('#wantInvoice').checked) {
+    const nip = $('#invNip').value.replace(/\D/g, '');
+    if (!$('#invName').value.trim() || !$('#invAddr').value.trim()) return 'Do faktury podaj nazwę firmy i adres.';
+    if (!/^\d{10}$/.test(nip) || [6, 5, 7, 2, 3, 4, 5, 6, 7].reduce((a, w, i) => a + w * +nip[i], 0) % 11 !== +nip[9]) return 'Sprawdź NIP: powinien mieć 10 cyfr.';
+  }
   if (n === 6 && !$('#consent').checked) return 'Zaakceptuj Regulamin i Politykę prywatności.';
   if (n === 6 && !$('#waiver').checked) return 'Zaznacz zgodę na wykonanie usługi od razu po płatności.';
   return '';
 }
+$('#wantInvoice').onchange = (e) => { $('#invoiceBox').hidden = !e.target.checked; if (e.target.checked) $('#invName').focus(); };
 let lastFocus = null;
 const modal = (open) => {
   ['nav', 'landing', 'foot', 'demoBar'].forEach((i) => { const n = $('#' + i); if (n) n.inert = open; });
@@ -449,11 +455,11 @@ const modal = (open) => {
 };
 const openWiz = (p) => {
   if (p) { $(`input[name=pkg][value=${p}]`).checked = true; refresh(); }
-  modal(true); $('#wiz').hidden = false; go(step === 7 ? 6 : step);
+  modal(true); $('#wiz').hidden = false; $('#mcta').hidden = true; document.body.classList.remove('mcta-on'); go(step === 7 ? 6 : step);
   setTimeout(() => $('#wizClose').focus(), 0);
 };
 const closeWiz = () => { $('#wiz').hidden = true; modal(false); };
-document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (b) { e.preventDefault(); openWiz(b.dataset.pkg); } });
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (!b) return; e.preventDefault(); if (b.dataset.addon) { $('#ad' + b.dataset.addon).checked = true; saveDraft(); } openWiz(b.dataset.pkg); });
 $('#wizClose').onclick = closeWiz;
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#wiz').hidden) closeWiz(); });
 $('#back').onclick = () => go(step - 1);
@@ -465,7 +471,7 @@ $('#wizForm').onsubmit = async (e) => {
   if (step < 6) return go(step + 1);
   const v = (id) => $('#' + id).value;
   const body = {
-    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, invoice: $('#wantInvoice').checked ? { want: true, name: $('#invName').value, nip: $('#invNip').value, address: $('#invAddr').value } : null, pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   $('#next').disabled = true;
@@ -639,9 +645,22 @@ let curLang = null; // aktywna dodatkowa wersja językowa (null = główny języ
 const cur = () => { const b = data.results[curAd]; return (curLang && b.variants?.[curLang]) || b; };
 
 function interviewNode(r, d) {
-  const p = paperEl('extra', { tpl: 'klasyczny', color: d.color });
+  const p = paperEl('extra', { tpl: 'klasyczny', color: d.color }), pr = r.prep || null;
+  const sec = (t, ...kids) => el('section', { className: 'iv-sec' }, el('h3', { textContent: t }), ...kids);
+  const ul = (list, cls = '') => el('ul', { className: 'iv-list ' + cls }, ...list.map((t) => el('li', { textContent: t })));
+  let cat = '';
+  const qa = el('div', { className: 'qa' }, ...r.interview.flatMap((x, i) => {
+    const head = x.cat && x.cat !== cat ? [el('div', { className: 'iv-cat', textContent: (cat = x.cat) })] : [];
+    return [...head, el('div', { className: 'q' }, el('span', { textContent: i + 1 }), el('div', {}, el('b', { textContent: x.q }), ...(x.why ? [el('small', { textContent: 'Co sprawdza rekruter: ' + x.why })] : []), el('p', { textContent: x.a })))];
+  }));
   p.append(el('div', { className: 'pg' }, el('header', { className: 'top lhead' }, el('h1', { textContent: 'Przygotowanie do rozmowy' }), el('div', { className: 'ct', textContent: r.position }), el('div', { className: 'rule' })),
-    el('div', { className: 'qa' }, ...r.interview.map((x, i) => el('div', { className: 'q' }, el('span', { textContent: i + 1 }), el('div', {}, el('b', { textContent: x.q }), el('p', { textContent: x.a })))))));
+    ...(pr?.pitch ? [sec('Opowiedz o sobie (ok. 60 sekund)', el('div', { className: 'iv-box', textContent: pr.pitch }))] : []),
+    ...(pr?.strengths?.length ? [sec('Twoje mocne strony pod to ogłoszenie', ul(pr.strengths))] : []),
+    sec(`Pytania i przykładowe odpowiedzi (${r.interview.length})`, qa),
+    ...(pr?.gaps?.length ? [sec('Czego może brakować i jak o tym mówić', ul(pr.gaps.map((g) => `${g.gap}: ${g.how}`)))] : []),
+    ...(pr?.ask?.length ? [sec('Pytania, które zadasz pracodawcy', ul(pr.ask))] : []),
+    ...(pr?.salary ? [sec('Rozmowa o wynagrodzeniu', el('div', { className: 'iv-box', textContent: pr.salary }))] : []),
+    ...(pr?.checklist?.length ? [sec('Lista kontrolna', ul(pr.checklist, 'check'))] : [])));
   return p;
 }
 function copyBtn(text) {
@@ -787,6 +806,30 @@ function drawMyCode() {
     el('p', { className: 'hint', textContent: k.uses ? `Kod został użyty ${k.uses} ${k.uses === 1 ? 'raz' : 'razy'}.` : 'Kod nie był jeszcze używany.' }));
 }
 
+// Ocena po zamówieniu: gwiazdki obowiązkowe, komentarz i zgoda na publikację opcjonalne.
+function drawRate() {
+  const box = $('#rate');
+  if (data.review) { box.replaceChildren(el('h3', { textContent: 'Dziękujemy za opinię' }), el('p', { className: 'hint', textContent: `Twoja ocena: ${'★'.repeat(data.review.rating)}${'☆'.repeat(5 - data.review.rating)}. Pomaga innym wybrać, a nam poprawiać dokumenty.` })); box.hidden = false; return; }
+  let rating = 0;
+  const pick = el('div', { className: 'starpick', role: 'radiogroup', ariaLabel: 'Ocena' }, ...[1, 2, 3, 4, 5].map((n) => el('button', { type: 'button', role: 'radio', ariaLabel: `${n} na 5`, ariaChecked: 'false', textContent: '★', onclick: () => { rating = n; $$('button', pick).forEach((b, i) => { b.classList.toggle('on', i < n); b.setAttribute('aria-checked', String(i === n - 1)); }); } })));
+  const text = el('textarea', { maxLength: 500, placeholder: 'Co Ci się podobało, a co możemy poprawić? (opcjonalnie)', ariaLabel: 'Komentarz' });
+  const name = el('input', { type: 'text', maxLength: 40, placeholder: 'Podpis, np. Anna, magazynierka z Poznania', ariaLabel: 'Podpis' });
+  const pub = el('input', { type: 'checkbox' });
+  const msg = el('p', { className: 'err', role: 'alert' });
+  const send = el('button', { type: 'button', className: 'btn sm', textContent: 'Wyślij opinię', onclick: async () => {
+    if (!rating) { msg.textContent = 'Wybierz liczbę gwiazdek.'; return; }
+    send.disabled = true; msg.textContent = '';
+    try {
+      const r = await fetch(`/api/orders/${orderId}/review`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ rating, text: text.value, name: name.value, publish: pub.checked }) });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error || 'Nie udało się wysłać opinii.');
+      data.review = { rating, text: text.value }; drawRate();
+    } catch (x) { msg.textContent = x.message; send.disabled = false; }
+  } });
+  box.replaceChildren(el('h3', { textContent: 'Jak oceniasz swoje dokumenty?' }), pick, text, name,
+    el('label', { className: 'check' }, pub, el('span', { textContent: 'Zgadzam się na publikację opinii z podpisem na stronie (bez nazwiska i e-maila).' })), msg, el('div', {}, send));
+  box.hidden = false;
+}
+
 let redraw = () => {};
 function showResult() {
   clearDraft(); try { localStorage.removeItem(REF_KEY); } catch {}
@@ -824,7 +867,7 @@ function showResult() {
   $('#reviseBtn').onclick = openRevise;
   $('#editor').hidden = $('#reviseBox').hidden = true; editing = null;
   if (data.expires) $('#retention').textContent = `Dane tego zamówienia, w tym dokumenty${data.photo ? ' i zdjęcie' : ''}, usuniemy automatycznie ${new Date(data.expires).toLocaleDateString('pl-PL')}. Zapisz PDF-y u siebie.`;
-  drawFollowup(); drawMyCode();
+  drawFollowup(); drawMyCode(); drawRate();
   draw();
 }
 $('#newOrder').onclick = () => {
@@ -868,6 +911,20 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#cha
 /* ---------- Podstrony: zawody i poradnik ---------- */
 let CONTENT = null;
 const CLAUSE = 'Wyrażam zgodę na przetwarzanie moich danych osobowych dla potrzeb niezbędnych do realizacji procesu rekrutacji zgodnie z art. 6 ust. 1 lit. a Rozporządzenia Parlamentu Europejskiego i Rady (UE) 2016/679.';
+async function loadReviews() {
+  try {
+    const r = await (await fetch('/api/reviews')).json();
+    if (!r.list?.length) return;
+    $('#rvAvg').replaceChildren(el('b', { textContent: String(r.avg).replace('.', ',') }), el('span', { className: 'stars', textContent: '★'.repeat(Math.round(r.avg)) + '☆'.repeat(5 - Math.round(r.avg)) }), ` średnia z ${r.count} ${r.count === 1 ? 'oceny' : 'ocen'}`);
+    $('#rvGrid').replaceChildren(...r.list.map((x) => el('figure', { className: 'rv' }, el('span', { className: 'stars', textContent: '★'.repeat(x.rating) + '☆'.repeat(5 - x.rating), ariaLabel: `${x.rating} na 5` }), el('blockquote', { style: 'margin:0' }, el('p', { textContent: x.text })), el('figcaption', {}, el('small', { textContent: `${x.name} · ${x.pkg} · ${new Date(x.date).toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })}` })))));
+    $('#opinie').hidden = false;
+  } catch {}
+}
+loadReviews();
+
+// Pasek „Zacznij” na telefonie: po przewinięciu strony, gdy nie jest otwarte okno ani wynik.
+addEventListener('scroll', () => { const show = scrollY > 600 && !$('#landing')?.hidden && $('#result').hidden && $('#wiz').hidden && document.body.style.overflow !== 'hidden'; $('#mcta').hidden = !show; document.body.classList.toggle('mcta-on', show); }, { passive: true });
+
 async function loadContent() {
   if (!CONTENT) { try { CONTENT = await (await fetch('/content.json')).json(); } catch { CONTENT = { INDEX: [], POPULAR: [], ARTICLES: [] }; } }
   return CONTENT;

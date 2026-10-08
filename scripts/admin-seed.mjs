@@ -47,9 +47,15 @@ ev('ogłoszenie', 'Strona nie odpowiedziała na czas.', { host: 'www.olx.pl' }, 
 ev('import', 'Plik PDF nie zawiera tekstu (skan).', {}, 3 * day);
 if (failed) ev('e-mail', '550 5.1.1 Mailbox does not exist', { orderId: failed.id }, failed ? now - failed.mail.at : 0);
 if (broken) ev('generowanie', 'Przekroczono limit czasu odpowiedzi AI.', { orderId: broken.id }, now - broken.created);
+// Faktury i opinie (przykładowe, tylko do obejrzenia panelu).
+const done = Object.values(orders).filter((o) => o.status === 'done');
+done.slice(0, 4).forEach((o, k) => { o.invoice = { name: ['Biuro Rachunkowe Lis Sp. z o.o.', 'Usługi Transportowe Mazur', 'Agencja Nowa', 'Sklep Pod Lipą'][k], nip: '5260001246', address: 'ul. Przykładowa 1, 00-001 Warszawa', issued: k > 1 }; });
+const reviews = {};
+const RV = [[5, 'Szybko i konkretnie. CV pod ogłoszenie wygląda o niebo lepiej niż moje stare.', 'Anna, księgowa'], [5, 'Pytania na rozmowę naprawdę padły, odpowiedzi miałam przygotowane.', 'Kasia z Krakowa'], [4, 'Dobre CV, raz poprawiłem nagłówek darmową poprawką.', 'Tomek'], [3, '', 'Klient'], [5, 'Pakiet 3 się opłacił, każde CV inne.', 'Paweł, kierowca'], [2, 'Chciałbym więcej szablonów.', 'Marcin']];
+done.slice(5, 11).forEach((o, k) => { const [rating, text, name] = RV[k]; reviews[o.id] = { id: o.id, rating, text, name, publish: !!text && k !== 5, pkg: o.pkg, status: k < 2 ? 'approved' : 'new', created: o.created + 4 * 3600e3 }; });
 const month = new Date().toISOString().slice(0, 7);
 const usage = { [month]: { id: month, calls: 214, input: 2_100_000, output: 610_000, cacheRead: 1_400_000, cacheWrite: 90_000 } };
 
 fs.mkdirSync(DIR, { recursive: true });
-for (const [f, v] of Object.entries({ 'orders.json': orders, 'codes.json': codes, 'events.json': events, 'usage.json': usage })) fs.writeFileSync(path.join(DIR, f), JSON.stringify(v, null, 2));
+for (const [f, v] of Object.entries({ 'orders.json': orders, 'codes.json': codes, 'events.json': events, 'usage.json': usage, 'reviews.json': reviews })) fs.writeFileSync(path.join(DIR, f), JSON.stringify(v, null, 2));
 console.log(`Zapisano ${Object.keys(orders).length} zamówień do ${DIR}`);
