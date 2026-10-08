@@ -1,6 +1,6 @@
 # CV Pod Ogłoszenie
 
-Strona generująca CV i listy motywacyjne dopasowane do konkretnego ogłoszenia (Claude), z płatnością Stripe.
+Strona generująca CV i listy motywacyjne dopasowane do konkretnego ogłoszenia (Claude), z płatnością Przelewy24 (BLIK, karta, szybki przelew, Google Pay, Apple Pay).
 
 | Pakiet | Cena |
 |---|---|
@@ -14,12 +14,12 @@ npm install
 cp .env.example .env   # uzupełnij klucze
 npm start              # http://localhost:3000
 ```
-- Bez `STRIPE_SECRET_KEY` działa **tryb DEMO** (płatność symulowana).
+- Bez danych Przelewy24 (`P24_MERCHANT_ID`, `P24_CRC`, `P24_API_KEY`) działa **tryb DEMO** (płatność symulowana).
 - Bez `ANTHROPIC_API_KEY` CV składa się z podanych danych bez dopasowania AI, a list jest tylko szablonem.
-- Produkcja: ustaw `BASE_URL`, a w Stripe dodaj webhook `POST /api/stripe-webhook` (zdarzenie `checkout.session.completed`) i wpisz `STRIPE_WEBHOOK_SECRET`. BLIK włącz w panelu Stripe (metody płatności).
+- Produkcja: ustaw `BASE_URL`. Przelewy24 wysyła powiadomienia o wpłacie na `BASE_URL/api/p24/status` (adres podawany automatycznie przy każdej transakcji); po powiadomieniu serwer potwierdza transakcję (verify). Do testów ustaw `P24_SANDBOX=1` i dane z konta testowego.
 
 ## Struktura
-- `server.js` – API, Stripe Checkout, webhook, kolejka generowania
+- `server.js` – API, płatności Przelewy24 (`lib/p24.js`), kolejka generowania
 - `lib/pricing.js` – cennik (kwota zawsze liczona po stronie serwera)
 - `lib/generate.js` – prompt i wywołanie Claude
 - `public/` – strona główna, kreator zamówienia (okno otwierane przyciskiem) i widok wyniku z PDF przez drukowanie
@@ -29,9 +29,9 @@ npm start              # http://localhost:3000
 
 ## Wdrożenie na Render (najprostsze)
 1. Wejdź na render.com → **New → Blueprint** → wybierz to repozytorium (wykryje `render.yaml`).
-2. Wpisz zmienne: `ANTHROPIC_API_KEY`, `STRIPE_SECRET_KEY`, `BASE_URL` (adres z Render, potem własna domena).
-3. W Stripe: Developers → Webhooks → dodaj `BASE_URL/api/stripe-webhook`, zdarzenie `checkout.session.completed`, skopiuj sekret do `STRIPE_WEBHOOK_SECRET`.
-4. Włącz BLIK w Stripe → Settings → Payment methods.
+2. Wpisz zmienne: `ANTHROPIC_API_KEY`, `P24_MERCHANT_ID`, `P24_POS_ID`, `P24_CRC`, `P24_API_KEY`, `BASE_URL` (adres z Render, potem własna domena).
+3. W panelu Przelewy24 włącz metody płatności (BLIK, karty, Google Pay, Apple Pay) i sprawdź, czy wypłaty idą na firmowy rachunek bankowy.
+4. Zrób płatność testową w środowisku sandbox (`P24_SANDBOX=1`), potem przełącz na produkcję.
 Dane zamówień trwają na dysku `/data` (zmienna `DATA_DIR`).
 
 ## Ogłoszenie z linku
@@ -59,7 +59,7 @@ Po wygenerowaniu serwer renderuje PDF (`lib/pdf.js`, czcionka Inter z `fonts/`) 
 - Model AI: `claude-opus-5-5` (zmiana przez `ANTHROPIC_MODEL`), z automatycznym przejściem na model zapasowy przy odmowie.
 
 ## Własna domena
-Kup domenę (np. w OVH, home.pl, nazwa.pl), w panelu Render dodaj ją w Settings → Custom Domains i ustaw rekordy DNS według instrukcji Render. Potem zmień `BASE_URL` na nowy adres i zaktualizuj adres webhooka w Stripe.
+Kup domenę (np. w OVH, home.pl, nazwa.pl), w panelu Render dodaj ją w Settings → Custom Domains i ustaw rekordy DNS według instrukcji Render. Potem zmień `BASE_URL` na nowy adres i zzrób płatność testową.
 
 ## Skaner, polecenia, przypomnienia, języki, asystent
 - **Darmowy skaner CV** – `POST /api/scan` (plik CV + treść ogłoszenia → wynik, spełnione/brakujące wymagania, 3 rady). Nic nie jest zapisywane; limit 6 skanów/godz. na IP. Z wyniku jednym kliknięciem przechodzi się do kreatora z zaimportowanym CV i ogłoszeniem.

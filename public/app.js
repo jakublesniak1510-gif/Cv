@@ -606,8 +606,9 @@ $('#fill').onclick = () => {
 /* ---------- Generowanie i wynik ---------- */
 let curAd = 0, curDoc = 'cv', timer;
 function landing(show) { ['landing', 'nav', 'foot'].forEach((i) => ($('#' + i).hidden = !show)); }
+let pendingPolls = 0;
 function startResult(id) {
-  orderId = id; landing(false); $('#result').hidden = true; $('#gen').hidden = false; $('#retry').hidden = true;
+  orderId = id; pendingPolls = 0; $('#payAgain').hidden = true; landing(false); $('#result').hidden = true; $('#gen').hidden = false; $('#retry').hidden = true;
   $('#genTitle').textContent = 'Piszemy Twoje dokumenty'; window.scrollTo(0, 0);
   clearTimeout(timer); poll();
 }
@@ -618,9 +619,11 @@ async function poll() {
   data.design = data.design || { ...design };
   if (data.status === 'done') { $('#gen').hidden = true; return showResult(); }
   if (data.status === 'paid') { $('#genTitle').textContent = 'Coś poszło nie tak'; $('#genMsg').textContent = data.error || 'Generowanie nie powiodło się. Płatność jest zachowana.'; $('#retry').hidden = false; return; }
+  if (data.status === 'pending' && data.canPay && ++pendingPolls >= 4) { $('#genTitle').textContent = 'Płatność nie jest jeszcze potwierdzona'; $('#genMsg').textContent = 'Jeśli przerwałeś płatność albo zamknąłeś okno banku, możesz ją dokończyć. Jeśli zapłaciłeś, poczekaj chwilę: potwierdzenie może przyjść z opóźnieniem.'; $('#payAgain').hidden = false; timer = setTimeout(poll, 5000); return; }
   $('#genMsg').textContent = data.status === 'pending' ? 'Czekamy na potwierdzenie płatności…' : 'To zajmie około minuty. Nie zamykaj tej strony. Gotowe dokumenty wyślemy też na Twój e-mail.';
   timer = setTimeout(poll, cfg.demo ? 800 : 2500);
 }
+$('#payAgain').onclick = async () => { $('#payAgain').disabled = true; try { const r = await fetch(`/api/orders/${orderId}/pay`, { method: 'POST' }); const j = await r.json(); if (!r.ok) throw new Error(j.error); location.href = j.url; } catch (x) { $('#genMsg').textContent = x.message || 'Nie udało się otworzyć płatności.'; $('#payAgain').disabled = false; } };
 $('#retry').onclick = async () => { await fetch(`/api/orders/${orderId}/retry`, { method: 'POST' }); startResult(orderId); };
 
 function drawMail() {

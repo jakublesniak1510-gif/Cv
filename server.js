@@ -1,8 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import crypto from 'node:crypto';
-import Stripe from 'stripe';
-import { lineItems, calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, withLetter as hasLetter } from './lib/pricing.js';
+import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, withLetter as hasLetter } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats } from './lib/store.js';
 import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
@@ -11,6 +10,7 @@ import { importCv, extractText, ImportError } from './lib/importCv.js';
 import { mailEnabled, sendOrderMail, sendReminder, sendReviewAsk } from './lib/mail.js';
 import { cleanDesign } from './lib/designs.js';
 import { seoRoutes } from './lib/seo.js';
+import { p24Enabled, p24Register, p24NotificationOk, p24Verify, p24BySession } from './lib/p24.js';
 import { renderDocx } from './lib/docx.js';
 import { adminRoutes } from './lib/admin.js';
 import { accountRoutes, accountHourly } from './lib/account.js';
@@ -19,26 +19,13 @@ import { logEvent, cleanupEvents } from './lib/events.js';
 
 const PORT = process.env.PORT || 3000;
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
-const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
-const DEMO = !stripe;
+const DEMO = !p24Enabled();
 const RETENTION_MS = 30 * 24 * 3600 * 1000;
 const MAX_REVISIONS = 10;
 
 const app = express();
 app.set('trust proxy', 1);
 
-// --- Webhook Stripe (surowe body, przed express.json) ---
-app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-  if (!stripe || !process.env.STRIPE_WEBHOOK_SECRET) return res.sendStatus(404);
-  let event;
-  try { event = stripe.webhooks.constructEvent(req.body, req.headers['stripe-signature'], process.env.STRIPE_WEBHOOK_SECRET); } catch { return res.sendStatus(400); }
-  if (event.type === 'checkout.session.completed' && event.data.object.payment_status === 'paid') {
-    const id = event.data.object.client_reference_id;
-    if (id) await updateOrder(id, { payment: { provider: 'stripe', intent: event.data.object.payment_intent, session: event.data.object.id } }).catch(() => {});
-    if (id) markPaidAndGenerate(id).catch(console.error);
-  }
-  res.sendStatus(200);
-});
 
 // Prosty limit zapytań na adres IP.
 const limiter = (max, windowMs) => { const hits = new Map(); return (req) => { const now = Date.now(), h = (hits.get(req.ip) || []).filter((t) => now - t < windowMs); if (h.length >= max) return false; hits.set(req.ip, [...h, now]); return true; }; };
@@ -158,21 +145,40 @@ app.post('/api/fetch-ad', async (req, res) => {
   }
 });
 
-async function checkout(order) {
+// Płatność przez Przelewy24. sessionId = numer zamówienia + numer próby, więc wpłatę zawsze da się przypisać do zamówienia.
+async function checkout(order, lang) {
   if (DEMO) return { id: order.id, demo: true };
-  const session = await stripe.checkout.sessions.create({
-    mode: 'payment', client_reference_id: order.id, customer_email: order.profile.email,
-    // Każda płatność ma w Stripe numer zamówienia: to pozwala przypisać wpłatę do konkretnej usługi w ewidencji.
-    payment_intent_data: { description: `CV Pod Ogłoszenie, zamówienie ${order.id}`, metadata: { orderId: order.id } },
-    line_items: lineItems(order.pkg, order.ads.length, order.addons, !!order.parentId, order.extraLangs, order.discount).map((i) => ({
-      quantity: i.quantity, price_data: { currency: 'pln', unit_amount: i.amount, product_data: { name: i.name } },
-    })),
-    success_url: `${BASE_URL}/?id=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: order.parentId ? `${BASE_URL}/?id=${order.parentId}` : `${BASE_URL}/?canceled=1`,
+  const attempt = (order.payAttempts || 0) + 1, sessionId = `${order.id}.${attempt}`;
+  const { token, url } = await p24Register({
+    sessionId, amount: order.total, email: order.profile.email, language: lang || order.uiLang,
+    description: `CV Pod Ogłoszenie, zamówienie ${order.id}`,
+    urlReturn: `${BASE_URL}/?id=${order.id}`, urlStatus: `${BASE_URL}/api/p24/status`,
   });
-  await updateOrder(order.id, { stripeSession: session.id });
-  return { id: order.id, url: session.url };
+  await updateOrder(order.id, { payAttempts: attempt, p24: { sessionId, token } });
+  return { id: order.id, url };
 }
+// Potwierdzenie wpłaty (z powiadomienia albo po powrocie klienta): verify w Przelewy24, potem generowanie.
+async function confirmP24(o, p24OrderId, amount, verified = false) {
+  if (amount !== o.total) { logEvent('płatność', `Kwota ${amount} nie zgadza się z zamówieniem`, { orderId: o.id }); return false; }
+  if (!verified && !(await p24Verify({ sessionId: o.p24.sessionId, orderId: p24OrderId, amount }))) return false;
+  await updateOrder(o.id, { payment: { provider: 'przelewy24', orderId: p24OrderId, sessionId: o.p24.sessionId, at: Date.now() } });
+  markPaidAndGenerate(o.id).catch(console.error);
+  return true;
+}
+app.post('/api/p24/status', async (req, res) => {
+  const n = req.body || {};
+  if (!p24Enabled() || !p24NotificationOk(n)) return res.sendStatus(400);
+  res.sendStatus(200);
+  const o = await getOrder(String(n.sessionId).split('.')[0]);
+  if (!o || o.status !== 'pending' || o.p24?.sessionId !== n.sessionId) return;
+  confirmP24(o, n.orderId, n.amount).catch((e) => logEvent('płatność', e.message, { orderId: o.id }));
+});
+// Klient wrócił bez zapłaty: nowa próba płatności dla tego samego zamówienia.
+app.post('/api/orders/:id/pay', async (req, res) => {
+  const o = await getOrder(req.params.id);
+  if (!o || o.status !== 'pending') return res.status(409).json({ error: 'To zamówienie jest już opłacone.' });
+  try { res.json(await checkout(o)); } catch (e) { logEvent('płatność', e.message, { orderId: o.id }); res.status(502).json({ error: 'Nie udało się otworzyć płatności. Spróbuj za chwilę.' }); }
+});
 
 app.post('/api/orders', async (req, res) => {
   try {
@@ -214,16 +220,16 @@ app.post('/api/orders/:id/followup', async (req, res) => {
 const view = (o, extra = {}) => ({
   ...extra, id: o.id, pkg: o.pkg, addons: o.addons || {}, extraLangs: o.extraLangs || [], total: o.total, status: o.status, results: o.results, error: o.error, mail: o.mail,
   design: cleanDesign(o.design), photo: o.profile.photo || '', email: o.profile.email, parentId: o.parentId || null,
-  createAccount: !!o.createAccount, revisionsLeft: MAX_REVISIONS - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
+  createAccount: !!o.createAccount, canPay: o.status === 'pending' && !DEMO, revisionsLeft: MAX_REVISIONS - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
 });
 
-// Stan zamówienia; po powrocie ze Stripe weryfikuje płatność u źródła.
+// Stan zamówienia; po powrocie z Przelewy24 sprawdza płatność u źródła (gdyby powiadomienie się spóźniło).
 app.get('/api/orders/:id', async (req, res) => {
   let o = await getOrder(req.params.id);
   if (!o) return res.sendStatus(404);
-  if (o.status === 'pending' && stripe && o.stripeSession) {
-    const s = await stripe.checkout.sessions.retrieve(o.stripeSession).catch(() => null);
-    if (s?.payment_status === 'paid') { await updateOrder(o.id, { payment: { provider: 'stripe', intent: s.payment_intent, session: s.id } }); await markPaidAndGenerate(o.id); o = await getOrder(o.id); }
+  if (o.status === 'pending' && !DEMO && o.p24?.sessionId) {
+    const t = await p24BySession(o.p24.sessionId);
+    if (t && (t.status === 1 || t.status === 2) && (await confirmP24(o, t.orderId, t.amount, t.status === 2).catch(() => false))) o = await getOrder(o.id);
   }
   // Kod klienta (−10 zł dla niego i znajomych) z liczbą użyć.
   let myCode = null;
@@ -432,4 +438,4 @@ async function hourly() {
 }
 hourly(); setInterval(hourly, 3600_000).unref();
 
-app.listen(PORT, () => console.log(`http://localhost:${PORT}  ${DEMO ? '[TRYB DEMO – brak STRIPE_SECRET_KEY]' : ''}${aiEnabled() ? '' : ' [bez AI – brak ANTHROPIC_API_KEY]'}`));
+app.listen(PORT, () => console.log(`http://localhost:${PORT}  ${DEMO ? '[TRYB DEMO – brak konfiguracji Przelewy24]' : ''}${aiEnabled() ? '' : ' [bez AI – brak ANTHROPIC_API_KEY]'}`));
