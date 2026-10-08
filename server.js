@@ -34,6 +34,7 @@ app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async
   try { event = stripe.webhooks.constructEvent(req.body, req.headers['stripe-signature'], process.env.STRIPE_WEBHOOK_SECRET); } catch { return res.sendStatus(400); }
   if (event.type === 'checkout.session.completed' && event.data.object.payment_status === 'paid') {
     const id = event.data.object.client_reference_id;
+    if (id) await updateOrder(id, { payment: { provider: 'stripe', intent: event.data.object.payment_intent, session: event.data.object.id } }).catch(() => {});
     if (id) markPaidAndGenerate(id).catch(console.error);
   }
   res.sendStatus(200);
@@ -161,6 +162,8 @@ async function checkout(order) {
   if (DEMO) return { id: order.id, demo: true };
   const session = await stripe.checkout.sessions.create({
     mode: 'payment', client_reference_id: order.id, customer_email: order.profile.email,
+    // Każda płatność ma w Stripe numer zamówienia: to pozwala przypisać wpłatę do konkretnej usługi w ewidencji.
+    payment_intent_data: { description: `CV Pod Ogłoszenie, zamówienie ${order.id}`, metadata: { orderId: order.id } },
     line_items: lineItems(order.pkg, order.ads.length, order.addons, !!order.parentId, order.extraLangs, order.discount).map((i) => ({
       quantity: i.quantity, price_data: { currency: 'pln', unit_amount: i.amount, product_data: { name: i.name } },
     })),
@@ -220,7 +223,7 @@ app.get('/api/orders/:id', async (req, res) => {
   if (!o) return res.sendStatus(404);
   if (o.status === 'pending' && stripe && o.stripeSession) {
     const s = await stripe.checkout.sessions.retrieve(o.stripeSession).catch(() => null);
-    if (s?.payment_status === 'paid') { await markPaidAndGenerate(o.id); o = await getOrder(o.id); }
+    if (s?.payment_status === 'paid') { await updateOrder(o.id, { payment: { provider: 'stripe', intent: s.payment_intent, session: s.id } }); await markPaidAndGenerate(o.id); o = await getOrder(o.id); }
   }
   // Kod klienta (−10 zł dla niego i znajomych) z liczbą użyć.
   let myCode = null;
