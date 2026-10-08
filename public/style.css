@@ -612,3 +612,32 @@ html:not([lang="pl"]) .nav nav{gap:16px}
 .letter.t-wstega .pg{padding:0 56px 48px}.letter.t-wstega .band{height:auto;padding:36px 56px;color:#fff;text-align:center}.letter.t-wstega .band h1{color:#fff;font-size:28px}.letter.t-wstega .band .ct{color:#fff;opacity:.9}.letter.t-wstega .body{padding-top:28px}
 @container (max-width:560px){.t-wstega .pg{padding:0 20px 28px}.t-wstega .band{margin:0 -20px;height:110px}.t-wstega .job{grid-template-columns:1fr}.t-wstega .job .when{padding:0}}
 .t-kreatywny .panel{background:none;border:0;box-shadow:none;padding:0;border-radius:0}
+/* przykład: ogłoszenie i CV (czytelniej, zwłaszcza na telefonie) */
+.doc mark,#exAd mark,#exCv mark{background:linear-gradient(transparent 52%,#FFE45C 52%);padding:0;border-radius:0;color:inherit}
+#exAd{display:grid;gap:10px;padding:20px}
+#exAd .ad-top{display:flex;align-items:center;gap:10px}
+#exAd .ad-logo{width:36px;height:36px;border-radius:9px;background:#EEF2FB;color:#2548E8;display:grid;place-items:center;font:800 14px var(--f-d);flex:none}
+#exAd .ad-top small{display:block;font:600 10.5px var(--f-b);letter-spacing:.08em;text-transform:uppercase;color:#6B7890}
+#exAd .ad-top b{font-size:14px;color:#16233A}
+#exAd h4{font-size:20px;margin:0}
+#exAd .ad-txt{margin:0;color:#2A3750;line-height:1.6}
+#exAd .ad-kws{border-top:1px dashed #D9E0EC;padding-top:10px}
+#exAd .ad-kws small{display:block;font-size:12px;color:#6B7890;margin-bottom:6px}
+#exAd .ad-kws div{display:flex;flex-wrap:wrap;gap:6px}
+#exAd .ad-kws span{background:#FFF6C7;color:#5C4A00;border-radius:6px;padding:2px 8px;font-size:12.5px;font-weight:600}
+#exCv{padding:0;overflow:hidden;font-size:14px}
+#exCv .mcv-head{display:flex;align-items:center;gap:14px;padding:18px 20px;background:#2548E8;color:#fff}
+#exCv .mcv-ini{width:46px;height:46px;border-radius:50%;background:#fff;color:#2548E8;display:grid;place-items:center;font:800 17px var(--f-d);flex:none}
+#exCv .mcv-head b{display:block;font:800 19px var(--f-d)}#exCv .mcv-head span{font-size:13.5px;opacity:.92}
+#exCv .mcv-sec{padding:12px 20px 0}
+#exCv .mcv-sec:last-child{padding-bottom:18px}
+#exCv h5{font:700 11px var(--f-b);letter-spacing:.1em;text-transform:uppercase;color:#2548E8;margin:0 0 6px;padding-bottom:4px;border-bottom:1px solid #E3E8F2}
+#exCv p{margin:0;line-height:1.6;color:#2A3750}
+#exCv .mcv-chips{display:flex;flex-wrap:wrap;gap:6px}
+#exCv .mcv-chips span{border:1px solid #D9E0EC;border-radius:99px;padding:2px 10px;font-size:13px;color:#2A3750}
+#exCv .mcv-chips span.kw{background:#FFE45C;border-color:#FFE45C;color:#16233A;font-weight:600}
+#exCv .mcv-job b{display:block;font-size:14.5px;color:#16233A}#exCv .mcv-job span{font-size:12.5px;color:#6B7890}
+#exCv ul{margin:6px 0 0;padding-left:18px;color:#2A3750}#exCv li{margin-bottom:3px;line-height:1.5}#exCv li::marker{color:#2548E8}
+@media(max-width:560px){#exAd,#exCv{font-size:14px}#exAd h4{font-size:18px}#exCv .mcv-head{padding:16px}#exCv .mcv-sec{padding:12px 16px 0}#exCv .mcv-sec:last-child{padding-bottom:16px}}
+/* na telefonie, gdy widać dolny pasek, przycisk asystenta jest okrągły i nie zasłania treści */
+@media(max-width:760px){body.mcta-on .chat-fab{font-size:0;gap:0;padding:12px;bottom:88px}body.mcta-on .chat-fab span{width:26px;height:26px;font-size:15px}}

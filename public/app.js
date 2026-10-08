@@ -227,12 +227,19 @@ const exResult = (i) => {
 };
 const changesList = (e) => [el('h3', { textContent: 'Co zmieniliśmy w tym CV' }), el('ul', {}, ...e.changes.map((c) => el('li', { textContent: c }))), e.notAdded && el('p', { className: 'notadded' }, el('b', { textContent: 'Czego nie dopisaliśmy: ' }), e.notAdded)].filter(Boolean);
 function drawEx(i) {
-  const e = EX[i], r = exResult(i);
+  const e = EX[i], r = exResult(i), job = r.cv.experience[1];
+  const isKw = (x) => e.kws.some((k) => x.toLowerCase().includes(k.toLowerCase()));
   $$('#exTabs button').forEach((b, j) => b.setAttribute('aria-selected', j === i));
-  $('#exAd').replaceChildren(el('div', { className: 'tagline', textContent: `Ogłoszenie · ${e.company}` }), el('h4', { textContent: e.title }), el('p', {}, hl(e.ad, e.kws)));
-  $('#exCv').replaceChildren(el('div', { className: 'tagline', textContent: 'CV Anny Nowak pod to ogłoszenie' }), el('h4', { textContent: 'Anna Nowak' }), el('div', { className: 'sub', textContent: e.title }),
-    el('p', {}, hl(e.sum, e.kws)), el('p', { className: 'h', textContent: 'Umiejętności' }), el('p', {}, hl(e.skills.join(' · '), e.kws)),
-    el('p', { className: 'h', textContent: `${r.cv.experience[1].title}, ${r.cv.experience[1].company}` }), ...r.cv.experience[1].bullets.map((b) => el('p', {}, '• ', hl(b, e.kws))));
+  $('#exAd').replaceChildren(
+    el('div', { className: 'ad-top' }, el('span', { className: 'ad-logo', textContent: e.company.split(/\s+/).map((w) => w[0]).join('').slice(0, 2) }), el('div', {}, el('small', { textContent: 'Ogłoszenie' }), el('b', { textContent: e.company }))),
+    el('h4', { textContent: e.title }), el('p', { className: 'ad-txt' }, hl(e.ad, e.kws)),
+    el('div', { className: 'ad-kws' }, el('small', { textContent: 'Słowa kluczowe, których szuka rekruter' }), el('div', {}, ...[...new Map(e.kws.map((k) => [k.toLowerCase().split(/\s+/).map((w) => w.slice(0, Math.max(3, Math.min(5, w.length - 1)))).join(' '), k])).values()].map((k) => el('span', { textContent: k })))));
+  $('#exCv').replaceChildren(
+    el('div', { className: 'mcv-head' }, el('span', { className: 'mcv-ini', textContent: 'AN' }), el('div', {}, el('b', { textContent: 'Anna Nowak' }), el('span', { textContent: e.title }))),
+    el('div', { className: 'mcv-sec' }, el('h5', { textContent: 'Profil zawodowy' }), el('p', {}, hl(e.sum, e.kws))),
+    el('div', { className: 'mcv-sec' }, el('h5', { textContent: 'Umiejętności' }), el('div', { className: 'mcv-chips' }, ...e.skills.map((x) => el('span', { className: isKw(x) ? 'kw' : '', textContent: x })))),
+    el('div', { className: 'mcv-sec' }, el('h5', { textContent: 'Doświadczenie' }), el('div', { className: 'mcv-job' }, el('b', { textContent: job.title }), el('span', { textContent: `${job.company} · ${job.period}` })),
+      el('ul', {}, ...job.bullets.map((b) => el('li', {}, hl(b, e.kws))))));
   $('#exChg').replaceChildren(...changesList(e));
 }
 EX.forEach((e, i) => $('#exTabs').append(el('button', { type: 'button', role: 'tab', textContent: e.tab, onclick: () => drawEx(i) })));
