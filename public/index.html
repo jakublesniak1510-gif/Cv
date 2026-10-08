@@ -10,10 +10,11 @@
 <link rel="stylesheet" href="/style.css"></head>
 <body>
 <div id="demoBar" class="demobar" hidden>Tryb DEMO: płatność jest symulowana.</div>
+<div id="refBanner" class="refbar" hidden>Masz 10 zł rabatu od znajomego. Kod wpiszemy automatycznie w podsumowaniu zamówienia.</div>
 
 <header class="nav" id="nav"><div class="inner">
   <a class="logo" href="/" data-page=""><svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--brand)"/><path d="M10 6.5h8.5l5.5 5.5v13.5a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-17a2 2 0 0 1 2-2z" fill="#fff"/><rect x="10.5" y="14.5" width="11" height="3.2" rx="1" fill="#FFE45C"/><rect x="10.5" y="20" width="8" height="1.8" rx=".9" fill="#2548E8" opacity=".55"/><rect x="10.5" y="10" width="5" height="1.8" rx=".9" fill="#2548E8" opacity=".55"/></svg><span class="wm">CV<span>Pod</span>Ogłoszenie</span></a>
-  <nav><a href="#jak">Jak to działa</a><a href="#szablony">Szablony</a><a href="#cennik">Cennik</a><a href="#zawody">Zawody</a><a href="#poradnik">Poradnik</a><a href="#faq">FAQ</a></nav>
+  <nav><a href="#skaner">Darmowy skaner</a><a href="#jak">Jak to działa</a><a href="#szablony">Szablony</a><a href="#cennik">Cennik</a><a href="#zawody">Zawody</a><a href="#poradnik">Poradnik</a><a href="#faq">FAQ</a></nav>
   <button class="btn sm" data-open>Zamów CV</button>
 </div></header>
 
@@ -34,6 +35,24 @@
     <div class="demo-cv"><div class="tagline">2 · Dostajesz CV pisane pod nie</div><div class="hero-thumb" id="heroThumb"></div></div>
   </div>
 </div></section>
+
+<section class="sec scan" id="skaner"><div class="inner scan-grid">
+  <div>
+    <p class="eyebrow">Za darmo, bez rejestracji</p>
+    <h2>Sprawdź, jak Twoje CV pasuje do ogłoszenia</h2>
+    <p class="sub2">Wgraj obecne CV i wklej ogłoszenie. W kilkanaście sekund zobaczysz, które wymagania spełniasz, czego brakuje i co poprawić.</p>
+    <ul class="ticks col"><li>Wynik dopasowania w procentach</li><li>Brakujące wymagania i słowa kluczowe</li><li>Trzy konkretne rady do Twojego CV</li></ul>
+  </div>
+  <form class="scan-card" id="scanForm" novalidate>
+    <div class="f">1. Twoje CV <span class="h">PDF, Word lub TXT, do 5 MB</span>
+      <div class="filerow"><label class="btn ghost sm filebtn">Wybierz plik<input type="file" id="scanFile" accept=".pdf,.docx,.txt" hidden></label><span id="scanFileName" class="hint">nie wybrano pliku</span></div></div>
+    <label class="f">2. Link do ogłoszenia albo jego treść<textarea id="scanAd" rows="4" placeholder="Wklej link (https://…) albo całą treść ogłoszenia"></textarea></label>
+    <button class="btn" type="submit" id="scanBtn">Sprawdź za darmo</button>
+    <p class="fstatus" id="scanMsg" role="status"></p>
+    <p class="hint small">Nie zapisujemy ani pliku, ani wyniku.</p>
+  </form>
+</div>
+<div class="inner"><div id="scanResult" class="scan-result" hidden></div></div></section>
 
 <section class="sec" id="jak"><div class="inner">
   <h2>Jak to działa</h2>
@@ -71,8 +90,13 @@
 
 <section class="sec alt" id="zawody"><div class="inner">
   <h2>CV dla Twojego zawodu</h2>
-  <p class="sub2">Przykładowe CV, słowa kluczowe z ogłoszeń i wskazówki dla popularnych stanowisk.</p>
+  <p class="sub2">Przykładowe CV, słowa kluczowe z ogłoszeń i wskazówki dla 50 zawodów.</p>
+  <div class="psearch"><input type="search" id="profSearch" placeholder="Wpisz zawód, np. magazynier, księgowa, kucharz" aria-label="Szukaj zawodu" autocomplete="off"></div>
+  <div class="prof-results" id="profResults" aria-live="polite" hidden></div>
+  <h3 class="sh">Najczęściej wybierane</h3>
   <div class="prof-grid" id="profGrid"></div>
+  <details class="allprof"><summary>Wszystkie zawody</summary><div id="profAll"></div></details>
+  <p class="hint notfound-tip">Nie ma Twojego zawodu na liście? To nic. CV pod Twoje ogłoszenie przygotujemy dla każdego zawodu: <button type="button" class="link" data-open>stwórz je samodzielnie w kreatorze</button>, wklejając ogłoszenie.</p>
 </div></section>
 
 <section class="sec" id="cennik"><div class="inner">
@@ -82,7 +106,7 @@
     <div class="price-card feat"><span class="badge">Najczęściej wybierany</span><h3>CV + list motywacyjny</h3><div class="amt">49 zł</div><ul><li>CV i list pod to samo ogłoszenie</li><li>List na jedną stronę A4, bez ogólników</li><li>PDF na stronie i w e-mailu</li></ul><button class="btn" data-open data-pkg="cv_letter">Wybierz komplet</button></div>
     <div class="price-card"><h3>Kolejne ogłoszenie</h3><div class="amt">+20 zł</div><ul><li>Osobne CV (i list) pod każdą ofertę</li><li>Dane wpisujesz tylko raz</li><li>Także później, ze strony Twoich dokumentów</li></ul><button class="btn ghost" data-open>Dodaj w kreatorze</button></div>
   </div>
-  <div class="addons-row"><b>Dodatki:</b><span>Przygotowanie do rozmowy <b>+15 zł</b></span><span>Wiadomość do rekrutera i e-mail z aplikacją <b>+9 zł</b></span><span>Wersja angielska <b>bez dopłaty</b></span></div>
+  <div class="addons-row"><b>Dodatki:</b><span>Przygotowanie do rozmowy <b>+15 zł</b></span><span>Wiadomość do rekrutera i e-mail z aplikacją <b>+9 zł</b></span><span>Dodatkowy język <b>+5 zł</b></span><span>Główny język (np. angielski) <b>w cenie</b></span></div>
   <p class="sub2 small">W każdym pakiecie: raport dopasowania, darmowa poprawka, edycja tekstu, 6 szablonów i PDF w e-mailu.</p>
 </div></section>
 
@@ -100,7 +124,8 @@
   <details><summary>Co jeśli strona nie odczyta ogłoszenia z linku?</summary><p>Część serwisów (np. LinkedIn) blokuje automatyczne pobieranie ogłoszeń. Wtedy kreator pokaże komunikat, a Ty wklejasz treść ogłoszenia samodzielnie. Zapłacić możesz dopiero po uzupełnieniu treści, więc nie zapłacisz za CV bez ogłoszenia.</p></details>
   <details><summary>Co jeśli gotowe CV mi nie pasuje?</summary><p>Masz darmową poprawkę: na stronie dokumentów opisujesz, co zmienić (np. „skróć”, „podkreśl pracę z klientem”), a poprawiona wersja jest gotowa w minutę. Możesz też samodzielnie edytować tekst.</p></details>
   <details><summary>Czy mogę wgrać swoje stare CV?</summary><p>Tak. W kreatorze wgrywasz PDF lub plik Word, a formularz uzupełnia się sam. Sprawdzasz dane i poprawiasz, co trzeba. Pliku nie zapisujemy.</p></details>
-  <details><summary>Czy zrobicie CV po angielsku?</summary><p>Tak, bez dopłaty. Gdy ogłoszenie jest po angielsku, dokumenty powstają po angielsku. Język możesz też wybrać ręcznie przy każdym ogłoszeniu.</p></details>
+  <details><summary>Czy zrobicie CV po angielsku lub niemiecku?</summary><p>Tak. Główny język dokumentów wybierasz przy ogłoszeniu i jest w cenie: polski, angielski, niemiecki, ukraiński, hiszpański lub francuski. Każda dodatkowa wersja językowa tych samych dokumentów kosztuje 5 zł.</p></details>
+  <details><summary>Jak działa program poleceń?</summary><p>Po zamówieniu dostajesz swój kod polecający. Znajomy, który go użyje, płaci 10 zł mniej, a Ty dostajesz kod na 10 zł rabatu za każde jego zamówienie.</p></details>
   <details><summary>Jak długo przechowujecie moje dane?</summary><p>30 dni. Po tym czasie zamówienie, w tym treść dokumentów i zdjęcie, jest automatycznie usuwane. Zapisz PDF-y u siebie, a kopię masz też w e-mailu.</p></details>
   <details><summary>W jakim formacie dostanę dokumenty?</summary><p>Zobaczysz je na stronie i zapiszesz jako PDF jednym kliknięciem. Gotowe PDF-y wysyłamy też automatycznie na e-mail podany w zamówieniu.</p></details>
 </div></section>
@@ -133,7 +158,8 @@
 <li><b>Jeżeli Serwis nie przetworzy ogłoszenia z linku albo pobierze je niekompletnie, Klient musi wkleić treść ogłoszenia samodzielnie.</b> Bez treści ogłoszenia zamówienia nie można opłacić.</li>
 <li>Klient odpowiada za to, że treść ogłoszenia, którą wkleił lub zatwierdził, jest właściwa i że ma prawo jej użyć w tym celu.</li></ol>
 <h2>§4 Ceny i płatności</h2>
-<ol><li>Ceny są podane w złotych i zawierają podatek VAT, o ile Usługodawca jest jego płatnikiem: samo CV – 39 zł, CV z listem motywacyjnym – 49 zł, każde kolejne ogłoszenie – 20 zł (także zamówione później ze strony dokumentów). Dodatki: przygotowanie do rozmowy – 15 zł, wiadomość do rekrutera i e-mail z aplikacją – 9 zł; dodatek obejmuje wszystkie ogłoszenia w zamówieniu. Wersja anglojęzyczna dokumentów nie wymaga dopłaty.</li>
+<ol><li>Ceny są podane w złotych i zawierają podatek VAT, o ile Usługodawca jest jego płatnikiem: samo CV – 39 zł, CV z listem motywacyjnym – 49 zł, każde kolejne ogłoszenie – 20 zł (także zamówione później ze strony dokumentów). Dodatki: przygotowanie do rozmowy – 15 zł, wiadomość do rekrutera i e-mail z aplikacją – 9 zł; dodatek obejmuje wszystkie ogłoszenia w zamówieniu. Główny język dokumentów (polski, angielski, niemiecki, ukraiński, hiszpański lub francuski) nie wymaga dopłaty; każda dodatkowa wersja językowa tych samych dokumentów kosztuje 5 zł.</li>
+<li>Kody rabatowe i polecające obniżają cenę zgodnie z §5b. Rabat nie podlega wymianie na gotówkę.</li>
 <li>Płatności obsługuje Stripe (m.in. BLIK, karta, Apple Pay, Google Pay). Płatność następuje z góry, przed wykonaniem usługi.</li></ol>
 <h2>§5 Realizacja</h2>
 <ol><li>Po zaksięgowaniu płatności dokumenty są przygotowywane automatycznie, zwykle w ciągu kilku minut, wyświetlane w Serwisie pod unikalnym adresem zamówienia oraz wysyłane na adres e-mail podany w zamówieniu jako pliki PDF. Klient może też zapisać je jako PDF w Serwisie. Jeśli wysyłka e-mailem się nie powiedzie, dokumenty pozostają dostępne w Serwisie.</li>
@@ -144,6 +170,13 @@
 <ol><li>Jeżeli dokument nie odpowiada Klientowi lub nie pasuje do ogłoszenia, Klient może bez dodatkowej opłaty poprosić o poprawkę, opisując w Serwisie, co zmienić. Poprawka jest przygotowywana automatycznie.</li>
 <li>W ramach jednego zamówienia przysługuje do 10 poprawek łącznie. Poprawka nie może polegać na dopisaniu nieprawdziwych informacji; nowe fakty Klient podaje sam.</li>
 <li>Darmowa poprawka nie ogranicza uprawnień Klienta z tytułu reklamacji.</li></ol>
+<h2>§5b Program poleceń i kody rabatowe</h2>
+<ol><li>Po zrealizowaniu zamówienia Klient otrzymuje kod polecający ważny 90 dni. Osoba, która użyje go przy pierwszym zamówieniu, otrzymuje rabat 10 zł.</li>
+<li>Za każde opłacone zamówienie z użyciem kodu polecającego Klient otrzymuje jednorazowy kod rabatowy o wartości 10 zł, ważny 90 dni.</li>
+<li>Nie można użyć własnego kodu polecającego. W jednym zamówieniu można użyć jednego kodu.</li></ol>
+<h2>§5c Usługi bezpłatne</h2>
+<ol><li>Darmowy skaner CV ocenia, jak przesłane CV pasuje do wskazanego ogłoszenia. Wynik ma charakter pomocniczy.</li>
+<li>Asystent na stronie udziela ogólnych wskazówek dotyczących CV i rekrutacji. Odpowiedzi są generowane automatycznie i nie stanowią porady prawnej.</li></ol>
 <h2>§6 Odstąpienie od umowy</h2>
 <ol><li>Usługa jest treścią cyfrową dostarczaną na wyraźne żądanie Klienta. Klient, który przed złożeniem zamówienia zaznaczył zgodę na rozpoczęcie wykonania usługi i przyjął do wiadomości utratę prawa odstąpienia, traci to prawo po pełnym wykonaniu usługi (art. 38 pkt 13 ustawy o prawach konsumenta).</li>
 <li>Przed wykonaniem usługi Klient może zrezygnować z zamówienia, pisząc na adres [E-MAIL].</li></ol>
@@ -167,17 +200,20 @@
 <p>Administratorem Twoich danych jest [NAZWA FIRMY / IMIĘ I NAZWISKO], [ADRES], NIP [NIP]. Kontakt w sprawach danych: [E-MAIL].</p>
 <h2>2. Jakie dane przetwarzamy</h2>
 <p>Dane z formularza zamówienia: imię i nazwisko, e-mail, telefon, miasto, link do profilu, przebieg pracy i nauki, umiejętności oraz inne informacje, które sam wpiszesz. Zdjęcie, jeśli je dodasz (nie trafia do dostawcy AI). Gdy wgrywasz stare CV, odczytujemy z niego tekst, przekazujemy go dostawcy AI w celu uzupełnienia formularza, a samego pliku nie zapisujemy. Treść ogłoszeń, które podasz (wklejoną lub pobraną z linku). Dane transakcji (kwota, status płatności). Dane płatnicze (np. numer karty) trafiają bezpośrednio do Stripe i nie są dostępne dla nas.</p>
+<p>Gdy korzystasz z darmowego skanera, przetwarzamy tekst Twojego CV i ogłoszenia tylko na czas oceny; nie zapisujemy ich. Pytania zadane asystentowi przekazujemy dostawcy AI w celu udzielenia odpowiedzi i nie zapisujemy ich na naszym serwerze.</p>
 <h2>3. Cele i podstawy prawne</h2>
 <ul><li>Wykonanie zamówienia i obsługa płatności – art. 6 ust. 1 lit. b RODO (umowa).</li>
 <li>Rozliczenia i księgowość – art. 6 ust. 1 lit. c RODO (obowiązek prawny).</li>
-<li>Bezpieczeństwo, obrona przed nadużyciami i dochodzenie roszczeń – art. 6 ust. 1 lit. f RODO (uzasadniony interes).</li></ul>
+<li>Bezpieczeństwo, obrona przed nadużyciami i dochodzenie roszczeń – art. 6 ust. 1 lit. f RODO (uzasadniony interes).</li>
+<li>Jednorazowe przypomnienie e-mail po 7 dniach – art. 6 ust. 1 lit. a RODO (Twoja zgoda, którą możesz wycofać, pisząc na [E-MAIL]).</li>
+<li>Program poleceń (kod polecający i nagrody) – art. 6 ust. 1 lit. b RODO.</li></ul>
 <h2>4. Odbiorcy danych</h2>
 <ul><li>Stripe – obsługa płatności.</li>
 <li>Dostawca narzędzi AI (Anthropic) – otrzymuje Twoje dane i treść ogłoszenia wyłącznie po to, aby przygotować dokumenty. Dane mogą być przetwarzane poza Europejskim Obszarem Gospodarczym (USA) na podstawie standardowych klauzul umownych lub innego mechanizmu zgodnego z RODO.</li>
 <li>Dostawca poczty e-mail ([DOSTAWCA SMTP]) – wysyła Ci gotowe dokumenty na podany adres.</li>
 <li>Dostawca hostingu: [HOSTING]. Biuro rachunkowe: [BIURO].</li></ul>
 <h2>5. Jak długo przechowujemy dane</h2>
-<p>Dane zamówienia, w tym dokumenty i zdjęcie: 30 dni od złożenia zamówienia, potem są automatycznie usuwane. Szkic formularza zapisuje się tylko w Twojej przeglądarce i znika po złożeniu zamówienia. Dokumenty księgowe: 5 lat od końca roku podatkowego.</p>
+<p>Dane zamówienia, w tym dokumenty i zdjęcie: 30 dni od złożenia zamówienia, potem są automatycznie usuwane. Szkic formularza zapisuje się tylko w Twojej przeglądarce i znika po złożeniu zamówienia. Kody polecające i rabatowe (z adresem e-mail osoby polecającej, potrzebnym do wysłania nagrody): 90 dni, potem są automatycznie usuwane. Dokumenty księgowe: 5 lat od końca roku podatkowego.</p>
 <h2>6. Twoje prawa</h2>
 <p>Masz prawo dostępu do danych, ich sprostowania, usunięcia, ograniczenia przetwarzania, przenoszenia oraz sprzeciwu wobec przetwarzania opartego na uzasadnionym interesie. Napisz na [E-MAIL]. Możesz też złożyć skargę do Prezesa Urzędu Ochrony Danych Osobowych (uodo.gov.pl).</p>
 <h2>7. Dobrowolność i zautomatyzowane decyzje</h2>
@@ -204,6 +240,9 @@
         <label class="opt"><input type="checkbox" id="adInterview"><span class="o-t">Przygotowanie do rozmowy<b data-price="interview">+15 zł</b></span><span class="o-d">Pytania, które mogą paść przy tym ogłoszeniu, i wskazówki do odpowiedzi z Twojego doświadczenia</span></label>
         <label class="opt"><input type="checkbox" id="adMessages"><span class="o-t">Wiadomość do rekrutera<b data-price="messages">+9 zł</b></span><span class="o-d">Krótka wiadomość na LinkedIn i gotowy e-mail z aplikacją</span></label>
       </div>
+      <h3 class="sh">Dodatkowe wersje językowe <span class="h">(+5 zł za każdy język, dla wszystkich ogłoszeń)</span></h3>
+      <p class="hint">Główny język wybierasz przy ogłoszeniu i jest w cenie. Tutaj zamówisz dodatkowe tłumaczenia CV i listu, np. po niemiecku do pracy za granicą.</p>
+      <div class="langpick" id="langPick"></div>
       <h3 class="sh">Wygląd CV <span class="h">(możesz go zmienić także po zakupie)</span></h3>
       <div id="wizDesign"></div>
       <p class="hint" style="margin-top:14px">Każde kolejne ogłoszenie (inny zawód lub firma) to <b>+20 zł</b> i osobne, dopasowane CV. Dodasz je w kroku „Ogłoszenia”.</p>
@@ -246,6 +285,8 @@
     </section>
     <section data-step="6" hidden>
       <div id="sum"></div>
+      <div class="codebox"><label class="f">Kod rabatowy lub polecający<span class="urlrow"><input type="text" id="codeInput" autocomplete="off" placeholder="np. POLEC-AB12CD"><button type="button" class="btn ghost sm" id="codeApply">Zastosuj</button></span></label><p class="fstatus" id="codeMsg" role="status"></p></div>
+      <label class="check"><input type="checkbox" id="reminder"> <span>Przypomnij mi raz po 7 dniach o możliwości zamówienia CV pod kolejne ogłoszenie (opcjonalnie, jedna wiadomość e-mail).</span></label>
       <p class="hint trust-mini">W cenie: raport dopasowania, darmowa poprawka i edycja tekstu. Dane usuwamy automatycznie po 30 dniach.</p>
       <label class="check"><input type="checkbox" id="consent"> <span>Akceptuję <a href="#regulamin" target="_blank" rel="noopener">Regulamin</a> i zapoznałem/am się z <a href="#prywatnosc" target="_blank" rel="noopener">Polityką prywatności</a>. Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów.</span></label>
       <label class="check"><input type="checkbox" id="waiver"> <span>Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.</span></label>
@@ -286,6 +327,7 @@
   <div class="res-tools noprint">
     <div class="seg" id="adTabs" role="tablist" aria-label="Ogłoszenia"></div>
     <div class="seg" id="docTabs" role="tablist" aria-label="Dokument"></div>
+    <div class="seg" id="langTabs" role="tablist" aria-label="Wersja językowa" hidden></div>
     <div class="res-design" id="resDesign"></div>
     <label class="tog"><input type="checkbox" id="hlTog" checked> Pokaż dopasowane słowa kluczowe</label>
     <button class="btn" id="print">Pobierz PDF</button>
@@ -293,6 +335,7 @@
   <p class="mailnote noprint" id="mailNote" hidden></p>
   <p class="note noprint" id="printNote" hidden>W podglądzie nie można pobierać plików. Na działającej stronie ten przycisk zapisuje dokument jako PDF.</p>
   <p class="note noprint" id="simNote" hidden>Podgląd używa uproszczonego dopasowania. Na działającej stronie CV i list pisze Claude, pełniej i pod treść ogłoszenia.</p>
+  <p class="note noprint" id="untrNote" hidden>Podgląd bez AI: dodatkowa wersja językowa nie jest tłumaczona, zmieniają się tylko nagłówki sekcji. Na działającej stronie tłumaczy ją Claude.</p>
   <div class="match noprint" id="matchBox" hidden></div>
   <div class="res-actions noprint" id="resActions" hidden>
     <button class="btn ghost sm" id="editBtn" type="button">Edytuj tekst</button>
@@ -302,8 +345,16 @@
   <div class="panel noprint" id="editor" hidden></div>
   <div class="panel noprint" id="reviseBox" hidden></div>
   <div id="paper"></div>
+  <section class="referral noprint" id="referral" hidden></section>
   <section class="followup noprint" id="followup" hidden></section>
   <p class="hint noprint retention" id="retention"></p>
 </div></section>
+<button type="button" class="chat-fab noprint" id="chatFab" aria-expanded="false" aria-controls="chat"><span aria-hidden="true">?</span> Zapytaj o CV</button>
+<div class="chat noprint" id="chat" hidden role="dialog" aria-label="Asystent CV">
+  <div class="chat-head"><div><b>Asystent CV</b><span>Odpowiada AI. Nie wpisuj tu danych osobowych.</span></div><button class="x" id="chatClose" type="button" aria-label="Zamknij">×</button></div>
+  <div class="chat-log" id="chatLog" aria-live="polite"></div>
+  <div class="chat-sugg" id="chatSugg"></div>
+  <form class="chat-form" id="chatForm"><input type="text" id="chatInput" maxlength="1000" placeholder="Np. jak opisać przerwę w pracy?" aria-label="Twoje pytanie" autocomplete="off"><button class="btn sm" type="submit">Wyślij</button></form>
+</div>
 <script src="/app.js"></script>
 </body></html>

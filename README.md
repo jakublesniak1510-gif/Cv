@@ -60,3 +60,11 @@ Po wygenerowaniu serwer renderuje PDF (`lib/pdf.js`, czcionka Inter z `fonts/`) 
 
 ## Własna domena
 Kup domenę (np. w OVH, home.pl, nazwa.pl), w panelu Render dodaj ją w Settings → Custom Domains i ustaw rekordy DNS według instrukcji Render. Potem zmień `BASE_URL` na nowy adres i zaktualizuj adres webhooka w Stripe.
+
+## Skaner, polecenia, przypomnienia, języki, asystent
+- **Darmowy skaner CV** – `POST /api/scan` (plik CV + treść ogłoszenia → wynik, spełnione/brakujące wymagania, 3 rady). Nic nie jest zapisywane; limit 6 skanów/godz. na IP. Z wyniku jednym kliknięciem przechodzi się do kreatora z zaimportowanym CV i ogłoszeniem.
+- **50 zawodów** – `lib/content.js` (+ `content-a.js`, `content-b.js`), wyszukiwarka na stronie głównej; gdy zawodu brak, klient tworzy CV samodzielnie w kreatorze.
+- **Program poleceń** – po zamówieniu klient dostaje kod `POLEC-…` (90 dni). Polecony płaci 10 zł mniej; polecający dostaje kupon `NAGRODA-…` na 10 zł (e-mail + strona dokumentów). Kody w `data/codes.json`, kasowane po 90 dniach.
+- **Przypomnienie po 7 dniach** – jednorazowy e-mail tylko za zgodą zaznaczoną w zamówieniu.
+- **Języki** – główny język (pl/en/de/uk/es/fr) w cenie; dodatkowe wersje po 5 zł za język (tłumaczenie gotowych dokumentów, warianty w `result.variants`).
+- **Asystent** – `POST /api/assistant`, krótkie odpowiedzi o CV (limit 30 pytań/godz. na IP); bez klucza AI odpowiada z małej bazy wiedzy.

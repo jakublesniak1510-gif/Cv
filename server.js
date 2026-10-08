@@ -2,13 +2,13 @@ import 'dotenv/config';
 import express from 'express';
 import crypto from 'node:crypto';
 import Stripe from 'stripe';
-import { lineItems, calcTotal, MAX_ADS, PRICES } from './lib/pricing.js';
-import { getOrder, saveOrder, updateOrder, deleteOlderThan } from './lib/store.js';
-import { generateForAd, reviseDoc } from './lib/generate.js';
+import { lineItems, calcTotal, MAX_ADS, PRICES, LANGS, REFERRAL_DISCOUNT } from './lib/pricing.js';
+import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes } from './lib/store.js';
+import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
 import { fetchAd, AdError } from './lib/fetchAd.js';
-import { importCv, ImportError } from './lib/importCv.js';
-import { mailEnabled, sendOrderMail } from './lib/mail.js';
+import { importCv, extractText, ImportError } from './lib/importCv.js';
+import { mailEnabled, sendOrderMail, sendReminder, sendReward } from './lib/mail.js';
 import { cleanDesign } from './lib/designs.js';
 import { seoRoutes } from './lib/seo.js';
 
@@ -36,7 +36,8 @@ app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async
 
 // Prosty limit zapytań na adres IP.
 const limiter = (max, windowMs) => { const hits = new Map(); return (req) => { const now = Date.now(), h = (hits.get(req.ip) || []).filter((t) => now - t < windowMs); if (h.length >= max) return false; hits.set(req.ip, [...h, now]); return true; }; };
-const importLimit = limiter(10, 600_000), fetchLimit = limiter(20, 600_000);
+const importLimit = limiter(10, 600_000), fetchLimit = limiter(20, 600_000), scanLimit = limiter(6, 3600_000), chatLimit = limiter(30, 3600_000);
+const CODE_TTL = 90 * 24 * 3600 * 1000, REMINDER_AFTER = 7 * 24 * 3600 * 1000;
 
 // --- Import starego CV (większy limit body, więc przed globalnym parserem) ---
 app.post('/api/import', express.json({ limit: '8mb' }), async (req, res) => {
@@ -46,6 +47,23 @@ app.post('/api/import', express.json({ limit: '8mb' }), async (req, res) => {
   if (!buf.length || buf.length > 5 * 1024 * 1024) return res.status(400).json({ error: 'Plik musi mieć do 5 MB.' });
   try { res.json(await importCv(buf)); }
   catch (e) { console.error('Import CV', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się odczytać pliku. Wpisz dane ręcznie.' }); }
+});
+
+// --- Darmowy skaner CV: plik CV + treść ogłoszenia -> raport dopasowania (bez zapisywania) ---
+app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
+  if (!scanLimit(req)) return res.status(429).json({ error: 'Wykorzystano limit darmowych skanów na godzinę. Spróbuj później.' });
+  const adText = typeof req.body?.adText === 'string' ? req.body.adText.trim().slice(0, 10000) : '';
+  if (adText.length < 80) return res.status(400).json({ error: 'Wklej pełną treść ogłoszenia (min. 80 znaków).' });
+  try {
+    let cvText = typeof req.body?.cvText === 'string' ? req.body.cvText.trim() : '';
+    if (!cvText) {
+      const buf = Buffer.from(typeof req.body?.data === 'string' ? req.body.data : '', 'base64');
+      if (!buf.length || buf.length > 5 * 1024 * 1024) return res.status(400).json({ error: 'Wgraj CV (PDF, Word lub TXT do 5 MB).' });
+      cvText = await extractText(buf);
+    }
+    if (cvText.length < 60) return res.status(400).json({ error: 'CV jest za krótkie, żeby je ocenić.' });
+    res.json(await scanCv({ cvText, adText }));
+  } catch (e) { console.error('Skaner', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się ocenić CV. Spróbuj ponownie.' }); }
 });
 
 app.use(express.json({ limit: '700kb' }));
@@ -74,7 +92,21 @@ function cleanProfile(p = {}) {
     photo: typeof p.photo === 'string' && p.photo.length < 400_000 && PHOTO.test(p.photo) ? p.photo : '',
   };
 }
-const cleanAds = (ads) => arr(ads, MAX_ADS).map((a) => ({ title: str(a?.title, 100), text: str(a?.text, 10000), lang: ['pl', 'en'].includes(a?.lang) ? a.lang : 'auto' })).filter((a) => a.text.length >= 80);
+const cleanAds = (ads) => arr(ads, MAX_ADS).map((a) => ({ title: str(a?.title, 100), text: str(a?.text, 10000), lang: a?.lang in LANGS ? a.lang : 'auto' })).filter((a) => a.text.length >= 80);
+const cleanLangs = (l) => [...new Set(arr(l, 6).filter((x) => x in LANGS))];
+const normCode = (c) => str(c, 20).toUpperCase().replace(/[^A-Z0-9-]/g, '');
+
+// Sprawdza kod polecający lub rabatowy dla danego e-maila; zwraca rabat w groszach.
+async function checkCode(raw, email) {
+  const code = normCode(raw);
+  if (!code) return { discount: 0 };
+  const c = await codes.get(code);
+  if (!c || Date.now() > c.expires) return { error: 'Ten kod nie istnieje albo wygasł.' };
+  if (c.type === 'coupon' && c.used) return { error: 'Ten kod został już wykorzystany.' };
+  if (c.type === 'referral' && email && c.ownerEmail === String(email).toLowerCase()) return { error: 'Nie możesz użyć własnego kodu polecającego.' };
+  return { code, type: c.type, discount: c.amount };
+}
+const newCode = (prefix) => `${prefix}-${crypto.randomBytes(4).toString('hex').toUpperCase().slice(0, 6)}`;
 const cleanAddons = (a = {}) => ({ interview: !!a.interview, messages: !!a.messages });
 // Edytowane przez klienta CV: ten sam kształt co z generatora, przycięte długości.
 const cleanCv = (c = {}) => ({
@@ -87,9 +119,24 @@ const cleanCv = (c = {}) => ({
 });
 
 app.get('/api/config', (_req, res) => res.json({
-  demo: DEMO, ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS,
+  demo: DEMO, ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, referral: REFERRAL_DISCOUNT / 100,
   prices: Object.fromEntries(Object.entries(PRICES).map(([k, v]) => [k, v / 100])),
 }));
+
+app.get('/api/code/:code', async (req, res) => {
+  const r = await checkCode(req.params.code, req.query.email);
+  if (r.error) return res.status(404).json({ error: r.error });
+  res.json({ code: r.code, discount: r.discount / 100, label: r.type === 'referral' ? 'Kod polecający' : 'Kod rabatowy' });
+});
+
+// Asystent: krótkie odpowiedzi na pytania o CV (limit na IP).
+app.post('/api/assistant', async (req, res) => {
+  if (!chatLimit(req)) return res.status(429).json({ error: 'Za dużo pytań w krótkim czasie. Spróbuj za chwilę.' });
+  const history = arr(req.body?.messages, 12).map((m) => ({ role: m?.role === 'assistant' ? 'assistant' : 'user', content: str(m?.content, 1000) })).filter((m) => m.content);
+  if (!history.length || history[history.length - 1].role !== 'user') return res.status(400).json({ error: 'Zadaj pytanie.' });
+  try { res.json({ answer: await assistant(history) }); }
+  catch (e) { console.error('Asystent', e.message); res.status(502).json({ error: 'Asystent jest chwilowo niedostępny. Zajrzyj do FAQ albo poradnika.' }); }
+});
 
 app.post('/api/fetch-ad', async (req, res) => {
   if (!fetchLimit(req)) return res.status(429).json({ error: 'Zbyt wiele prób. Spróbuj za kilka minut lub wklej treść ogłoszenia.' });
@@ -101,7 +148,7 @@ async function checkout(order) {
   if (DEMO) return { id: order.id, demo: true };
   const session = await stripe.checkout.sessions.create({
     mode: 'payment', client_reference_id: order.id, customer_email: order.profile.email,
-    line_items: lineItems(order.pkg, order.ads.length, order.addons, !!order.parentId).map((i) => ({
+    line_items: lineItems(order.pkg, order.ads.length, order.addons, !!order.parentId, order.extraLangs, order.discount).map((i) => ({
       quantity: i.quantity, price_data: { currency: 'pln', unit_amount: i.amount, product_data: { name: i.name } },
     })),
     success_url: `${BASE_URL}/?id=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
@@ -113,15 +160,17 @@ async function checkout(order) {
 
 app.post('/api/orders', async (req, res) => {
   try {
-    const { pkg, profile, ads, consent, design, addons } = req.body || {};
+    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
     const a = cleanAds(ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
     const p = cleanProfile(profile);
     if (!p.name || !/^\S+@\S+\.\S+$/.test(p.email)) return res.status(400).json({ error: 'Podaj imię i nazwisko oraz poprawny e-mail.' });
     if (!p.experience.length && !p.education.length) return res.status(400).json({ error: 'Dodaj doświadczenie lub wykształcenie.' });
-    const ad = cleanAddons(addons);
-    const order = { id: crypto.randomUUID(), pkg, addons: ad, total: calcTotal(pkg, a.length, ad), profile: p, ads: a, design: cleanDesign(design), status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const ad = cleanAddons(addons), langs = cleanLangs(extraLangs);
+    const c = await checkCode(code, p.email);
+    if (c.error) return res.status(400).json({ error: c.error });
+    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: c.discount || 0, total: calcTotal(pkg, a.length, ad, false, langs, c.discount || 0), profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -134,15 +183,17 @@ app.post('/api/orders/:id/followup', async (req, res) => {
     if (!parent || parent.status !== 'done') return res.status(409).json({ error: 'Najpierw dokończ poprzednie zamówienie.' });
     const a = cleanAds(req.body?.ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
-    const ad = cleanAddons(req.body?.addons);
-    const order = { id: crypto.randomUUID(), parentId: parent.id, pkg: parent.pkg, addons: ad, total: calcTotal(parent.pkg, a.length, ad, true), profile: parent.profile, ads: a, design: parent.design, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const ad = cleanAddons(req.body?.addons), langs = cleanLangs(req.body?.extraLangs);
+    const c = await checkCode(req.body?.code, parent.profile.email);
+    if (c.error) return res.status(400).json({ error: c.error });
+    const order = { id: crypto.randomUUID(), parentId: parent.id, rootId: parent.rootId || parent.id, pkg: parent.pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: c.discount || 0, total: calcTotal(parent.pkg, a.length, ad, true, langs, c.discount || 0), profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
 });
 
-const view = (o) => ({
-  id: o.id, pkg: o.pkg, addons: o.addons || {}, total: o.total, status: o.status, results: o.results, error: o.error, mail: o.mail,
+const view = (o, extra = {}) => ({
+  ...extra, id: o.id, pkg: o.pkg, addons: o.addons || {}, extraLangs: o.extraLangs || [], total: o.total, status: o.status, results: o.results, error: o.error, mail: o.mail,
   design: cleanDesign(o.design), photo: o.profile.photo || '', email: o.profile.email, parentId: o.parentId || null,
   revisionsLeft: MAX_REVISIONS - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
 });
@@ -155,7 +206,13 @@ app.get('/api/orders/:id', async (req, res) => {
     const s = await stripe.checkout.sessions.retrieve(o.stripeSession).catch(() => null);
     if (s?.payment_status === 'paid') { await markPaidAndGenerate(o.id); o = await getOrder(o.id); }
   }
-  res.json(view(o));
+  // Kod polecający klienta i nagrody (kody rabatowe za poleconych znajomych).
+  let referral = null;
+  if (o.status === 'done' && o.referralCode) {
+    const r = await codes.get(o.referralCode), all = await codes.all();
+    referral = { code: o.referralCode, discount: REFERRAL_DISCOUNT / 100, uses: r?.uses || 0, rewards: Object.values(all).filter((x) => x.type === 'coupon' && x.ownerOrderId === (r?.ownerOrderId) && !x.used).map((x) => x.id) };
+  }
+  res.json(view(o, { referral }));
 });
 
 // Tylko tryb DEMO: symulacja płatności.
@@ -175,6 +232,28 @@ async function trySend(order) {
   catch (e) { console.error('Wysyłka e-mail nie powiodła się', order.id, e.message); return { status: 'failed', to, at: Date.now() }; }
 }
 
+// Po opłaceniu: zużywamy kupon, nagradzamy polecającego i tworzymy kod polecający dla klienta.
+async function afterPaid(o) {
+  try {
+    if (o.code) {
+      const c = await codes.get(o.code);
+      if (c?.type === 'coupon') await codes.update(c.id, { used: true, usedBy: o.id });
+      if (c?.type === 'referral') {
+        await codes.update(c.id, (x) => ({ ...x, uses: (x.uses || 0) + 1 }));
+        const reward = { id: newCode('NAGRODA'), type: 'coupon', amount: REFERRAL_DISCOUNT, ownerEmail: c.ownerEmail, ownerOrderId: c.ownerOrderId, used: false, created: Date.now(), expires: Date.now() + CODE_TTL };
+        await codes.save(reward);
+        if (mailEnabled()) sendReward(c.ownerEmail, reward, BASE_URL, c.ownerOrderId).catch((e) => console.error('Mail nagrody', e.message));
+      }
+    }
+    const root = o.rootId || o.parentId || o.id;
+    const existing = Object.values(await codes.all()).find((c) => c.type === 'referral' && c.ownerOrderId === root);
+    if (existing) return existing.id;
+    const ref = { id: newCode('POLEC'), type: 'referral', amount: REFERRAL_DISCOUNT, ownerEmail: o.profile.email.toLowerCase(), ownerOrderId: root, uses: 0, created: Date.now(), expires: Date.now() + CODE_TTL };
+    await codes.save(ref);
+    return ref.id;
+  } catch (e) { console.error('Kody po płatności', o.id, e.message); return null; }
+}
+
 const inFlight = new Set();
 async function markPaidAndGenerate(id) {
   const o = await getOrder(id);
@@ -183,9 +262,15 @@ async function markPaidAndGenerate(id) {
   try {
     await updateOrder(id, { status: 'generating' });
     const withLetter = o.pkg === 'cv_letter';
-    const results = await Promise.all(o.ads.map((ad) => generateForAd({ profile: o.profile, ad, withLetter, addons: o.addons })));
-    const mail = await trySend({ ...o, results });
-    await updateOrder(id, { status: 'done', results, mail });
+    const results = await Promise.all(o.ads.map(async (ad) => {
+      const r = await generateForAd({ profile: o.profile, ad, withLetter, addons: o.addons });
+      const langs = (o.extraLangs || []).filter((l) => l !== r.lang);
+      if (langs.length) r.variants = Object.fromEntries(await Promise.all(langs.map(async (l) => [l, await translateResult(r, l)])));
+      return r;
+    }));
+    const referralCode = await afterPaid(o);
+    const mail = await trySend({ ...o, results, referralCode });
+    await updateOrder(id, { status: 'done', results, mail, referralCode });
   } catch (e) {
     console.error('Generowanie nie powiodło się', id, e);
     await updateOrder(id, { status: 'paid', error: 'Generowanie nie powiodło się. Spróbuj ponownie.' });
@@ -203,12 +288,14 @@ const doneOrder = async (req, res) => {
 // Ręczna edycja treści przez klienta.
 app.put('/api/orders/:id/results/:i', async (req, res) => {
   const d = await doneOrder(req, res); if (!d) return;
-  const r = { ...d.o.results[d.i] };
+  const lang = str(req.body?.lang, 5), base = d.o.results[d.i];
+  const r = { ...(base.variants?.[lang] || base) };
   if (req.body?.cv) r.cv = cleanCv(req.body.cv);
   if (typeof req.body?.letter === 'string' && d.o.pkg === 'cv_letter') r.letter = str(req.body.letter, 8000);
-  const results = d.o.results.map((x, k) => (k === d.i ? r : x));
+  const merged = base.variants?.[lang] ? { ...base, variants: { ...base.variants, [lang]: r } } : { ...r, variants: base.variants };
+  const results = d.o.results.map((x, k) => (k === d.i ? merged : x));
   await updateOrder(d.o.id, { results });
-  res.json({ result: r });
+  res.json({ result: merged });
 });
 
 // Darmowa poprawka: klient opisuje zmianę, AI poprawia dokument (limit na zamówienie).
@@ -220,17 +307,19 @@ app.post('/api/orders/:id/revise', async (req, res) => {
   const instruction = str(req.body?.instruction, 500);
   if (instruction.length < 3) return res.status(400).json({ error: 'Opisz, co zmienić.' });
   try {
-    const out = await reviseDoc({ profile: o.profile, ad: o.ads[i], result: o.results[i], doc, instruction });
-    const r = { ...o.results[i], ...(doc === 'letter' ? { letter: str(out.letter, 8000) } : { cv: cleanCv(out.cv) }) };
+    const lang = str(req.body?.lang, 5), base = o.results[i], target = base.variants?.[lang] || base;
+    const out = await reviseDoc({ profile: o.profile, ad: o.ads[i], result: target, doc, instruction });
+    const r = { ...target, ...(doc === 'letter' ? { letter: str(out.letter, 8000) } : { cv: cleanCv(out.cv) }) };
     // Klient dopisał brakujące wymaganie: przenosimy je w raporcie do spełnionych.
     const resolves = str(req.body?.resolves, 120);
     if (resolves && r.match?.missing?.some((m) => m.keyword === resolves)) {
       const found = [...r.match.found, resolves], missing = r.match.missing.filter((m) => m.keyword !== resolves);
       r.match = { found, missing, score: Math.round((100 * found.length) / (found.length + missing.length)) };
     }
-    const results = o.results.map((x, k) => (k === i ? r : x));
+    const merged = base.variants?.[lang] ? { ...base, variants: { ...base.variants, [lang]: r } } : { ...r, variants: base.variants };
+    const results = o.results.map((x, k) => (k === i ? merged : x));
     await updateOrder(o.id, { results, revisions: (o.revisions || 0) + 1 });
-    res.json({ result: r, note: str(out.note, 300), revisionsLeft: MAX_REVISIONS - (o.revisions || 0) - 1 });
+    res.json({ result: merged, note: str(out.note, 300), revisionsLeft: MAX_REVISIONS - (o.revisions || 0) - 1 });
   } catch (e) {
     console.error('Poprawka', o.id, e.message);
     res.status(502).json({ error: e instanceof AiRefusal ? 'Nie możemy wprowadzić tej zmiany. Spróbuj opisać ją inaczej.' : 'Poprawka się nie udała. Spróbuj ponownie za chwilę.' });
@@ -264,7 +353,20 @@ app.post('/api/orders/:id/retry', async (req, res) => {
 });
 
 // Dane zamówień (w tym zdjęcia) kasujemy po 30 dniach.
-const cleanup = () => deleteOlderThan(RETENTION_MS).then((n) => n && console.log(`Usunięto ${n} zamówień starszych niż 30 dni`)).catch(console.error);
-cleanup(); setInterval(cleanup, 3600_000).unref();
+// Co godzinę: kasowanie starych zamówień i kodów oraz jednorazowe przypomnienie po 7 dniach (tylko za zgodą klienta).
+async function hourly() {
+  try {
+    const n = await deleteOlderThan(RETENTION_MS);
+    if (n) console.log(`Usunięto ${n} zamówień starszych niż 30 dni`);
+    await codes.deleteWhere((c) => Date.now() > c.expires);
+    if (!mailEnabled()) return;
+    for (const o of Object.values(await allOrders())) {
+      if (o.status !== 'done' || !o.reminder?.consent || o.reminder.sent || Date.now() - o.created < REMINDER_AFTER) continue;
+      try { await sendReminder(o, BASE_URL); await updateOrder(o.id, (x) => ({ ...x, reminder: { ...x.reminder, sent: true, at: Date.now() } })); }
+      catch (e) { console.error('Przypomnienie', o.id, e.message); }
+    }
+  } catch (e) { console.error('Zadanie cogodzinne', e); }
+}
+hourly(); setInterval(hourly, 3600_000).unref();
 
 app.listen(PORT, () => console.log(`http://localhost:${PORT}  ${DEMO ? '[TRYB DEMO – brak STRIPE_SECRET_KEY]' : ''}${aiEnabled() ? '' : ' [bez AI – brak ANTHROPIC_API_KEY]'}`));

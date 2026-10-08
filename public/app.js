@@ -2,7 +2,8 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const el = (t, p = {}, ...k) => { const e = Object.assign(document.createElement(t), p); e.append(...k.filter((x) => x != null && x !== false)); return e; };
-let PRICE = { cv: 39, cv_letter: 49, extra: 20, interview: 15, messages: 9 };
+let PRICE = { cv: 39, cv_letter: 49, extra: 20, interview: 15, messages: 9, extraLang: 5 };
+let promo = null; // zastosowany kod rabatowy/polecający: { code, discount, label }
 let data; // bieżące zamówienie na stronie wyniku
 const STEPS = ['Pakiet i wygląd CV', 'Twoje dane', 'Doświadczenie', 'Wykształcenie i umiejętności', 'Ogłoszenia', 'Podsumowanie'];
 let cfg = { demo: false, maxAds: 5, noPrint: false, maxRevisions: 10 };
@@ -28,7 +29,12 @@ function paperEl(cls, d) { const p = el('div', { className: `paper t-${d.tpl} ${
 const LBL = {
   pl: { summary: 'Profil zawodowy', exp: 'Doświadczenie zawodowe', edu: 'Wykształcenie', skills: 'Umiejętności', langs: 'Języki', certs: 'Certyfikaty i kursy', interests: 'Zainteresowania', contact: 'Kontakt', locale: 'pl-PL' },
   en: { summary: 'Professional summary', exp: 'Work experience', edu: 'Education', skills: 'Skills', langs: 'Languages', certs: 'Certifications', interests: 'Interests', contact: 'Contact', locale: 'en-GB' },
+  de: { summary: 'Profil', exp: 'Berufserfahrung', edu: 'Ausbildung', skills: 'Kenntnisse', langs: 'Sprachen', certs: 'Zertifikate und Kurse', interests: 'Interessen', contact: 'Kontakt', locale: 'de-DE' },
+  uk: { summary: 'Професійний профіль', exp: 'Досвід роботи', edu: 'Освіта', skills: 'Навички', langs: 'Мови', certs: 'Сертифікати та курси', interests: 'Інтереси', contact: 'Контакти', locale: 'uk-UA' },
+  es: { summary: 'Perfil profesional', exp: 'Experiencia laboral', edu: 'Formación', skills: 'Habilidades', langs: 'Idiomas', certs: 'Certificados y cursos', interests: 'Intereses', contact: 'Contacto', locale: 'es-ES' },
+  fr: { summary: 'Profil professionnel', exp: 'Expérience professionnelle', edu: 'Formation', skills: 'Compétences', langs: 'Langues', certs: 'Certifications et formations', interests: "Centres d'intérêt", contact: 'Contact', locale: 'fr-FR' },
 };
+const LANGS = { pl: 'polski', en: 'angielski', de: 'niemiecki', uk: 'ukraiński', es: 'hiszpański', fr: 'francuski' };
 function parts(c, kw, lang = 'pl', photo = '') {
   const L = LBL[lang] || LBL.pl;
   const contact = (c.contact || []).filter(Boolean);
@@ -117,7 +123,7 @@ function hl(text, kws) {
 }
 
 fetch('/api/config').then((r) => r.json()).then((c) => {
-  cfg = c; drawLists(); if (c.prices) PRICE = { cv: c.prices.cv, cv_letter: c.prices.cv_letter, extra: c.prices.extraAd, interview: c.prices.interview, messages: c.prices.messages }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
+  cfg = c; drawLists(); if (c.prices) PRICE = { cv: c.prices.cv, cv_letter: c.prices.cv_letter, extra: c.prices.extraAd, interview: c.prices.interview, messages: c.prices.messages, extraLang: c.prices.extraLang }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
 });
 
 /* ---------- Przykład dopasowania ---------- */
@@ -275,7 +281,7 @@ const rowT = {
   edu: () => `<div class="grid4"><label class="f">Szkoła<input type="text" data-k="school"></label><label class="f">Kierunek / tytuł<input type="text" data-k="degree"></label><label class="f">Od<input type="text" data-k="from"></label><label class="f">Do<input type="text" data-k="to"></label></div>`,
   ads: () => `<div class="seg modes" role="tablist"><button type="button" role="tab" data-mode="link">Link do ogłoszenia</button><button type="button" role="tab" data-mode="paste">Wklej treść</button></div>
 <div class="linkbox"><label class="f">Adres ogłoszenia<span class="urlrow"><input type="text" data-k="url" inputmode="url" placeholder="https://…"><button type="button" class="btn sm fetchbtn">Pobierz</button></span></label><div class="fstatus" role="status"></div></div>
-<div class="adfields"><label class="adlang">Język dokumentów <select data-k="lang"><option value="auto">jak w ogłoszeniu</option><option value="pl">polski</option><option value="en">angielski</option></select></label><label class="f">Nazwa stanowiska<input type="text" data-k="title" placeholder="np. Kasjer / Sprzedawca"></label><label class="f">Treść ogłoszenia <span class="h">sprawdź i w razie potrzeby popraw</span><textarea data-k="text" style="min-height:150px"></textarea></label></div>`,
+<div class="adfields"><label class="adlang">Język dokumentów <select data-k="lang"><option value="auto">jak w ogłoszeniu</option><option value="pl">polski</option><option value="en">angielski</option><option value="de">niemiecki</option><option value="uk">ukraiński</option><option value="es">hiszpański</option><option value="fr">francuski</option></select></label><label class="f">Nazwa stanowiska<input type="text" data-k="title" placeholder="np. Kasjer / Sprzedawca"></label><label class="f">Treść ogłoszenia <span class="h">sprawdź i w razie potrzeby popraw</span><textarea data-k="text" style="min-height:150px"></textarea></label></div>`,
 };
 const label = { exp: 'Stanowisko', edu: 'Szkoła', ads: 'Ogłoszenie', fuAds: 'Ogłoszenie' };
 function addRow(box, v = {}) {
@@ -328,15 +334,17 @@ const rows = (box) => $$('#' + box + ' .entry').map((e) => Object.fromEntries($$
 const pkg = () => $('input[name=pkg]:checked').value;
 const nAds = () => Math.max(1, $('#ads').children.length);
 const addons = () => ({ interview: $('#adInterview').checked, messages: $('#adMessages').checked });
-const addonsTotal = () => (addons().interview ? PRICE.interview : 0) + (addons().messages ? PRICE.messages : 0);
-const total = () => PRICE[pkg()] + PRICE.extra * (nAds() - 1) + addonsTotal();
+const extraLangs = () => $$('#langPick input:checked').map((i) => i.value);
+const addonsTotal = () => (addons().interview ? PRICE.interview : 0) + (addons().messages ? PRICE.messages : 0) + PRICE.extraLang * extraLangs().length;
+const discount = () => (promo ? Math.min(promo.discount, PRICE[pkg()] - 2) : 0);
+const total = () => PRICE[pkg()] + PRICE.extra * (nAds() - 1) + addonsTotal() - discount();
 
 const DKEY = 'cvpo-draft-v1', FIELDS = ['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'];
 let saveT, restoring = false;
 function saveDraft() {
   if (restoring) return;
   clearTimeout(saveT);
-  saveT = setTimeout(() => { try { localStorage.setItem(DKEY, JSON.stringify({ design, photo, addons: addons(), pkg: pkg(), f: Object.fromEntries(FIELDS.map((k) => [k, $('#' + k).value])), exp: rows('exp'), edu: rows('edu'), ads: rows('ads') })); } catch {} }, 300);
+  saveT = setTimeout(() => { try { localStorage.setItem(DKEY, JSON.stringify({ design, photo, addons: addons(), langs: extraLangs(), pkg: pkg(), f: Object.fromEntries(FIELDS.map((k) => [k, $('#' + k).value])), exp: rows('exp'), edu: rows('edu'), ads: rows('ads') })); } catch {} }, 300);
 }
 const clearDraft = () => { try { localStorage.removeItem(DKEY); } catch {} };
 function restoreDraft() {
@@ -348,6 +356,7 @@ function restoreDraft() {
   if (d.design && COLORS[d.design.color] && TPLS.some((t) => t[0] === d.design.tpl)) design = { ...d.design };
   FIELDS.forEach((k) => ($('#' + k).value = d.f[k] || ''));
   if (d.addons) { $('#adInterview').checked = !!d.addons.interview; $('#adMessages').checked = !!d.addons.messages; }
+  (d.langs || []).forEach((l) => { const i = $(`#langPick input[value="${l}"]`); if (i) i.checked = true; });
   setPhoto(d.photo || '');
   ['exp', 'edu', 'ads'].forEach((b) => { $('#' + b).replaceChildren(); (d[b]?.length ? d[b] : [{}]).forEach((v) => addRow(b, v)); });
   restoring = false; refresh();
@@ -356,13 +365,34 @@ function restoreDraft() {
 function refresh() {
   saveDraft();
   $('#total').textContent = total() + ' zł';
-  $('#brk').textContent = [nAds() > 1 ? `${PRICE[pkg()]} zł + ${nAds() - 1} × ${PRICE.extra} zł` : '', addonsTotal() ? `dodatki ${addonsTotal()} zł` : ''].filter(Boolean).join(' · ');
+  $('#brk').textContent = [nAds() > 1 ? `${PRICE[pkg()]} zł + ${nAds() - 1} × ${PRICE.extra} zł` : '', addonsTotal() ? `dodatki ${addonsTotal()} zł` : '', discount() ? `rabat −${discount()} zł` : ''].filter(Boolean).join(' · ');
   $$('.opt b[data-price]').forEach((b) => (b.textContent = `+${PRICE[b.dataset.price]} zł`));
   $('#addAd').disabled = nAds() >= cfg.maxAds;
   $('#addAd').title = nAds() >= cfg.maxAds ? `Maksymalnie ${cfg.maxAds} ogłoszeń w jednym zamówieniu` : '';
 }
 $$('input[name=pkg]').forEach((r) => (r.onchange = refresh));
 $('#adInterview').onchange = $('#adMessages').onchange = refresh;
+$('#langPick').replaceChildren(...Object.entries(LANGS).map(([k, n]) => el('label', { className: 'chk' }, el('input', { type: 'checkbox', value: k, onchange: refresh }), ` ${n}`)));
+
+/* kod rabatowy lub polecający */
+const REF_KEY = 'cvpo-ref';
+async function applyCode(raw, quiet) {
+  const code = String(raw || '').trim().toUpperCase(), st = $('#codeMsg');
+  if (!code) { promo = null; refresh(); st.textContent = ''; return; }
+  try {
+    const r = await fetch(`/api/code/${encodeURIComponent(code)}?email=${encodeURIComponent($('#email').value)}`);
+    const j = await r.json(); if (!r.ok) throw new Error(j.error);
+    promo = j; st.className = 'fstatus good'; st.textContent = `${j.label}: −${j.discount} zł`;
+  } catch (x) { promo = null; if (!quiet) { st.className = 'fstatus bad'; st.textContent = x.message; } }
+  refresh(); if (step === 6) drawSummary();
+}
+$('#codeApply').onclick = () => applyCode($('#codeInput').value);
+{
+  const ref = new URLSearchParams(location.search).get('ref');
+  try { if (ref) localStorage.setItem(REF_KEY, ref); } catch {}
+  let saved = ref; try { saved = saved || localStorage.getItem(REF_KEY); } catch {}
+  if (saved) { $('#codeInput').value = saved; $('#refBanner').hidden = false; }
+}
 $('#wizForm').addEventListener('input', saveDraft);
 $('#addExp').onclick = () => addRow('exp');
 $('#addEdu').onclick = () => addRow('edu');
@@ -377,7 +407,7 @@ function go(n) {
   $('#back').hidden = n === 1 || n === 7;
   $('#next').hidden = n === 7;
   $('#next').textContent = n === 6 ? (cfg.demo ? `Przejdź do płatności · ${total()} zł` : `Zapłać ${total()} zł`) : 'Dalej';
-  if (n === 6) drawSummary();
+  if (n === 6) { if ($('#codeInput').value && !promo) applyCode($('#codeInput').value, true); drawSummary(); }
   $('#werr').textContent = '';
   $('.wiz-body').scrollTop = 0;
 }
@@ -389,6 +419,8 @@ function drawSummary() {
     ...ads.map((a, i) => el('div', { className: 'sumrow' }, el('span', { textContent: `Ogłoszenie ${i + 1}: ${a.title}${a.lang === 'en' ? ' (po angielsku)' : ''}` }), el('span', { textContent: i === 0 ? 'w cenie' : '+' + PRICE.extra + ' zł' }))),
     ...(addons().interview ? [el('div', { className: 'sumrow' }, el('span', { textContent: 'Przygotowanie do rozmowy' }), el('span', { textContent: '+' + PRICE.interview + ' zł' }))] : []),
     ...(addons().messages ? [el('div', { className: 'sumrow' }, el('span', { textContent: 'Wiadomość do rekrutera i e-mail z aplikacją' }), el('span', { textContent: '+' + PRICE.messages + ' zł' }))] : []),
+    ...extraLangs().map((l) => el('div', { className: 'sumrow' }, el('span', { textContent: `Dodatkowa wersja: ${LANGS[l]}` }), el('span', { textContent: '+' + PRICE.extraLang + ' zł' }))),
+    ...(discount() ? [el('div', { className: 'sumrow' }, el('span', { textContent: `${promo.label} ${promo.code}` }), el('span', { textContent: '−' + discount() + ' zł' }))] : []),
     el('div', { className: 'sumrow' }, el('span', { textContent: 'Razem' }), el('span', { textContent: total() + ' zł' })));
 }
 function validate(n) {
@@ -428,7 +460,7 @@ $('#wizForm').onsubmit = async (e) => {
   if (step < 6) return go(step + 1);
   const v = (id) => $('#' + id).value;
   const body = {
-    design, addons: addons(), pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   $('#next').disabled = true;
@@ -468,15 +500,19 @@ $('#photoFile').onchange = (e) => {
 $('#photoDel').onclick = () => { setPhoto(''); saveDraft(); };
 
 /* import starego CV */
+const fileB64 = (file) => new Promise((ok, no) => { const fr = new FileReader(); fr.onload = () => ok(String(fr.result).split(',')[1]); fr.onerror = no; fr.readAsDataURL(file); });
 $('#importFile').onchange = async (e) => {
   const file = e.target.files[0]; e.target.value = '';
   const st = $('#importStatus'); st.className = 'fstatus';
   if (!file) return;
   if (file.size > 5 * 1024 * 1024) { st.textContent = 'Plik musi mieć do 5 MB.'; st.classList.add('bad'); return; }
+  importData(await fileB64(file));
+};
+async function importData(b64) {
+  const st = $('#importStatus'); st.className = 'fstatus';
   st.textContent = 'Czytam Twoje CV…';
   try {
-    const b64 = await new Promise((ok, no) => { const fr = new FileReader(); fr.onload = () => ok(String(fr.result).split(',')[1]); fr.onerror = no; fr.readAsDataURL(file); });
-    const r = await fetch('/api/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: file.name, data: b64 }) });
+    const r = await fetch('/api/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: b64 }) });
     const j = await r.json(); if (!r.ok) throw new Error(j.error);
     const p = j.profile || {};
     FIELDS.forEach((k) => { if (p[k] && !$('#' + k).value.trim()) $('#' + k).value = p[k]; });
@@ -488,7 +524,60 @@ $('#importFile').onchange = async (e) => {
     if (cfg.preview) st.textContent += ' Podgląd: zamiast odczytu pliku wstawiamy przykładowe dane.';
     st.classList.add('good');
   } catch (x) { st.textContent = x.message || 'Nie udało się odczytać pliku.'; st.classList.add('bad'); }
+}
+
+/* darmowy skaner CV */
+let scanData = null;
+$('#scanFile').onchange = (e) => ($('#scanFileName').textContent = e.target.files[0]?.name || 'nie wybrano pliku');
+$('#scanForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const msg = $('#scanMsg'), file = $('#scanFile').files[0];
+  let ad = $('#scanAd').value.trim(), title = '';
+  msg.className = 'fstatus';
+  const fail = (t) => { msg.className = 'fstatus bad'; msg.textContent = t; };
+  if (!file) return fail('Wybierz plik ze swoim CV.');
+  if (file.size > 5 * 1024 * 1024) return fail('Plik musi mieć do 5 MB.');
+  if (!ad) return fail('Wklej link do ogłoszenia albo jego treść.');
+  $('#scanBtn').disabled = true;
+  try {
+    if (/^https?:\/\/\S+$/i.test(ad)) {
+      msg.textContent = 'Pobieram ogłoszenie…';
+      const r = await fetch('/api/fetch-ad', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: ad }) });
+      const j = await r.json(); if (!r.ok) throw new Error(`${j.error} Wklej treść ogłoszenia zamiast linku.`);
+      ad = j.text; title = j.title;
+    }
+    if (ad.length < 80) throw new Error('Wklej pełną treść ogłoszenia (min. 80 znaków).');
+    msg.textContent = 'Porównujemy Twoje CV z ogłoszeniem…';
+    const b64 = await fileB64(file);
+    const r = await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: b64, adText: ad }) });
+    const j = await r.json(); if (!r.ok) throw new Error(j.error);
+    // Nazwa stanowiska: z linku, z oceny AI albo z pierwszego zdania ogłoszenia.
+    const guess = ad.split(/[.\n]/)[0].replace(/^(poszukujemy|szukamy|zatrudnimy|zatrudni[mę]?)\s+/i, '').trim().slice(0, 60);
+    scanData = { b64, adText: ad, title: title || j.position || guess.charAt(0).toUpperCase() + guess.slice(1) };
+    msg.textContent = ''; renderScan(j);
+  } catch (x) { fail(x.message); }
+  $('#scanBtn').disabled = false;
 };
+function renderScan(j) {
+  const box = $('#scanResult'), total = j.found.length + j.missing.length, pct = j.score ?? 0;
+  box.replaceChildren(
+    el('div', { className: 'ring', style: `--p:${pct}` }, el('b', { textContent: `${pct}%` })),
+    el('div', { className: 'mcol ok' }, el('h3', { textContent: `Spełniasz ${j.found.length} z ${total} wymagań${j.position ? ': ' + j.position : ''}` }), el('ul', {}, ...j.found.map((x) => el('li', { textContent: x })))),
+    el('div', { className: 'mcol miss' }, el('h3', { textContent: j.missing.length ? 'Czego nie widać w Twoim CV' : 'Niczego nie brakuje' }), el('ul', {}, ...j.missing.map((m) => el('li', {}, el('b', { textContent: m.keyword }), el('small', { textContent: m.hint }))))),
+    j.tips?.length ? el('div', { className: 'tips' }, el('h3', { textContent: 'Co poprawić' }), el('ol', {}, ...j.tips.map((t) => el('li', { textContent: t })))) : null,
+    el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Zrób CV pisane pod to ogłoszenie' }), el('p', { className: 'hint', textContent: 'Uzupełnimy formularz danymi z Twojego pliku, ułożymy CV pod te wymagania, a brakujące rzeczy, które masz, dopiszesz jednym kliknięciem. Od 39 zł, z darmową poprawką.' })),
+      el('button', { type: 'button', className: 'btn', textContent: 'Zrób CV pod to ogłoszenie', onclick: fromScan })));
+  box.hidden = false; box.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+}
+function fromScan() {
+  if (!scanData) return;
+  const first = $('#ads .entry');
+  if (first && !$('[data-k=text]', first).value.trim()) {
+    $('[data-k=title]', first).value = scanData.title || ''; $('[data-k=text]', first).value = scanData.adText;
+    first.dataset.fetched = '1'; setMode(first, 'paste');
+  }
+  openWiz(); go(2); importData(scanData.b64);
+}
 
 /* dane przykładowe (tryb DEMO) */
 $('#fill').onclick = () => {
@@ -540,6 +629,8 @@ function drawMail() {
 const DOCS = { cv: 'CV', letter: 'List motywacyjny', interview: 'Rozmowa', messages: 'Wiadomości' };
 const docsOf = (r) => ['cv', ...(data.pkg === 'cv_letter' ? ['letter'] : []), ...(r.interview?.length ? ['interview'] : []), ...(r.messages ? ['messages'] : [])];
 let editing = null; // kopia dokumentu w trakcie ręcznej edycji
+let curLang = null; // aktywna dodatkowa wersja językowa (null = główny język)
+const cur = () => { const b = data.results[curAd]; return (curLang && b.variants?.[curLang]) || b; };
 
 function interviewNode(r, d) {
   const p = paperEl('extra', { tpl: 'klasyczny', color: d.color });
@@ -585,7 +676,7 @@ async function revise(doc, instruction, resolves, btn) {
   const out = $('#reviseMsg');
   if (out) { out.className = 'hint'; out.textContent = 'Poprawiamy dokument…'; }
   try {
-    const r = await fetch(`/api/orders/${orderId}/revise`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ i: curAd, doc, instruction, resolves }) });
+    const r = await fetch(`/api/orders/${orderId}/revise`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ i: curAd, lang: curLang, doc, instruction, resolves }) });
     const j = await r.json(); if (!r.ok) throw new Error(j.error);
     data.results[curAd] = j.result; data.revisionsLeft = j.revisionsLeft;
     redraw();
@@ -613,7 +704,7 @@ function openRevise() {
 }
 
 function openEditor() {
-  const box = $('#editor'), r = data.results[curAd], doc = curDoc === 'letter' ? 'letter' : 'cv';
+  const box = $('#editor'), r = cur(), doc = curDoc === 'letter' ? 'letter' : 'cv';
   $('#reviseBox').hidden = true;
   editing = { doc, cv: JSON.parse(JSON.stringify(r.cv)), letter: r.letter };
   const fld = (label, value, on, rowsN) => { const i = rowsN ? el('textarea', { value, rows: rowsN }) : el('input', { type: 'text', value }); i.oninput = () => { on(i.value); drawPaper(); }; return el('label', { className: 'f' }, label, i); };
@@ -630,7 +721,7 @@ function openEditor() {
   box.replaceChildren(el('h3', { textContent: doc === 'cv' ? 'Edytuj CV' : 'Edytuj list motywacyjny' }), el('p', { className: 'hint', textContent: 'Zmiany widzisz od razu w dokumencie poniżej.' }), el('div', { className: 'editor-grid' }, ...body),
     el('p', {}, el('button', { type: 'button', className: 'btn', textContent: 'Zapisz zmiany', onclick: async (e) => {
       e.target.disabled = true;
-      const r2 = await fetch(`/api/orders/${orderId}/results/${curAd}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(doc === 'cv' ? { cv: editing.cv } : { letter: editing.letter }) });
+      const r2 = await fetch(`/api/orders/${orderId}/results/${curAd}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lang: curLang, ...(doc === 'cv' ? { cv: editing.cv } : { letter: editing.letter }) }) });
       const j = await r2.json().catch(() => ({}));
       if (r2.ok) { data.results[curAd] = j.result; editing = null; box.hidden = true; redraw(); flash('Zapisano zmiany.'); } else { e.target.disabled = false; flash(j.error || 'Nie udało się zapisać.', true); }
     } }), ' ', el('button', { type: 'button', className: 'btn ghost', textContent: 'Anuluj', onclick: () => { editing = null; box.hidden = true; drawPaper(); } })));
@@ -638,7 +729,7 @@ function openEditor() {
 }
 
 function drawPaper() {
-  const base = data.results[curAd], r = editing ? { ...base, cv: editing.cv, letter: editing.letter } : base, d = data.design;
+  const base = cur(), r = editing ? { ...base, cv: editing.cv, letter: editing.letter } : base, d = data.design;
   const node = { cv: () => cvNode(r, undefined, d), letter: () => letterNode(r, d), interview: () => interviewNode(r, d), messages: () => messagesNode(r, d) }[curDoc];
   $('#paper').replaceChildren(node());
 }
@@ -652,13 +743,14 @@ function drawFollowup() {
   box.replaceChildren(el('h3', { textContent: 'Masz kolejne ogłoszenie?' }),
     el('p', { className: 'hint', textContent: `Twoje dane już mamy. ${doc} pod nowe ogłoszenie kosztuje ${PRICE.extra} zł, w tym samym wyglądzie.` }),
     el('div', { id: 'fuAds' }),
+    el('label', { className: 'f fucode' }, 'Kod rabatowy (np. nagroda za polecenie) ', el('input', { type: 'text', id: 'fuCode', placeholder: 'opcjonalnie', autocomplete: 'off' })),
     el('p', {}, el('button', { type: 'button', className: 'btn', id: 'fuPay', textContent: `Zamów za ${PRICE.extra} zł`, onclick: async (e) => {
-      const ads = rows('fuAds'), err = $('#fuErr');
+      const ads = rows('fuAds'), err = $('#fuErr'), code = $('#fuCode').value.trim();
       const bad = ads.find((a) => !a.title || a.text.length < 80);
       if (bad) { err.textContent = 'Podaj nazwę stanowiska i pełną treść ogłoszenia (min. 80 znaków).'; return; }
       e.target.disabled = true; err.textContent = '';
       try {
-        const r = await fetch(`/api/orders/${orderId}/followup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ads }) });
+        const r = await fetch(`/api/orders/${orderId}/followup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ads, code }) });
         const j = await r.json(); if (!r.ok) throw new Error(j.error);
         if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); delete box.dataset.ready; startResult(j.id); } else location.href = j.url;
       } catch (x) { err.textContent = x.message; e.target.disabled = false; }
@@ -667,15 +759,33 @@ function drawFollowup() {
   addRow('fuAds');
 }
 
+function drawReferral() {
+  const box = $('#referral'), r = data.referral;
+  box.hidden = !r;
+  if (!r) return;
+  const link = cfg.preview ? `https://twojadomena.pl/?ref=${r.code}` : `${location.origin}/?ref=${r.code}`;
+  box.replaceChildren(el('h3', { textContent: `Poleć nas i zyskaj ${r.discount} zł` }),
+    el('p', { className: 'hint', textContent: `Znajomy z Twoim kodem zapłaci ${r.discount} zł mniej, a Ty dostaniesz kod na ${r.discount} zł rabatu za każde jego zamówienie.` }),
+    el('div', { className: 'refrow' }, el('code', { textContent: r.code }), el('input', { type: 'text', readOnly: true, value: link, ariaLabel: 'Link polecający', onfocus: (e) => e.target.select() }),
+      el('button', { type: 'button', className: 'btn sm', textContent: 'Kopiuj link', onclick: async (e) => { try { await navigator.clipboard.writeText(link); e.target.textContent = 'Skopiowano'; } catch { e.target.previousSibling.select(); e.target.textContent = 'Zaznaczono, skopiuj'; } } })),
+    el('p', { className: 'hint', textContent: r.uses ? `Z Twojego kodu skorzystało osób: ${r.uses}.` : 'Nikt jeszcze nie użył Twojego kodu.' }),
+    ...(r.rewards?.length ? [el('p', { className: 'rewards' }, el('b', { textContent: 'Twoje kody nagród: ' }), r.rewards.join(', '), ' (wpisz przy kolejnym ogłoszeniu poniżej)')] : []));
+}
+
 let redraw = () => {};
 function showResult() {
-  clearDraft();
+  clearDraft(); try { localStorage.removeItem(REF_KEY); } catch {}
   $('#result').hidden = false; window.scrollTo(0, 0);
   curAd = Math.min(curAd, data.results.length - 1);
   const draw = () => {
-    const r = data.results[curAd], docs = docsOf(r);
+    const base = data.results[curAd], vl = Object.keys(base.variants || {});
+    if (curLang && !vl.includes(curLang)) curLang = null;
+    const r = cur(), docs = docsOf(r);
+    $('#langTabs').replaceChildren(...[null, ...vl].map((l) => el('button', { type: 'button', role: 'tab', ariaSelected: String(l === curLang), textContent: (l || base.lang || 'pl').toUpperCase(), title: LANGS[l || base.lang || 'pl'], onclick: () => { curLang = l; editing = null; $('#editor').hidden = $('#reviseBox').hidden = true; draw(); } })));
+    $('#langTabs').hidden = !vl.length;
+    $('#untrNote').hidden = !r.untranslated;
     if (!docs.includes(curDoc)) curDoc = 'cv';
-    $('#adTabs').replaceChildren(...data.results.map((x, i) => el('button', { type: 'button', role: 'tab', textContent: `${i + 1}. ${(x.position || '').slice(0, 32)}${x.lang === 'en' ? ' (EN)' : ''}`, onclick: () => { curAd = i; editing = null; $('#editor').hidden = $('#reviseBox').hidden = true; draw(); } })));
+    $('#adTabs').replaceChildren(...data.results.map((x, i) => el('button', { type: 'button', role: 'tab', textContent: `${i + 1}. ${(x.position || '').slice(0, 32)}${x.lang === 'en' ? ' (EN)' : ''}`, onclick: () => { curAd = i; curLang = null; editing = null; $('#editor').hidden = $('#reviseBox').hidden = true; draw(); } })));
     $$('#adTabs button').forEach((b, i) => b.setAttribute('aria-selected', i === curAd));
     $('#adTabs').hidden = data.results.length < 2;
     $('#docTabs').replaceChildren(...docs.map((k) => el('button', { type: 'button', role: 'tab', textContent: DOCS[k], onclick: () => { curDoc = k; editing = null; $('#editor').hidden = $('#reviseBox').hidden = true; draw(); } })));
@@ -699,7 +809,7 @@ function showResult() {
   $('#reviseBtn').onclick = openRevise;
   $('#editor').hidden = $('#reviseBox').hidden = true; editing = null;
   if (data.expires) $('#retention').textContent = `Dane tego zamówienia, w tym dokumenty${data.photo ? ' i zdjęcie' : ''}, usuniemy automatycznie ${new Date(data.expires).toLocaleDateString('pl-PL')}. Zapisz PDF-y u siebie.`;
-  drawFollowup();
+  drawFollowup(); drawReferral();
   draw();
 }
 $('#newOrder').onclick = () => {
@@ -709,13 +819,51 @@ $('#newOrder').onclick = () => {
 };
 function resetWizard() { design = { tpl: 'nowoczesny', color: 'niebieski' }; drawWizDesign(); setPhoto(''); restoring = true; $('#wizForm').reset(); ['exp', 'edu', 'ads'].forEach((b) => { $('#' + b).replaceChildren(); addRow(b); }); restoring = false; refresh(); go(1); }
 
+/* ---------- Asystent na stronie ---------- */
+const chat = { history: [], started: false };
+const SUGG = ['Jak opisać przerwę w pracy?', 'Czy dodać zdjęcie do CV?', 'Jak długie powinno być CV?', 'Co to jest ATS?'];
+function chatMsg(role, text) { const m = el('div', { className: `msg ${role === 'user' ? 'me' : 'bot'}`, textContent: text }); $('#chatLog').append(m); $('#chatLog').scrollTop = 1e9; return m; }
+function toggleChat(open) {
+  $('#chat').hidden = !open; $('#chatFab').setAttribute('aria-expanded', String(open));
+  if (!open) return $('#chatFab').focus();
+  if (!chat.started) {
+    chat.started = true;
+    chatMsg('assistant', 'Cześć! Pomogę Ci z CV, listem motywacyjnym i rozmową o pracę. O co chcesz zapytać?');
+    $('#chatSugg').replaceChildren(...SUGG.map((q) => el('button', { type: 'button', textContent: q, onclick: () => askChat(q) })));
+    if (cfg.preview) $('.chat-head span').textContent = 'Podgląd: odpowiedzi z krótkiej bazy, bez AI.';
+  }
+  $('#chatInput').focus();
+}
+async function askChat(q) {
+  q = String(q || '').trim(); if (!q) return;
+  $('#chatSugg').replaceChildren(); chatMsg('user', q); chat.history.push({ role: 'user', content: q });
+  const w = chatMsg('assistant', 'Piszę odpowiedź…'); w.classList.add('wait');
+  try {
+    const r = await fetch('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: chat.history.slice(-12) }) });
+    const j = await r.json(); if (!r.ok) throw new Error(j.error);
+    w.textContent = j.answer; chat.history.push({ role: 'assistant', content: j.answer });
+  } catch (x) { w.textContent = x.message; chat.history.pop(); }
+  w.classList.remove('wait'); $('#chatLog').scrollTop = 1e9;
+}
+$('#chatFab').onclick = () => toggleChat($('#chat').hidden);
+$('#chatClose').onclick = () => toggleChat(false);
+$('#chatForm').onsubmit = (e) => { e.preventDefault(); const v = $('#chatInput').value; $('#chatInput').value = ''; askChat(v); };
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#chat').hidden && $('#wiz').hidden && $('#exview').hidden) toggleChat(false); });
+
 /* ---------- Podstrony: zawody i poradnik ---------- */
 let CONTENT = null;
 const CLAUSE = 'Wyrażam zgodę na przetwarzanie moich danych osobowych dla potrzeb niezbędnych do realizacji procesu rekrutacji zgodnie z art. 6 ust. 1 lit. a Rozporządzenia Parlamentu Europejskiego i Rady (UE) 2016/679.';
 async function loadContent() {
-  if (!CONTENT) { try { CONTENT = await (await fetch('/content.json')).json(); } catch { CONTENT = { PROFESSIONS: [], ARTICLES: [] }; } }
+  if (!CONTENT) { try { CONTENT = await (await fetch('/content.json')).json(); } catch { CONTENT = { INDEX: [], POPULAR: [], ARTICLES: [] }; } }
   return CONTENT;
 }
+async function loadProf(slug) {
+  const C = await loadContent(), p = C.POPULAR.find((x) => x.slug === slug);
+  if (p) return p;
+  try { const r = await fetch(`/content/cv/${slug}.json`); if (r.ok) return await r.json(); } catch {}
+  return null;
+}
+const fold = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ł/g, 'l');
 const profResult = (p) => ({ position: p.sample.headline, lang: 'pl', keywords: [], cv: {
   name: p.sample.name, headline: p.sample.headline, contact: p.sample.contact, summary: p.sample.summary,
   experience: p.sample.jobs.map((j) => ({ title: j.title, company: j.company, period: j.period, bullets: j.bullets })),
@@ -726,10 +874,29 @@ const openBtn = (t, cls = 'btn') => { const b = el('button', { type: 'button', c
 
 async function drawLists() {
   const C = await loadContent();
-  $('#profGrid').replaceChildren(...C.PROFESSIONS.map((p, k) => pageLink(`cv/${p.slug}`, { className: 'prof-card' },
+  $('#profGrid').replaceChildren(...C.POPULAR.map((p, k) => pageLink(`cv/${p.slug}`, { className: 'prof-card' },
     thumb(profResult(p), { tpl: TPLS[k % TPLS.length][0], color: Object.keys(COLORS)[k % 6] }), el('b', { textContent: p.name }))));
   $('#artGrid').replaceChildren(...C.ARTICLES.map((a) => pageLink(`poradnik/${a.slug}`, { className: 'art-card' }, el('small', { textContent: `${a.readMinutes} min czytania` }), el('b', { textContent: a.title }), el('span', { textContent: a.lead }))));
-  $('#footProf').replaceChildren(...C.PROFESSIONS.slice(0, 6).map((p) => pageLink(`cv/${p.slug}`, { textContent: p.name })));
+  $('#footProf').replaceChildren(...C.POPULAR.slice(0, 6).map((p) => pageLink(`cv/${p.slug}`, { textContent: p.name })));
+  const cats = [...new Set(C.INDEX.map((p) => p.category))];
+  $('#profAll').replaceChildren(...cats.map((c) => el('div', { className: 'cat' }, el('b', { textContent: c }), el('div', {}, ...C.INDEX.filter((p) => p.category === c).map((p) => pageLink(`cv/${p.slug}`, { textContent: p.name }))))));
+  $('.allprof summary').textContent = `Wszystkie zawody (${C.INDEX.length})`;
+}
+
+/* wyszukiwarka zawodów; gdy brak wyniku, zachęcamy do stworzenia CV samodzielnie w kreatorze */
+let searchT;
+$('#profSearch').addEventListener('input', () => { clearTimeout(searchT); searchT = setTimeout(runSearch, 150); });
+async function runSearch() {
+  const raw = $('#profSearch').value.trim(), q = fold(raw), box = $('#profResults');
+  if (q.length < 2) { box.hidden = true; return; }
+  const C = await loadContent();
+  const hits = C.INDEX.map((p) => ({ p, name: fold(p.name).includes(q), any: fold(`${p.name} ${p.category} ${p.keywords.join(' ')}`).includes(q) }))
+    .filter((x) => x.any).sort((a, b) => b.name - a.name).slice(0, 12);
+  box.hidden = false;
+  if (hits.length) { box.replaceChildren(...hits.map(({ p }) => pageLink(`cv/${p.slug}`, {}, el('b', { textContent: p.name }), el('small', { textContent: p.category })))); return; }
+  box.replaceChildren(el('div', { className: 'notfound' },
+    el('p', {}, el('b', { textContent: `Nie mamy jeszcze strony dla „${raw}”. ` }), 'To nie problem: CV pod konkretne ogłoszenie przygotujemy dla każdego zawodu. Stwórz je samodzielnie w kreatorze: wpisz swoje doświadczenie i wklej ogłoszenie, a resztą zajmiemy się my.'),
+    el('button', { type: 'button', className: 'btn', textContent: 'Stwórz CV samodzielnie', onclick: () => { if (!$('#headline').value.trim()) $('#headline').value = raw; openWiz(); } })));
 }
 
 function profPage(p, C) {
@@ -748,7 +915,7 @@ function profPage(p, C) {
         el('h2', { textContent: 'Przykładowe CV' }), el('p', { className: 'hint', textContent: 'Dane w przykładzie są fikcyjne. Szablon i kolor zmienisz w panelu obok.' }), full,
         el('h2', { textContent: 'Pytania' }), ...p.faq.map((f) => el('details', {}, el('summary', { textContent: f.q }), el('p', { textContent: f.a }))),
         el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Masz konkretne ogłoszenie?' }), el('p', { className: 'hint', textContent: 'Wklej link, a przygotujemy CV pisane pod nie. Od 39 zł, z darmową poprawką.' })), openBtn('Zamów CV')),
-        el('h2', { textContent: 'Inne zawody' }), el('div', { className: 'more' }, ...C.PROFESSIONS.filter((x) => x.slug !== p.slug).map((x) => pageLink(`cv/${x.slug}`, { textContent: x.name })))),
+        el('h2', { textContent: 'Podobne zawody' }), el('div', { className: 'more' }, ...C.INDEX.filter((x) => x.slug !== p.slug && x.category === p.category).slice(0, 10).map((x) => pageLink(`cv/${x.slug}`, { textContent: x.name })), el('a', { href: '#zawody', textContent: 'Wszystkie zawody' }))),
       el('aside', { className: 'side-card' }, el('b', { textContent: `Przykład: ${p.sample.name}` }), side, picker, openBtn('Zamów CV pod swoje ogłoszenie'), el('p', { className: 'hint', textContent: 'Raport dopasowania, darmowa poprawka, PDF w e-mailu.' }))));
 }
 function articlePage(a, C) {
@@ -757,7 +924,7 @@ function articlePage(a, C) {
     el('h1', { textContent: a.title }), el('p', { className: 'meta', textContent: `${a.readMinutes} min czytania` }), el('p', { className: 'lead', textContent: a.lead }),
     ...a.sections.flatMap((sec) => [el('h2', { textContent: sec.h }), ...sec.p.map((t) => el('p', { textContent: t }))]),
     el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Zrób CV pod swoje ogłoszenie' }), el('p', { className: 'hint', textContent: 'Wklejasz link, dostajesz CV z raportem dopasowania. Od 39 zł.' })), openBtn('Zamów CV')),
-    el('h2', { textContent: 'Przeczytaj też' }), el('div', { className: 'more' }, ...C.ARTICLES.filter((x) => x.slug !== a.slug).map((x) => pageLink(`poradnik/${x.slug}`, { textContent: x.title })), ...C.PROFESSIONS.slice(0, 4).map((x) => pageLink(`cv/${x.slug}`, { textContent: `CV: ${x.name}` }))));
+    el('h2', { textContent: 'Przeczytaj też' }), el('div', { className: 'more' }, ...C.ARTICLES.filter((x) => x.slug !== a.slug).map((x) => pageLink(`poradnik/${x.slug}`, { textContent: x.title })), ...C.POPULAR.slice(0, 4).map((x) => pageLink(`cv/${x.slug}`, { textContent: `CV: ${x.name}` }))));
 }
 function setMeta(desc) { let m = document.querySelector('meta[name=description]'); if (!m) { m = el('meta', { name: 'description' }); document.head.append(m); } m.content = desc; }
 function navTo(r) {
@@ -768,7 +935,7 @@ function navTo(r) {
 }
 async function showPage(r, push = true) {
   const C = await loadContent(), [kind, slug] = r.split('/');
-  const item = kind === 'cv' ? C.PROFESSIONS.find((p) => p.slug === slug) : C.ARTICLES.find((a) => a.slug === slug);
+  const item = kind === 'cv' ? await loadProf(slug) : C.ARTICLES.find((a) => a.slug === slug);
   if (!item) return showHome(push);
   $('#landing').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true));
   $('#page').hidden = false;
