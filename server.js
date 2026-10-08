@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import { calcTotal, MAX_ADS } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder } from './lib/store.js';
 import { generateForAd } from './lib/generate.js';
+import { fetchAd, AdError } from './lib/fetchAd.js';
 
 const PORT = process.env.PORT || 3000;
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
@@ -52,6 +53,15 @@ function cleanProfile(p = {}) {
 }
 
 app.get('/api/config', (_req, res) => res.json({ demo: DEMO, maxAds: MAX_ADS, noPrint: false }));
+
+const hits = new Map(); // prosty limit: 20 pobrań / 10 min na adres IP
+app.post('/api/fetch-ad', async (req, res) => {
+  const now = Date.now(), h = (hits.get(req.ip) || []).filter((t) => now - t < 600_000);
+  if (h.length >= 20) return res.status(429).json({ error: 'Zbyt wiele prób. Spróbuj za kilka minut lub wklej treść ogłoszenia.' });
+  hits.set(req.ip, [...h, now]);
+  try { res.json(await fetchAd(req.body?.url)); }
+  catch (e) { res.status(422).json({ error: e instanceof AdError ? e.message : 'Nie udało się odczytać ogłoszenia.' }); }
+});
 
 app.post('/api/orders', async (req, res) => {
   try {

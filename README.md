@@ -33,3 +33,6 @@ npm start              # http://localhost:3000
 3. W Stripe: Developers → Webhooks → dodaj `BASE_URL/api/stripe-webhook`, zdarzenie `checkout.session.completed`, skopiuj sekret do `STRIPE_WEBHOOK_SECRET`.
 4. Włącz BLIK w Stripe → Settings → Payment methods.
 Dane zamówień trwają na dysku `/data` (zmienna `DATA_DIR`).
+
+## Ogłoszenie z linku
+`POST /api/fetch-ad {url}` pobiera stronę (`lib/fetchAd.js`), czyta dane `JobPosting` (JSON-LD) albo główny tekst strony i zwraca `{title, company, text}`. Klient widzi wynik i może go poprawić; gdy pobranie się nie uda (np. LinkedIn), wkleja treść ręcznie. Zabezpieczenia: tylko http/https, blokada adresów prywatnych sprawdzana przy łączeniu (SSRF, DNS rebinding), limit 1,5 MB i 10 s, 3 przekierowania, limit 20 pobrań / 10 min na IP.

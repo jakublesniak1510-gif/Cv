@@ -105,6 +105,12 @@ textarea{min-height:88px;resize:vertical}
 .payrow{display:flex;gap:12px;flex-wrap:wrap}
 .sumrow{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}.sumrow:last-child{border:0;font-weight:700}
 .sumrow span:first-child{min-width:0;overflow-wrap:anywhere}
+/* ogłoszenia: link / treść */
+.modes{margin-bottom:12px}.modes button{padding:7px 12px}
+.urlrow{display:flex;gap:8px;margin-top:5px}.urlrow input{margin-top:0;flex:1;min-width:0}
+.fstatus{font-size:14px;color:var(--mute);margin:-4px 0 12px;min-height:0}.fstatus:empty{display:none}
+.fstatus.good{color:var(--ok);font-weight:600}.fstatus.bad{color:var(--err);font-weight:600}
+.linkbox[hidden],.adfields[hidden]{display:none}
 /* generowanie i wynik */
 .gen{position:fixed;inset:0;z-index:60;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;text-align:center}
 .gen-box{max-width:420px}.gen-box h2{font-size:28px;margin:18px 0 8px}.gen-box p{color:var(--mute)}

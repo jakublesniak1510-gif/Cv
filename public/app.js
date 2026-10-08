@@ -17,7 +17,7 @@ function hl(text, kws) {
 }
 
 fetch('/api/config').then((r) => r.json()).then((c) => {
-  cfg = c; $('#demoBar').hidden = !c.demo; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
+  cfg = c; $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
 });
 
 /* ---------- Przykład dopasowania (strona główna) ---------- */
@@ -48,7 +48,9 @@ drawEx(0);
 const rowT = {
   exp: () => `<div class="grid4"><label class="f">Stanowisko<input type="text" data-k="title"></label><label class="f">Firma<input type="text" data-k="company"></label><label class="f">Od<input type="text" data-k="from" placeholder="03.2021"></label><label class="f">Do<input type="text" data-k="to" placeholder="obecnie"></label></div><label class="f">Obowiązki i osiągnięcia <span class="h">każdy punkt w nowej linii</span><textarea data-k="description"></textarea></label>`,
   edu: () => `<div class="grid4"><label class="f">Szkoła<input type="text" data-k="school"></label><label class="f">Kierunek / tytuł<input type="text" data-k="degree"></label><label class="f">Od<input type="text" data-k="from"></label><label class="f">Do<input type="text" data-k="to"></label></div>`,
-  ads: () => `<label class="f">Nazwa stanowiska z ogłoszenia<input type="text" data-k="title" placeholder="np. Kasjer / Sprzedawca"></label><label class="f">Treść ogłoszenia <span class="h">wklej cały tekst oferty</span><textarea data-k="text" style="min-height:150px"></textarea></label>`,
+  ads: () => `<div class="seg modes" role="tablist"><button type="button" role="tab" data-mode="link">Link do ogłoszenia</button><button type="button" role="tab" data-mode="paste">Wklej treść</button></div>
+<div class="linkbox"><label class="f">Adres ogłoszenia<span class="urlrow"><input type="text" data-k="url" inputmode="url" placeholder="https://…"><button type="button" class="btn sm fetchbtn">Pobierz</button></span></label><div class="fstatus" role="status"></div></div>
+<div class="adfields"><label class="f">Nazwa stanowiska<input type="text" data-k="title" placeholder="np. Kasjer / Sprzedawca"></label><label class="f">Treść ogłoszenia <span class="h">sprawdź i w razie potrzeby popraw</span><textarea data-k="text" style="min-height:150px"></textarea></label></div>`,
 };
 const label = { exp: 'Stanowisko', edu: 'Szkoła', ads: 'Ogłoszenie' };
 function addRow(box, v = {}) {
@@ -57,7 +59,41 @@ function addRow(box, v = {}) {
   $('.rm', e).onclick = () => { e.remove(); renum(box); refresh(); };
   $('#' + box).append(e);
   Object.entries(v).forEach(([k, val]) => { const i = $(`[data-k="${k}"]`, e); if (i) i.value = val; });
+  if (box === 'ads') initAd(e, v.text ? 'paste' : 'link');
   renum(box); refresh();
+}
+function setMode(e, mode) {
+  e.dataset.mode = mode;
+  $$('.modes button', e).forEach((b) => b.setAttribute('aria-selected', b.dataset.mode === mode));
+  $('.linkbox', e).hidden = mode !== 'link';
+  $('.adfields', e).hidden = mode === 'link' && !e.dataset.fetched;
+}
+function initAd(e, mode) {
+  $$('.modes button', e).forEach((b) => (b.onclick = () => setMode(e, b.dataset.mode)));
+  const status = $('.fstatus', e), btn = $('.fetchbtn', e);
+  const run = async () => {
+    const url = $('[data-k=url]', e).value.trim();
+    status.className = 'fstatus';
+    if (!url) { status.textContent = 'Wklej link do ogłoszenia.'; status.classList.add('bad'); return; }
+    btn.disabled = true; status.textContent = 'Pobieram ogłoszenie…';
+    try {
+      const r = await fetch('/api/fetch-ad', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error);
+      $('[data-k=title]', e).value = j.title || ''; $('[data-k=text]', e).value = j.text;
+      e.dataset.fetched = '1'; setMode(e, 'link');
+      status.textContent = `Pobrano${j.title ? ': „' + j.title + '”' : ''}${j.company ? ' (' + j.company + ')' : ''}, ${j.text.length} znaków. Sprawdź treść poniżej.`;
+      status.classList.add('good');
+    } catch (x) {
+      e.dataset.fetched = '1'; $('.adfields', e).before(status); setMode(e, 'paste');
+      status.textContent = `${x.message} Wklej treść ogłoszenia poniżej.`; status.classList.add('bad');
+    }
+    btn.disabled = false;
+  };
+  btn.onclick = run;
+  $('[data-k=url]', e).onkeydown = (k) => { if (k.key === 'Enter') { k.preventDefault(); run(); } };
+  if (cfg.fakeFetch) $('.linkbox', e).append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' }));
+  setMode(e, mode);
 }
 function renum(box) {
   const rows = $('#' + box).children;
@@ -103,6 +139,7 @@ function validate(n) {
   if (n === 2) { if (!v('name')) return 'Podaj imię i nazwisko.'; if (!/^\S+@\S+\.\S+$/.test(v('email'))) return 'Podaj poprawny adres e-mail.'; }
   if (n === 4 && !rows('exp').some((e) => e.title || e.company) && !rows('edu').some((e) => e.school)) return 'Dodaj co najmniej jedno stanowisko (krok 3) lub szkołę.';
   if (n === 5) for (const [i, a] of rows('ads').entries()) {
+    if (!a.text) return `Ogłoszenie ${i + 1}: kliknij „Pobierz” przy linku albo wklej treść oferty.`;
     if (!a.title) return `Ogłoszenie ${i + 1}: podaj nazwę stanowiska.`;
     if (a.text.length < 80) return `Ogłoszenie ${i + 1}: wklej pełną treść oferty (min. 80 znaków).`;
   }
