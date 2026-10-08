@@ -24,3 +24,10 @@ npm start              # http://localhost:3000
 - `lib/generate.js` – prompt i wywołanie Claude
 - `public/` – formularz (`index.html`) i widok wyniku z PDF przez drukowanie (`order.html`)
 - Zamówienia: `data/orders.json` (plik; do produkcji zamień na bazę danych)
+
+## Wdrożenie na Render (najprostsze)
+1. Wejdź na render.com → **New → Blueprint** → wybierz to repozytorium (wykryje `render.yaml`).
+2. Wpisz zmienne: `ANTHROPIC_API_KEY`, `STRIPE_SECRET_KEY`, `BASE_URL` (adres z Render, potem własna domena).
+3. W Stripe: Developers → Webhooks → dodaj `BASE_URL/api/stripe-webhook`, zdarzenie `checkout.session.completed`, skopiuj sekret do `STRIPE_WEBHOOK_SECRET`.
+4. Włącz BLIK w Stripe → Settings → Payment methods.
+Dane zamówień trwają na dysku `/data` (zmienna `DATA_DIR`).
