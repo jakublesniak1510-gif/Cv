@@ -23,6 +23,10 @@ const TPLS = [
   ['geometria', 'Geometria', 'Skośny kolorowy nagłówek i panel boczny. Wyróżnia się w stosie CV.'],
   ['elegancki', 'Elegancki', 'Szeryfowa typografia i monogram. Na stanowiska biurowe i kierownicze.'],
   ['klasyczny', 'Klasyczny ATS', 'Jedna kolumna, którą najlepiej odczytują systemy rekrutacyjne.'],
+  ['monogram', 'Monogram', 'Wyśrodkowany nagłówek z inicjałami w okręgu i sekcje w wierszach. Do biur i finansów.'],
+  ['kreatywny', 'Kreatywny', 'Ukośny kolorowy nagłówek i żółte akcenty. Do marketingu, sprzedaży i branż kreatywnych.'],
+  ['kompetencje', 'Kompetencje', 'Jasna kolumna z umiejętnościami i poziomem języków. Do IT, logistyki i pracy technicznej.'],
+  ['wstega', 'Wstęga', 'Kolorowa wstęga u góry, zdjęcie na jej krawędzi i wyśrodkowane sekcje.'],
 ];
 const LEGACY = { wyrazisty: 'geometria' };
 const COLORS = { niebieski: '#2548E8', granat: '#1E3A5F', morski: '#0F766E', bordo: '#9F1239', fiolet: '#6D28D9', grafit: '#374151' };
@@ -69,6 +73,11 @@ function parts(c, kw, lang = 'pl', photo = '') {
     certs: () => (c.certificates?.length ? sec(L.certs, el('div', { textContent: c.certificates.join(' · ') })) : null),
     intr: () => (c.interests ? sec(L.interests, el('div', { textContent: c.interests })) : null),
     clause: () => (c.clause ? el('div', { className: 'clause', textContent: c.clause }) : null),
+    // Języki z poziomem: paski z oznaczeń A1–C2 (bez oznaczenia sam tekst, niczego nie zgadujemy).
+    langsLv: () => (c.languages?.length ? sec(L.langs, ...c.languages.map((t) => {
+      const m = /\b([ABC][12])\b/i.exec(t), n = m ? { A1: 1, A2: 2, B1: 3, B2: 4, C1: 5, C2: 5 }[m[1].toUpperCase()] : /ojczyst|native|rodzim|muttersprach|рідн/i.test(t) ? 5 : 0;
+      return el('div', { className: 'lv' }, el('span', { textContent: t }), n ? el('div', { className: 'dots', ariaHidden: 'true' }, ...[1, 2, 3, 4, 5].map((i) => el('i', { className: i <= n ? 'f' : '' }))) : null);
+    })) : null),
     contactSec: () => sec(L.contact, el('ul', { className: 'clist' }, ...contact.map((x) => el('li', { textContent: x })))),
   };
 }
@@ -84,12 +93,21 @@ const CV_LAYOUT = {
       el('aside', { className: 'panel' }, k.contactSec(), k.skills(), k.langs(), k.certs(), k.intr()))],
   elegancki: (k) => [el('header', { className: 'top' }, k.mono(), k.name(), k.head(), k.ct(), k.rule()), k.summary(), k.exp(), k.edu(), k.skills(), k.langs(), k.certs(), k.intr(), k.clause()],
   klasyczny: (k) => [el('header', { className: 'top' }, el('div', { className: 'who' }, k.name(), k.head(), k.ct()), k.pic()), k.summary(), k.exp(), k.edu(), k.skills(), k.langs(), k.certs(), k.intr(), k.clause()],
+  monogram: (k) => [el('header', { className: 'top' }, k.mono(), k.name(), k.head(), k.ct()), k.summary(), k.exp(), k.edu(), k.skills(), k.langs(), k.certs(), k.intr(), k.clause()],
+  kreatywny: (k) => [el('header', { className: 'band' }, el('div', { className: 'who' }, k.name(), k.head(), k.ct()), k.pic()),
+    el('div', { className: 'body' }, el('div', { className: 'mainc' }, k.summary(), k.exp(), k.edu(), k.clause()), el('aside', { className: 'panel' }, k.skills(), k.langs(), k.certs(), k.intr()))],
+  kompetencje: (k) => [el('div', { className: 'mainc' }, el('header', { className: 'top' }, k.name(), k.head()), k.summary(), k.exp(), k.edu(), k.clause()),
+    el('aside', { className: 'side' }, k.pic(), k.contactSec(), k.skills(), k.langsLv(), k.certs(), k.intr())],
+  wstega: (k) => [el('div', { className: 'band' }, k.mono()), el('header', { className: 'top' }, k.name(), k.head(), k.ct()), k.summary(), k.exp(), k.edu(), k.skills(), k.langs(), k.certs(), k.intr(), k.clause()],
 };
 const LETTER_HEAD = {
   geometria: (k) => el('header', { className: 'band' }, el('div', {}, k.name(), k.ct()), k.mono()),
   elegancki: (k) => el('header', { className: 'top lhead' }, k.mono(), k.name(), k.ct(), k.rule()),
   szwajcarski: (k) => el('header', { className: 'top lhead' }, el('div', { className: 'sq' }), k.name(), k.ct(), k.rule()),
   os: (k) => el('header', { className: 'top lhead' }, el('div', { className: 'split' }, k.name(), k.clist()), k.rule()),
+  monogram: (k) => el('header', { className: 'top lhead' }, k.mono(), k.name(), k.ct(), k.rule()),
+  kreatywny: (k) => el('header', { className: 'band' }, el('div', {}, k.name(), k.ct())),
+  wstega: (k) => el('header', { className: 'band' }, el('div', {}, k.name(), k.ct())),
 };
 function cvNode(r, on, d, photo) {
   d = d || (data && data.design) || design;

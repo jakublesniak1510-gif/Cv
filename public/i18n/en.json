@@ -62,7 +62,7 @@
 "Pominięty punkt o kontakcie po angielsku, bo oferta go nie wymaga.": "Left out the point about speaking English with customers, as the ad doesn't require it.",
 "Zobacz pełne CV i list": "See the full CV and letter",
 "Szablony, które przyciągają wzrok": "Templates that catch the eye",
-"Sześć oryginalnych układów i sześć kolorów. Wybierasz w kreatorze, a po zakupie możesz zmienić wygląd w każdej chwili, bez dopłaty. Kliknij miniaturę, aby zobaczyć pełne CV.": "Six original layouts and six colours. You choose in the wizard, and after purchase you can change the look at any time, at no extra cost. Click a thumbnail to see the full CV.",
+"Dziesięć oryginalnych układów i sześć kolorów. Wybierasz w kreatorze, a po zakupie możesz zmienić wygląd w każdej chwili, bez dopłaty. Kliknij miniaturę, aby zobaczyć pełne CV.": "Ten original layouts and six colours. You choose in the wizard, and after purchase you can change the look at any time, at no extra cost. Click a thumbnail to see the full CV.",
 "Kolor szablonów": "Template colour",
 "Kolor:": "Colour:",
 "Kolor niebieski": "Blue",
@@ -195,7 +195,7 @@
 "+5 zł": "+5 PLN",
 "Główny język (np. angielski)": "Main language (e.g. English)",
 "w cenie": "included",
-"W każdym pakiecie: raport dopasowania, darmowa poprawka, edycja tekstu, 6 szablonów i PDF w e-mailu.": "Every package includes: match report, free revision, text editing, 6 templates and PDF by email.",
+"W każdym pakiecie: raport dopasowania, darmowa poprawka, edycja tekstu, 10 szablonów i PDF w e-mailu.": "Every package includes: match report, free revision, text editing, 10 templates and PDF by email.",
 "Metody płatności": "Payment methods",
 "Bezpieczna płatność Przelewy24": "Secure payment with Przelewy24",
 "Karta": "Card",
@@ -857,5 +857,13 @@
 "Płatność nie jest jeszcze potwierdzona": "Payment not confirmed yet",
 "Jeśli przerwałeś płatność albo zamknąłeś okno banku, możesz ją dokończyć. Jeśli zapłaciłeś, poczekaj chwilę: potwierdzenie może przyjść z opóźnieniem.": "If you interrupted the payment or closed the bank window, you can complete it now. If you have paid, wait a moment: the confirmation may be delayed.",
 "To zamówienie jest już opłacone.": "This order has already been paid.",
-"Nie udało się otworzyć płatności. Spróbuj za chwilę.": "Could not open the payment. Please try again in a moment."
+"Nie udało się otworzyć płatności. Spróbuj za chwilę.": "Could not open the payment. Please try again in a moment.",
+"Monogram": "Monogram",
+"Kreatywny": "Creative",
+"Kompetencje": "Skills",
+"Wstęga": "Ribbon",
+"Wyśrodkowany nagłówek z inicjałami w okręgu i sekcje w wierszach. Do biur i finansów.": "Centred header with initials in a circle and sections in rows. For office and finance roles.",
+"Ukośny kolorowy nagłówek i żółte akcenty. Do marketingu, sprzedaży i branż kreatywnych.": "Slanted coloured header with yellow accents. For marketing, sales and creative fields.",
+"Jasna kolumna z umiejętnościami i poziomem języków. Do IT, logistyki i pracy technicznej.": "Light column with skills and language levels. For IT, logistics and technical jobs.",
+"Kolorowa wstęga u góry, zdjęcie na jej krawędzi i wyśrodkowane sekcje.": "Coloured ribbon at the top, photo on its edge and centred sections."
 }

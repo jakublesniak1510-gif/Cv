@@ -62,7 +62,7 @@
 "Pominięty punkt o kontakcie po angielsku, bo oferta go nie wymaga.": "Пропущено пункт про спілкування англійською, бо вакансія цього не вимагає.",
 "Zobacz pełne CV i list": "Переглянути повне резюме і лист",
 "Szablony, które przyciągają wzrok": "Шаблони, які привертають увагу",
-"Sześć oryginalnych układów i sześć kolorów. Wybierasz w kreatorze, a po zakupie możesz zmienić wygląd w każdej chwili, bez dopłaty. Kliknij miniaturę, aby zobaczyć pełne CV.": "Шість оригінальних макетів і шість кольорів. Ви обираєте в конструкторі, а після покупки можете будь-коли змінити вигляд без доплати. Натисніть мініатюру, щоб побачити повне резюме.",
+"Dziesięć oryginalnych układów i sześć kolorów. Wybierasz w kreatorze, a po zakupie możesz zmienić wygląd w każdej chwili, bez dopłaty. Kliknij miniaturę, aby zobaczyć pełne CV.": "Десять оригінальних макетів і шість кольорів. Ви обираєте в конструкторі, а після покупки можете будь-коли змінити вигляд без доплати. Натисніть мініатюру, щоб побачити повне резюме.",
 "Kolor szablonów": "Колір шаблонів",
 "Kolor:": "Колір:",
 "Kolor niebieski": "Синій колір",
@@ -195,7 +195,7 @@
 "+5 zł": "+5 зл",
 "Główny język (np. angielski)": "Основна мова (напр. англійська)",
 "w cenie": "входить у ціну",
-"W każdym pakiecie: raport dopasowania, darmowa poprawka, edycja tekstu, 6 szablonów i PDF w e-mailu.": "У кожному пакеті: звіт про відповідність, безкоштовне виправлення, редагування тексту, 6 шаблонів і PDF на e-mail.",
+"W każdym pakiecie: raport dopasowania, darmowa poprawka, edycja tekstu, 10 szablonów i PDF w e-mailu.": "У кожному пакеті: звіт про відповідність, безкоштовне виправлення, редагування тексту, 10 шаблонів і PDF на e-mail.",
 "Metody płatności": "Способи оплати",
 "Bezpieczna płatność Przelewy24": "Безпечна оплата Przelewy24",
 "Karta": "Картка",
@@ -857,5 +857,13 @@
 "Płatność nie jest jeszcze potwierdzona": "Оплату ще не підтверджено",
 "Jeśli przerwałeś płatność albo zamknąłeś okno banku, możesz ją dokończyć. Jeśli zapłaciłeś, poczekaj chwilę: potwierdzenie może przyjść z opóźnieniem.": "Якщо ви перервали оплату або закрили вікно банку, можете її завершити. Якщо ви вже оплатили, зачекайте: підтвердження може надійти із затримкою.",
 "To zamówienie jest już opłacone.": "Це замовлення вже оплачено.",
-"Nie udało się otworzyć płatności. Spróbuj za chwilę.": "Не вдалося відкрити оплату. Спробуйте за хвилину."
+"Nie udało się otworzyć płatności. Spróbuj za chwilę.": "Не вдалося відкрити оплату. Спробуйте за хвилину.",
+"Monogram": "Монограма",
+"Kreatywny": "Креативний",
+"Kompetencje": "Компетенції",
+"Wstęga": "Стрічка",
+"Wyśrodkowany nagłówek z inicjałami w okręgu i sekcje w wierszach. Do biur i finansów.": "Заголовок по центру з ініціалами в колі та розділи в рядках. Для офісу та фінансів.",
+"Ukośny kolorowy nagłówek i żółte akcenty. Do marketingu, sprzedaży i branż kreatywnych.": "Косий кольоровий заголовок і жовті акценти. Для маркетингу, продажів і креативних професій.",
+"Jasna kolumna z umiejętnościami i poziomem języków. Do IT, logistyki i pracy technicznej.": "Світла колонка з навичками та рівнем мов. Для IT, логістики й технічної роботи.",
+"Kolorowa wstęga u góry, zdjęcie na jej krawędzi i wyśrodkowane sekcje.": "Кольорова стрічка вгорі, фото на її краю та розділи по центру."
 }
