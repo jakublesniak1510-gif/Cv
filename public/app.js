@@ -1243,7 +1243,14 @@ const profResult = (p) => ({ position: p.sample.headline, lang: 'pl', keywords: 
   name: p.sample.name, headline: p.sample.headline, contact: p.sample.contact, summary: p.sample.summary,
   experience: p.sample.jobs.map((j) => ({ title: j.title, company: j.company, period: j.period, bullets: j.bullets })),
   education: [p.sample.education], skills: p.sample.skills, languages: p.sample.languages || [], certificates: [], interests: '', clause: CLAUSE } });
-const pageHref = (r) => (cfg.preview ? (r ? '#/' + r : '#top') : '/' + r);
+// Publiczny adres podstrony: na wersji DE strona główna to /de, a artykuły mają własne adresy /de/ratgeber/<slugDe>.
+const pubPath = (r) => {
+  if (window.I18N?.lang !== 'de') return r;
+  if (!r) return 'de';
+  const m = /^poradnik\/([\w-]+)$/.exec(r), a = m && CONTENT?.ARTICLES.find((x) => x.slug === m[1]);
+  return a?.slugDe ? 'de/ratgeber/' + a.slugDe : r;
+};
+const pageHref = (r) => (cfg.preview ? (r ? '#/' + r : '#top') : '/' + pubPath(r));
 const pageLink = (r, props, ...kids) => { const a = el('a', { href: pageHref(r), ...props }, ...kids); a.dataset.page = r; return a; };
 const openBtn = (t, cls = 'btn') => { const b = el('button', { type: 'button', className: cls, textContent: t }); b.dataset.open = ''; return b; };
 
@@ -1386,7 +1393,7 @@ function articlePage(a, C) {
   // Na wersji DE artykuły są przetłumaczone, więc tłumaczymy też elementy wokół nich (reszta podstron zostaje po polsku).
   const T = (s) => (window.I18N?.lang === 'de' ? window.I18N.t(s) : s);
   return el('div', { className: 'inner narrow article', lang: window.I18N?.lang === 'de' ? 'de' : 'pl' },
-    el('nav', { className: 'crumbs', ariaLabel: T('Ścieżka') }, pageLink('', { textContent: T('Strona główna') }), '›', el('a', { href: '#poradnik', textContent: T('Poradnik') }), '›', el('span', { textContent: a.title })),
+    el('nav', { className: 'crumbs', ariaLabel: T('Ścieżka') }, pageLink('', { textContent: T('Strona główna') }), '›', el('a', { href: window.I18N?.lang === 'de' && !cfg.preview ? '/de#poradnik' : '#poradnik', textContent: T('Poradnik'), onclick: (e) => { e.preventDefault(); showHome(true); $('#poradnik').scrollIntoView(); } }), '›', el('span', { textContent: a.title })),
     el('h1', { textContent: a.title }), el('p', { className: 'meta', textContent: T(`${a.readMinutes} min czytania`) }), el('p', { className: 'lead', textContent: a.lead }),
     ...a.sections.flatMap((sec) => [el('h2', { textContent: sec.h }), ...sec.p.map((t) => el('p', { textContent: t }))]),
     el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: T('Zrób CV pod swoje ogłoszenie') }), el('p', { className: 'hint', textContent: T('Wklejasz link, dostajesz CV z raportem dopasowania. Od 39 zł.') })), openBtn(T('Zamów CV'))),
@@ -1396,10 +1403,11 @@ function setMeta(desc) { let m = document.querySelector('meta[name=description]'
 function navTo(r) {
   try {
     if (cfg.preview) history.pushState(null, '', r ? '#/' + r : '#top');
-    else history.pushState(null, '', '/' + r);
+    else history.pushState(null, '', '/' + pubPath(r));
   } catch {}
 }
 async function showPage(r, push = true) {
+  if (r.startsWith('ratgeber/')) { const a = (await loadContent()).ARTICLES.find((x) => x.slugDe === r.slice(9)); r = a ? 'poradnik/' + a.slug : ''; }
   const C = await loadContent(), [kind, slug, sub] = r.split('/');
   let item = null, node = null;
   if (kind === 'cv') {
@@ -1427,7 +1435,7 @@ document.addEventListener('click', (e) => {
   const a = e.target.closest('a[data-page]');
   if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
   e.preventDefault();
-  if (!$('#result').hidden) { location.href = cfg.preview ? '#top' : '/' + a.dataset.page; return; }
+  if (!$('#result').hidden) { location.href = cfg.preview ? '#top' : '/' + pubPath(a.dataset.page); return; }
   a.dataset.page ? showPage(a.dataset.page) : showHome(true);
 });
 window.addEventListener('popstate', () => route());
@@ -1547,6 +1555,8 @@ function route() {
   if (hm) return showPage(hm[1], false);
   const anchor = h.length > 1 && document.getElementById(h.slice(1));
   if (pm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage(pm[1], false);
+  const dm = /^\/de\/ratgeber\/([\w-]+)\/?$/.exec(location.pathname);
+  if (dm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage('ratgeber/' + dm[1], false);
   $('#page').hidden = $('#pageNote').hidden = true;
   const id = LEGAL[h];
   $('#landing').hidden = !!id;

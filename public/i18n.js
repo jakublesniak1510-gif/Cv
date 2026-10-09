@@ -4,7 +4,7 @@
   const LANGS = ['pl', 'en', 'uk', 'de'];
   const pick = () => {
     const fromPath = /^\/(en|uk|de)(\/|$)/.exec(location.pathname)?.[1];
-    if (fromPath) return fromPath;
+    if (fromPath) { try { localStorage.setItem('cvpo-lang', fromPath); } catch {} return fromPath; }
     if (window.__LANG) return window.__LANG;
     try { const s = localStorage.getItem('cvpo-lang'); if (LANGS.includes(s)) return s; } catch {}
     return 'pl';
