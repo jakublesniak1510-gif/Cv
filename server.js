@@ -10,7 +10,7 @@ import { adFromImage, AdImageError } from './lib/adImage.js';
 import { simTurn, SimError } from './lib/sim.js';
 import { samplePdf } from './lib/sample.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
-import { mailEnabled, sendOrderMail, sendReminder, sendReviewAsk } from './lib/mail.js';
+import { mailEnabled, sendOrderMail, sendReminder, sendReviewAsk, sendPayReminder } from './lib/mail.js';
 import { cleanDesign } from './lib/designs.js';
 import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes } from './lib/seo.js';
@@ -227,7 +227,7 @@ app.post('/api/orders/:id/pay', async (req, res) => {
 
 app.post('/api/orders', async (req, res) => {
   try {
-    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, reviewAsk, uiLang, createAccount } = req.body || {};
+    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, reviewAsk, payReminder, uiLang, createAccount } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
     const a = cleanAds(ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
@@ -238,7 +238,7 @@ app.post('/api/orders', async (req, res) => {
     const c = await checkCode(code, p.email);
     if (c.error) return res.status(400).json({ error: c.error });
     const disc = discountFor(c, pkg, a.length, ad, false, langs);
-    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, false, langs, disc), profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, reviewAsk: { consent: !!reviewAsk, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, false, langs, disc), profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -460,6 +460,7 @@ adminRoutes(app, { DEMO, BASE_URL, markPaidAndGenerate, trySend, retentionMs: RE
 
 // Dane zamówień (w tym zdjęcia) kasujemy po 30 dniach.
 // Co godzinę: kasowanie starych zamówień i kodów oraz jednorazowe przypomnienie po 7 dniach (tylko za zgodą klienta).
+const PAY_REMINDER_AFTER = 3 * 3600_000;
 async function hourly() {
   try {
     const n = await deleteOlderThan(RETENTION_MS);
@@ -478,6 +479,15 @@ async function hourly() {
       if (o.status !== 'done' || !o.reviewAsk?.consent || o.reviewAsk.sent || Date.now() - o.created < REVIEW_AFTER || (await reviews.get(o.id))) continue;
       try { await sendReviewAsk(o, BASE_URL); await updateOrder(o.id, (x) => ({ ...x, reviewAsk: { ...x.reviewAsk, sent: true, at: Date.now() } })); }
       catch (e) { console.error('Prośba o opinię', o.id, e.message); }
+    }
+    // Niedokończona płatność: jeden e-mail po ok. 3 h (za zgodą), o ile klient nie zapłacił w międzyczasie za inne zamówienie.
+    const all = Object.values(await allOrders());
+    for (const o of all) {
+      const age = Date.now() - o.created;
+      if (o.status !== 'pending' || !o.payReminder?.consent || o.payReminder.sent || age < PAY_REMINDER_AFTER || age > 48 * 3600_000) continue;
+      if (all.some((x) => x.status === 'done' && x.profile?.email === o.profile.email && x.created > o.created)) continue;
+      try { await sendPayReminder(o, BASE_URL); await updateOrder(o.id, (x) => ({ ...x, payReminder: { ...x.payReminder, sent: true, at: Date.now() } })); }
+      catch (e) { console.error('Przypomnienie o płatności', o.id, e.message); }
     }
   } catch (e) { console.error('Zadanie cogodzinne', e); }
 }
