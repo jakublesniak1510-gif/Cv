@@ -572,7 +572,8 @@ drawGallery();
 const rowT = {
   exp: () => `<div class="grid4"><label class="f">Stanowisko<input type="text" data-k="title"></label><label class="f">Firma<input type="text" data-k="company"></label><label class="f">Od<input type="text" data-k="from" placeholder="03.2021"></label><label class="f">Do<input type="text" data-k="to" placeholder="obecnie"></label></div><label class="f">Obowiązki i osiągnięcia <span class="h">każdy punkt w nowej linii</span><textarea data-k="description"></textarea></label>`,
   edu: () => `<div class="grid4"><label class="f">Szkoła<input type="text" data-k="school"></label><label class="f">Kierunek / tytuł<input type="text" data-k="degree"></label><label class="f">Od<input type="text" data-k="from"></label><label class="f">Do<input type="text" data-k="to"></label></div>`,
-  ads: () => `<div class="seg modes" role="tablist"><button type="button" role="tab" data-mode="link">Link do ogłoszenia</button><button type="button" role="tab" data-mode="paste">Wklej treść</button></div>
+  ads: () => `<div class="seg modes" role="tablist"><button type="button" role="tab" data-mode="link">Link do ogłoszenia</button><button type="button" role="tab" data-mode="photo">Zdjęcie ogłoszenia</button><button type="button" role="tab" data-mode="paste">Wklej treść</button></div>
+<div class="photobox" hidden><b class="flabel">Zdjęcie lub zrzut ekranu ogłoszenia</b><label class="btn ghost filebtn"><span>Wybierz zdjęcie</span><input type="file" class="adphoto" accept="image/*"></label><p class="hint">Zrób zdjęcie ogłoszenia albo wgraj zrzut ekranu, np. z Facebooka, OLX lub grupy z ofertami. Odczytamy z niego treść.</p><div class="pstatus" role="status"></div></div>
 <div class="linkbox"><label class="f">Adres ogłoszenia<span class="urlrow"><input type="text" data-k="url" inputmode="url" placeholder="https://…"><button type="button" class="btn sm fetchbtn">Pobierz</button></span></label><div class="fstatus" role="status"></div></div>
 <div class="adfields"><label class="adlang">Język dokumentów <select data-k="lang"><option value="auto">jak w ogłoszeniu</option><option value="pl">polski</option><option value="en">angielski</option><option value="de">niemiecki</option><option value="uk">ukraiński</option><option value="es">hiszpański</option><option value="fr">francuski</option></select></label><label class="f">Nazwa stanowiska<input type="text" data-k="title" placeholder="np. Kasjer / Sprzedawca"></label><label class="f">Treść ogłoszenia <span class="h">sprawdź i w razie potrzeby popraw</span><textarea data-k="text" style="min-height:150px"></textarea></label></div>`,
 };
@@ -586,11 +587,26 @@ function addRow(box, v = {}) {
   if (box === 'ads' || box === 'fuAds') initAd(e, v.text ? 'paste' : 'link');
   renum(box); refresh();
 }
+// Zmniejszenie zdjęcia przed wysłaniem (telefony robią zdjęcia po kilka MB).
+function shrinkImage(f, max) {
+  return new Promise((resolve, reject) => {
+    const img = new Image(), url = URL.createObjectURL(f);
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Nie udało się otworzyć tego pliku jako zdjęcia.')); };
+    img.src = url;
+  });
+}
 function setMode(e, mode) {
   e.dataset.mode = mode;
   $$('.modes button', e).forEach((b) => b.setAttribute('aria-selected', b.dataset.mode === mode));
   $('.linkbox', e).hidden = mode !== 'link';
-  $('.adfields', e).hidden = mode === 'link' && !e.dataset.fetched;
+  $('.photobox', e).hidden = mode !== 'photo';
+  $('.adfields', e).hidden = (mode === 'link' || mode === 'photo') && !e.dataset.fetched;
 }
 function initAd(e, mode) {
   $$('.modes button', e).forEach((b) => (b.onclick = () => setMode(e, b.dataset.mode)));
@@ -615,6 +631,23 @@ function initAd(e, mode) {
     btn.disabled = false;
   };
   btn.onclick = run;
+  // Zdjęcie ogłoszenia: zmniejszamy w przeglądarce (max 1600 px, JPEG), serwer odczytuje treść.
+  const ps = $('.pstatus', e), file = $('.adphoto', e);
+  file.onchange = async () => {
+    const f = file.files[0]; if (!f) return;
+    ps.className = 'pstatus'; ps.textContent = 'Odczytuję ogłoszenie ze zdjęcia…';
+    try {
+      const image = await shrinkImage(f, 1600);
+      const r = await fetch('/api/ad-image', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image }) });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error);
+      $('[data-k=title]', e).value = j.title || ''; $('[data-k=text]', e).value = j.text;
+      e.dataset.fetched = '1'; setMode(e, 'photo'); refresh();
+      ps.replaceChildren(el('span', { textContent: 'Odczytano ogłoszenie ze zdjęcia.' }), ' ', el('span', { textContent: 'Sprawdź treść poniżej i popraw, jeśli coś się nie zgadza.' }), j.demo ? el('span', { textContent: ' Podgląd: wstawiamy przykładowe ogłoszenie.' }) : '');
+      ps.classList.add('good');
+    } catch (x) { ps.replaceChildren(el('span', { textContent: x.message || 'Nie udało się odczytać zdjęcia.' }), ' ', el('span', { textContent: 'Możesz też wkleić treść ogłoszenia.' })); ps.classList.add('bad'); }
+    file.value = '';
+  };
   $('[data-k=url]', e).onkeydown = (k) => { if (k.key === 'Enter') { k.preventDefault(); run(); } };
   if (cfg.fakeFetch) $('.linkbox', e).append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' }));
   setMode(e, mode);

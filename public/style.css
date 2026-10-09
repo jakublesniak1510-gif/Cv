@@ -712,3 +712,8 @@ html[lang="en"] .legal-pl,html[lang="uk"] .legal-pl,html[lang="de"] .legal-pl{di
 .t-europass .lt td{padding:5px 10px;border-bottom:1px solid #EEF0F3}
 @container (max-width:560px){.t-lebenslauf .pg,.t-europass .pg{padding:24px 18px}.t-lebenslauf .kv,.t-lebenslauf .row{grid-template-columns:96px minmax(0,1fr);gap:4px 10px}.t-lebenslauf .pic{width:64px;height:84px}.t-europass .pic{width:64px;height:64px}.t-lebenslauf .sign{flex-direction:column;align-items:stretch;gap:16px}}
 .kw span small{display:block;font-size:11px;opacity:.7;font-weight:400}
+.photobox[hidden]{display:none}
+.pstatus{font-size:14px;color:var(--mute);margin:-4px 0 12px}.pstatus:empty{display:none}.pstatus.good{color:var(--ok);font-weight:600}.pstatus.bad{color:var(--err);font-weight:600}
+.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.modes button{line-height:1.2;text-align:center}
+@media(max-width:480px){.modes button{font-size:13px;padding-inline:6px}}
+.photobox .flabel{display:block;margin-bottom:8px}.filebtn{position:relative;display:inline-flex;margin-bottom:6px}.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}

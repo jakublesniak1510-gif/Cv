@@ -6,6 +6,7 @@ import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, re
 import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
 import { fetchAd, AdError } from './lib/fetchAd.js';
+import { adFromImage, AdImageError } from './lib/adImage.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
 import { mailEnabled, sendOrderMail, sendReminder, sendReviewAsk } from './lib/mail.js';
 import { cleanDesign } from './lib/designs.js';
@@ -134,6 +135,20 @@ app.post('/api/assistant', async (req, res) => {
   if (!history.length || history[history.length - 1].role !== 'user') return res.status(400).json({ error: 'Zadaj pytanie.' });
   try { res.json({ answer: await assistant(history) }); }
   catch (e) { console.error('Asystent', e.message); logEvent('asystent', e.message); res.status(502).json({ error: 'Asystent jest chwilowo niedostępny. Zajrzyj do FAQ albo poradnika.' }); }
+});
+
+// Ogłoszenie ze zdjęcia: bez AI w trybie DEMO wstawiamy przykład, na prawdziwej stronie odsyłamy do wklejenia treści.
+app.post('/api/ad-image', express.json({ limit: '8mb' }), async (req, res) => {
+  if (!fetchLimit(req)) return res.status(429).json({ error: 'Zbyt wiele prób. Spróbuj za kilka minut lub wklej treść ogłoszenia.' });
+  if (!aiEnabled()) {
+    if (DEMO) return res.json({ demo: true, title: 'Magazynier', company: 'Hurtownia Sigma', text: 'Poszukujemy magazyniera do pracy w hurtowni. Zakres: przyjmowanie i wydawanie towaru, inwentaryzacja, praca z dokumentacją magazynową. Wymagamy rzetelności i gotowości do pracy zmianowej. Mile widziane uprawnienia na wózki widłowe. Oferujemy umowę o pracę.' });
+    return res.status(503).json({ error: 'Odczyt zdjęć jest chwilowo niedostępny.' });
+  }
+  try { res.json(await adFromImage(req.body?.image)); }
+  catch (e) {
+    logEvent('ogłoszenie-zdjęcie', e.message);
+    res.status(422).json({ error: e instanceof AdImageError ? e.message : e instanceof AiRefusal ? 'Nie udało się odczytać tego zdjęcia.' : 'Nie udało się odczytać zdjęcia.' });
+  }
 });
 
 app.post('/api/fetch-ad', async (req, res) => {

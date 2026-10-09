@@ -11,6 +11,7 @@
   const make = (fields) => { const id = 'preview-' + Math.random().toString(36).slice(2); orders[id] = { id, status: 'pending', revisions: 0, created: Date.now(), ...fields }; return orders[id]; };
   window.fetch = async (url, opts = {}) => {
     const m = (opts.method || 'GET').toUpperCase(), body = opts.body ? JSON.parse(opts.body) : {};
+    if (url === '/api/ad-image' && m === 'POST') { await wait(900); return json({ demo: true, title: 'Magazynier', company: 'Hurtownia Sigma', text: 'Poszukujemy magazyniera do pracy w hurtowni. Zakres: przyjmowanie i wydawanie towaru, inwentaryzacja, praca z dokumentacją magazynową. Wymagamy rzetelności i gotowości do pracy zmianowej. Mile widziane uprawnienia na wózki widłowe. Oferujemy umowę o pracę.' }); }
     if (url === '/api/config') return json({ demo: true, preview: true, ai: false, maxAds: 3, noPrint: true, fakeFetch: true, maxRevisions: MAXREV, prices: Object.fromEntries(Object.entries(P).map(([k, v]) => [k, v / 100])) });
     if (url === '/content.json') return json({ INDEX: PROFESSIONS.map(({ slug, name, category, keywords }) => ({ slug, name, category, keywords })), POPULAR: PROFESSIONS.filter((p) => POPULAR_SLUGS.includes(p.slug)), ARTICLES, CITIES, TOOLS });
     { const m = /^\/content\/articles-(\w+)\.json$/.exec(url); if (m && ART_LANGS[m[1]]) return json(ART_LANGS[m[1]].data); }
