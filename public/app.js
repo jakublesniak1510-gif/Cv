@@ -2,8 +2,8 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const el = (t, p = {}, ...k) => { const e = Object.assign(document.createElement(t), p); e.append(...k.filter((x) => x != null && x !== false)); return e; };
-let PRICE = { cv: 39, cv_letter: 49, pack3: 79, interview: 50, messages: 9, linkedin: 19, docx: 9, extraLang: 5 };
-const ADDON_KEYS = { interview: ['#adInterview', 'Przygotowanie do rozmowy'], messages: ['#adMessages', 'Wiadomość do rekrutera i e-mail z aplikacją'], linkedin: ['#adLinkedin', 'Profil LinkedIn'], docx: ['#adDocx', 'Wersja Word (.docx)'] };
+let PRICE = { cv: 39, cv_letter: 49, pack3: 79, interview: 50, messages: 9, linkedin: 19, sim: 29, docx: 9, extraLang: 5 };
+const ADDON_KEYS = { interview: ['#adInterview', 'Przygotowanie do rozmowy'], messages: ['#adMessages', 'Wiadomość do rekrutera i e-mail z aplikacją'], linkedin: ['#adLinkedin', 'Profil LinkedIn'], sim: ['#adSim', 'Symulator rozmowy kwalifikacyjnej'], docx: ['#adDocx', 'Wersja Word (.docx)'] };
 const PKG_ADS = { cv: 1, cv_letter: 1, pack3: 3 };
 const PKG_NAME = { cv: 'CV', cv_letter: 'CV + list motywacyjny', pack3: 'Pakiet 3 CV + listy motywacyjne' };
 let promo = null; // zastosowany kod rabatowy: { code, discount, label }
@@ -699,7 +699,7 @@ function refresh() {
   $('#packTip').hidden = maxA !== 1;
 }
 $$('input[name=pkg]').forEach((r) => (r.onchange = refresh));
-$('#adInterview').onchange = $('#adMessages').onchange = refresh;
+Object.values(ADDON_KEYS).forEach(([sel]) => ($(sel).onchange = refresh));
 $('#langPick').replaceChildren(...Object.entries(LANGS).map(([k, n]) => el('label', { className: 'chk' }, el('input', { type: 'checkbox', value: k, onchange: refresh }), ` ${n}`, el('small', { className: 'incl', hidden: true, textContent: 'w cenie' }))));
 // Język, w którym i tak powstaną dokumenty (z ogłoszeń; zanim ktoś je wklei — polski na polskiej wersji strony), jest w cenie: nie da się go dokupić.
 function syncLangPick() {
@@ -981,11 +981,69 @@ function drawMail() {
       if (j.mail) data.mail = j.mail; drawMail();
     } }));
 }
-const DOCS = { cv: 'CV', letter: 'List motywacyjny', interview: 'Rozmowa', messages: 'Wiadomości', linkedin: 'LinkedIn' };
-const docsOf = (r) => ['cv', ...(data.pkg !== 'cv' ? ['letter'] : []), ...(r.interview?.length ? ['interview'] : []), ...(r.messages ? ['messages'] : []), ...(r.linkedin ? ['linkedin'] : [])];
+const DOCS = { cv: 'CV', letter: 'List motywacyjny', interview: 'Rozmowa', sim: 'Symulator rozmowy', messages: 'Wiadomości', linkedin: 'LinkedIn' };
+const docsOf = (r) => ['cv', ...(data.pkg !== 'cv' ? ['letter'] : []), ...(r.interview?.length ? ['interview'] : []), ...(data.addons?.sim ? ['sim'] : []), ...(r.messages ? ['messages'] : []), ...(r.linkedin ? ['linkedin'] : [])];
 let editing = null; // kopia dokumentu w trakcie ręcznej edycji
 let curLang = null; // aktywna dodatkowa wersja językowa (null = główny język)
 const cur = () => { const b = data.results[curAd]; return (curLang && b.variants?.[curLang]) || b; };
+
+// Symulator rozmowy: przebieg zapisany w przeglądarce (osobno dla każdego ogłoszenia), żeby odświeżenie strony go nie kasowało.
+const simKey = () => `cvpo-sim-${orderId}-${curAd}`;
+const simLoad = () => { try { return JSON.parse(localStorage.getItem(simKey())) || null; } catch { return null; } };
+const simSave = (s) => { try { localStorage.setItem(simKey(), JSON.stringify(s)); } catch {} };
+function simNode() {
+  let s = simLoad() || { turns: [], q: null, summary: null };
+  const box = el('div', { className: 'sim' }), log = el('div', { className: 'sim-log', ariaLive: 'polite' });
+  const ans = el('textarea', { className: 'sim-in', placeholder: 'Twoja odpowiedź – tak jak powiedział(a)byś na rozmowie', rows: 5 });
+  const send = el('button', { type: 'button', className: 'btn', textContent: 'Wyślij odpowiedź' }), end = el('button', { type: 'button', className: 'btn ghost', textContent: 'Zakończ i podsumuj' });
+  const status = el('p', { className: 'hint sim-st', role: 'status' });
+  const score = (n) => el('span', { className: 'sim-score', ariaLabel: `${n}/5` }, ...[1, 2, 3, 4, 5].map((i) => el('i', { className: i <= n ? 'f' : '' })), el('b', { textContent: ` ${n}/5` }));
+  const fb = (f) => el('div', { className: 'sim-fb' }, el('div', { className: 'sim-fb-h' }, el('span', { textContent: 'Ocena odpowiedzi' }), score(f.score)),
+    f.good ? el('p', {}, el('b', { textContent: 'Dobrze: ' }), f.good) : null, f.improve ? el('p', {}, el('b', { textContent: 'Do poprawy: ' }), f.improve) : null,
+    f.better ? el('p', { className: 'sim-better' }, el('b', { textContent: 'Lepiej: ' }), f.better) : null);
+  const paint = () => {
+    log.replaceChildren(...[...s.turns.flatMap((t) => [el('div', { className: 'sim-msg q' }, el('small', { textContent: 'Rekruter' }), t.q), el('div', { className: 'sim-msg a' }, el('small', { textContent: 'Ty' }), t.a), t.fb ? fb(t.fb) : null]),
+      s.q ? el('div', { className: 'sim-msg q' }, el('small', { textContent: 'Rekruter' }), s.q) : null,
+      s.summary ? el('div', { className: 'sim-sum' }, el('h3', { textContent: 'Podsumowanie rozmowy' }), score(s.summary.score),
+        s.summary.strengths?.length ? el('div', {}, el('b', { textContent: 'Mocne strony' }), el('ul', {}, ...s.summary.strengths.map((x) => el('li', { textContent: x })))) : null,
+        s.summary.improve?.length ? el('div', {}, el('b', { textContent: 'Nad czym popracować' }), el('ul', {}, ...s.summary.improve.map((x) => el('li', { textContent: x })))) : null,
+        s.summary.tip ? el('p', { className: 'sim-better' }, el('b', { textContent: 'Rada na koniec: ' }), s.summary.tip) : null) : null].filter(Boolean));
+    const active = !!s.q && !s.summary;
+    ans.hidden = send.hidden = end.hidden = !active; start.hidden = active;
+    start.textContent = s.turns.length || s.summary ? 'Zacznij nową rozmowę' : 'Zacznij rozmowę';
+  };
+  const call = async (body) => {
+    status.textContent = 'Rekruter czyta Twoją odpowiedź…'; send.disabled = end.disabled = start.disabled = true;
+    try {
+      const r = await fetch(`/api/orders/${orderId}/sim`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ i: curAd, ...body }) });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      status.textContent = ''; return j;
+    } catch (x) { status.textContent = x.message || 'Symulator jest chwilowo niedostępny. Spróbuj za chwilę.'; return null; }
+    finally { send.disabled = end.disabled = start.disabled = false; }
+  };
+  const answer = async (finish) => {
+    const a = ans.value.trim();
+    if (!finish && !a) { status.textContent = 'Napisz odpowiedź na pytanie.'; return; }
+    const history = [...s.turns.map((t) => ({ q: t.q, a: t.a })), ...(a ? [{ q: s.q, a }] : [])];
+    const j = await call({ history, finish }); if (!j) return;
+    if (a) s.turns.push({ q: s.q, a, fb: j.feedback }); else if (j.feedback && s.turns.length) s.turns[s.turns.length - 1].fb ||= j.feedback;
+    s.q = j.question; s.summary = j.summary || (!j.question ? s.summary : null);
+    if (!j.question && !j.summary) { const k = await call({ history, finish: true }); if (k) s.summary = k.summary; }
+    ans.value = ''; simSave(s); paint(); log.lastElementChild?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  };
+  const start = el('button', { type: 'button', className: 'btn', onclick: async () => {
+    s = { turns: [], q: null, summary: null };
+    const j = await call({ history: [] }); if (!j) return;
+    s.q = j.question; simSave(s); paint(); ans.focus();
+  } });
+  send.onclick = () => answer(false); end.onclick = () => answer(true);
+  ans.onkeydown = (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) answer(false); };
+  box.append(el('div', { className: 'sim-intro' }, el('h2', { textContent: 'Symulator rozmowy kwalifikacyjnej' }),
+    el('p', { textContent: 'Rekruter zada Ci do 8 pytań do tego ogłoszenia, po jednym. Po każdej odpowiedzi dostaniesz ocenę i wskazówki, a na końcu podsumowanie. Odpowiadaj tak, jak mówił(a)byś na prawdziwej rozmowie.' })),
+    log, el('div', { className: 'sim-form' }, ans, el('div', { className: 'sim-btns' }, send, end, start)), status);
+  paint();
+  return box;
+}
 
 function interviewNode(r, d) {
   const p = paperEl('extra', { tpl: 'klasyczny', color: d.color }), pr = r.prep || null;
@@ -1107,7 +1165,7 @@ function openEditor() {
 
 function drawPaper() {
   const base = cur(), r = editing ? { ...base, cv: editing.cv, letter: editing.letter } : base, d = data.design;
-  const node = { cv: () => cvNode(r, undefined, d), letter: () => letterNode(r, d), interview: () => interviewNode(r, d), messages: () => messagesNode(r, d), linkedin: () => linkedinNode(r, d) }[curDoc];
+  const node = { cv: () => cvNode(r, undefined, d), letter: () => letterNode(r, d), interview: () => interviewNode(r, d), sim: () => simNode(), messages: () => messagesNode(r, d), linkedin: () => linkedinNode(r, d) }[curDoc];
   $('#paper').replaceChildren(node());
 }
 
@@ -1215,7 +1273,8 @@ function showResult() {
     $('#docTabs').replaceChildren(...docs.map((k) => el('button', { type: 'button', role: 'tab', textContent: DOCS[k], onclick: () => { curDoc = k; editing = null; $('#editor').hidden = $('#reviseBox').hidden = true; draw(); } })));
     $$('#docTabs button').forEach((b, i) => b.setAttribute('aria-selected', docs[i] === curDoc));
     $('#docTabs').hidden = docs.length < 2;
-    $('#print').textContent = `Pobierz PDF: ${{ cv: 'CV', letter: 'list', interview: 'pytania', messages: 'wiadomości', linkedin: 'profil LinkedIn' }[curDoc]}`;
+    $('#print').textContent = `Pobierz PDF: ${{ cv: 'CV', letter: 'list', interview: 'pytania', messages: 'wiadomości', linkedin: 'profil LinkedIn', sim: '' }[curDoc]}`;
+    $('#print').hidden = curDoc === 'sim';
     const editable = curDoc === 'cv' || curDoc === 'letter';
     $('#docxBtn').hidden = !(data.addons?.docx && editable);
     $('#docxBtn').href = `/api/orders/${orderId}/docx/${curAd}?doc=${curDoc}${curLang ? '&lang=' + curLang : ''}`;

@@ -7,6 +7,7 @@ import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './
 import { aiEnabled, AiRefusal } from './lib/ai.js';
 import { fetchAd, AdError } from './lib/fetchAd.js';
 import { adFromImage, AdImageError } from './lib/adImage.js';
+import { simTurn, SimError } from './lib/sim.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
 import { mailEnabled, sendOrderMail, sendReminder, sendReviewAsk } from './lib/mail.js';
 import { cleanDesign } from './lib/designs.js';
@@ -135,6 +136,24 @@ app.post('/api/assistant', async (req, res) => {
   if (!history.length || history[history.length - 1].role !== 'user') return res.status(400).json({ error: 'Zadaj pytanie.' });
   try { res.json({ answer: await assistant(history) }); }
   catch (e) { console.error('Asystent', e.message); logEvent('asystent', e.message); res.status(502).json({ error: 'Asystent jest chwilowo niedostępny. Zajrzyj do FAQ albo poradnika.' }); }
+});
+
+// Symulator rozmowy (dodatek): jedna tura = pytanie rekrutera i ocena ostatniej odpowiedzi; limit tur na zamówienie.
+const SIM_LIMIT = 120;
+app.post('/api/orders/:id/sim', async (req, res) => {
+  const o = await getOrder(req.params.id);
+  if (!o || o.status !== 'done' || !o.addons?.sim) return res.status(404).json({ error: 'Symulator nie jest dostępny dla tego zamówienia.' });
+  const i = Number(req.body?.i) || 0, r = o.results?.[i];
+  if (!r) return res.status(400).json({ error: 'Nie znaleziono ogłoszenia.' });
+  if ((o.simTurns || 0) >= SIM_LIMIT) return res.status(429).json({ error: 'Wykorzystano limit rozmów w symulatorze dla tego zamówienia.' });
+  try {
+    const out = await simTurn({ result: r, ad: o.ads[i] || {}, uiLang: o.uiLang, history: req.body?.history, finish: !!req.body?.finish });
+    await updateOrder(o.id, (x) => ({ ...x, simTurns: (x.simTurns || 0) + 1 }));
+    res.json(out);
+  } catch (e) {
+    if (!(e instanceof SimError)) { console.error('Symulator', e.message); logEvent('symulator', e.message, { order: o.id }); }
+    res.status(e instanceof SimError ? 400 : 502).json({ error: e instanceof SimError ? e.message : 'Symulator jest chwilowo niedostępny. Spróbuj za chwilę.' });
+  }
 });
 
 // Ogłoszenie ze zdjęcia: bez AI w trybie DEMO wstawiamy przykład, na prawdziwej stronie odsyłamy do wklejenia treści.
