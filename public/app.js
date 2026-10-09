@@ -510,6 +510,17 @@ const gal = { tpl: 'nowoczesny', color: 'niebieski' };
 // Przykładowe CV w PDF ze znakiem wodnym (fikcyjna osoba) w danym szablonie i kolorze.
 const sampleLink = (d, text, cls = 'btn ghost sm') => el('a', { className: cls, href: `/api/sample.pdf?tpl=${d.tpl}&color=${d.color}&lang=${window.I18N?.lang || 'pl'}`, download: '', textContent: text,
   onclick: (e) => { if (cfg.preview) { e.preventDefault(); flash('W podglądzie pobieranie PDF jest wyłączone. Na działającej stronie pobierzesz przykładowe CV ze znakiem wodnym „PRZYKŁAD”.'); } else track('sample', { tpl: d.tpl }); } });
+// Formularz „Dla firm i instytucji”.
+$('#b2bForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault(); const out = $('#bMsgOut'), btn = $('#b2bForm button[type=submit]');
+  out.className = 'fstatus'; btn.disabled = true;
+  try {
+    const r = await fetch('/api/b2b', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ org: $('#bOrg').value, name: $('#bName').value, email: $('#bEmail').value, phone: $('#bPhone').value, count: $('#bCount').value, msg: $('#bMsg').value, consent: $('#bConsent').checked, uiLang: window.I18N?.lang || 'pl' }) });
+    const j = await r.json(); if (!r.ok) throw new Error(j.error);
+    e.target.reset(); out.classList.add('good'); out.textContent = 'Dziękujemy! Odpowiemy e-mailem, zwykle w ciągu 1–2 dni roboczych.'; track('b2b');
+  } catch (x) { out.classList.add('bad'); out.textContent = x.message; }
+  btn.disabled = false;
+});
 function drawGallery() {
   const sample = exResult(1);
   $('#galColors').replaceChildren(el('span', { className: 'dp-lbl', textContent: 'Kolor:' }), ...Object.entries(COLORS).map(([id, hex]) => el('button', { type: 'button', className: 'sw', title: COLOR_NAMES[id], ariaLabel: `Kolor ${COLOR_NAMES[id]}`, ariaPressed: String(gal.color === id), style: `--c:${hex}`, onclick: () => { gal.color = id; drawGallery(); } })));
@@ -667,7 +678,7 @@ const nAds = () => Math.max(1, $('#ads').children.length);
 const addons = () => Object.fromEntries(Object.entries(ADDON_KEYS).map(([k, [sel]]) => [k, $(sel).checked]));
 const extraLangs = () => $$('#langPick input:checked').map((i) => i.value);
 const addonsTotal = () => Object.entries(addons()).reduce((s, [k, on]) => s + (on ? PRICE[k] : 0), 0) + PRICE.extraLang * extraLangs().length;
-const discount = () => (promo ? Math.min(promo.percent ? Math.round((PRICE[pkg()] + addonsTotal()) * promo.percent) / 100 : promo.discount, PRICE[pkg()] - 2) : 0);
+const discount = () => (promo?.voucher ? Math.min(PRICE[pkg()], PRICE[promo.voucher]) : promo ? Math.min(promo.percent ? Math.round((PRICE[pkg()] + addonsTotal()) * promo.percent) / 100 : promo.discount, PRICE[pkg()] - 2) : 0);
 const total = () => PRICE[pkg()] + addonsTotal() - discount();
 
 const DKEY = 'cvpo-draft-v1', FIELDS = ['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'];
@@ -736,9 +747,9 @@ async function applyCode(raw, quiet) {
   try {
     const r = await fetch(`/api/code/${encodeURIComponent(code)}?email=${encodeURIComponent($('#email').value)}`);
     const j = await r.json(); if (!r.ok) throw new Error(j.error);
-    promo = j; st.className = 'fstatus good'; st.textContent = `${j.label}: −${j.percent ? j.percent + '%' : j.discount + ' zł'}`;
+    promo = j; st.className = 'fstatus good'; st.textContent = j.voucher ? `${j.label}: ${PKG_NAME[j.voucher]} bez opłaty` : `${j.label}: −${j.percent ? j.percent + '%' : j.discount + ' zł'}`;
   } catch (x) { promo = null; if (!quiet) { st.className = 'fstatus bad'; st.textContent = x.message; } }
-  refresh(); if (step === 6) drawSummary();
+  refresh(); if (step === 6) { drawSummary(); nextLabel(); }
 }
 $('#codeApply').onclick = () => applyCode($('#codeInput').value);
 $('#toPack').onclick = () => { $('input[name=pkg][value=pack3]').checked = true; refresh(); $('#werr').textContent = ''; };
@@ -753,6 +764,7 @@ $('#addExp').onclick = () => addRow('exp');
 $('#addEdu').onclick = () => addRow('edu');
 $('#addAd').onclick = () => addRow('ads');
 
+const nextLabel = () => ($('#next').textContent = step === 6 ? (total() === 0 ? 'Zamów bez opłaty' : cfg.demo ? `Przejdź do płatności · ${total()} zł` : `Zapłać ${total()} zł`) : 'Dalej');
 function go(n) {
   refresh();
   step = n; if (!$('#wiz').hidden) track('step', { s: n });
@@ -762,7 +774,7 @@ function go(n) {
   $('#wizTitle').textContent = n <= 6 ? STEPS[n - 1] : 'Zapłać za zamówienie';
   $('#back').hidden = n === 1 || n === 7;
   $('#next').hidden = n === 7;
-  $('#next').textContent = n === 6 ? (cfg.demo ? `Przejdź do płatności · ${total()} zł` : `Zapłać ${total()} zł`) : 'Dalej';
+  nextLabel();
   if (n === 6) { if ($('#codeInput').value && !promo) applyCode($('#codeInput').value, true); drawSummary(); }
   $('#werr').textContent = '';
   $('.wiz-body').scrollTop = 0;
@@ -775,7 +787,7 @@ function drawSummary() {
     ...ads.map((a, i) => el('div', { className: 'sumrow' }, el('span', { textContent: `Ogłoszenie ${i + 1}: ${a.title}${a.lang === 'en' ? ' (po angielsku)' : ''}` }), el('span', { textContent: 'w cenie' }))),
     ...Object.entries(addons()).filter(([, on]) => on).map(([k]) => el('div', { className: 'sumrow' }, el('span', { textContent: ADDON_KEYS[k][1] }), el('span', { textContent: '+' + PRICE[k] + ' zł' }))),
     ...extraLangs().map((l) => el('div', { className: 'sumrow' }, el('span', { textContent: `Tłumaczenie: ${LANGS[l]}` }), el('span', { textContent: '+' + PRICE.extraLang + ' zł' }))),
-    ...(discount() ? [el('div', { className: 'sumrow' }, el('span', { textContent: `${promo.label} ${promo.code}` }), el('span', { textContent: '−' + discount() + ' zł' }))] : []),
+    ...(discount() ? [el('div', { className: 'sumrow' }, el('span', {}, el('span', { textContent: promo.label }), ' ' + promo.code), el('span', { textContent: '−' + discount() + ' zł' }))] : []),
     el('div', { className: 'sumrow' }, el('span', { textContent: 'Razem' }), el('span', { textContent: total() + ' zł' })));
 }
 function validate(n) {
@@ -825,7 +837,7 @@ $('#wizForm').onsubmit = async (e) => {
     const j = await r.json();
     if (!r.ok) throw new Error(j.error);
     orderId = j.id;
-    if (j.demo) go(7); else location.href = j.url;
+    if (j.free) { closeWiz(); startResult(j.id); } else if (j.demo) go(7); else location.href = j.url;
   } catch (x) { $('#werr').textContent = x.message; }
   $('#next').disabled = false;
 };
@@ -1201,7 +1213,7 @@ function drawFollowup() {
       try {
         const r = await fetch(`/api/orders/${orderId}/followup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pkg: fpkg, ads, code }) });
         const j = await r.json(); if (!r.ok) throw new Error(j.error);
-        if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); delete box.dataset.ready; startResult(j.id); } else location.href = j.url;
+        if (j.free) { delete box.dataset.ready; startResult(j.id); } else if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); delete box.dataset.ready; startResult(j.id); } else location.href = j.url;
       } catch (x) { err.textContent = x.message; e.target.disabled = false; }
     } }), cfg.demo ? el('span', { className: 'hint', textContent: '  Podgląd: płatność jest symulowana.' }) : null),
     el('p', { className: 'err', id: 'fuErr' }));

@@ -735,3 +735,8 @@ html[lang="en"] .legal-pl,html[lang="uk"] .legal-pl,html[lang="de"] .legal-pl{di
 .sim-st:empty{display:none}
 .gal-sample{margin:18px 0 0;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}.gal-sample .hint{margin:0}
 #exSample a{margin-right:10px}@media(max-width:640px){#exSample{display:none}}
+.b2b-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:start}
+.b2b-form{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:grid;gap:4px}
+.b2b-form textarea{min-height:80px}
+@media(max-width:860px){.b2b-grid{grid-template-columns:1fr}}
+.checks{list-style:none;padding:0;margin:14px 0}.checks li{position:relative;padding-left:24px;margin-bottom:8px}.checks li::before{content:"✓";position:absolute;left:0;color:var(--ok);font-weight:700}

@@ -28,6 +28,7 @@
       <button data-v="orders"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg>Zamówienia</button>
       <button data-v="codes"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/></svg>Kody rabatowe</button>
       <button data-v="reviews"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Opinie<span class="badge info" id="rvBadge" hidden></span></button>
+      <button data-v="leads"><svg viewBox="0 0 24 24"><path d="M3 21V7l9-4 9 4v14"/><path d="M9 21v-6h6v6M8 10h.01M12 10h.01M16 10h.01"/></svg>Firmy</button>
       <button data-v="problems"><svg viewBox="0 0 24 24"><path d="M12 3 2 21h20z"/><path d="M12 10v5M12 18v.01"/></svg>Problemy<span class="badge" id="probBadge" hidden></span></button>
       <button data-v="export"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>Eksport</button>
     </nav>
@@ -83,16 +84,17 @@
         <h2>Nowy kod na akcję promocyjną</h2>
         <form id="codeForm" class="codeform">
           <label class="f">Kod<input id="cCode" required maxlength="20" placeholder="np. JESIEN20" autocapitalize="characters"></label>
-          <div class="f" style="display:grid;gap:4px;font-size:13px;font-weight:600;color:var(--ink2)">Rodzaj rabatu<div class="seg" id="cKind"><button type="button" data-k="amount" aria-pressed="true">zł</button><button type="button" data-k="percent" aria-pressed="false">%</button></div></div>
-          <label class="f"><span id="cValLbl">Rabat (zł)</span><input id="cVal" type="number" min="1" max="70" step="1" required value="10"></label>
+          <div class="f" style="display:grid;gap:4px;font-size:13px;font-weight:600;color:var(--ink2)">Rodzaj rabatu<div class="seg" id="cKind"><button type="button" data-k="amount" aria-pressed="true">zł</button><button type="button" data-k="percent" aria-pressed="false">%</button><button type="button" data-k="voucher" aria-pressed="false">pakiet (instytucja)</button></div></div>
+          <label class="f" id="cValBox"><span id="cValLbl">Rabat (zł)</span><input id="cVal" type="number" min="1" max="70" step="1" required value="10"></label>
+          <label class="f" id="cPkgBox" hidden>Pakiet bez opłaty<select id="cPkg"><option value="cv">CV (39 zł)</option><option value="cv_letter" selected>CV + list (49 zł)</option><option value="pack3">Pakiet 3 (79 zł)</option></select></label>
           <label class="f">Ważny (dni)<input id="cDays" type="number" min="1" max="365" value="30" required></label>
           <label class="f">Limit użyć<input id="cMax" type="number" min="0" placeholder="bez limitu"></label>
           <label class="f">Notatka<input id="cNote" maxlength="100" placeholder="np. post na FB"></label>
           <div class="wide"><button class="btn" type="submit">Utwórz kod</button> <span class="msg" id="cMsg"></span></div>
         </form>
-        <p class="help">Każda osoba (adres e-mail) może użyć danego kodu raz. Kody klientów (KOD-…) powstają automatycznie po zakupie i dają −10 zł.</p>
+        <p class="help">Każda osoba (adres e-mail) może użyć danego kodu raz. Kody klientów (KOD-…) powstają automatycznie po zakupie i dają −10 zł. Kod „pakiet (instytucja)” daje wybrany pakiet bez opłaty – dla urzędu pracy, szkoły czy firmy; w „Limit użyć” wpisz liczbę osób, a w notatce nazwę instytucji.</p>
       </div>
-      <div class="filters"><div class="seg" id="codeKind"><button type="button" data-k="" aria-pressed="true">Wszystkie</button><button type="button" data-k="akcja" aria-pressed="false">Akcje</button><button type="button" data-k="klient" aria-pressed="false">Kody klientów</button></div></div>
+      <div class="filters"><div class="seg" id="codeKind"><button type="button" data-k="" aria-pressed="true">Wszystkie</button><button type="button" data-k="akcja" aria-pressed="false">Akcje</button><button type="button" data-k="instytucja" aria-pressed="false">Instytucje</button><button type="button" data-k="klient" aria-pressed="false">Kody klientów</button></div></div>
       <div class="tbl-wrap" id="codeTable"></div>
     </section>
 
@@ -105,6 +107,10 @@
     </section>
 
     <!-- Problemy -->
+    <section data-view="leads" hidden>
+      <div class="card"><h2>Zapytania od firm i instytucji</h2><p class="help">Z formularza „Dla firm i instytucji” na stronie. Odpowiedz e-mailem, ustal liczbę osób i cenę, a potem w zakładce „Kody rabatowe” utwórz kod „pakiet (instytucja)” z limitem użyć. Zapytania usuwamy automatycznie po 12 miesiącach.</p></div>
+      <div id="leadTable"></div>
+    </section>
     <section data-view="problems" hidden>
       <div class="head"><h1>Problemy</h1></div>
       <div class="card" style="margin-bottom:14px"><h2>Zamówienia wymagające uwagi</h2><p class="help" style="margin:-6px 0 12px">Opłacone, ale dokumenty się nie wygenerowały, albo e-mail nie doszedł. Otwórz zamówienie i użyj „Generuj ponownie” lub „Wyślij e-mail ponownie”.</p><div class="tbl-wrap" id="probOrders"></div></div>

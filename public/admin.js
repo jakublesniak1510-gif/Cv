@@ -225,6 +225,7 @@ $('#cKind').addEventListener('click', (e) => {
   const b = e.target.closest('button'); if (!b) return; kind = b.dataset.k;
   $$('#cKind button').forEach((x) => x.setAttribute('aria-pressed', x === b));
   $('#cValLbl').textContent = kind === 'amount' ? 'Rabat (zł)' : 'Rabat (%)'; $('#cVal').max = kind === 'amount' ? 70 : 90;
+  $('#cValBox').hidden = kind === 'voucher'; $('#cVal').required = kind !== 'voucher'; $('#cPkgBox').hidden = kind !== 'voucher';
 });
 $('#codeKind').addEventListener('click', (e) => {
   const b = e.target.closest('button'); if (!b) return; codeFilter = b.dataset.k;
@@ -233,7 +234,7 @@ $('#codeKind').addEventListener('click', (e) => {
 $('#codeForm').addEventListener('submit', async (e) => {
   e.preventDefault(); const m = $('#cMsg'); m.className = 'msg'; m.textContent = '';
   try {
-    await post('/codes', { code: $('#cCode').value, [kind]: $('#cVal').value, days: $('#cDays').value, maxUses: $('#cMax').value, note: $('#cNote').value });
+    await post('/codes', { code: $('#cCode').value, [kind]: kind === 'voucher' ? $('#cPkg').value : $('#cVal').value, days: $('#cDays').value, maxUses: $('#cMax').value, note: $('#cNote').value });
     m.className = 'msg good'; m.textContent = `Kod ${$('#cCode').value.toUpperCase()} utworzony.`; $('#cCode').value = $('#cNote').value = $('#cMax').value = '';
     loaders.codes();
   } catch (x) { m.className = 'msg bad'; m.textContent = x.message; }
@@ -249,8 +250,8 @@ loaders.codes = async () => {
         if (del.dataset.sure !== '1') { del.dataset.sure = '1'; del.textContent = 'Na pewno?'; setTimeout(() => { del.dataset.sure = ''; del.textContent = 'Usuń'; }, 3000); return; }
         try { await api('/codes/' + encodeURIComponent(c.code), { method: 'DELETE' }); toast(`Kod ${c.code} usunięty.`); loaders.codes(); } catch (x) { toast(x.message); }
       };
-      return el('tr', {}, el('td', { className: 'mono', textContent: c.code }), el('td', {}, el('span', { className: 'tag', textContent: c.kind === 'klient' ? 'klient' : 'akcja' })),
-        el('td', { className: 'r', textContent: c.percent ? `−${c.percent}%` : `−${zl(c.amount)}` }),
+      return el('tr', {}, el('td', { className: 'mono', textContent: c.code }), el('td', {}, el('span', { className: 'tag', textContent: c.kind })),
+        el('td', { className: 'r', textContent: c.voucher ? `${{ cv: 'CV', cv_letter: 'CV + list', pack3: 'Pakiet 3' }[c.voucher]} gratis` : c.percent ? `−${c.percent}%` : `−${zl(c.amount)}` }),
         el('td', { className: 'r', textContent: c.maxUses ? `${c.uses} / ${c.maxUses}` : String(c.uses) }),
         el('td', { className: 'num', textContent: dd(c.expires) }), el('td', { className: 'ell mute', textContent: c.note || '—' }), el('td', { className: 'r' }, del));
     }))));
@@ -333,3 +334,18 @@ async function start() {
   go(loaders[v] ? v : 'dash');
 }
 start();
+
+// --- zapytania od firm ---
+loaders.leads = async () => {
+  const list = await api('/leads');
+  if (!list.length) return $('#leadTable').replaceChildren(el('div', { className: 'empty', textContent: 'Brak zapytań.' }));
+  $('#leadTable').replaceChildren(el('table', {},
+    el('thead', {}, el('tr', {}, ['Data', 'Instytucja', 'Osoba', 'Kontakt', 'Osób', 'Wiadomość', ''].map((t, i) => el('th', { className: i === 4 ? 'r' : '', textContent: t })))),
+    el('tbody', {}, list.map((l) => {
+      const del = el('button', { className: 'btn danger sm', textContent: 'Usuń' });
+      del.onclick = async () => { if (del.dataset.sure !== '1') { del.dataset.sure = '1'; del.textContent = 'Na pewno?'; return; } try { await api('/leads/' + l.id, { method: 'DELETE' }); loaders.leads(); } catch (x) { toast(x.message); } };
+      return el('tr', {}, el('td', { className: 'num', textContent: dd(l.created) }), el('td', { textContent: l.org }), el('td', { textContent: l.name }),
+        el('td', {}, el('a', { href: 'mailto:' + l.email, textContent: l.email }), l.phone ? el('div', { className: 'mute', textContent: l.phone }) : ''),
+        el('td', { className: 'r', textContent: l.count || '—' }), el('td', { className: 'mute', textContent: l.msg || '—' }), el('td', { className: 'r' }, del));
+    }))));
+};

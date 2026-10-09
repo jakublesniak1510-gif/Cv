@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import crypto from 'node:crypto';
 import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, withLetter as hasLetter } from './lib/pricing.js';
-import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats } from './lib/store.js';
+import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads } from './lib/store.js';
 import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
 import { fetchAd, AdError } from './lib/fetchAd.js';
@@ -103,10 +103,12 @@ async function checkCode(raw, email) {
   if (!c || Date.now() > c.expires) return { error: 'Ten kod nie istnieje albo wygasł.' };
   if (email && (c.usedBy || []).includes(emailHash(email))) return { error: 'Ten kod został już przez Ciebie wykorzystany.' };
   if (c.maxUses && (c.usedBy || []).length >= c.maxUses) return { error: 'Limit użyć tego kodu został wyczerpany.' };
-  return { code, discount: c.amount || 0, percent: c.percent || 0 };
+  return { code, discount: c.amount || 0, percent: c.percent || 0, voucher: c.voucher || null };
 }
 // Rabat w groszach: kwotowy albo procentowy (kody akcji promocyjnych z panelu).
-const discountFor = (c, pkg, n, ad, returning, langs) => (c.percent ? Math.round((calcTotal(pkg, n, ad, returning, langs, 0) * c.percent) / 100) : c.discount || 0);
+// Kod od instytucji (voucher) pokrywa cały pakiet; przy droższym pakiecie klient dopłaca różnicę.
+const discountFor = (c, pkg, n, ad, returning, langs) => c.voucher ? (PRICES[pkg] <= PRICES[c.voucher] ? 'voucher' : PRICES[c.voucher]) : (c.percent ? Math.round((calcTotal(pkg, n, ad, returning, langs, 0) * c.percent) / 100) : c.discount || 0);
+const discountGr = (disc, pkg) => (disc === 'voucher' ? PRICES[pkg] : disc); // do zapisu w zamówieniu (grosze)
 const newCode = (prefix) => `${prefix}-${crypto.randomBytes(4).toString('hex').toUpperCase().slice(0, 6)}`;
 const cleanAddons = (a = {}) => Object.fromEntries(Object.keys(ADDONS).map((k) => [k, !!a[k]]));
 // Edytowane przez klienta CV: ten sam kształt co z generatora, przycięte długości.
@@ -127,7 +129,7 @@ app.get('/api/config', (_req, res) => res.json({
 app.get('/api/code/:code', async (req, res) => {
   const r = await checkCode(req.params.code, req.query.email);
   if (r.error) return res.status(404).json({ error: r.error });
-  res.json({ code: r.code, discount: r.discount / 100, percent: r.percent || 0, label: 'Kod rabatowy' });
+  res.json({ code: r.code, discount: r.discount / 100, percent: r.percent || 0, voucher: r.voucher, label: r.voucher ? 'Kod od instytucji' : 'Kod rabatowy' });
 });
 
 // Asystent: krótkie odpowiedzi na pytania o CV (limit na IP).
@@ -137,6 +139,18 @@ app.post('/api/assistant', async (req, res) => {
   if (!history.length || history[history.length - 1].role !== 'user') return res.status(400).json({ error: 'Zadaj pytanie.' });
   try { res.json({ answer: await assistant(history) }); }
   catch (e) { console.error('Asystent', e.message); logEvent('asystent', e.message); res.status(502).json({ error: 'Asystent jest chwilowo niedostępny. Zajrzyj do FAQ albo poradnika.' }); }
+});
+
+// Zapytanie od firmy lub instytucji (paczka kodów dla podopiecznych, pracowników, absolwentów).
+app.post('/api/b2b', async (req, res) => {
+  if (!fetchLimit(req)) return res.status(429).json({ error: 'Zbyt wiele prób. Spróbuj za kilka minut.' });
+  const b = req.body || {}, s = (v, n) => String(v || '').trim().slice(0, n);
+  const lead = { id: crypto.randomUUID(), org: s(b.org, 150), name: s(b.name, 100), email: s(b.email, 150), phone: s(b.phone, 40), count: Math.max(0, Math.min(100000, parseInt(b.count, 10) || 0)), msg: s(b.msg, 2000), uiLang: s(b.uiLang, 2), created: Date.now() };
+  if (!lead.org || !lead.name || !/^\S+@\S+\.\S+$/.test(lead.email)) return res.status(400).json({ error: 'Podaj nazwę instytucji, imię i nazwisko oraz poprawny e-mail.' });
+  if (!b.consent) return res.status(400).json({ error: 'Zaznacz zgodę na kontakt w sprawie zapytania.' });
+  await leads.save(lead);
+  logEvent('firma', `Zapytanie: ${lead.org} (${lead.count || '?'} osób)`, { email: lead.email });
+  res.json({ ok: true });
 });
 
 // Przykładowe CV w PDF (fikcyjna osoba, znak wodny „PRZYKŁAD”) w wybranym szablonie i kolorze.
@@ -192,6 +206,8 @@ app.post('/api/fetch-ad', async (req, res) => {
 
 // Płatność przez Przelewy24. sessionId = numer zamówienia + numer próby, więc wpłatę zawsze da się przypisać do zamówienia.
 async function checkout(order, lang) {
+  // Zamówienie za 0 zł (kod od instytucji): bez płatności, dokumenty powstają od razu.
+  if (order.total === 0) { await updateOrder(order.id, { payment: { provider: 'kod', code: order.code, at: Date.now() } }); markPaidAndGenerate(order.id).catch(console.error); return { id: order.id, free: true }; }
   if (DEMO) return { id: order.id, demo: true };
   const attempt = (order.payAttempts || 0) + 1, sessionId = `${order.id}.${attempt}`;
   const { token, url } = await p24Register({
@@ -238,7 +254,7 @@ app.post('/api/orders', async (req, res) => {
     const c = await checkCode(code, p.email);
     if (c.error) return res.status(400).json({ error: c.error });
     const disc = discountFor(c, pkg, a.length, ad, false, langs);
-    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, false, langs, disc), profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), total: calcTotal(pkg, a.length, ad, false, langs, disc), profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -256,7 +272,7 @@ app.post('/api/orders/:id/followup', async (req, res) => {
     if (c.error) return res.status(400).json({ error: c.error });
     const pkg = ['cv', 'cv_letter', 'pack3'].includes(req.body?.pkg) ? req.body.pkg : parent.pkg;
     const disc = discountFor(c, pkg, a.length, ad, true, langs);
-    const order = { id: crypto.randomUUID(), uiLang: parent.uiLang, parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, true, langs, disc), profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const order = { id: crypto.randomUUID(), uiLang: parent.uiLang, parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), total: calcTotal(pkg, a.length, ad, true, langs, disc), profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -467,6 +483,7 @@ async function hourly() {
     if (n) console.log(`Usunięto ${n} zamówień starszych niż 30 dni`);
     await codes.deleteWhere((c) => Date.now() > c.expires);
     await cleanupEvents(RETENTION_MS);
+    await leads.deleteWhere((l) => Date.now() - l.created > 365 * 864e5);
     await cleanupAnalytics().catch(() => {});
     await accountHourly(BASE_URL).catch((e) => console.error('Konta', e.message));
     if (!mailEnabled()) return;
