@@ -239,7 +239,7 @@ Chętnie opowiem o swoim doświadczeniu na rozmowie. Dziękuję za rozważenie m
 Z poważaniem,
 Anna Nowak` },
 ];
-// Przykład (Anna Nowak) w języku strony: na wersji EN i UA szablony, podgląd i sekcja „Przykład” pokazują dokumenty po angielsku / ukraińsku.
+// Przykład (Anna Nowak) w języku strony: na wersji EN, UA i DE szablony, podgląd i sekcja „Przykład” pokazują dokumenty po angielsku / ukraińsku.
 const EX_LOC = {
   en: {
     base: {
@@ -369,8 +369,72 @@ Anna Nowak` },
 Anna Nowak` },
     ],
   },
+  de: {
+    base: {
+      contact: ['+48 600 100 200', 'anna.nowak@example.com', 'Krakau', 'linkedin.com/in/anna-nowak'],
+      jobs: [{ title: 'Kundenservice-Spezialistin', company: 'Nova Serwis Sp. z o.o.', period: '03.2022 – heute' }, { title: 'Verkäuferin / Kassiererin', company: 'Market Dom', period: '06.2019 – 02.2022' }],
+      edu: [{ school: 'Wirtschaftsuniversität Krakau', degree: 'Management, Bachelor', period: '2016 – 2019' }],
+      skills: 'Kundenservice, Kassenbedienung, Kommunikationsstärke, Schichtarbeit, CRM, Reklamationsbearbeitung, Ticketbearbeitung, Excel, Inventur',
+      langs: ['Englisch B2', 'Deutsch A2'], certs: ['Kurs Kundenservice B2B'],
+      facts: ['Bearbeitung von 40–50 Tickets pro Tag im CRM-System', 'Bearbeitung von Reklamationen der Kunden', 'Kontakt mit internationalen Kunden auf Englisch', 'Kassenbedienung und Kassenabrechnung zum Schichtende', 'Kundenservice und Reklamationen an der Kasse', 'Inventur', 'Schichtarbeit in einem Team von 8 Personen'],
+      clause: 'Ich willige in die Verarbeitung meiner personenbezogenen Daten für die Zwecke des Bewerbungsverfahrens gemäß Art. 6 Abs. 1 lit. a der Verordnung (EU) 2016/679 (DSGVO) ein.',
+    },
+    ex: [
+      { tab: 'Kassierer/in / Verkäufer/in', title: 'Kassierer/in / Verkäufer/in', company: 'Supermarkt Zielony Rynek',
+        ad: 'Wir suchen eine Person für den Kundenservice und die Kassenbedienung in unserem Supermarkt. Wir erwarten Kommunikationsstärke, Ehrlichkeit und Bereitschaft zur Schichtarbeit. Wir bieten einen Arbeitsvertrag und ein Benefit-Paket.',
+        kws: ['Kundenservice', 'Kassenbedienung', 'Kommunikationsstärke', 'Schichtarbeit'],
+        sum: 'Bewerbung als Kassierer/in / Verkäufer/in. Fast drei Jahre lang habe ich bei Market Dom die Kasse bedient und Kunden betreut, im Schichtbetrieb in einem Team von 8 Personen. Ich bringe Kommunikationsstärke und Erfahrung mit Inventuren mit.',
+        skills: ['Kundenservice', 'Kassenbedienung', 'Kommunikationsstärke', 'Schichtarbeit', 'Inventur', 'CRM', 'Excel'],
+        changes: ['Überschrift geändert in „Kassierer/in / Verkäufer/in“.', 'Fähigkeiten aus der Anzeige stehen vorne: Kassenbedienung und Schichtarbeit.', 'Bei Market Dom steht die Kasse an erster Stelle, weil es in der Anzeige darum geht.', 'Der Punkt zum Kontakt auf Englisch wurde weggelassen, weil die Anzeige ihn nicht verlangt.'],
+        letter: `Sehr geehrte Damen und Herren,
+
+mit Interesse bewerbe ich mich auf Ihre Anzeige als Kassiererin / Verkäuferin im Supermarkt Zielony Rynek. Im Handel habe ich 2019 bei Market Dom angefangen, wo ich fast drei Jahre lang die Kasse bedient, Schichten abgerechnet und täglich mit Kunden gesprochen habe.
+
+Sie suchen eine kommunikationsstarke Person, die zur Schichtarbeit bereit ist. Ich habe im Schichtbetrieb in einem Team von acht Personen gearbeitet und mich außerdem um Reklamationen an der Kasse und um Inventuren gekümmert.
+
+Derzeit arbeite ich im Kundenservice bei Nova Serwis, wo ich Reklamationen bearbeite und Tickets im CRM-System betreue.
+
+Gerne erzähle ich Ihnen in einem persönlichen Gespräch mehr über meine Erfahrung. Vielen Dank für die Berücksichtigung meiner Bewerbung.
+
+Mit freundlichen Grüßen
+Anna Nowak` },
+      { tab: 'Kundenservice-Spezialist/in', title: 'Kundenservice-Spezialist/in', company: 'Telko Group',
+        ad: 'Für unser Kundenservice-Büro suchen wir eine/n Spezialist/in. Aufgaben: Ticketbearbeitung, Bearbeitung von Reklamationen, Arbeit im CRM-System. Wir erwarten mindestens 2 Jahre Erfahrung und Englischkenntnisse. Wir bieten einen Arbeitsvertrag und flexible Arbeitszeiten.',
+        kws: ['Ticketbearbeitung', 'Tickets', 'Reklamationen', 'CRM', 'Englisch', 'Kundenservice'],
+        sum: 'Bewerbung als Kundenservice-Spezialist/in. Seit 2022 bearbeite ich Tickets und Reklamationen von Kunden im CRM-System und spreche mit internationalen Kunden Englisch.',
+        skills: ['CRM', 'Reklamationsbearbeitung', 'Ticketbearbeitung', 'Kundenservice', 'Englisch B2', 'Excel'],
+        changes: ['Überschrift geändert in „Kundenservice-Spezialist/in“.', 'CRM, Reklamationen und Tickets stehen oben in den Fähigkeiten, wie in der Anzeige.', 'Englisch im Profil und in der aktuellen Stelle hervorgehoben.', 'Aus dem Job im Geschäft sind nur die Punkte zu Kunden und Schichten geblieben.'],
+        letter: `Sehr geehrte Damen und Herren,
+
+hiermit bewerbe ich mich als Kundenservice-Spezialistin bei Telko Group. Seit März 2022 arbeite ich als Kundenservice-Spezialistin bei Nova Serwis, wo ich täglich 40–50 Tickets im CRM-System bearbeite und Kundenreklamationen löse. Das entspricht genau den Aufgaben aus Ihrer Anzeige.
+
+Sie erwarten Englischkenntnisse. In meiner aktuellen Stelle kommuniziere ich auf Englisch mit internationalen Kunden, auf Niveau B2. Zuvor habe ich bei Market Dom fast drei Jahre direkt mit Kunden gearbeitet und Reklamationen bearbeitet.
+
+Gerne stelle ich Ihnen meine Erfahrung in einem Gespräch vor und erfahre mehr über das Team. Vielen Dank für die Berücksichtigung meiner Bewerbung.
+
+Mit freundlichen Grüßen
+Anna Nowak` },
+      { tab: 'Lagermitarbeiter/in', title: 'Lagermitarbeiter/in', company: 'Großhandel Sigma',
+        ad: 'Wir suchen eine/n Lagermitarbeiter/in für unseren Großhandel. Aufgaben: Warenannahme und -ausgabe, Inventur, Arbeit mit Lagerdokumenten. Wir erwarten Zuverlässigkeit und Bereitschaft zur Schichtarbeit. Ein Staplerschein ist von Vorteil.',
+        kws: ['Inventur', 'Schichtarbeit'],
+        sum: 'Bewerbung als Lagermitarbeiter/in. Ich habe praktische Erfahrung mit Inventuren und Schichtarbeit in einem Team von 8 Personen. Ich kenne Excel und CRM-Systeme.',
+        skills: ['Inventur', 'Schichtarbeit', 'Excel', 'CRM', 'Kundenservice'],
+        changes: ['Überschrift geändert in „Lagermitarbeiter/in“.', 'Inventur und Schichtarbeit stehen oben, weil die Anzeige danach sucht.', 'Aus der aktuellen Stelle ist ein Punkt geblieben, der Rest betrifft den Kundenservice.'],
+        notAdded: 'einen Staplerschein, weil er nicht angegeben wurde. Wenn Sie einen haben, tragen Sie ihn im Bestellformular ein, dann erscheint er im Lebenslauf.',
+        letter: `Sehr geehrte Damen und Herren,
+
+mit Interesse bewerbe ich mich auf Ihre Anzeige als Lagermitarbeiterin im Großhandel Sigma. Sie erwarten Zuverlässigkeit und Bereitschaft zur Schichtarbeit. Bei Market Dom habe ich von 2019 bis 2022 im Schichtbetrieb in einem Team von acht Personen gearbeitet und war für Inventuren zuständig, was direkt zu einem Teil der beschriebenen Aufgaben passt.
+
+Sie erwähnen auch die Arbeit mit Lagerdokumenten. Ich arbeite täglich mit Dokumenten und Daten: An der Kasse habe ich Schichten abgerechnet, heute betreue ich Tickets im CRM-System und arbeite mit Excel.
+
+Gerne erzähle ich Ihnen in einem persönlichen Gespräch mehr über meine Erfahrung. Vielen Dank für die Berücksichtigung meiner Bewerbung.
+
+Mit freundlichen Grüßen
+Anna Nowak` },
+    ],
+  },
 };
-const EX_UI = { pl: ['Ogłoszenie', 'Słowa kluczowe, których szuka rekruter'], en: ['Job ad', 'Keywords the recruiter is looking for'], uk: ['Оголошення', 'Ключові слова, які шукає рекрутер'] };
+const EX_UI = { pl: ['Ogłoszenie', 'Słowa kluczowe, których szuka rekruter'], en: ['Job ad', 'Keywords the recruiter is looking for'], uk: ['Оголошення', 'Ключові слова, які шукає рекрутер'], de: ['Stellenanzeige', 'Schlüsselwörter, nach denen der Recruiter sucht'] };
 const EX_LANG = EX_LOC[window.I18N?.lang] ? window.I18N.lang : 'pl';
 if (EX_LANG !== 'pl') { Object.assign(BASE, EX_LOC[EX_LANG].base); EX_LOC[EX_LANG].ex.forEach((x, i) => Object.assign(EX[i], x)); }
 const exResult = (i) => {
@@ -1461,7 +1525,7 @@ function accDash(d) {
   return wrap;
 }
 
-// Przełącznik języka strony (PL / EN / UA).
+// Przełącznik języka strony (PL / EN / UA / DE).
 $$('.langsw a').forEach((a) => {
   a.classList.toggle('on', a.dataset.lang === (window.I18N?.lang || 'pl'));
   a.onclick = (e) => { e.preventDefault(); window.I18N?.set(a.dataset.lang); if (cfg.preview) location.reload(); else location.href = a.getAttribute('href'); };

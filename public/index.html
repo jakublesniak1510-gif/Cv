@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#2548E8">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Caladea:wght@400;700&family=Instrument+Sans:wght@400;500;600&display=swap">
-<link rel="alternate" hreflang="pl" href="/"><link rel="alternate" hreflang="en" href="/en"><link rel="alternate" hreflang="uk" href="/uk">
+<link rel="alternate" hreflang="pl" href="/"><link rel="alternate" hreflang="en" href="/en"><link rel="alternate" hreflang="uk" href="/uk"><link rel="alternate" hreflang="de" href="/de">
 <script src="/i18n.js"></script>
 <link rel="stylesheet" href="/style.css"></head>
 <body>
@@ -17,7 +17,7 @@
 <header class="nav" id="nav"><div class="inner">
   <a class="logo" href="/" data-page=""><svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--brand)"/><path d="M10 6.5h8.5l5.5 5.5v13.5a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-17a2 2 0 0 1 2-2z" fill="#fff"/><rect x="10.5" y="14.5" width="11" height="3.2" rx="1" fill="#FFE45C"/><rect x="10.5" y="20" width="8" height="1.8" rx=".9" fill="#2548E8" opacity=".55"/><rect x="10.5" y="10" width="5" height="1.8" rx=".9" fill="#2548E8" opacity=".55"/></svg><span class="wm">CV<span>Pod</span>Ogłoszenie</span></a>
   <nav><a href="#skaner">Darmowy skaner</a><a href="#szablony">Szablony</a><a href="#cennik">Cennik</a><a href="#zawody" class="nav-t">Zawody</a><a href="#poradnik">Poradnik</a><a href="/konto" data-acct>Moje konto</a></nav>
-  <div class="langsw" data-noi18n aria-label="Język strony"><a href="/" data-lang="pl" hreflang="pl">PL</a><a href="/en" data-lang="en" hreflang="en">EN</a><a href="/uk" data-lang="uk" hreflang="uk">UA</a></div>
+  <div class="langsw" data-noi18n aria-label="Język strony"><a href="/" data-lang="pl" hreflang="pl">PL</a><a href="/en" data-lang="en" hreflang="en">EN</a><a href="/uk" data-lang="uk" hreflang="uk">UA</a><a href="/de" data-lang="de" hreflang="de">DE</a></div>
   <button class="btn sm nav-cta" data-open>Zamów CV</button>
 </div></header>
 
@@ -33,7 +33,7 @@
   </div>
   <div class="demo" id="demo" aria-label="Animacja: ogłoszenie zamienia się w dopasowane CV">
     <div class="demo-left">
-      <div class="doc ad demo-ad"><div class="tagline">1 · Wklejasz ogłoszenie</div><h4 id="demoTitle"></h4><p id="demoAd"></p></div>
+      <div class="doc ad demo-ad"><div class="tagline" data-i18n>1 · Wklejasz ogłoszenie</div><h4 id="demoTitle"></h4><p id="demoAd"></p></div>
       <div class="demo-meter" aria-hidden="true"><div><b id="demoScore">0 / 0</b><span>słów kluczowych z ogłoszenia w Twoim CV</span></div><i><em id="demoFill"></em></i></div>
     </div>
     <div class="demo-cv"><div class="tagline">2 · Dostajesz CV pisane pod nie</div><div class="hero-thumb" id="heroThumb"></div></div>
