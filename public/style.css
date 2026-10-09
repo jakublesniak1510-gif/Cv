@@ -21,7 +21,8 @@ mark{background:var(--mark);color:inherit;border-radius:3px;padding:0 3px}
 .nav .inner{display:flex;align-items:center;gap:24px;height:62px}
 .logo{display:inline-flex;align-items:center;gap:9px;font:800 20px var(--f-d);color:var(--ink);text-decoration:none;letter-spacing:-.01em}.logo .mark{width:30px;height:30px;flex:none}.logo .wm span{color:var(--brand)}
 .nav nav{display:flex;gap:20px;margin-left:auto;white-space:nowrap}.nav nav a{color:var(--mute);text-decoration:none;font-size:15px}.nav nav a:hover{color:var(--ink)}
-@media(max-width:760px){.nav nav{display:none}.nav .btn{margin-left:auto}}
+@media(max-width:900px){.nav nav{display:none}.langsw{margin-left:auto}}
+@media(max-width:1023px){.nav nav a.nav-t{display:none}}
 /* hero */
 .hero{padding-block:64px 56px}
 .hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center}
@@ -671,3 +672,4 @@ html:not([lang="pl"]) .nav nav{gap:16px}
   .cmp .cl{display:block;font-size:13px;font-weight:600;color:var(--mute)}
   .cmp td.us .cl{color:var(--brand)}
 }
+html[lang="uk"] .nav nav a.nav-x{display:none}

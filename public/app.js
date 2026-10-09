@@ -430,10 +430,10 @@ function refresh() {
 $$('input[name=pkg]').forEach((r) => (r.onchange = refresh));
 $('#adInterview').onchange = $('#adMessages').onchange = refresh;
 $('#langPick').replaceChildren(...Object.entries(LANGS).map(([k, n]) => el('label', { className: 'chk' }, el('input', { type: 'checkbox', value: k, onchange: refresh }), ` ${n}`, el('small', { className: 'incl', hidden: true, textContent: 'w cenie' }))));
-// Język, w którym i tak powstaną dokumenty (z ogłoszeń; zanim ktoś je wklei — polski), jest w cenie: nie da się go dokupić.
+// Język, w którym i tak powstaną dokumenty (z ogłoszeń; zanim ktoś je wklei — polski na polskiej wersji strony), jest w cenie: nie da się go dokupić.
 function syncLangPick() {
   const ads = rows('ads').filter((a) => (a.text || '').length >= 80);
-  const free = usefulExtraLangs(Object.keys(LANGS), ads.length ? ads : [{ lang: 'pl' }]);
+  const free = usefulExtraLangs(Object.keys(LANGS), ads.length ? ads : (window.I18N?.lang || 'pl') === 'pl' ? [{ lang: 'pl' }] : []);
   $$('#langPick label').forEach((lb) => {
     const i = $('input', lb), inPrice = !free.includes(i.value);
     if (inPrice) i.checked = false;
