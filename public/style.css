@@ -733,3 +733,5 @@ html[lang="en"] .legal-pl,html[lang="uk"] .legal-pl,html[lang="de"] .legal-pl{di
 .sim-form{display:grid;gap:10px}.sim-in{width:100%;min-height:110px}
 .sim-btns{display:flex;flex-wrap:wrap;gap:10px}.sim-btns [hidden]{display:none}.sim-in[hidden]{display:none}
 .sim-st:empty{display:none}
+.gal-sample{margin:18px 0 0;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}.gal-sample .hint{margin:0}
+#exSample a{margin-right:10px}@media(max-width:640px){#exSample{display:none}}

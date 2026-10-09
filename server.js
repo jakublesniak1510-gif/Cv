@@ -8,6 +8,7 @@ import { aiEnabled, AiRefusal } from './lib/ai.js';
 import { fetchAd, AdError } from './lib/fetchAd.js';
 import { adFromImage, AdImageError } from './lib/adImage.js';
 import { simTurn, SimError } from './lib/sim.js';
+import { samplePdf } from './lib/sample.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
 import { mailEnabled, sendOrderMail, sendReminder, sendReviewAsk } from './lib/mail.js';
 import { cleanDesign } from './lib/designs.js';
@@ -136,6 +137,15 @@ app.post('/api/assistant', async (req, res) => {
   if (!history.length || history[history.length - 1].role !== 'user') return res.status(400).json({ error: 'Zadaj pytanie.' });
   try { res.json({ answer: await assistant(history) }); }
   catch (e) { console.error('Asystent', e.message); logEvent('asystent', e.message); res.status(502).json({ error: 'Asystent jest chwilowo niedostępny. Zajrzyj do FAQ albo poradnika.' }); }
+});
+
+// Przykładowe CV w PDF (fikcyjna osoba, znak wodny „PRZYKŁAD”) w wybranym szablonie i kolorze.
+app.get('/api/sample.pdf', async (req, res) => {
+  try {
+    const l = String(req.query.lang || 'pl'), pdf = await samplePdf(l, { tpl: String(req.query.tpl || ''), color: String(req.query.color || '') });
+    const name = { en: 'sample-cv', uk: 'zrazok-reziume', de: 'muster-lebenslauf' }[l] || 'przykladowe-cv';
+    res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="${name}.pdf"`, 'Cache-Control': 'public, max-age=86400' }).send(pdf);
+  } catch (e) { console.error('Przykładowy PDF', e.message); res.status(500).json({ error: 'Nie udało się przygotować przykładu.' }); }
 });
 
 // Symulator rozmowy (dodatek): jedna tura = pytanie rekrutera i ocena ostatniej odpowiedzi; limit tur na zamówienie.
