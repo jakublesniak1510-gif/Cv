@@ -47,6 +47,28 @@ const LBL = {
   fr: { summary: 'Profil professionnel', exp: 'Expérience professionnelle', edu: 'Formation', skills: 'Compétences', langs: 'Langues', certs: 'Certifications et formations', interests: "Centres d'intérêt", contact: 'Contact', locale: 'fr-FR' },
 };
 const LANGS = { pl: 'polski', en: 'angielski', de: 'niemiecki', uk: 'ukraiński', es: 'hiszpański', fr: 'francuski' };
+// Rozpoznanie języka ogłoszenia — kopia lib/lang.js (serwer liczy cenę tą samą metodą).
+const W = (s) => new RegExp(`(?<!\\p{L})(${s})(?!\\p{L})`, 'gu');
+const HINTS = {
+  pl: [/[ąćęłńśźż]/g, W('i|w|z|na|do|się|oraz|jest|dla|od|nie|lub|pracy|oferujemy|wymagania|doświadczenie')],
+  en: [null, W('the|and|of|to|with|for|you|we|are|is|our|in|will|experience|skills')],
+  de: [/[äöüß]/g, W('und|der|die|das|mit|für|wir|sie|ist|bei|ein|eine|zu|erfahrung')],
+  es: [/[ñ¿¡]/g, W('el|la|los|las|de|y|con|para|en|un|una|ofrecemos|experiencia')],
+  fr: [/[àâçèêëîôûœ]/g, W('le|la|les|et|des|pour|avec|vous|nous|est|une|du|expérience')],
+};
+function detectLang(text = '') {
+  const t = String(text).toLowerCase();
+  if ((t.match(/[а-яіїєґ]/g) || []).length > 20) return 'uk';
+  let best = 'pl', top = 0;
+  for (const [l, [chars, words]] of Object.entries(HINTS)) {
+    const s = (chars ? (t.match(chars) || []).length * 2 : 0) + (t.match(words) || []).length;
+    if (s > top) { best = l; top = s; }
+  }
+  return best;
+}
+const mainLang = (ad) => (ad.lang && ad.lang !== 'auto' ? ad.lang : detectLang(ad.text));
+// Tłumaczenie na język, w którym i tak powstaną wszystkie dokumenty, nie ma sensu — nie liczymy go.
+const usefulExtraLangs = (langs, ads) => langs.filter((l) => !ads.length || !ads.every((a) => mainLang(a) === l));
 function parts(c, kw, lang = 'pl', photo = '') {
   const L = LBL[lang] || LBL.pl;
   const contact = (c.contact || []).filter(Boolean);
@@ -396,6 +418,7 @@ function restoreDraft() {
   return true;
 }
 function refresh() {
+  if ($('#langPick').children.length) syncLangPick();
   saveDraft();
   $('#total').textContent = total() + ' zł';
   $('#brk').textContent = [addonsTotal() ? `dodatki ${addonsTotal()} zł` : '', discount() ? `rabat −${discount()} zł` : ''].filter(Boolean).join(' · ');
@@ -406,7 +429,28 @@ function refresh() {
 }
 $$('input[name=pkg]').forEach((r) => (r.onchange = refresh));
 $('#adInterview').onchange = $('#adMessages').onchange = refresh;
-$('#langPick').replaceChildren(...Object.entries(LANGS).map(([k, n]) => el('label', { className: 'chk' }, el('input', { type: 'checkbox', value: k, onchange: refresh }), ` ${n}`)));
+$('#langPick').replaceChildren(...Object.entries(LANGS).map(([k, n]) => el('label', { className: 'chk' }, el('input', { type: 'checkbox', value: k, onchange: refresh }), ` ${n}`, el('small', { className: 'incl', hidden: true, textContent: 'w cenie' }))));
+// Język, w którym i tak powstaną dokumenty (z ogłoszeń; zanim ktoś je wklei — polski), jest w cenie: nie da się go dokupić.
+function syncLangPick() {
+  const ads = rows('ads').filter((a) => (a.text || '').length >= 80);
+  const free = usefulExtraLangs(Object.keys(LANGS), ads.length ? ads : [{ lang: 'pl' }]);
+  $$('#langPick label').forEach((lb) => {
+    const i = $('input', lb), inPrice = !free.includes(i.value);
+    if (inPrice) i.checked = false;
+    i.disabled = inPrice; lb.classList.toggle('off', inPrice); $('.incl', lb).hidden = !inPrice;
+  });
+}
+// Tabela porównania: na telefonie każdy wiersz to karta, więc każda komórka dostaje podpis kolumny.
+{
+  const heads = $$('.cmp thead th').map((th) => th.textContent);
+  $$('.cmp tbody tr').forEach((tr) => $$('td', tr).forEach((td, i) => {
+    const v = el('span', { className: 'v ' + [...td.classList].filter((c) => c === 'yes' || c === 'no').join(' ') }, ...td.childNodes);
+    td.classList.remove('yes', 'no');
+    td.replaceChildren(el('span', { className: 'cl', textContent: heads[i + 1] }), v);
+  }));
+}
+$('#ads').addEventListener('input', refresh);
+$('#ads').addEventListener('change', refresh);
 
 /* kod rabatowy */
 const REF_KEY = 'cvpo-ref';
@@ -434,6 +478,7 @@ $('#addEdu').onclick = () => addRow('edu');
 $('#addAd').onclick = () => addRow('ads');
 
 function go(n) {
+  refresh();
   step = n; if (!$('#wiz').hidden) track('step', { s: n });
   $$('#wiz section[data-step]').forEach((s) => (s.hidden = +s.dataset.step !== n));
   $('#stepper').replaceChildren(...STEPS.map((_, i) => el('li', { className: i + 1 < n ? 'done' : i + 1 === n ? 'cur' : '' })));
@@ -453,7 +498,7 @@ function drawSummary() {
     el('div', { className: 'sumrow' }, el('span', { textContent: `Wygląd: ${tplName(design.tpl)}, kolor ${COLOR_NAMES[design.color]}` }), el('span', { textContent: 'w cenie' })),
     ...ads.map((a, i) => el('div', { className: 'sumrow' }, el('span', { textContent: `Ogłoszenie ${i + 1}: ${a.title}${a.lang === 'en' ? ' (po angielsku)' : ''}` }), el('span', { textContent: 'w cenie' }))),
     ...Object.entries(addons()).filter(([, on]) => on).map(([k]) => el('div', { className: 'sumrow' }, el('span', { textContent: ADDON_KEYS[k][1] }), el('span', { textContent: '+' + PRICE[k] + ' zł' }))),
-    ...extraLangs().map((l) => el('div', { className: 'sumrow' }, el('span', { textContent: `Dodatkowa wersja: ${LANGS[l]}` }), el('span', { textContent: '+' + PRICE.extraLang + ' zł' }))),
+    ...extraLangs().map((l) => el('div', { className: 'sumrow' }, el('span', { textContent: `Tłumaczenie: ${LANGS[l]}` }), el('span', { textContent: '+' + PRICE.extraLang + ' zł' }))),
     ...(discount() ? [el('div', { className: 'sumrow' }, el('span', { textContent: `${promo.label} ${promo.code}` }), el('span', { textContent: '−' + discount() + ' zł' }))] : []),
     el('div', { className: 'sumrow' }, el('span', { textContent: 'Razem' }), el('span', { textContent: total() + ' zł' })));
 }
@@ -978,7 +1023,7 @@ loadReviews();
 (async () => { try { const s = await (await fetch('/api/public-stats')).json(); if (s.cvs) { $('#cvCounter').replaceChildren(el('b', { textContent: s.cvs.toLocaleString('pl-PL') }), ' CV przygotowanych pod konkretne ogłoszenia'); $('#cvCounter').hidden = false; } } catch {} })();
 
 // Pasek „Zacznij” na telefonie: po przewinięciu strony, gdy nie jest otwarte okno ani wynik.
-addEventListener('scroll', () => { const show = scrollY > 600 && !$('#landing')?.hidden && $('#result').hidden && $('#wiz').hidden && document.body.style.overflow !== 'hidden'; $('#mcta').hidden = !show; document.body.classList.toggle('mcta-on', show); }, { passive: true });
+addEventListener('scroll', () => { const show = scrollY > 500 && $('#result').hidden && ($('#account')?.hidden ?? true) && $('#wiz').hidden && document.body.style.overflow !== 'hidden'; $('#mcta').hidden = !show; document.body.classList.toggle('mcta-on', show); }, { passive: true });
 
 async function loadContent() {
   if (!CONTENT) { try { CONTENT = await (await fetch('/content.json')).json(); } catch { CONTENT = { INDEX: [], POPULAR: [], ARTICLES: [], CITIES: [] }; } }

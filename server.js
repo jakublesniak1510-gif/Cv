@@ -9,6 +9,7 @@ import { fetchAd, AdError } from './lib/fetchAd.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
 import { mailEnabled, sendOrderMail, sendReminder, sendReviewAsk } from './lib/mail.js';
 import { cleanDesign } from './lib/designs.js';
+import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes } from './lib/seo.js';
 import { p24Enabled, p24Register, p24NotificationOk, p24Verify, p24BySession } from './lib/p24.js';
 import { renderDocx } from './lib/docx.js';
@@ -189,7 +190,7 @@ app.post('/api/orders', async (req, res) => {
     const p = cleanProfile(profile);
     if (!p.name || !/^\S+@\S+\.\S+$/.test(p.email)) return res.status(400).json({ error: 'Podaj imię i nazwisko oraz poprawny e-mail.' });
     if (!p.experience.length && !p.education.length) return res.status(400).json({ error: 'Dodaj doświadczenie lub wykształcenie.' });
-    const ad = cleanAddons(addons), langs = cleanLangs(extraLangs);
+    const ad = cleanAddons(addons), langs = usefulExtraLangs(cleanLangs(extraLangs), a);
     const c = await checkCode(code, p.email);
     if (c.error) return res.status(400).json({ error: c.error });
     const disc = discountFor(c, pkg, a.length, ad, false, langs);
@@ -206,7 +207,7 @@ app.post('/api/orders/:id/followup', async (req, res) => {
     if (!parent || parent.status !== 'done') return res.status(409).json({ error: 'Najpierw dokończ poprzednie zamówienie.' });
     const a = cleanAds(req.body?.ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
-    const ad = cleanAddons(req.body?.addons), langs = cleanLangs(req.body?.extraLangs);
+    const ad = cleanAddons(req.body?.addons), langs = usefulExtraLangs(cleanLangs(req.body?.extraLangs), a);
     const c = await checkCode(req.body?.code, parent.profile.email);
     if (c.error) return res.status(400).json({ error: c.error });
     const pkg = ['cv', 'cv_letter', 'pack3'].includes(req.body?.pkg) ? req.body.pkg : parent.pkg;
