@@ -988,7 +988,7 @@ function drawFollowup() {
     if ($('#fuPay')) $('#fuPay').textContent = `Zamów za ${PRICE[fpkg]} zł`;
   };
   box.replaceChildren(el('h3', { textContent: 'Masz kolejne ogłoszenia?' }),
-    el('p', { className: 'hint', textContent: 'Twoje dane już mamy, więc nie wpisujesz ich ponownie. Dokumenty powstaną w tym samym wyglądzie.' + (data.myCode && !data.myCode.usedByMe ? ` Twój kod ${data.myCode.code} obniży cenę o ${data.myCode.discount} zł.` : '') }),
+    el('p', { className: 'hint', textContent: 'Twoje dane już mamy, więc nie wpisujesz ich ponownie. Dokumenty powstaną w tym samym wyglądzie.' + (data.myCode && !data.myCode.usedByMe ? ` Twój kod ${data.myCode.code} obniży cenę o ${data.myCode.mine} zł.` : '') }),
     pick, el('div', { id: 'fuAds' }),
     el('button', { type: 'button', className: 'btn ghost sm', id: 'fuAdd', textContent: '+ Dodaj ogłoszenie (w pakiecie do 3)', onclick: () => { addRow('fuAds'); drawPick(); } }),
     el('label', { className: 'f fucode' }, 'Kod rabatowy ', el('input', { type: 'text', id: 'fuCode', placeholder: 'opcjonalnie', autocomplete: 'off', value: data.myCode && !data.myCode.usedByMe ? data.myCode.code : '' })),
@@ -1014,11 +1014,21 @@ function drawMyCode() {
   box.hidden = !k;
   if (!k) return;
   const link = cfg.preview ? `https://twojadomena.pl/?ref=${k.code}` : `${location.origin}/?ref=${k.code}`;
-  box.replaceChildren(el('h3', { textContent: `Twój kod −${k.discount} zł` }),
-    el('p', { className: 'hint', textContent: `Użyj go przy kolejnym zamówieniu i podaj znajomym: każdy, kto go wpisze, zapłaci ${k.discount} zł mniej. Każda osoba może użyć kodu raz. Ważny do ${new Date(k.expires).toLocaleDateString('pl-PL')}.` }),
+  const share = `Robię CV pod konkretne ogłoszenie na CV Pod Ogłoszenie. Z moim linkiem zapłacisz ${k.discount} zł mniej: ${link}`;
+  box.replaceChildren(el('h3', { textContent: `Polecaj i zbieraj ${k.discount} zł za każdego znajomego` }),
+    el('p', { className: 'hint', textContent: `Twój kod ${k.code}: znajomi płacą z nim ${k.discount} zł mniej, a Ty za każdego, kto zapłaci, dostajesz ${k.discount} zł na kolejne zamówienia (saldo do 50 zł). Każda osoba może użyć kodu raz. Ważny do ${new Date(k.expires).toLocaleDateString('pl-PL')}.` }),
+    el('div', { className: 'refstats' },
+      el('div', {}, el('b', { textContent: String(k.referrals || 0) }), el('span', { textContent: 'poleconych znajomych' })),
+      el('div', {}, el('b', { textContent: `${k.credit || 0} zł` }), el('span', { textContent: 'saldo do wykorzystania' })),
+      el('div', {}, el('b', { textContent: `${k.mine || 0} zł` }), el('span', { textContent: 'mniej przy Twoim kolejnym zamówieniu' }))),
     el('div', { className: 'refrow' }, el('code', { textContent: k.code }), el('input', { type: 'text', readOnly: true, value: link, ariaLabel: 'Link z kodem dla znajomych', onfocus: (e) => e.target.select() }),
       el('button', { type: 'button', className: 'btn sm', textContent: 'Kopiuj link', onclick: async (e) => { try { await navigator.clipboard.writeText(link); e.target.textContent = 'Skopiowano'; } catch { e.target.previousSibling.select(); e.target.textContent = 'Zaznaczono, skopiuj'; } } })),
-    el('p', { className: 'hint', textContent: k.uses ? `Kod został użyty ${k.uses} ${k.uses === 1 ? 'raz' : 'razy'}.` : 'Kod nie był jeszcze używany.' }));
+    el('div', { className: 'refshare' },
+      navigator.share ? el('button', { type: 'button', className: 'btn ghost sm', textContent: 'Udostępnij', onclick: () => navigator.share({ title: 'CV Pod Ogłoszenie', text: share, url: link }).catch(() => {}) }) : null,
+      el('a', { className: 'btn ghost sm', href: `https://wa.me/?text=${encodeURIComponent(share)}`, target: '_blank', rel: 'noopener', textContent: 'WhatsApp' }),
+      el('a', { className: 'btn ghost sm', href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`, target: '_blank', rel: 'noopener', textContent: 'Facebook' }),
+      el('a', { className: 'btn ghost sm', href: `mailto:?subject=${encodeURIComponent('CV pod ogłoszenie taniej o ' + k.discount + ' zł')}&body=${encodeURIComponent(share)}`, textContent: 'E-mail' }),
+      pageLink('program-polecen', { className: 'link', textContent: 'Zasady programu' })));
 }
 
 // Konto jest opcjonalne: po zakupie można je założyć jednym kliknięciem (albo założy się samo, jeśli klient zaznaczył to w zamówieniu).
@@ -1174,6 +1184,9 @@ const profResult = (p) => ({ position: p.sample.headline, lang: 'pl', keywords: 
   name: p.sample.name, headline: p.sample.headline, contact: p.sample.contact, summary: p.sample.summary,
   experience: p.sample.jobs.map((j) => ({ title: j.title, company: j.company, period: j.period, bullets: j.bullets })),
   education: [p.sample.education], skills: p.sample.skills, languages: p.sample.languages || [], certificates: [], interests: '', clause: CLAUSE } });
+// Podstrony bez danych z content.json: treść w <template id="pg-…"> w index.html (serwer renderuje ją też dla wyszukiwarek).
+const STATIC_PAGES = ['dla-firm', 'program-polecen'];
+const HOME_TITLE = 'CV pod ogłoszenie i list motywacyjny od 39 zł | CV Pod Ogłoszenie';
 const pageHref = (r) => (cfg.preview ? (r ? '#/' + r : '#top') : '/' + r);
 const pageLink = (r, props, ...kids) => { const a = el('a', { href: pageHref(r), ...props }, ...kids); a.dataset.page = r; return a; };
 const openBtn = (t, cls = 'btn') => { const b = el('button', { type: 'button', className: cls, textContent: t }); b.dataset.open = ''; return b; };
@@ -1337,6 +1350,7 @@ async function showPage(r, push = true) {
     else if (p && !sub) { item = p; node = () => profPage(p, C); }
   } else if (kind === 'poradnik') { item = C.ARTICLES.find((a) => a.slug === slug); node = () => articlePage(item, C); }
   else if (kind === 'narzedzia' && C.TOOLS?.[slug]) { item = C.TOOLS[slug]; node = () => toolPage(slug, C); }
+  else if (!slug && STATIC_PAGES.includes(kind)) { const t = $('#pg-' + kind); item = { title: t.dataset.title, metaDescription: t.dataset.desc }; node = () => t.content.cloneNode(true); }
   if (!item) return showHome(push);
   $('#landing').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#account').hidden = true;
   $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl';
@@ -1344,11 +1358,12 @@ async function showPage(r, push = true) {
   try { document.title = `${item.title} | CV Pod Ogłoszenie`; } catch {}
   setMeta(item.metaDescription);
   if (push) { navTo(r); track('pv'); }
-  window.scrollTo(0, 0);
+  const target = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
+  if (target && $('#page').contains(target)) target.scrollIntoView(); else window.scrollTo(0, 0);
 }
 function showHome(push) {
   $('#page').hidden = $('#pageNote').hidden = true; $('#account').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#landing').hidden = false;
-  try { document.title = 'CV Pod Ogłoszenie'; } catch {}
+  try { document.title = HOME_TITLE; } catch {}
   if (push) navTo('');
   window.scrollTo(0, 0);
 }
@@ -1357,9 +1372,30 @@ document.addEventListener('click', (e) => {
   if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
   e.preventDefault();
   if (!$('#result').hidden) { location.href = cfg.preview ? '#top' : '/' + a.dataset.page; return; }
-  a.dataset.page ? showPage(a.dataset.page) : showHome(true);
+  // Link do miejsca na podstronie (np. /dla-firm#zapytanie): po wyrenderowaniu przewijamy do niego.
+  const anchor = a.hash && a.pathname === '/' + a.dataset.page ? a.hash.slice(1) : '';
+  (a.dataset.page ? showPage(a.dataset.page) : Promise.resolve(showHome(true))).then(() => { if (anchor) document.getElementById(anchor)?.scrollIntoView(); });
 });
 window.addEventListener('popstate', () => route());
+
+// Formularze: kontakt, zapytanie firmy / uczelni i zapis do newslettera (podwójna zgoda: potwierdzenie linkiem z e-maila).
+document.addEventListener('submit', async (e) => {
+  const f = e.target.closest('form[data-lead]'); if (!f) return;
+  e.preventDefault();
+  const kind = f.dataset.lead, st = $('.fstatus', f), btn = $('button[type=submit]', f), v = (n) => f.elements[n]?.value ?? '';
+  const body = { kind, name: v('name'), email: v('email'), phone: v('phone'), org: v('org'), orgType: v('orgType'), size: v('size'), topic: v('topic'), message: v('message'), website: v('website'), consent: !!f.elements.consent?.checked };
+  if (kind === 'newsletter') Object.assign(body, { source: $('#page').hidden ? 'strona główna' : location.pathname.slice(1) || 'podstrona', lang: window.I18N?.lang });
+  st.className = 'fstatus'; st.textContent = 'Wysyłanie…'; btn.disabled = true;
+  try {
+    const r = await fetch(kind === 'newsletter' ? '/api/newsletter' : '/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || 'Nie udało się wysłać. Spróbuj ponownie.');
+    st.className = 'fstatus good';
+    st.textContent = kind === 'newsletter' ? 'Prawie gotowe: sprawdź skrzynkę i kliknij link potwierdzający zapis.' : kind === 'firma' ? 'Dziękujemy! Odpowiemy z propozycją, zwykle w ciągu jednego dnia roboczego.' : 'Dziękujemy! Odpowiemy na podany adres e-mail.';
+    if (j.demoLink) st.append(' ', el('a', { href: j.demoLink, textContent: 'Tryb DEMO: potwierdź zapis tym linkiem' }));
+    f.reset();
+  } catch (x) { st.className = 'fstatus bad'; st.textContent = x.message; }
+  btn.disabled = false;
+});
 
 // --- Konto klienta: logowanie linkiem, zamówienia, lista aplikacji z przypomnieniem o rozmowie ---
 document.addEventListener('click', (e) => {
@@ -1472,7 +1508,7 @@ function route() {
   if (!$('#result').hidden || !$('#gen').hidden) return;
   if (location.pathname === '/konto' || location.hash === '#konto') return showAccount();
   $('#account').hidden = true;
-  const h = location.hash, hm = /^#\/((?:cv|poradnik|narzedzia)\/[\w-]+(?:\/[\w-]+)?)$/.exec(h), pm = /^\/((?:cv|poradnik|narzedzia)\/[\w-]+(?:\/[\w-]+)?)\/?$/.exec(location.pathname);
+  const h = location.hash, hm = /^#\/((?:cv|poradnik|narzedzia)\/[\w-]+(?:\/[\w-]+)?|dla-firm|program-polecen)$/.exec(h), pm = /^\/((?:cv|poradnik|narzedzia)\/[\w-]+(?:\/[\w-]+)?|dla-firm|program-polecen)\/?$/.exec(location.pathname);
   if (hm) return showPage(hm[1], false);
   const anchor = h.length > 1 && document.getElementById(h.slice(1));
   if (pm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage(pm[1], false);
@@ -1481,7 +1517,7 @@ function route() {
   $('#landing').hidden = !!id;
   Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = l !== id));
   if (id) { window.scrollTo(0, 0); try { document.title = location.hash === '#regulamin' ? 'Regulamin – CV Pod Ogłoszenie' : 'Polityka prywatności – CV Pod Ogłoszenie'; } catch {} }
-  else { try { document.title = 'CV Pod Ogłoszenie'; } catch {} const t = location.hash.length > 1 && document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+  else { try { document.title = HOME_TITLE; } catch {} const t = location.hash.length > 1 && document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
 }
 window.addEventListener('hashchange', route); route();
 

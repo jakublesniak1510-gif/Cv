@@ -28,6 +28,8 @@
       <button data-v="orders"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg>Zamówienia</button>
       <button data-v="codes"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/></svg>Kody rabatowe</button>
       <button data-v="reviews"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Opinie<span class="badge info" id="rvBadge" hidden></span></button>
+      <button data-v="messages"><svg viewBox="0 0 24 24"><path d="M3 5h18v12H8l-5 4z"/></svg>Wiadomości<span class="badge info" id="msgBadge" hidden></span></button>
+      <button data-v="newsletter"><svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg>Newsletter</button>
       <button data-v="problems"><svg viewBox="0 0 24 24"><path d="M12 3 2 21h20z"/><path d="M12 10v5M12 18v.01"/></svg>Problemy<span class="badge" id="probBadge" hidden></span></button>
       <button data-v="export"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>Eksport</button>
     </nav>
@@ -90,7 +92,7 @@
           <label class="f">Notatka<input id="cNote" maxlength="100" placeholder="np. post na FB"></label>
           <div class="wide"><button class="btn" type="submit">Utwórz kod</button> <span class="msg" id="cMsg"></span></div>
         </form>
-        <p class="help">Każda osoba (adres e-mail) może użyć danego kodu raz. Kody klientów (KOD-…) powstają automatycznie po zakupie i dają −10 zł.</p>
+        <p class="help">Każda osoba (adres e-mail) może użyć danego kodu raz. Kody klientów (KOD-…) powstają automatycznie po zakupie i dają −10 zł. To też program poleceń: za każdego znajomego, który zapłaci z kodem klienta, właściciel kodu dostaje 10 zł salda na kolejne zamówienia (do 50 zł).</p>
       </div>
       <div class="filters"><div class="seg" id="codeKind"><button type="button" data-k="" aria-pressed="true">Wszystkie</button><button type="button" data-k="akcja" aria-pressed="false">Akcje</button><button type="button" data-k="klient" aria-pressed="false">Kody klientów</button></div></div>
       <div class="tbl-wrap" id="codeTable"></div>
@@ -102,6 +104,30 @@
       <p class="help" style="margin:-8px 0 14px">Na stronie głównej pokazują się tylko opinie zatwierdzone, z treścią i zgodą autora na publikację. Średnia na stronie liczy wszystkie oceny oprócz oznaczonych jako spam, także negatywne.</p>
       <div class="filters"><div class="seg" id="rvKind"><button type="button" data-k="new" aria-pressed="true">Do sprawdzenia</button><button type="button" data-k="approved" aria-pressed="false">Opublikowane</button><button type="button" data-k="" aria-pressed="false">Wszystkie</button></div></div>
       <div id="rvList" class="rv-admin"></div>
+    </section>
+
+    <!-- Wiadomości -->
+    <section data-view="messages" hidden>
+      <div class="head"><h1>Wiadomości</h1><span class="mute" id="msgSum"></span></div>
+      <p class="help" style="margin:-8px 0 14px">Formularz kontaktowy i zapytania z podstrony „Dla firm i uczelni”. Odpowiadasz zwykłym e-mailem (przycisk „Odpowiedz”). Gdy ustawisz CONTACT_EMAIL, każda nowa wiadomość przychodzi też na ten adres. Wiadomości są usuwane po 180 dniach.</p>
+      <div class="filters"><div class="seg" id="msgKind"><button type="button" data-k="new" aria-pressed="true">Nowe</button><button type="button" data-k="firma" aria-pressed="false">Firmy i uczelnie</button><button type="button" data-k="" aria-pressed="false">Wszystkie</button></div></div>
+      <div id="msgList" class="rv-admin"></div>
+    </section>
+
+    <!-- Newsletter -->
+    <section data-view="newsletter" hidden>
+      <div class="head"><h1>Newsletter</h1><a class="btn ghost sm" href="/api/admin/newsletter.csv" download>Pobierz listę (CSV)</a></div>
+      <div class="tiles" id="nlTiles"></div>
+      <div class="card" style="margin-bottom:14px">
+        <h2>Nowe wydanie</h2>
+        <form id="nlForm">
+          <label class="f">Temat<input id="nlSubj" maxlength="150" required placeholder="np. 5 błędów w CV, przez które nie dostajesz zaproszeń"></label>
+          <label class="f">Treść<textarea id="nlText" rows="10" required placeholder="Zwykły tekst. Pusta linia = nowy akapit. Linki (https://…) staną się klikalne."></textarea></label>
+          <div class="actions"><button class="btn ghost" type="button" id="nlTest">Wyślij test</button><button class="btn" type="submit" id="nlSend">Wyślij do wszystkich</button> <span class="msg" id="nlMsg"></span></div>
+        </form>
+        <p class="help">Wysyłamy tylko do osób, które potwierdziły zapis kliknięciem w link (podwójna zgoda). Każda wiadomość ma link do wypisania i nagłówek List-Unsubscribe. Test idzie na adres z CONTACT_EMAIL.</p>
+      </div>
+      <div class="tbl-wrap" id="nlTable"></div>
     </section>
 
     <!-- Problemy -->

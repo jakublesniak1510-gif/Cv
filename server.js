@@ -17,6 +17,8 @@ import { adminRoutes } from './lib/admin.js';
 import { accountRoutes, accountHourly } from './lib/account.js';
 import { analyticsRoutes, cleanupAnalytics } from './lib/analytics.js';
 import { logEvent, cleanupEvents } from './lib/events.js';
+import { leadRoutes, cleanupLeads } from './lib/leads.js';
+import { emailHash, codeDiscount, applyPaidCode, isOwner, CODE_TTL } from './lib/referral.js';
 
 const PORT = process.env.PORT || 3000;
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
@@ -31,7 +33,7 @@ app.set('trust proxy', 1);
 // Prosty limit zapytań na adres IP.
 const limiter = (max, windowMs) => { const hits = new Map(); return (req) => { const now = Date.now(), h = (hits.get(req.ip) || []).filter((t) => now - t < windowMs); if (h.length >= max) return false; hits.set(req.ip, [...h, now]); return true; }; };
 const importLimit = limiter(10, 600_000), fetchLimit = limiter(20, 600_000), scanLimit = limiter(6, 3600_000), chatLimit = limiter(30, 3600_000);
-const CODE_TTL = 90 * 24 * 3600 * 1000, REMINDER_AFTER = 7 * 24 * 3600 * 1000, REVIEW_AFTER = 4 * 24 * 3600 * 1000;
+const REMINDER_AFTER = 7 * 24 * 3600 * 1000, REVIEW_AFTER = 4 * 24 * 3600 * 1000;
 
 // --- Import starego CV (większy limit body, więc przed globalnym parserem) ---
 app.post('/api/import', express.json({ limit: '8mb' }), async (req, res) => {
@@ -90,18 +92,19 @@ const cleanAds = (ads) => arr(ads, MAX_ADS).map((a) => ({ title: str(a?.title, 1
 const cleanLangs = (l) => [...new Set(arr(l, 6).filter((x) => x in LANGS))];
 const normCode = (c) => str(c, 20).toUpperCase().replace(/[^A-Z0-9-]/g, '');
 
-// Kod klienta: −10 zł dla niego i dla znajomych, każda osoba (adres e-mail) może go użyć raz.
-// Zamiast adresów zapisujemy ich skróty, więc w pliku kodów nie ma danych osobowych.
-const emailHash = (e) => crypto.createHash('sha256').update(`${process.env.CODE_SALT || 'cvpo'}:${String(e || '').trim().toLowerCase()}`).digest('hex').slice(0, 32);
+// Kod klienta (program poleceń, lib/referral.js): −10 zł dla znajomych, każda osoba (adres e-mail) może go użyć raz,
+// a właściciel zbiera 10 zł za każdego znajomego, który zapłacił. Zamiast adresów zapisujemy ich skróty.
 async function checkCode(raw, email) {
   const code = normCode(raw);
   if (!code) return { discount: 0 };
   const c = await codes.get(code);
   if (!c || Date.now() > c.expires) return { error: 'Ten kod nie istnieje albo wygasł.' };
-  if (email && (c.usedBy || []).includes(emailHash(email))) return { error: 'Ten kod został już przez Ciebie wykorzystany.' };
-  if (c.maxUses && (c.usedBy || []).length >= c.maxUses) return { error: 'Limit użyć tego kodu został wyczerpany.' };
-  return { code, discount: c.amount || 0, percent: c.percent || 0 };
+  const d = codeDiscount(c, email);
+  if (d.error) return d;
+  return { code, discount: d.base + d.credit, base: d.base, credit: d.credit, owner: isOwner(c, email), percent: c.percent || 0 };
 }
+// Ile z salda poleceń faktycznie zeszło w tym zamówieniu (rabat jest przycinany do ceny pakietu).
+const creditUsedFor = (c, full, total) => (c.credit ? Math.max(0, Math.min(c.credit, full - total - c.base)) : 0);
 // Rabat w groszach: kwotowy albo procentowy (kody akcji promocyjnych z panelu).
 const discountFor = (c, pkg, n, ad, returning, langs) => (c.percent ? Math.round((calcTotal(pkg, n, ad, returning, langs, 0) * c.percent) / 100) : c.discount || 0);
 const newCode = (prefix) => `${prefix}-${crypto.randomBytes(4).toString('hex').toUpperCase().slice(0, 6)}`;
@@ -124,7 +127,7 @@ app.get('/api/config', (_req, res) => res.json({
 app.get('/api/code/:code', async (req, res) => {
   const r = await checkCode(req.params.code, req.query.email);
   if (r.error) return res.status(404).json({ error: r.error });
-  res.json({ code: r.code, discount: r.discount / 100, percent: r.percent || 0, label: 'Kod rabatowy' });
+  res.json({ code: r.code, discount: r.discount / 100, percent: r.percent || 0, label: r.owner ? 'Twój kod z saldem poleceń' : 'Kod rabatowy' });
 });
 
 // Asystent: krótkie odpowiedzi na pytania o CV (limit na IP).
@@ -193,8 +196,8 @@ app.post('/api/orders', async (req, res) => {
     const ad = cleanAddons(addons), langs = usefulExtraLangs(cleanLangs(extraLangs), a);
     const c = await checkCode(code, p.email);
     if (c.error) return res.status(400).json({ error: c.error });
-    const disc = discountFor(c, pkg, a.length, ad, false, langs);
-    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, false, langs, disc), profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, reviewAsk: { consent: !!reviewAsk, sent: false }, uiLang: ['en', 'uk'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const disc = discountFor(c, pkg, a.length, ad, false, langs), total = calcTotal(pkg, a.length, ad, false, langs, disc);
+    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, reviewAsk: { consent: !!reviewAsk, sent: false }, uiLang: ['en', 'uk'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -211,8 +214,8 @@ app.post('/api/orders/:id/followup', async (req, res) => {
     const c = await checkCode(req.body?.code, parent.profile.email);
     if (c.error) return res.status(400).json({ error: c.error });
     const pkg = ['cv', 'cv_letter', 'pack3'].includes(req.body?.pkg) ? req.body.pkg : parent.pkg;
-    const disc = discountFor(c, pkg, a.length, ad, true, langs);
-    const order = { id: crypto.randomUUID(), uiLang: parent.uiLang, parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, total: calcTotal(pkg, a.length, ad, true, langs, disc), profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const disc = discountFor(c, pkg, a.length, ad, true, langs), total = calcTotal(pkg, a.length, ad, true, langs, disc);
+    const order = { id: crypto.randomUUID(), uiLang: parent.uiLang, parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, true, langs, 0), total), total, profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -232,11 +235,14 @@ app.get('/api/orders/:id', async (req, res) => {
     const t = await p24BySession(o.p24.sessionId);
     if (t && (t.status === 1 || t.status === 2) && (await confirmP24(o, t.orderId, t.amount, t.status === 2).catch(() => false))) o = await getOrder(o.id);
   }
-  // Kod klienta (−10 zł dla niego i znajomych) z liczbą użyć.
+  // Kod klienta (program poleceń): rabat dla znajomych, liczba poleceń i saldo do wykorzystania przez właściciela.
   let myCode = null;
   if (o.status === 'done' && o.myCode) {
     const c = await codes.get(o.myCode);
-    if (c && Date.now() < c.expires) myCode = { code: c.id, discount: c.amount / 100, expires: c.expires, uses: (c.usedBy || []).length, usedByMe: (c.usedBy || []).includes(emailHash(o.profile.email)) };
+    if (c && Date.now() < c.expires) {
+      const d = codeDiscount(c, o.profile.email), mine = d.error ? 0 : (d.base + d.credit) / 100;
+      myCode = { code: c.id, discount: c.amount / 100, expires: c.expires, uses: (c.usedBy || []).length, referrals: c.referrals || 0, credit: (c.credit || 0) / 100, earned: (c.earned || 0) / 100, mine, usedByMe: !mine };
+    }
   }
   const rv = await reviews.get(o.id);
   res.json(view(o, { myCode, review: rv ? { rating: rv.rating, text: rv.text } : null }));
@@ -291,11 +297,14 @@ async function trySend(order) {
 // Po opłaceniu: zapisujemy użycie kodu i dajemy klientowi jego kod (jeden na klienta, także przy kolejnych zamówieniach).
 async function afterPaid(o) {
   try {
-    if (o.code) await codes.update(o.code, (c) => ({ ...c, usedBy: [...new Set([...(c.usedBy || []), emailHash(o.profile.email)])] }));
+    if (o.code) await codes.update(o.code, (c) => applyPaidCode(c, { email: o.profile.email, creditUsed: o.creditUsed || 0 }));
     const root = o.rootId || o.parentId || o.id;
     const existing = Object.values(await codes.all()).find((c) => c.ownerOrderId === root);
-    if (existing) return existing.id;
-    const mine = { id: newCode('KOD'), amount: CODE_DISCOUNT, ownerOrderId: root, usedBy: [], created: Date.now(), expires: Date.now() + CODE_TTL };
+    if (existing) {
+      if (!existing.ownerHash) await codes.update(existing.id, (c) => ({ ...c, ownerHash: emailHash(o.profile.email) }));
+      return existing.id;
+    }
+    const mine = { id: newCode('KOD'), amount: CODE_DISCOUNT, ownerOrderId: root, ownerHash: emailHash(o.profile.email), usedBy: [], referrals: 0, credit: 0, created: Date.now(), expires: Date.now() + CODE_TTL };
     await codes.save(mine);
     return mine.id;
   } catch (e) { console.error('Kody po płatności', o.id, e.message); return null; }
@@ -411,6 +420,7 @@ app.post('/api/orders/:id/retry', async (req, res) => {
 });
 
 accountRoutes(app, { BASE_URL, DEMO });
+leadRoutes(app, { BASE_URL, DEMO });
 analyticsRoutes(app, BASE_URL);
 adminRoutes(app, { DEMO, BASE_URL, markPaidAndGenerate, trySend, retentionMs: RETENTION_MS });
 
@@ -421,7 +431,13 @@ async function hourly() {
     const n = await deleteOlderThan(RETENTION_MS);
     if (n) console.log(`Usunięto ${n} zamówień starszych niż 30 dni`);
     await codes.deleteWhere((c) => Date.now() > c.expires);
+    // Starsze kody klientów nie miały skrótu e-maila właściciela: uzupełniamy go, póki zamówienie jeszcze istnieje.
+    for (const c of Object.values(await codes.all())) {
+      const o = !c.ownerHash && c.ownerOrderId && (await getOrder(c.ownerOrderId));
+      if (o?.profile?.email) await codes.update(c.id, (x) => ({ ...x, ownerHash: emailHash(o.profile.email) }));
+    }
     await cleanupEvents(RETENTION_MS);
+    await cleanupLeads().catch(() => {});
     await cleanupAnalytics().catch(() => {});
     await accountHourly(BASE_URL).catch((e) => console.error('Konta', e.message));
     if (!mailEnabled()) return;

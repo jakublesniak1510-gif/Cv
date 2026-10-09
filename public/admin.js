@@ -70,12 +70,13 @@ loaders.dash = async () => {
     ['Ocena klientów', s.reviews.count ? `${String(s.reviews.avg).replace('.', ',')} / 5 (${s.reviews.count})` : 'brak ocen'], [`Koszt AI (${s.ai.month})`, `$${s.ai.usd.toFixed(2)} · ${s.ai.calls} wywołań`],
   ].map(([k, v]) => el('div', {}, el('dt', { textContent: k }), el('dd', { textContent: v }))));
   drawChart(s.byDay);
-  setBadge(s.problems); setRvBadge(s.reviews.waiting);
+  setBadge(s.problems); setRvBadge(s.reviews.waiting); setMsgBadge(s.newMessages);
   $('#dashUpd').textContent = 'Stan na ' + new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
   const r = await api('/orders?page=0');
   $('#recent').replaceChildren(orderTable(r.rows.slice(0, 6), true));
 };
 $('#dashRefresh').addEventListener('click', () => loaders.dash());
+function setMsgBadge(n) { $('#msgBadge').hidden = !n; $('#msgBadge').textContent = n; }
 function setRvBadge(n) { $('#rvBadge').hidden = !n; $('#rvBadge').textContent = n; }
 function setBadge(n) { $('#probBadge').hidden = !n; $('#probBadge').textContent = n; }
 
@@ -249,7 +250,7 @@ loaders.codes = async () => {
         if (del.dataset.sure !== '1') { del.dataset.sure = '1'; del.textContent = 'Na pewno?'; setTimeout(() => { del.dataset.sure = ''; del.textContent = 'Usuń'; }, 3000); return; }
         try { await api('/codes/' + encodeURIComponent(c.code), { method: 'DELETE' }); toast(`Kod ${c.code} usunięty.`); loaders.codes(); } catch (x) { toast(x.message); }
       };
-      return el('tr', {}, el('td', { className: 'mono', textContent: c.code }), el('td', {}, el('span', { className: 'tag', textContent: c.kind === 'klient' ? 'klient' : 'akcja' })),
+      return el('tr', {}, el('td', { className: 'mono', textContent: c.code }), el('td', {}, el('span', { className: 'tag', textContent: c.kind === 'klient' ? 'klient' : 'akcja' }), c.referrals ? el('div', { className: 'mute', style: 'font-size:12px', textContent: `${c.referrals} pol. · saldo ${c.credit}` }) : null),
         el('td', { className: 'r', textContent: c.percent ? `−${c.percent}%` : `−${zl(c.amount)}` }),
         el('td', { className: 'r', textContent: c.maxUses ? `${c.uses} / ${c.maxUses}` : String(c.uses) }),
         el('td', { className: 'num', textContent: dd(c.expires) }), el('td', { className: 'ell mute', textContent: c.note || '—' }), el('td', { className: 'r' }, del));
@@ -275,6 +276,51 @@ loaders.reviews = async () => {
       el('div', { className: 'actions' }, r.publish && r.status !== 'approved' ? act('approved', 'Opublikuj', '') : null, r.status !== 'hidden' ? act('hidden', 'Ukryj') : null, r.status !== 'spam' ? act('spam', 'Spam', 'danger') : act('new', 'To nie spam')));
   }));
 };
+
+// --- wiadomości (kontakt i zapytania firm) ---
+let msgFilter = 'new';
+$('#msgKind').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; msgFilter = b.dataset.k; $$('#msgKind button').forEach((x) => x.setAttribute('aria-pressed', x === b)); loaders.messages(); });
+loaders.messages = async () => {
+  const all = await api('/messages'), fresh = all.filter((m) => m.status === 'new').length;
+  setMsgBadge(fresh); $('#msgSum').textContent = all.length ? `${fresh} nowych z ${all.length}` : '';
+  const list = all.filter((m) => (msgFilter === 'new' ? m.status === 'new' : msgFilter === 'firma' ? m.kind === 'firma' : true));
+  if (!list.length) return $('#msgList').replaceChildren(el('div', { className: 'card empty', textContent: msgFilter === 'new' ? 'Nie ma nowych wiadomości.' : 'Brak wiadomości.' }));
+  $('#msgList').replaceChildren(...list.map((m) => {
+    const act = (fn, label, cls = 'ghost') => { const b = el('button', { className: `btn sm ${cls}`, textContent: label }); b.onclick = async () => { b.disabled = true; try { await fn(); loaders.messages(); } catch (x) { toast(x.message); b.disabled = false; } }; return b; };
+    const subj = m.kind === 'firma' ? `Oferta CV Pod Ogłoszenie dla: ${m.org}` : `Re: ${m.topic || 'Twoja wiadomość'}`;
+    return el('div', { className: 'rv-item' },
+      el('div', { className: 'meta' }, el('span', { className: 'tag', textContent: m.kind === 'firma' ? 'firma / uczelnia' : 'kontakt' }), el('b', { textContent: m.kind === 'firma' ? m.org : m.name || m.email, style: 'color:var(--ink)' }), el('span', { textContent: dt(m.created) }), m.status === 'done' ? el('span', { className: 'tag', textContent: 'załatwione' }) : null),
+      kv([['E-mail', m.email], m.name && ['Osoba', m.name], m.phone && ['Telefon', m.phone], m.orgTypeName && ['Typ', m.orgTypeName], m.size && ['Liczba osób', m.size], m.topic && ['Temat', m.topic]]),
+      m.message ? el('p', { textContent: m.message, style: 'white-space:pre-wrap' }) : null,
+      el('div', { className: 'actions' }, el('a', { className: 'btn sm', href: `mailto:${encodeURIComponent(m.email)}?subject=${encodeURIComponent(subj)}`, textContent: 'Odpowiedz' }),
+        m.status === 'new' ? act(() => post(`/messages/${m.id}`, { status: 'done' }), 'Załatwione') : act(() => post(`/messages/${m.id}`, { status: 'new' }), 'Oznacz jako nowe'),
+        act(() => api(`/messages/${m.id}`, { method: 'DELETE' }), 'Usuń', 'danger')));
+  }));
+};
+
+// --- newsletter ---
+loaders.newsletter = async () => {
+  const n = await api('/newsletter');
+  $('#nlTiles').replaceChildren(tile('Potwierdzeni', String(n.confirmed), 'dostaną kolejne wydanie'), tile('Czekają na potwierdzenie', String(n.pending), 'usuwani po 7 dniach'),
+    tile('Wysyłka', n.sending ? `${n.sending.sent} / ${n.sending.total}` : '—', n.sending ? 'trwa…' : n.mail ? 'gotowa' : 'brak SMTP_URL'));
+  $('#nlTest').disabled = !n.mail || !n.testTo; $('#nlSend').disabled = !n.mail || !n.confirmed || !!n.sending;
+  if (!n.list.length) return $('#nlTable').replaceChildren(el('div', { className: 'empty', textContent: 'Nikt się jeszcze nie zapisał.' }));
+  $('#nlTable').replaceChildren(el('table', {},
+    el('thead', {}, el('tr', {}, ['E-mail', 'Status', 'Źródło', 'Zapis', ''].map((t) => el('th', { textContent: t })))),
+    el('tbody', {}, n.list.map((x) => {
+      const del = el('button', { className: 'btn danger sm', textContent: 'Usuń' });
+      del.onclick = async () => { try { await api(`/newsletter/${x.id}`, { method: 'DELETE' }); toast('Usunięto z listy.'); loaders.newsletter(); } catch (e) { toast(e.message); } };
+      return el('tr', {}, el('td', { textContent: x.email }), el('td', {}, el('span', { className: 'tag', textContent: x.status === 'confirmed' ? 'potwierdzony' : 'czeka' })), el('td', { className: 'mute', textContent: x.source || '—' }), el('td', { className: 'num', textContent: dt(x.confirmedAt || x.created) }), el('td', { className: 'r' }, del));
+    }))));
+};
+async function nlSend(test) {
+  const body = { subject: $('#nlSubj').value, text: $('#nlText').value, test };
+  if (!test && !confirm('Wysłać to wydanie do wszystkich potwierdzonych subskrybentów?')) return;
+  $('#nlMsg').textContent = 'Wysyłanie…';
+  try { const r = await post('/newsletter/send', body); $('#nlMsg').textContent = r.test ? 'Test wysłany.' : `Wysyłka rozpoczęta: ${r.total} odbiorców.`; loaders.newsletter(); } catch (x) { $('#nlMsg').textContent = x.message; }
+}
+$('#nlTest').addEventListener('click', () => nlSend(true));
+$('#nlForm').addEventListener('submit', (e) => { e.preventDefault(); nlSend(false); });
 
 // --- ruch ---
 let lastTraffic = null, trDays = 30;
