@@ -939,5 +939,8 @@
 "Zaznacz zgodę na kontakt w sprawie zapytania.": "Позначте згоду на контакт щодо запиту.",
 "Kod od instytucji: {0} bez opłaty": "Код від установи: {0} без оплати",
 "Zamów bez opłaty": "Замовити без оплати",
-"Kod od instytucji": "Код від установи"
+"Kod od instytucji": "Код від установи",
+"Zainstaluj aplikację": "Встановити застосунок",
+"Brak internetu – widzisz zapisaną wersję strony. Zamówienie i płatność zadziałają po połączeniu.": "Немає інтернету – ви бачите збережену версію сторінки. Замовлення та оплата запрацюють після підключення.",
+"Na iPhonie: stuknij „Udostępnij” w Safari, a potem „Do ekranu początkowego”.": "На iPhone: торкніться «Поділитися» в Safari, а потім «На екран „Додому“»."
 }

@@ -212,7 +212,7 @@ function hl(text, kws) {
 
 fetch('/api/config').then((r) => r.json()).then((c) => {
   cfg = c; track('pv'); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
-});
+}).catch(() => drawLists().catch(() => {})); // bez internetu (aplikacja na telefonie): treści z pamięci
 
 /* ---------- Przykład dopasowania ---------- */
 const BASE = {
@@ -1749,4 +1749,20 @@ const q = new URLSearchParams(location.search);
 if (window.__ROUTE) showPage(window.__ROUTE, false);
 if (q.get('id')) startResult(q.get('id'));
 else if (q.has('canceled')) { try { history.replaceState(null, '', location.pathname); } catch {} openWiz(); go(6); $('#werr').textContent = 'Płatność została anulowana. Twoje dane są zachowane, możesz spróbować ponownie.'; }
+/* aplikacja na telefon (PWA) */
+if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('/sw.js').catch(() => {});
+{
+  let ask = null; const btn = $('#installApp');
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !navigator.standalone;
+  addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); ask = e; btn.hidden = false; });
+  addEventListener('appinstalled', () => { ask = null; btn.hidden = true; });
+  if (ios) btn.hidden = false;
+  btn.onclick = async (e) => {
+    e.preventDefault();
+    if (ask) { ask.prompt(); await ask.userChoice.catch(() => {}); ask = null; btn.hidden = true; }
+    else alert(window.I18N.t('Na iPhonie: stuknij „Udostępnij” w Safari, a potem „Do ekranu początkowego”.'));
+  };
+  const net = () => ($('#offline').hidden = navigator.onLine);
+  addEventListener('online', net); addEventListener('offline', net); net();
+}
 })();

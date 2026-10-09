@@ -939,5 +939,8 @@
 "Zaznacz zgodę na kontakt w sprawie zapytania.": "Tick the consent to be contacted about the enquiry.",
 "Kod od instytucji: {0} bez opłaty": "Institution code: {0} free of charge",
 "Zamów bez opłaty": "Order free of charge",
-"Kod od instytucji": "Institution code"
+"Kod od instytucji": "Institution code",
+"Zainstaluj aplikację": "Install the app",
+"Brak internetu – widzisz zapisaną wersję strony. Zamówienie i płatność zadziałają po połączeniu.": "No internet – you are seeing a saved version of the page. Ordering and payment will work once you are back online.",
+"Na iPhonie: stuknij „Udostępnij” w Safari, a potem „Do ekranu początkowego”.": "On iPhone: tap “Share” in Safari, then “Add to Home Screen”."
 }
