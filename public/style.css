@@ -519,6 +519,8 @@ textarea{min-height:88px;resize:vertical}
 .tool-form{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0 14px}
 .tool-form input,.tool-form select{width:100%;margin-top:6px}
 .tool-out{white-space:pre-wrap}
+.tool-box .tool-out{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:16px;margin:0}
+.tool-out .net-big b,.tool-out .net-rows dd{color:var(--ink)}.tool-out .net-rows dd b{color:var(--ink)}
 .net-big{display:grid;margin-bottom:10px}.net-big small{color:var(--mute)}.net-big b{font:800 34px var(--f-d)}
 .net-rows{display:grid;grid-template-columns:1fr auto;gap:6px 16px;margin:0}.net-rows dt{color:var(--mute)}.net-rows dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
 .counter{margin:18px 0 0;color:var(--mute);font-size:15px}.counter b{color:var(--ink);font:800 20px var(--f-d);margin-right:4px}
