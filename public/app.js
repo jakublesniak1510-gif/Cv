@@ -1225,6 +1225,11 @@ addEventListener('scroll', () => { const show = scrollY > 500 && $('#result').hi
 
 async function loadContent() {
   if (!CONTENT) { try { CONTENT = await (await fetch('/content.json')).json(); } catch { CONTENT = { INDEX: [], POPULAR: [], ARTICLES: [], CITIES: [] }; } }
+  // Poradnik po niemiecku: tłumaczenia artykułów ładujemy tylko na wersji DE.
+  if (window.I18N?.lang === 'de' && !CONTENT.deArticles) {
+    CONTENT.deArticles = true;
+    try { const de = await (await fetch('/content/articles-de.json')).json(); CONTENT.ARTICLES = CONTENT.ARTICLES.map((a) => ({ ...a, ...(de[a.slug] || {}) })); } catch {}
+  }
   return CONTENT;
 }
 async function loadProf(slug) {
@@ -1378,12 +1383,14 @@ function cityPage(p, c, C) {
       el('aside', { className: 'side-card' }, el('b', { textContent: `CV: ${p.name}, ${c.name}` }), el('div', { className: 'side-thumb' }, thumb(r, d, false, '')), openBtn('Zamów CV pod swoje ogłoszenie'), el('p', { className: 'hint', textContent: 'Raport dopasowania, darmowa poprawka, PDF w e-mailu.' }))));
 }
 function articlePage(a, C) {
-  return el('div', { className: 'inner narrow article' },
-    el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', el('a', { href: '#poradnik', textContent: 'Poradnik' }), '›', el('span', { textContent: a.title })),
-    el('h1', { textContent: a.title }), el('p', { className: 'meta', textContent: `${a.readMinutes} min czytania` }), el('p', { className: 'lead', textContent: a.lead }),
+  // Na wersji DE artykuły są przetłumaczone, więc tłumaczymy też elementy wokół nich (reszta podstron zostaje po polsku).
+  const T = (s) => (window.I18N?.lang === 'de' ? window.I18N.t(s) : s);
+  return el('div', { className: 'inner narrow article', lang: window.I18N?.lang === 'de' ? 'de' : 'pl' },
+    el('nav', { className: 'crumbs', ariaLabel: T('Ścieżka') }, pageLink('', { textContent: T('Strona główna') }), '›', el('a', { href: '#poradnik', textContent: T('Poradnik') }), '›', el('span', { textContent: a.title })),
+    el('h1', { textContent: a.title }), el('p', { className: 'meta', textContent: T(`${a.readMinutes} min czytania`) }), el('p', { className: 'lead', textContent: a.lead }),
     ...a.sections.flatMap((sec) => [el('h2', { textContent: sec.h }), ...sec.p.map((t) => el('p', { textContent: t }))]),
-    el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Zrób CV pod swoje ogłoszenie' }), el('p', { className: 'hint', textContent: 'Wklejasz link, dostajesz CV z raportem dopasowania. Od 39 zł.' })), openBtn('Zamów CV')),
-    el('h2', { textContent: 'Przeczytaj też' }), el('div', { className: 'more' }, ...C.ARTICLES.filter((x) => x.slug !== a.slug).map((x) => pageLink(`poradnik/${x.slug}`, { textContent: x.title })), ...C.POPULAR.slice(0, 4).map((x) => pageLink(`cv/${x.slug}`, { textContent: `CV: ${x.name}` }))));
+    el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: T('Zrób CV pod swoje ogłoszenie') }), el('p', { className: 'hint', textContent: T('Wklejasz link, dostajesz CV z raportem dopasowania. Od 39 zł.') })), openBtn(T('Zamów CV'))),
+    el('h2', { textContent: T('Przeczytaj też') }), el('div', { className: 'more' }, ...C.ARTICLES.filter((x) => x.slug !== a.slug).map((x) => pageLink(`poradnik/${x.slug}`, { textContent: x.title })), ...C.POPULAR.slice(0, 4).map((x) => pageLink(`cv/${x.slug}`, { textContent: T(`CV: ${x.name}`) }))));
 }
 function setMeta(desc) { let m = document.querySelector('meta[name=description]'); if (!m) { m = el('meta', { name: 'description' }); document.head.append(m); } m.content = desc; }
 function navTo(r) {
