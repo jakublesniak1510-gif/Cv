@@ -18,4 +18,9 @@ ${strip(r('lib/articles-de.js'))}
 ${strip(r('lib/articles-en.js'))}
 ${strip(r('lib/articles-uk.js'))}
 ${strip(r('lib/articles-i18n.js'))}
+${strip(r('lib/professions-en.js'))}
+${strip(r('lib/professions-uk.js'))}
+${strip(r('lib/professions-de.js'))}
+${strip(r('lib/professions-i18n.js'))}
+${strip(r('lib/page-i18n.js')).replace(/^const fillT = .*$/m, '')}
 ${strip(r('lib/content.js'))}\n${strip(r('lib/tailor.js'))}\n${r('scripts/preview-stub.js')}\n${r('public/app.js')}\n</script>\n`);

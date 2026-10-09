@@ -226,6 +226,7 @@ $('#cKind').addEventListener('click', (e) => {
   const b = e.target.closest('button'); if (!b) return; kind = b.dataset.k;
   $$('#cKind button').forEach((x) => x.setAttribute('aria-pressed', x === b));
   $('#cValLbl').textContent = kind === 'amount' ? 'Rabat (zł)' : 'Rabat (%)'; $('#cVal').max = kind === 'amount' ? 70 : 90;
+  $('#cValBox').hidden = kind === 'voucher'; $('#cVal').required = kind !== 'voucher'; $('#cPkgBox').hidden = kind !== 'voucher';
 });
 $('#codeKind').addEventListener('click', (e) => {
   const b = e.target.closest('button'); if (!b) return; codeFilter = b.dataset.k;
@@ -234,7 +235,7 @@ $('#codeKind').addEventListener('click', (e) => {
 $('#codeForm').addEventListener('submit', async (e) => {
   e.preventDefault(); const m = $('#cMsg'); m.className = 'msg'; m.textContent = '';
   try {
-    await post('/codes', { code: $('#cCode').value, [kind]: $('#cVal').value, days: $('#cDays').value, maxUses: $('#cMax').value, note: $('#cNote').value });
+    await post('/codes', { code: $('#cCode').value, [kind]: kind === 'voucher' ? $('#cPkg').value : $('#cVal').value, days: $('#cDays').value, maxUses: $('#cMax').value, note: $('#cNote').value });
     m.className = 'msg good'; m.textContent = `Kod ${$('#cCode').value.toUpperCase()} utworzony.`; $('#cCode').value = $('#cNote').value = $('#cMax').value = '';
     loaders.codes();
   } catch (x) { m.className = 'msg bad'; m.textContent = x.message; }
@@ -250,8 +251,8 @@ loaders.codes = async () => {
         if (del.dataset.sure !== '1') { del.dataset.sure = '1'; del.textContent = 'Na pewno?'; setTimeout(() => { del.dataset.sure = ''; del.textContent = 'Usuń'; }, 3000); return; }
         try { await api('/codes/' + encodeURIComponent(c.code), { method: 'DELETE' }); toast(`Kod ${c.code} usunięty.`); loaders.codes(); } catch (x) { toast(x.message); }
       };
-      return el('tr', {}, el('td', { className: 'mono', textContent: c.code }), el('td', {}, el('span', { className: 'tag', textContent: c.kind === 'klient' ? 'klient' : 'akcja' }), c.referrals ? el('div', { className: 'mute', style: 'font-size:12px', textContent: `${c.referrals} pol. · saldo ${c.credit}` }) : null),
-        el('td', { className: 'r', textContent: c.percent ? `−${c.percent}%` : `−${zl(c.amount)}` }),
+      return el('tr', {}, el('td', { className: 'mono', textContent: c.code }), el('td', {}, el('span', { className: 'tag', textContent: c.kind }), c.referrals ? el('div', { className: 'mute', style: 'font-size:12px', textContent: `${c.referrals} pol. · saldo ${c.credit}` }) : null),
+        el('td', { className: 'r', textContent: c.voucher ? `${{ cv: 'CV', cv_letter: 'CV + list', pack3: 'Pakiet 3' }[c.voucher]} gratis` : c.percent ? `−${c.percent}%` : `−${zl(c.amount)}` }),
         el('td', { className: 'r', textContent: c.maxUses ? `${c.uses} / ${c.maxUses}` : String(c.uses) }),
         el('td', { className: 'num', textContent: dd(c.expires) }), el('td', { className: 'ell mute', textContent: c.note || '—' }), el('td', { className: 'r' }, del));
     }))));
@@ -283,14 +284,14 @@ $('#msgKind').addEventListener('click', (e) => { const b = e.target.closest('but
 loaders.messages = async () => {
   const all = await api('/messages'), fresh = all.filter((m) => m.status === 'new').length;
   setMsgBadge(fresh); $('#msgSum').textContent = all.length ? `${fresh} nowych z ${all.length}` : '';
-  const list = all.filter((m) => (msgFilter === 'new' ? m.status === 'new' : msgFilter === 'firma' ? m.kind === 'firma' : true));
+  const list = all.filter((m) => (msgFilter === 'new' ? m.status === 'new' : true));
   if (!list.length) return $('#msgList').replaceChildren(el('div', { className: 'card empty', textContent: msgFilter === 'new' ? 'Nie ma nowych wiadomości.' : 'Brak wiadomości.' }));
   $('#msgList').replaceChildren(...list.map((m) => {
     const act = (fn, label, cls = 'ghost') => { const b = el('button', { className: `btn sm ${cls}`, textContent: label }); b.onclick = async () => { b.disabled = true; try { await fn(); loaders.messages(); } catch (x) { toast(x.message); b.disabled = false; } }; return b; };
-    const subj = m.kind === 'firma' ? `Oferta CV Pod Ogłoszenie dla: ${m.org}` : `Re: ${m.topic || 'Twoja wiadomość'}`;
+    const subj = `Re: ${m.topic || 'Twoja wiadomość'}`;
     return el('div', { className: 'rv-item' },
-      el('div', { className: 'meta' }, el('span', { className: 'tag', textContent: m.kind === 'firma' ? 'firma / uczelnia' : 'kontakt' }), el('b', { textContent: m.kind === 'firma' ? m.org : m.name || m.email, style: 'color:var(--ink)' }), el('span', { textContent: dt(m.created) }), m.status === 'done' ? el('span', { className: 'tag', textContent: 'załatwione' }) : null),
-      kv([['E-mail', m.email], m.name && ['Osoba', m.name], m.phone && ['Telefon', m.phone], m.orgTypeName && ['Typ', m.orgTypeName], m.size && ['Liczba osób', m.size], m.topic && ['Temat', m.topic]]),
+      el('div', { className: 'meta' }, el('b', { textContent: m.name || m.email, style: 'color:var(--ink)' }), el('span', { textContent: dt(m.created) }), m.status === 'done' ? el('span', { className: 'tag', textContent: 'załatwione' }) : null),
+      kv([['E-mail', m.email], m.topic && ['Temat', m.topic]]),
       m.message ? el('p', { textContent: m.message, style: 'white-space:pre-wrap' }) : null,
       el('div', { className: 'actions' }, el('a', { className: 'btn sm', href: `mailto:${encodeURIComponent(m.email)}?subject=${encodeURIComponent(subj)}`, textContent: 'Odpowiedz' }),
         m.status === 'new' ? act(() => post(`/messages/${m.id}`, { status: 'done' }), 'Załatwione') : act(() => post(`/messages/${m.id}`, { status: 'new' }), 'Oznacz jako nowe'),
@@ -379,3 +380,18 @@ async function start() {
   go(loaders[v] ? v : 'dash');
 }
 start();
+
+// --- zapytania od firm ---
+loaders.leads = async () => {
+  const list = await api('/leads');
+  if (!list.length) return $('#leadTable').replaceChildren(el('div', { className: 'empty', textContent: 'Brak zapytań.' }));
+  $('#leadTable').replaceChildren(el('table', {},
+    el('thead', {}, el('tr', {}, ['Data', 'Instytucja', 'Osoba', 'Kontakt', 'Osób', 'Wiadomość', ''].map((t, i) => el('th', { className: i === 4 ? 'r' : '', textContent: t })))),
+    el('tbody', {}, list.map((l) => {
+      const del = el('button', { className: 'btn danger sm', textContent: 'Usuń' });
+      del.onclick = async () => { if (del.dataset.sure !== '1') { del.dataset.sure = '1'; del.textContent = 'Na pewno?'; return; } try { await api('/leads/' + l.id, { method: 'DELETE' }); loaders.leads(); } catch (x) { toast(x.message); } };
+      return el('tr', {}, el('td', { className: 'num', textContent: dd(l.created) }), el('td', { textContent: l.org }), el('td', { textContent: l.name }),
+        el('td', {}, el('a', { href: 'mailto:' + l.email, textContent: l.email }), l.phone ? el('div', { className: 'mute', textContent: l.phone }) : ''),
+        el('td', { className: 'r', textContent: l.count || '—' }), el('td', { className: 'mute', textContent: l.msg || '—' }), el('td', { className: 'r' }, del));
+    }))));
+};

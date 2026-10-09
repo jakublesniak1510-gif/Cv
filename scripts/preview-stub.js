@@ -11,10 +11,19 @@
   const make = (fields) => { const id = 'preview-' + Math.random().toString(36).slice(2); orders[id] = { id, status: 'pending', revisions: 0, created: Date.now(), ...fields }; return orders[id]; };
   window.fetch = async (url, opts = {}) => {
     const m = (opts.method || 'GET').toUpperCase(), body = opts.body ? JSON.parse(opts.body) : {};
+    { const sm = /^\/api\/orders\/[\w-]+\/sim$/.exec(url); if (sm && m === 'POST') { await wait(700); const h = body.history || [], qs = ['Proszę opowiedzieć krótko o sobie.', 'Dlaczego interesuje Pana/Panią to stanowisko?', 'Jakie doświadczenie z poprzedniej pracy przyda się u nas najbardziej?', 'Proszę opisać sytuację, w której rozwiązał(a) Pan/Pani trudny problem w pracy.', 'Od kiedy może Pan/Pani zacząć pracę?'];
+      const a = h[h.length - 1]?.a || '', fb = h.length ? { score: a.length >= 120 ? (/\d/.test(a) ? 4 : 3) : 2, good: a.length >= 120 ? 'Odpowiedź ma odpowiednią długość.' : 'Odpowiedź jest zwięzła.', improve: 'Dodaj konkretny przykład z liczbami: ile, jak często, jaki efekt.', better: 'Sytuacja – zadanie – działanie – rezultat: opisz krótko każdy z tych elementów.' } : null;
+      const done = body.finish || h.length >= 5;
+      return json(done ? { question: null, feedback: fb, summary: { score: 3, strengths: ['Odpowiadasz na każde pytanie.'], improve: ['Podawaj konkretne przykłady z liczbami.', 'Odnoś odpowiedzi do wymagań z ogłoszenia.'], tip: 'Przed rozmową przygotuj 3 krótkie historie ze swojej pracy według schematu STAR.' } } : { question: qs[h.length], feedback: fb, summary: null }); } }
+    if (url === '/api/ad-image' && m === 'POST') { await wait(900); return json({ demo: true, title: 'Magazynier', company: 'Hurtownia Sigma', text: 'Poszukujemy magazyniera do pracy w hurtowni. Zakres: przyjmowanie i wydawanie towaru, inwentaryzacja, praca z dokumentacją magazynową. Wymagamy rzetelności i gotowości do pracy zmianowej. Mile widziane uprawnienia na wózki widłowe. Oferujemy umowę o pracę.' }); }
     if (url === '/api/config') return json({ demo: true, preview: true, ai: false, maxAds: 3, noPrint: true, fakeFetch: true, maxRevisions: MAXREV, prices: Object.fromEntries(Object.entries(P).map(([k, v]) => [k, v / 100])) });
     if (url === '/content.json') return json({ INDEX: PROFESSIONS.map(({ slug, name, category, keywords }) => ({ slug, name, category, keywords })), POPULAR: PROFESSIONS.filter((p) => POPULAR_SLUGS.includes(p.slug)), ARTICLES, CITIES, TOOLS });
     { const m = /^\/content\/articles-(\w+)\.json$/.exec(url); if (m && ART_LANGS[m[1]]) return json(ART_LANGS[m[1]].data); }
-    { const c = /^\/content\/cv\/([\w-]+)\.json$/.exec(url); if (c) { const p = PROFESSIONS.find((x) => x.slug === c[1]); return p ? json(p) : json({}, 404); } }
+    { const m = /^\/content\/prof-(\w+)\.json$/.exec(url), x = m && PROF_LANGS[m[1]];
+      if (x) { const tr = (p) => ({ ...p, ...x.prof[p.slug], kwPl: p.keywords, lang: m[1] });
+        return json({ seg: x.seg, tpl: PAGE_T[m[1]], index: Object.fromEntries(Object.entries(x.prof).map(([pl, t]) => [pl, { slugLang: t.slugLang, name: t.name }])),
+          popular: Object.fromEntries(PROFESSIONS.filter((p) => POPULAR_SLUGS.includes(p.slug)).map((p) => [p.slug, tr(p)])), cities: Object.fromEntries(CITIES.map((c) => [c.slug, { ...c, ...x.cities[c.slug] }])) }); } }
+    { const c = /^\/content\/cv\/([\w-]+)\.json(?:\?lang=(\w+))?$/.exec(url); if (c) { const p = PROFESSIONS.find((x) => x.slug === c[1]), x = c[2] && PROF_LANGS[c[2]]; return p ? json(x && x.prof[p.slug] ? { ...p, ...x.prof[p.slug], kwPl: p.keywords, lang: c[2] } : p) : json({}, 404); } }
     // Podgląd nie pokazuje żadnych opinii: na prawdziwej stronie pojawią się dopiero opinie prawdziwych klientów.
     // Konto w podglądzie: logowanie bez e-maila, wszystko w pamięci przeglądarki.
     if (url.startsWith('/api/account')) {

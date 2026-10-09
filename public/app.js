@@ -2,8 +2,8 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const el = (t, p = {}, ...k) => { const e = Object.assign(document.createElement(t), p); e.append(...k.filter((x) => x != null && x !== false)); return e; };
-let PRICE = { cv: 39, cv_letter: 49, pack3: 79, interview: 50, messages: 9, linkedin: 19, docx: 9, extraLang: 5 };
-const ADDON_KEYS = { interview: ['#adInterview', 'Przygotowanie do rozmowy'], messages: ['#adMessages', 'Wiadomość do rekrutera i e-mail z aplikacją'], linkedin: ['#adLinkedin', 'Profil LinkedIn'], docx: ['#adDocx', 'Wersja Word (.docx)'] };
+let PRICE = { cv: 39, cv_letter: 49, pack3: 79, interview: 50, messages: 9, linkedin: 19, sim: 29, docx: 9, extraLang: 5 };
+const ADDON_KEYS = { interview: ['#adInterview', 'Przygotowanie do rozmowy'], messages: ['#adMessages', 'Wiadomość do rekrutera i e-mail z aplikacją'], linkedin: ['#adLinkedin', 'Profil LinkedIn'], sim: ['#adSim', 'Symulator rozmowy kwalifikacyjnej'], docx: ['#adDocx', 'Wersja Word (.docx)'] };
 const PKG_ADS = { cv: 1, cv_letter: 1, pack3: 3 };
 const PKG_NAME = { cv: 'CV', cv_letter: 'CV + list motywacyjny', pack3: 'Pakiet 3 CV + listy motywacyjne' };
 let promo = null; // zastosowany kod rabatowy: { code, discount, label }
@@ -212,7 +212,7 @@ function hl(text, kws) {
 
 fetch('/api/config').then((r) => r.json()).then((c) => {
   cfg = c; track('pv'); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
-});
+}).catch(() => drawLists().catch(() => {})); // bez internetu (aplikacja na telefonie): treści z pamięci
 
 /* ---------- Przykład dopasowania ---------- */
 const BASE = {
@@ -507,6 +507,20 @@ drawEx(0);
 
 /* galeria szablonów i hero */
 const gal = { tpl: 'nowoczesny', color: 'niebieski' };
+// Przykładowe CV w PDF ze znakiem wodnym (fikcyjna osoba) w danym szablonie i kolorze.
+const sampleLink = (d, text, cls = 'btn ghost sm') => el('a', { className: cls, href: `/api/sample.pdf?tpl=${d.tpl}&color=${d.color}&lang=${window.I18N?.lang || 'pl'}`, download: '', textContent: text,
+  onclick: (e) => { if (cfg.preview) { e.preventDefault(); flash('W podglądzie pobieranie PDF jest wyłączone. Na działającej stronie pobierzesz przykładowe CV ze znakiem wodnym „PRZYKŁAD”.'); } else track('sample', { tpl: d.tpl }); } });
+// Formularz „Dla firm i instytucji”.
+$('#b2bForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault(); const out = $('#bMsgOut'), btn = $('#b2bForm button[type=submit]');
+  out.className = 'fstatus'; btn.disabled = true;
+  try {
+    const r = await fetch('/api/b2b', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ org: $('#bOrg').value, name: $('#bName').value, email: $('#bEmail').value, phone: $('#bPhone').value, count: $('#bCount').value, msg: $('#bMsg').value, consent: $('#bConsent').checked, uiLang: window.I18N?.lang || 'pl' }) });
+    const j = await r.json(); if (!r.ok) throw new Error(j.error);
+    e.target.reset(); out.classList.add('good'); out.textContent = 'Dziękujemy! Odpowiemy e-mailem, zwykle w ciągu 1–2 dni roboczych.'; track('b2b');
+  } catch (x) { out.classList.add('bad'); out.textContent = x.message; }
+  btn.disabled = false;
+});
 function drawGallery() {
   const sample = exResult(1);
   $('#galColors').replaceChildren(el('span', { className: 'dp-lbl', textContent: 'Kolor:' }), ...Object.entries(COLORS).map(([id, hex]) => el('button', { type: 'button', className: 'sw', title: COLOR_NAMES[id], ariaLabel: `Kolor ${COLOR_NAMES[id]}`, ariaPressed: String(gal.color === id), style: `--c:${hex}`, onclick: () => { gal.color = id; drawGallery(); } })));
@@ -514,6 +528,7 @@ function drawGallery() {
     el('button', { type: 'button', className: 'gal-thumb', ariaLabel: `Podgląd szablonu ${name}`, onclick: () => openEx(1, { tpl: id, color: gal.color }) }, thumb(sample, { tpl: id, color: gal.color })),
     el('div', { className: 'gal-meta' }, el('b', { textContent: name }), el('span', { textContent: desc })),
     el('button', { type: 'button', className: 'btn ghost sm', textContent: 'Wybierz ten szablon', onclick: () => { design = { tpl: id, color: gal.color }; drawWizDesign(); saveDraft(); openWiz(); } }))));
+  $('#galSample').replaceChildren(sampleLink(gal, 'Pobierz przykładowe CV w PDF'), el('span', { className: 'hint', textContent: ' Fikcyjna osoba, ze znakiem wodnym. Twoje CV będzie z Twoimi danymi i pod Twoje ogłoszenie.' }));
 }
 const drawWizDesign = () => designPicker($('#wizDesign'), design, (d) => { design = d; saveDraft(); });
 /* animowane demo w nagłówku: słowa z ogłoszenia zapalają się w ogłoszeniu i w CV */
@@ -559,6 +574,7 @@ function drawExView() {
   $('#exDocTabs').replaceChildren(...[['cv', 'CV'], ['letter', 'List motywacyjny']].map(([k, t]) => el('button', { type: 'button', role: 'tab', ariaSelected: String(k === exDoc), textContent: t, onclick: () => { exDoc = k; drawExView(); } })));
   $('#exPaper').replaceChildren(exDoc === 'cv' ? cvNode(r, true, exDesign) : letterNode(r, exDesign));
   $('#exChanges').replaceChildren(...changesList(e));
+  $('#exSample').replaceChildren(sampleLink(exDesign, 'Pobierz przykładowe CV (PDF)'));
 }
 function openEx(i = 0, d) { exI = i; exDoc = 'cv'; if (d) Object.assign(exDesign, d); designPicker($('#exDesign'), exDesign, () => drawExView(), { thumbs: false }); drawExView(); modal(true); $('#exview').hidden = false; $('.exv-body').scrollTop = 0; setTimeout(() => $('#exClose').focus(), 0); }
 const closeEx = () => { $('#exview').hidden = true; modal(false); };
@@ -572,7 +588,8 @@ drawGallery();
 const rowT = {
   exp: () => `<div class="grid4"><label class="f">Stanowisko<input type="text" data-k="title"></label><label class="f">Firma<input type="text" data-k="company"></label><label class="f">Od<input type="text" data-k="from" placeholder="03.2021"></label><label class="f">Do<input type="text" data-k="to" placeholder="obecnie"></label></div><label class="f">Obowiązki i osiągnięcia <span class="h">każdy punkt w nowej linii</span><textarea data-k="description"></textarea></label>`,
   edu: () => `<div class="grid4"><label class="f">Szkoła<input type="text" data-k="school"></label><label class="f">Kierunek / tytuł<input type="text" data-k="degree"></label><label class="f">Od<input type="text" data-k="from"></label><label class="f">Do<input type="text" data-k="to"></label></div>`,
-  ads: () => `<div class="seg modes" role="tablist"><button type="button" role="tab" data-mode="link">Link do ogłoszenia</button><button type="button" role="tab" data-mode="paste">Wklej treść</button></div>
+  ads: () => `<div class="seg modes" role="tablist"><button type="button" role="tab" data-mode="link">Link do ogłoszenia</button><button type="button" role="tab" data-mode="photo">Zdjęcie ogłoszenia</button><button type="button" role="tab" data-mode="paste">Wklej treść</button></div>
+<div class="photobox" hidden><b class="flabel">Zdjęcie lub zrzut ekranu ogłoszenia</b><label class="btn ghost filebtn"><span>Wybierz zdjęcie</span><input type="file" class="adphoto" accept="image/*"></label><p class="hint">Zrób zdjęcie ogłoszenia albo wgraj zrzut ekranu, np. z Facebooka, OLX lub grupy z ofertami. Odczytamy z niego treść.</p><div class="pstatus" role="status"></div></div>
 <div class="linkbox"><label class="f">Adres ogłoszenia<span class="urlrow"><input type="text" data-k="url" inputmode="url" placeholder="https://…"><button type="button" class="btn sm fetchbtn">Pobierz</button></span></label><div class="fstatus" role="status"></div></div>
 <div class="adfields"><label class="adlang">Język dokumentów <select data-k="lang"><option value="auto">jak w ogłoszeniu</option><option value="pl">polski</option><option value="en">angielski</option><option value="de">niemiecki</option><option value="uk">ukraiński</option><option value="es">hiszpański</option><option value="fr">francuski</option></select></label><label class="f">Nazwa stanowiska<input type="text" data-k="title" placeholder="np. Kasjer / Sprzedawca"></label><label class="f">Treść ogłoszenia <span class="h">sprawdź i w razie potrzeby popraw</span><textarea data-k="text" style="min-height:150px"></textarea></label></div>`,
 };
@@ -586,11 +603,26 @@ function addRow(box, v = {}) {
   if (box === 'ads' || box === 'fuAds') initAd(e, v.text ? 'paste' : 'link');
   renum(box); refresh();
 }
+// Zmniejszenie zdjęcia przed wysłaniem (telefony robią zdjęcia po kilka MB).
+function shrinkImage(f, max) {
+  return new Promise((resolve, reject) => {
+    const img = new Image(), url = URL.createObjectURL(f);
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Nie udało się otworzyć tego pliku jako zdjęcia.')); };
+    img.src = url;
+  });
+}
 function setMode(e, mode) {
   e.dataset.mode = mode;
   $$('.modes button', e).forEach((b) => b.setAttribute('aria-selected', b.dataset.mode === mode));
   $('.linkbox', e).hidden = mode !== 'link';
-  $('.adfields', e).hidden = mode === 'link' && !e.dataset.fetched;
+  $('.photobox', e).hidden = mode !== 'photo';
+  $('.adfields', e).hidden = (mode === 'link' || mode === 'photo') && !e.dataset.fetched;
 }
 function initAd(e, mode) {
   $$('.modes button', e).forEach((b) => (b.onclick = () => setMode(e, b.dataset.mode)));
@@ -615,6 +647,23 @@ function initAd(e, mode) {
     btn.disabled = false;
   };
   btn.onclick = run;
+  // Zdjęcie ogłoszenia: zmniejszamy w przeglądarce (max 1600 px, JPEG), serwer odczytuje treść.
+  const ps = $('.pstatus', e), file = $('.adphoto', e);
+  file.onchange = async () => {
+    const f = file.files[0]; if (!f) return;
+    ps.className = 'pstatus'; ps.textContent = 'Odczytuję ogłoszenie ze zdjęcia…';
+    try {
+      const image = await shrinkImage(f, 1600);
+      const r = await fetch('/api/ad-image', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image }) });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error);
+      $('[data-k=title]', e).value = j.title || ''; $('[data-k=text]', e).value = j.text;
+      e.dataset.fetched = '1'; setMode(e, 'photo'); refresh();
+      ps.replaceChildren(el('span', { textContent: 'Odczytano ogłoszenie ze zdjęcia.' }), ' ', el('span', { textContent: 'Sprawdź treść poniżej i popraw, jeśli coś się nie zgadza.' }), j.demo ? el('span', { textContent: ' Podgląd: wstawiamy przykładowe ogłoszenie.' }) : '');
+      ps.classList.add('good');
+    } catch (x) { ps.replaceChildren(el('span', { textContent: x.message || 'Nie udało się odczytać zdjęcia.' }), ' ', el('span', { textContent: 'Możesz też wkleić treść ogłoszenia.' })); ps.classList.add('bad'); }
+    file.value = '';
+  };
   $('[data-k=url]', e).onkeydown = (k) => { if (k.key === 'Enter') { k.preventDefault(); run(); } };
   if (cfg.fakeFetch) $('.linkbox', e).append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' }));
   setMode(e, mode);
@@ -629,7 +678,7 @@ const nAds = () => Math.max(1, $('#ads').children.length);
 const addons = () => Object.fromEntries(Object.entries(ADDON_KEYS).map(([k, [sel]]) => [k, $(sel).checked]));
 const extraLangs = () => $$('#langPick input:checked').map((i) => i.value);
 const addonsTotal = () => Object.entries(addons()).reduce((s, [k, on]) => s + (on ? PRICE[k] : 0), 0) + PRICE.extraLang * extraLangs().length;
-const discount = () => (promo ? Math.min(promo.percent ? Math.round((PRICE[pkg()] + addonsTotal()) * promo.percent) / 100 : promo.discount, PRICE[pkg()] - 2) : 0);
+const discount = () => (promo?.voucher ? Math.min(PRICE[pkg()], PRICE[promo.voucher]) : promo ? Math.min(promo.percent ? Math.round((PRICE[pkg()] + addonsTotal()) * promo.percent) / 100 : promo.discount, PRICE[pkg()] - 2) : 0);
 const total = () => PRICE[pkg()] + addonsTotal() - discount();
 
 const DKEY = 'cvpo-draft-v1', FIELDS = ['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'];
@@ -666,7 +715,7 @@ function refresh() {
   $('#packTip').hidden = maxA !== 1;
 }
 $$('input[name=pkg]').forEach((r) => (r.onchange = refresh));
-$('#adInterview').onchange = $('#adMessages').onchange = refresh;
+Object.values(ADDON_KEYS).forEach(([sel]) => ($(sel).onchange = refresh));
 $('#langPick').replaceChildren(...Object.entries(LANGS).map(([k, n]) => el('label', { className: 'chk' }, el('input', { type: 'checkbox', value: k, onchange: refresh }), ` ${n}`, el('small', { className: 'incl', hidden: true, textContent: 'w cenie' }))));
 // Język, w którym i tak powstaną dokumenty (z ogłoszeń; zanim ktoś je wklei — polski na polskiej wersji strony), jest w cenie: nie da się go dokupić.
 function syncLangPick() {
@@ -698,9 +747,9 @@ async function applyCode(raw, quiet) {
   try {
     const r = await fetch(`/api/code/${encodeURIComponent(code)}?email=${encodeURIComponent($('#email').value)}`);
     const j = await r.json(); if (!r.ok) throw new Error(j.error);
-    promo = j; st.className = 'fstatus good'; st.textContent = `${j.label}: −${j.percent ? j.percent + '%' : j.discount + ' zł'}`;
+    promo = j; st.className = 'fstatus good'; st.textContent = j.voucher ? `${j.label}: ${PKG_NAME[j.voucher]} bez opłaty` : `${j.label}: −${j.percent ? j.percent + '%' : j.discount + ' zł'}`;
   } catch (x) { promo = null; if (!quiet) { st.className = 'fstatus bad'; st.textContent = x.message; } }
-  refresh(); if (step === 6) drawSummary();
+  refresh(); if (step === 6) { drawSummary(); nextLabel(); }
 }
 $('#codeApply').onclick = () => applyCode($('#codeInput').value);
 $('#toPack').onclick = () => { $('input[name=pkg][value=pack3]').checked = true; refresh(); $('#werr').textContent = ''; };
@@ -715,6 +764,7 @@ $('#addExp').onclick = () => addRow('exp');
 $('#addEdu').onclick = () => addRow('edu');
 $('#addAd').onclick = () => addRow('ads');
 
+const nextLabel = () => ($('#next').textContent = step === 6 ? (total() === 0 ? 'Zamów bez opłaty' : cfg.demo ? `Przejdź do płatności · ${total()} zł` : `Zapłać ${total()} zł`) : 'Dalej');
 function go(n) {
   refresh();
   step = n; if (!$('#wiz').hidden) track('step', { s: n });
@@ -724,7 +774,7 @@ function go(n) {
   $('#wizTitle').textContent = n <= 6 ? STEPS[n - 1] : 'Zapłać za zamówienie';
   $('#back').hidden = n === 1 || n === 7;
   $('#next').hidden = n === 7;
-  $('#next').textContent = n === 6 ? (cfg.demo ? `Przejdź do płatności · ${total()} zł` : `Zapłać ${total()} zł`) : 'Dalej';
+  nextLabel();
   if (n === 6) { if ($('#codeInput').value && !promo) applyCode($('#codeInput').value, true); drawSummary(); }
   $('#werr').textContent = '';
   $('.wiz-body').scrollTop = 0;
@@ -737,7 +787,7 @@ function drawSummary() {
     ...ads.map((a, i) => el('div', { className: 'sumrow' }, el('span', { textContent: `Ogłoszenie ${i + 1}: ${a.title}${a.lang === 'en' ? ' (po angielsku)' : ''}` }), el('span', { textContent: 'w cenie' }))),
     ...Object.entries(addons()).filter(([, on]) => on).map(([k]) => el('div', { className: 'sumrow' }, el('span', { textContent: ADDON_KEYS[k][1] }), el('span', { textContent: '+' + PRICE[k] + ' zł' }))),
     ...extraLangs().map((l) => el('div', { className: 'sumrow' }, el('span', { textContent: `Tłumaczenie: ${LANGS[l]}` }), el('span', { textContent: '+' + PRICE.extraLang + ' zł' }))),
-    ...(discount() ? [el('div', { className: 'sumrow' }, el('span', { textContent: `${promo.label} ${promo.code}` }), el('span', { textContent: '−' + discount() + ' zł' }))] : []),
+    ...(discount() ? [el('div', { className: 'sumrow' }, el('span', {}, el('span', { textContent: promo.label }), ' ' + promo.code), el('span', { textContent: '−' + discount() + ' zł' }))] : []),
     el('div', { className: 'sumrow' }, el('span', { textContent: 'Razem' }), el('span', { textContent: total() + ' zł' })));
 }
 function validate(n) {
@@ -778,7 +828,7 @@ $('#wizForm').onsubmit = async (e) => {
   if (step < 6) return go(step + 1);
   const v = (id) => $('#' + id).value;
   const body = {
-    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, reviewAsk: $('#reviewAsk').checked, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   $('#next').disabled = true;
@@ -787,7 +837,7 @@ $('#wizForm').onsubmit = async (e) => {
     const j = await r.json();
     if (!r.ok) throw new Error(j.error);
     orderId = j.id;
-    if (j.demo) go(7); else location.href = j.url;
+    if (j.free) { closeWiz(); startResult(j.id); } else if (j.demo) go(7); else location.href = j.url;
   } catch (x) { $('#werr').textContent = x.message; }
   $('#next').disabled = false;
 };
@@ -948,11 +998,69 @@ function drawMail() {
       if (j.mail) data.mail = j.mail; drawMail();
     } }));
 }
-const DOCS = { cv: 'CV', letter: 'List motywacyjny', interview: 'Rozmowa', messages: 'Wiadomości', linkedin: 'LinkedIn' };
-const docsOf = (r) => ['cv', ...(data.pkg !== 'cv' ? ['letter'] : []), ...(r.interview?.length ? ['interview'] : []), ...(r.messages ? ['messages'] : []), ...(r.linkedin ? ['linkedin'] : [])];
+const DOCS = { cv: 'CV', letter: 'List motywacyjny', interview: 'Rozmowa', sim: 'Symulator rozmowy', messages: 'Wiadomości', linkedin: 'LinkedIn' };
+const docsOf = (r) => ['cv', ...(data.pkg !== 'cv' ? ['letter'] : []), ...(r.interview?.length ? ['interview'] : []), ...(data.addons?.sim ? ['sim'] : []), ...(r.messages ? ['messages'] : []), ...(r.linkedin ? ['linkedin'] : [])];
 let editing = null; // kopia dokumentu w trakcie ręcznej edycji
 let curLang = null; // aktywna dodatkowa wersja językowa (null = główny język)
 const cur = () => { const b = data.results[curAd]; return (curLang && b.variants?.[curLang]) || b; };
+
+// Symulator rozmowy: przebieg zapisany w przeglądarce (osobno dla każdego ogłoszenia), żeby odświeżenie strony go nie kasowało.
+const simKey = () => `cvpo-sim-${orderId}-${curAd}`;
+const simLoad = () => { try { return JSON.parse(localStorage.getItem(simKey())) || null; } catch { return null; } };
+const simSave = (s) => { try { localStorage.setItem(simKey(), JSON.stringify(s)); } catch {} };
+function simNode() {
+  let s = simLoad() || { turns: [], q: null, summary: null };
+  const box = el('div', { className: 'sim' }), log = el('div', { className: 'sim-log', ariaLive: 'polite' });
+  const ans = el('textarea', { className: 'sim-in', placeholder: 'Twoja odpowiedź – tak jak powiedział(a)byś na rozmowie', rows: 5 });
+  const send = el('button', { type: 'button', className: 'btn', textContent: 'Wyślij odpowiedź' }), end = el('button', { type: 'button', className: 'btn ghost', textContent: 'Zakończ i podsumuj' });
+  const status = el('p', { className: 'hint sim-st', role: 'status' });
+  const score = (n) => el('span', { className: 'sim-score', ariaLabel: `${n}/5` }, ...[1, 2, 3, 4, 5].map((i) => el('i', { className: i <= n ? 'f' : '' })), el('b', { textContent: ` ${n}/5` }));
+  const fb = (f) => el('div', { className: 'sim-fb' }, el('div', { className: 'sim-fb-h' }, el('span', { textContent: 'Ocena odpowiedzi' }), score(f.score)),
+    f.good ? el('p', {}, el('b', { textContent: 'Dobrze: ' }), f.good) : null, f.improve ? el('p', {}, el('b', { textContent: 'Do poprawy: ' }), f.improve) : null,
+    f.better ? el('p', { className: 'sim-better' }, el('b', { textContent: 'Lepiej: ' }), f.better) : null);
+  const paint = () => {
+    log.replaceChildren(...[...s.turns.flatMap((t) => [el('div', { className: 'sim-msg q' }, el('small', { textContent: 'Rekruter' }), t.q), el('div', { className: 'sim-msg a' }, el('small', { textContent: 'Ty' }), t.a), t.fb ? fb(t.fb) : null]),
+      s.q ? el('div', { className: 'sim-msg q' }, el('small', { textContent: 'Rekruter' }), s.q) : null,
+      s.summary ? el('div', { className: 'sim-sum' }, el('h3', { textContent: 'Podsumowanie rozmowy' }), score(s.summary.score),
+        s.summary.strengths?.length ? el('div', {}, el('b', { textContent: 'Mocne strony' }), el('ul', {}, ...s.summary.strengths.map((x) => el('li', { textContent: x })))) : null,
+        s.summary.improve?.length ? el('div', {}, el('b', { textContent: 'Nad czym popracować' }), el('ul', {}, ...s.summary.improve.map((x) => el('li', { textContent: x })))) : null,
+        s.summary.tip ? el('p', { className: 'sim-better' }, el('b', { textContent: 'Rada na koniec: ' }), s.summary.tip) : null) : null].filter(Boolean));
+    const active = !!s.q && !s.summary;
+    ans.hidden = send.hidden = end.hidden = !active; start.hidden = active;
+    start.textContent = s.turns.length || s.summary ? 'Zacznij nową rozmowę' : 'Zacznij rozmowę';
+  };
+  const call = async (body) => {
+    status.textContent = 'Rekruter czyta Twoją odpowiedź…'; send.disabled = end.disabled = start.disabled = true;
+    try {
+      const r = await fetch(`/api/orders/${orderId}/sim`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ i: curAd, ...body }) });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      status.textContent = ''; return j;
+    } catch (x) { status.textContent = x.message || 'Symulator jest chwilowo niedostępny. Spróbuj za chwilę.'; return null; }
+    finally { send.disabled = end.disabled = start.disabled = false; }
+  };
+  const answer = async (finish) => {
+    const a = ans.value.trim();
+    if (!finish && !a) { status.textContent = 'Napisz odpowiedź na pytanie.'; return; }
+    const history = [...s.turns.map((t) => ({ q: t.q, a: t.a })), ...(a ? [{ q: s.q, a }] : [])];
+    const j = await call({ history, finish }); if (!j) return;
+    if (a) s.turns.push({ q: s.q, a, fb: j.feedback }); else if (j.feedback && s.turns.length) s.turns[s.turns.length - 1].fb ||= j.feedback;
+    s.q = j.question; s.summary = j.summary || (!j.question ? s.summary : null);
+    if (!j.question && !j.summary) { const k = await call({ history, finish: true }); if (k) s.summary = k.summary; }
+    ans.value = ''; simSave(s); paint(); log.lastElementChild?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  };
+  const start = el('button', { type: 'button', className: 'btn', onclick: async () => {
+    s = { turns: [], q: null, summary: null };
+    const j = await call({ history: [] }); if (!j) return;
+    s.q = j.question; simSave(s); paint(); ans.focus();
+  } });
+  send.onclick = () => answer(false); end.onclick = () => answer(true);
+  ans.onkeydown = (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) answer(false); };
+  box.append(el('div', { className: 'sim-intro' }, el('h2', { textContent: 'Symulator rozmowy kwalifikacyjnej' }),
+    el('p', { textContent: 'Rekruter zada Ci do 8 pytań do tego ogłoszenia, po jednym. Po każdej odpowiedzi dostaniesz ocenę i wskazówki, a na końcu podsumowanie. Odpowiadaj tak, jak mówił(a)byś na prawdziwej rozmowie.' })),
+    log, el('div', { className: 'sim-form' }, ans, el('div', { className: 'sim-btns' }, send, end, start)), status);
+  paint();
+  return box;
+}
 
 function interviewNode(r, d) {
   const p = paperEl('extra', { tpl: 'klasyczny', color: d.color }), pr = r.prep || null;
@@ -1074,7 +1182,7 @@ function openEditor() {
 
 function drawPaper() {
   const base = cur(), r = editing ? { ...base, cv: editing.cv, letter: editing.letter } : base, d = data.design;
-  const node = { cv: () => cvNode(r, undefined, d), letter: () => letterNode(r, d), interview: () => interviewNode(r, d), messages: () => messagesNode(r, d), linkedin: () => linkedinNode(r, d) }[curDoc];
+  const node = { cv: () => cvNode(r, undefined, d), letter: () => letterNode(r, d), interview: () => interviewNode(r, d), sim: () => simNode(), messages: () => messagesNode(r, d), linkedin: () => linkedinNode(r, d) }[curDoc];
   $('#paper').replaceChildren(node());
 }
 
@@ -1105,7 +1213,7 @@ function drawFollowup() {
       try {
         const r = await fetch(`/api/orders/${orderId}/followup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pkg: fpkg, ads, code }) });
         const j = await r.json(); if (!r.ok) throw new Error(j.error);
-        if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); delete box.dataset.ready; startResult(j.id); } else location.href = j.url;
+        if (j.free) { delete box.dataset.ready; startResult(j.id); } else if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); delete box.dataset.ready; startResult(j.id); } else location.href = j.url;
       } catch (x) { err.textContent = x.message; e.target.disabled = false; }
     } }), cfg.demo ? el('span', { className: 'hint', textContent: '  Podgląd: płatność jest symulowana.' }) : null),
     el('p', { className: 'err', id: 'fuErr' }));
@@ -1192,7 +1300,8 @@ function showResult() {
     $('#docTabs').replaceChildren(...docs.map((k) => el('button', { type: 'button', role: 'tab', textContent: DOCS[k], onclick: () => { curDoc = k; editing = null; $('#editor').hidden = $('#reviseBox').hidden = true; draw(); } })));
     $$('#docTabs button').forEach((b, i) => b.setAttribute('aria-selected', docs[i] === curDoc));
     $('#docTabs').hidden = docs.length < 2;
-    $('#print').textContent = `Pobierz PDF: ${{ cv: 'CV', letter: 'list', interview: 'pytania', messages: 'wiadomości', linkedin: 'profil LinkedIn' }[curDoc]}`;
+    $('#print').textContent = `Pobierz PDF: ${{ cv: 'CV', letter: 'list', interview: 'pytania', messages: 'wiadomości', linkedin: 'profil LinkedIn', sim: '' }[curDoc]}`;
+    $('#print').hidden = curDoc === 'sim';
     const editable = curDoc === 'cv' || curDoc === 'letter';
     $('#docxBtn').hidden = !(data.addons?.docx && editable);
     $('#docxBtn').href = `/api/orders/${orderId}/docx/${curAd}?doc=${curDoc}${curLang ? '&lang=' + curLang : ''}`;
@@ -1280,17 +1389,25 @@ async function loadContent() {
   if (ART_SEG[l] && !CONTENT.artLang) {
     CONTENT.artLang = l;
     try { const tr = await (await fetch(`/content/articles-${l}.json`)).json(); CONTENT.ARTICLES = CONTENT.ARTICLES.map((a) => ({ ...a, ...(tr[a.slug] || {}) })); } catch {}
+    // Zawody i miasta w języku strony: nazwy i adresy w indeksie, pełne dane popularnych zawodów, miasta i wzory zdań.
+    try {
+      const pr = await (await fetch(`/content/prof-${l}.json`)).json();
+      CONTENT.prof = pr;
+      CONTENT.INDEX = CONTENT.INDEX.map((p) => (pr.index[p.slug] ? { ...p, ...pr.index[p.slug] } : p));
+      CONTENT.POPULAR = CONTENT.POPULAR.map((p) => pr.popular[p.slug] || p);
+      CONTENT.CITIES = (CONTENT.CITIES || []).map((c) => pr.cities[c.slug] || c);
+    } catch {}
   }
   return CONTENT;
 }
 async function loadProf(slug) {
   const C = await loadContent(), p = C.POPULAR.find((x) => x.slug === slug);
   if (p) return p;
-  try { const r = await fetch(`/content/cv/${slug}.json`); if (r.ok) return await r.json(); } catch {}
+  try { const r = await fetch(`/content/cv/${slug}.json${C.prof ? '?lang=' + C.artLang : ''}`); if (r.ok) return await r.json(); } catch {}
   return null;
 }
 const fold = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ł/g, 'l');
-const profResult = (p) => ({ position: p.sample.headline, lang: 'pl', keywords: [], cv: {
+const profResult = (p) => ({ position: p.sample.headline, lang: p.lang || 'pl', keywords: [], cv: {
   name: p.sample.name, headline: p.sample.headline, contact: p.sample.contact, summary: p.sample.summary,
   experience: p.sample.jobs.map((j) => ({ title: j.title, company: j.company, period: j.period, bullets: j.bullets })),
   education: [p.sample.education], skills: p.sample.skills, languages: p.sample.languages || [], certificates: [], interests: '', clause: CLAUSE } });
@@ -1298,13 +1415,15 @@ const profResult = (p) => ({ position: p.sample.headline, lang: 'pl', keywords: 
 const STATIC_PAGES = ['dla-firm', 'program-polecen'];
 const HOME_TITLE = 'CV pod ogłoszenie i list motywacyjny od 39 zł | CV Pod Ogłoszenie';
 // Publiczny adres podstrony: na wersjach EN / UA / DE strona główna to /<język>, a przetłumaczone artykuły mają własne adresy.
-const ART_SEG = { de: 'ratgeber', en: 'guides', uk: 'porady' };
+const ART_SEG = { de: 'ratgeber', en: 'guides', uk: 'porady' }, PROF_SEG = { de: 'lebenslauf', en: 'cv', uk: 'rezyume' };
 const pubPath = (r) => {
   const l = window.I18N?.lang;
   if (!ART_SEG[l]) return r;
   if (!r) return l;
   const m = /^poradnik\/([\w-]+)$/.exec(r), a = m && CONTENT?.ARTICLES.find((x) => x.slug === m[1]);
-  return a?.slugLang ? `${l}/${ART_SEG[l]}/${a.slugLang}` : r;
+  if (a?.slugLang) return `${l}/${ART_SEG[l]}/${a.slugLang}`;
+  const pm = /^cv\/([\w-]+)(?:\/([\w-]+))?$/.exec(r), P = CONTENT?.prof, ps = pm && P?.index[pm[1]]?.slugLang, cs = pm?.[2] && P?.cities[pm[2]]?.slugLang;
+  return ps && (!pm[2] || cs) ? `${l}/${P.seg}/${ps}${cs ? '/' + cs : ''}` : r;
 };
 const pageHref = (r) => (cfg.preview ? (r ? '#/' + r : '#top') : '/' + pubPath(r));
 const pageLink = (r, props, ...kids) => { const a = el('a', { href: pageHref(r), ...props }, ...kids); a.dataset.page = r; return a; };
@@ -1339,25 +1458,30 @@ async function runSearch() {
     el('button', { type: 'button', className: 'btn', textContent: 'Stwórz CV samodzielnie', onclick: () => { if (!$('#headline').value.trim()) $('#headline').value = raw; openWiz(); } })));
 }
 
+// Zdania z miastem w języku strony (wzory przychodzą z serwera razem z tłumaczeniem zawodów).
+const fillT = (s, p, c) => s.replace(/\{(\w+)\}/g, (_, k) => ({ name: p?.name, low: p?.name?.toLowerCase(), loc: c?.loc, gen: c?.gen, city: c?.name, near: (c?.near || []).join(', ') })[k] ?? '');
+// Tłumaczenie elementów strony zawodu, gdy zawód ma tłumaczenie (p.lang); w przeciwnym razie zostaje po polsku.
+const pT = (p) => (s) => (p.lang ? window.I18N.t(s) : s);
+const kwChips = (p) => el('div', { className: 'kw' }, ...p.keywords.map((k, i) => el('span', {}, k, p.kwPl?.[i] ? el('small', { textContent: p.kwPl[i] }) : null)));
 function profPage(p, C) {
-  const d = { tpl: 'nowoczesny', color: 'niebieski' }, r = profResult(p);
+  const d = { tpl: 'nowoczesny', color: 'niebieski' }, r = profResult(p), T = pT(p), PT = p.lang && C.prof?.tpl;
   const side = el('div', { className: 'side-thumb' }), full = el('div', { className: 'side-full' });
   const paint = () => { side.replaceChildren(thumb(r, d, false, '')); full.replaceChildren(cvNode(r, false, d, '')); };
   const picker = el('div'); designPicker(picker, d, paint, { thumbs: false }); paint();
-  return el('div', { className: 'inner' },
-    el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', el('a', { href: '#zawody', textContent: 'CV dla zawodów' }), '›', el('span', { textContent: p.name })),
+  return el('div', { className: 'inner', lang: p.lang || 'pl' },
+    el('nav', { className: 'crumbs', ariaLabel: T('Ścieżka') }, pageLink('', { textContent: T('Strona główna') }), '›', el('a', { href: '#zawody', textContent: T('CV dla zawodów') }), '›', el('span', { textContent: p.name })),
     el('h1', { textContent: p.title }), el('p', { className: 'lead', textContent: p.intro }),
     el('div', { className: 'page-grid' },
       el('div', {},
-        el('h2', { textContent: 'Słowa kluczowe z ogłoszeń' }), el('p', { className: 'hint', textContent: 'Te sformułowania często pojawiają się w ofertach. Jeśli to prawda o Tobie, użyj ich w CV w takim samym brzmieniu.' }),
-        el('div', { className: 'kw' }, ...p.keywords.map((k) => el('span', { textContent: k }))),
-        el('h2', { textContent: 'Wskazówki do CV' }), el('ol', { className: 'tips' }, ...p.tips.map((t) => el('li', { textContent: t }))),
-        el('h2', { textContent: 'Przykładowe CV' }), el('p', { className: 'hint', textContent: 'Dane w przykładzie są fikcyjne. Szablon i kolor zmienisz w panelu obok.' }), full,
-        el('h2', { textContent: 'Pytania' }), ...p.faq.map((f) => el('details', {}, el('summary', { textContent: f.q }), el('p', { textContent: f.a }))),
-        el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Masz konkretne ogłoszenie?' }), el('p', { className: 'hint', textContent: 'Wklej link, a przygotujemy CV pisane pod nie. Od 39 zł, z darmową poprawką.' })), openBtn('Zamów CV')),
-        ...(C.POPULAR.some((x) => x.slug === p.slug) && C.CITIES?.length ? [el('h2', { textContent: `${p.name} w Twoim mieście` }), el('div', { className: 'more' }, ...C.CITIES.map((x) => pageLink(`cv/${p.slug}/${x.slug}`, { textContent: x.name })))] : []),
-        el('h2', { textContent: 'Podobne zawody' }), el('div', { className: 'more' }, ...C.INDEX.filter((x) => x.slug !== p.slug && x.category === p.category).slice(0, 10).map((x) => pageLink(`cv/${x.slug}`, { textContent: x.name })), el('a', { href: '#zawody', textContent: 'Wszystkie zawody' }))),
-      el('aside', { className: 'side-card' }, el('b', { textContent: `Przykład: ${p.sample.name}` }), side, picker, openBtn('Zamów CV pod swoje ogłoszenie'), el('p', { className: 'hint', textContent: 'Raport dopasowania, darmowa poprawka, PDF w e-mailu.' }))));
+        el('h2', { textContent: T('Słowa kluczowe z ogłoszeń') }), el('p', { className: 'hint', textContent: T('Te sformułowania często pojawiają się w ofertach. Jeśli to prawda o Tobie, użyj ich w CV w takim samym brzmieniu.') + (PT ? ' ' + PT.kwPl : '') }),
+        kwChips(p),
+        el('h2', { textContent: T('Wskazówki do CV') }), el('ol', { className: 'tips' }, ...p.tips.map((t) => el('li', { textContent: t }))),
+        el('h2', { textContent: T('Przykładowe CV') }), el('p', { className: 'hint', textContent: T('Dane w przykładzie są fikcyjne. Szablon i kolor zmienisz w panelu obok.') }), full,
+        el('h2', { textContent: T('Pytania') }), ...p.faq.map((f) => el('details', {}, el('summary', { textContent: f.q }), el('p', { textContent: f.a }))),
+        el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: T('Masz konkretne ogłoszenie?') }), el('p', { className: 'hint', textContent: T('Wklej link, a przygotujemy CV pisane pod nie. Od 39 zł, z darmową poprawką.') })), openBtn(T('Zamów CV'))),
+        ...(C.POPULAR.some((x) => x.slug === p.slug) && C.CITIES?.length ? [el('h2', { textContent: PT ? fillT(PT.inCity, p) : `${p.name} w Twoim mieście` }), el('div', { className: 'more' }, ...C.CITIES.map((x) => pageLink(`cv/${p.slug}/${x.slug}`, { textContent: x.name })))] : []),
+        el('h2', { textContent: T('Podobne zawody') }), el('div', { className: 'more' }, ...C.INDEX.filter((x) => x.slug !== p.slug && x.category === p.category).slice(0, 10).map((x) => pageLink(`cv/${x.slug}`, { textContent: x.name })), el('a', { href: '#zawody', textContent: T('Wszystkie zawody') }))),
+      el('aside', { className: 'side-card' }, el('b', { textContent: p.lang ? T(`Przykład: ${p.sample.name}`) : `Przykład: ${p.sample.name}` }), side, picker, openBtn(T('Zamów CV pod swoje ogłoszenie')), el('p', { className: 'hint', textContent: T('Raport dopasowania, darmowa poprawka, PDF w e-mailu.') }))));
 }
 // --- Darmowe narzędzia ---
 const CLAUSES = {
@@ -1428,22 +1552,23 @@ const copyBtn2 = (node) => el('button', { type: 'button', className: 'btn sm', t
 // Strona zawodu w konkretnym mieście: dane zawodu + lokalny rynek pracy.
 const cityMeta = (p, c) => ({ title: `${p.name} ${c.loc}: CV pod lokalne ogłoszenia`, metaDescription: `Jak napisać CV na stanowisko ${p.name.toLowerCase()} ${c.loc}: słowa kluczowe z ogłoszeń, wskazówki dla rynku pracy ${c.gen} i przykładowe CV. CV pod ogłoszenie od 39 zł.` });
 function cityPage(p, c, C) {
-  const d = { tpl: 'nowoczesny', color: 'niebieski' }, r = profResult(p), m = cityMeta(p, c);
-  return el('div', { className: 'inner' },
-    el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', pageLink(`cv/${p.slug}`, { textContent: p.name }), '›', el('span', { textContent: c.name })),
-    el('h1', { textContent: m.title }), el('p', { className: 'lead', textContent: `${c.intro}` }),
+  const d = { tpl: 'nowoczesny', color: 'niebieski' }, r = profResult(p), T = pT(p), PT = p.lang && C.prof?.tpl;
+  const F = (k, pl) => (PT ? fillT(PT[k], p, c) : pl);
+  return el('div', { className: 'inner', lang: p.lang || 'pl' },
+    el('nav', { className: 'crumbs', ariaLabel: T('Ścieżka') }, pageLink('', { textContent: T('Strona główna') }), '›', pageLink(`cv/${p.slug}`, { textContent: p.name }), '›', el('span', { textContent: c.name })),
+    el('h1', { textContent: F('title', cityMeta(p, c).title) }), el('p', { className: 'lead', textContent: `${c.intro}` }),
     el('div', { className: 'page-grid' },
       el('div', {},
-        el('h2', { textContent: `Szukasz pracy jako ${p.name.toLowerCase()} ${c.loc}?` }), el('p', { textContent: p.intro }),
-        el('h2', { textContent: `Wskazówki dla rynku pracy ${c.gen}` }), el('ol', { className: 'tips' }, ...c.tips.map((t) => el('li', { textContent: t }))),
-        c.near?.length ? el('p', { className: 'hint', textContent: `Szukając ofert, sprawdź też okolice: ${c.near.join(', ')}. Jeśli możesz dojeżdżać, napisz to w CV.` }) : null,
-        el('h2', { textContent: 'Słowa kluczowe z ogłoszeń' }), el('div', { className: 'kw' }, ...p.keywords.map((k) => el('span', { textContent: k }))),
-        el('h2', { textContent: 'Wskazówki do CV' }), el('ol', { className: 'tips' }, ...p.tips.map((t) => el('li', { textContent: t }))),
-        el('h2', { textContent: 'Przykładowe CV' }), el('p', { className: 'hint', textContent: 'Dane w przykładzie są fikcyjne.' }), cvNode(r, false, d, ''),
-        el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: `Masz ogłoszenie ${c.loc}?` }), el('p', { className: 'hint', textContent: 'Wklej link, a przygotujemy CV pisane pod nie. Od 39 zł, z darmową poprawką.' })), openBtn('Zamów CV')),
-        el('h2', { textContent: `${p.name} w innych miastach` }), el('div', { className: 'more' }, ...(C.CITIES || []).filter((x) => x.slug !== c.slug).map((x) => pageLink(`cv/${p.slug}/${x.slug}`, { textContent: x.name }))),
-        el('h2', { textContent: `Inne zawody ${c.loc}` }), el('div', { className: 'more' }, ...C.POPULAR.filter((x) => x.slug !== p.slug).map((x) => pageLink(`cv/${x.slug}/${c.slug}`, { textContent: x.name })))),
-      el('aside', { className: 'side-card' }, el('b', { textContent: `CV: ${p.name}, ${c.name}` }), el('div', { className: 'side-thumb' }, thumb(r, d, false, '')), openBtn('Zamów CV pod swoje ogłoszenie'), el('p', { className: 'hint', textContent: 'Raport dopasowania, darmowa poprawka, PDF w e-mailu.' }))));
+        el('h2', { textContent: F('seek', `Szukasz pracy jako ${p.name.toLowerCase()} ${c.loc}?`) }), el('p', { textContent: p.intro }),
+        el('h2', { textContent: F('market', `Wskazówki dla rynku pracy ${c.gen}`) }), el('ol', { className: 'tips' }, ...c.tips.map((t) => el('li', { textContent: t }))),
+        c.near?.length ? el('p', { className: 'hint', textContent: F('near', `Szukając ofert, sprawdź też okolice: ${c.near.join(', ')}. Jeśli możesz dojeżdżać, napisz to w CV.`) }) : null,
+        el('h2', { textContent: T('Słowa kluczowe z ogłoszeń') }), PT ? el('p', { className: 'hint', textContent: PT.kwPl }) : null, kwChips(p),
+        el('h2', { textContent: T('Wskazówki do CV') }), el('ol', { className: 'tips' }, ...p.tips.map((t) => el('li', { textContent: t }))),
+        el('h2', { textContent: T('Przykładowe CV') }), el('p', { className: 'hint', textContent: T('Dane w przykładzie są fikcyjne.') }), cvNode(r, false, d, ''),
+        el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: F('cta', `Masz ogłoszenie ${c.loc}?`) }), el('p', { className: 'hint', textContent: T('Wklej link, a przygotujemy CV pisane pod nie. Od 39 zł, z darmową poprawką.') })), openBtn(T('Zamów CV'))),
+        el('h2', { textContent: F('otherCities', `${p.name} w innych miastach`) }), el('div', { className: 'more' }, ...(C.CITIES || []).filter((x) => x.slug !== c.slug).map((x) => pageLink(`cv/${p.slug}/${x.slug}`, { textContent: x.name }))),
+        el('h2', { textContent: F('otherProf', `Inne zawody ${c.loc}`) }), el('div', { className: 'more' }, ...C.POPULAR.filter((x) => x.slug !== p.slug).map((x) => pageLink(`cv/${x.slug}/${c.slug}`, { textContent: x.name })))),
+      el('aside', { className: 'side-card' }, el('b', { textContent: F('side', `CV: ${p.name}, ${c.name}`) }), el('div', { className: 'side-thumb' }, thumb(r, d, false, '')), openBtn(T('Zamów CV pod swoje ogłoszenie')), el('p', { className: 'hint', textContent: T('Raport dopasowania, darmowa poprawka, PDF w e-mailu.') }))));
 }
 function articlePage(a, C) {
   // Przetłumaczony artykuł (EN / UA / DE): tłumaczymy też elementy wokół niego (reszta podstron zostaje po polsku).
@@ -1464,18 +1589,22 @@ function navTo(r) {
 }
 async function showPage(r, push = true) {
   if (r.startsWith('art/')) { const a = (await loadContent()).ARTICLES.find((x) => x.slugLang === r.slice(4)); r = a ? 'poradnik/' + a.slug : ''; }
+  if (r.startsWith('prof/')) {
+    const C0 = await loadContent(), [, ps, cs] = r.split('/'), pl = Object.keys(C0.prof?.index || {}).find((k) => C0.prof.index[k].slugLang === ps), city = cs && C0.CITIES.find((c) => c.slugLang === cs);
+    r = pl && (!cs || city) ? `cv/${pl}${city ? '/' + city.slug : ''}` : '';
+  }
   const C = await loadContent(), [kind, slug, sub] = r.split('/');
   let item = null, node = null;
   if (kind === 'cv') {
     const p = await loadProf(slug), city = sub && (C.CITIES || []).find((c) => c.slug === sub);
-    if (p && sub && city && C.POPULAR.some((x) => x.slug === p.slug)) { item = cityMeta(p, city); node = () => cityPage(p, city, C); }
+    if (p && sub && city && C.POPULAR.some((x) => x.slug === p.slug)) { item = p.lang && C.prof ? { title: fillT(C.prof.tpl.title, p, city), metaDescription: fillT(C.prof.tpl.desc, p, city) } : cityMeta(p, city); node = () => cityPage(p, city, C); }
     else if (p && !sub) { item = p; node = () => profPage(p, C); }
   } else if (kind === 'poradnik') { item = C.ARTICLES.find((a) => a.slug === slug); node = () => articlePage(item, C); }
   else if (kind === 'narzedzia' && C.TOOLS?.[slug]) { item = C.TOOLS[slug]; node = () => toolPage(slug, C); }
   else if (!slug && STATIC_PAGES.includes(kind)) { const t = $('#pg-' + kind); item = { title: t.dataset.title, metaDescription: t.dataset.desc }; node = () => t.content.cloneNode(true); }
   if (!item) return showHome(push);
   $('#landing').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#account').hidden = true;
-  $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl' || (kind === 'poradnik' && !!item.slugLang);
+  $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl' || (kind === 'poradnik' && !!item.slugLang) || (kind === 'cv' && !!C.prof);
   $('#page').replaceChildren(node());
   try { document.title = `${item.title} | CV Pod Ogłoszenie`; } catch {}
   setMeta(item.metaDescription);
@@ -1505,11 +1634,13 @@ document.addEventListener('submit', async (e) => {
   const f = e.target.closest('form[data-lead]'); if (!f) return;
   e.preventDefault();
   const kind = f.dataset.lead, st = $('.fstatus', f), btn = $('button[type=submit]', f), v = (n) => f.elements[n]?.value ?? '';
-  const body = { kind, name: v('name'), email: v('email'), phone: v('phone'), org: v('org'), orgType: v('orgType'), size: v('size'), topic: v('topic'), message: v('message'), website: v('website'), consent: !!f.elements.consent?.checked };
+  let body = { kind, name: v('name'), email: v('email'), topic: v('topic'), message: v('message'), website: v('website'), consent: !!f.elements.consent?.checked };
   if (kind === 'newsletter') Object.assign(body, { source: $('#page').hidden ? 'strona główna' : location.pathname.slice(1) || 'podstrona', lang: window.I18N?.lang });
+  // Zapytanie organizacji trafia tam, gdzie formularz „Dla firm” ze strony głównej (zakładka Firmy w panelu).
+  if (kind === 'firma') { const t = f.elements.orgType; body = { org: v('org'), name: v('name'), email: v('email'), phone: v('phone'), count: v('count'), msg: [t ? `[${t.options[t.selectedIndex].text}]` : '', v('message')].filter(Boolean).join(' '), consent: body.consent, uiLang: window.I18N?.lang }; }
   st.className = 'fstatus'; st.textContent = 'Wysyłanie…'; btn.disabled = true;
   try {
-    const r = await fetch(kind === 'newsletter' ? '/api/newsletter' : '/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const r = await fetch(kind === 'newsletter' ? '/api/newsletter' : kind === 'firma' ? '/api/b2b' : '/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || 'Nie udało się wysłać. Spróbuj ponownie.');
     st.className = 'fstatus good';
     st.textContent = kind === 'newsletter' ? 'Prawie gotowe: sprawdź skrzynkę i kliknij link potwierdzający zapis.' : kind === 'firma' ? 'Dziękujemy! Odpowiemy z propozycją, zwykle w ciągu jednego dnia roboczego.' : 'Dziękujemy! Odpowiemy na podany adres e-mail.';
@@ -1634,8 +1765,11 @@ function route() {
   if (hm) return showPage(hm[1], false);
   const anchor = h.length > 1 && document.getElementById(h.slice(1));
   if (pm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage(pm[1], false);
-  const dm = /^\/(de|en|uk)\/(\w+)\/([\w-]+)\/?$/.exec(location.pathname);
-  if (dm && ART_SEG[dm[1]] === dm[2] && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage('art/' + dm[3], false);
+  const dm = /^\/(de|en|uk)\/(\w+)\/([\w-]+)(?:\/([\w-]+))?\/?$/.exec(location.pathname);
+  if (dm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) {
+    if (ART_SEG[dm[1]] === dm[2] && !dm[4]) return showPage('art/' + dm[3], false);
+    if (PROF_SEG[dm[1]] === dm[2]) return showPage('prof/' + dm[3] + (dm[4] ? '/' + dm[4] : ''), false);
+  }
   $('#page').hidden = $('#pageNote').hidden = true;
   const id = LEGAL[h];
   $('#landing').hidden = !!id;
@@ -1653,4 +1787,20 @@ const q = new URLSearchParams(location.search);
 if (window.__ROUTE) showPage(window.__ROUTE, false);
 if (q.get('id')) startResult(q.get('id'));
 else if (q.has('canceled')) { try { history.replaceState(null, '', location.pathname); } catch {} openWiz(); go(6); $('#werr').textContent = 'Płatność została anulowana. Twoje dane są zachowane, możesz spróbować ponownie.'; }
+/* aplikacja na telefon (PWA) */
+if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('/sw.js').catch(() => {});
+{
+  let ask = null; const btn = $('#installApp');
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !navigator.standalone;
+  addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); ask = e; btn.hidden = false; });
+  addEventListener('appinstalled', () => { ask = null; btn.hidden = true; });
+  if (ios) btn.hidden = false;
+  btn.onclick = async (e) => {
+    e.preventDefault();
+    if (ask) { ask.prompt(); await ask.userChoice.catch(() => {}); ask = null; btn.hidden = true; }
+    else alert(window.I18N.t('Na iPhonie: stuknij „Udostępnij” w Safari, a potem „Do ekranu początkowego”.'));
+  };
+  const net = () => ($('#offline').hidden = navigator.onLine);
+  addEventListener('online', net); addEventListener('offline', net); net();
+}
 })();

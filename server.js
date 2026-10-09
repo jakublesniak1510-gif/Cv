@@ -2,12 +2,15 @@ import 'dotenv/config';
 import express from 'express';
 import crypto from 'node:crypto';
 import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, withLetter as hasLetter } from './lib/pricing.js';
-import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats } from './lib/store.js';
+import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads } from './lib/store.js';
 import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
 import { fetchAd, AdError } from './lib/fetchAd.js';
+import { adFromImage, AdImageError } from './lib/adImage.js';
+import { simTurn, SimError } from './lib/sim.js';
+import { samplePdf } from './lib/sample.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
-import { mailEnabled, sendOrderMail, sendReminder, sendReviewAsk } from './lib/mail.js';
+import { mailEnabled, sendOrderMail, sendReminder, sendReviewAsk, sendPayReminder } from './lib/mail.js';
 import { cleanDesign } from './lib/designs.js';
 import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes } from './lib/seo.js';
@@ -101,12 +104,14 @@ async function checkCode(raw, email) {
   if (!c || Date.now() > c.expires) return { error: 'Ten kod nie istnieje albo wygasł.' };
   const d = codeDiscount(c, email);
   if (d.error) return d;
-  return { code, discount: d.base + d.credit, base: d.base, credit: d.credit, owner: isOwner(c, email), percent: c.percent || 0 };
+  return { code, discount: d.base + d.credit, base: d.base, credit: d.credit, owner: isOwner(c, email), percent: c.percent || 0, voucher: c.voucher || null };
 }
 // Ile z salda poleceń faktycznie zeszło w tym zamówieniu (rabat jest przycinany do ceny pakietu).
 const creditUsedFor = (c, full, total) => (c.credit ? Math.max(0, Math.min(c.credit, full - total - c.base)) : 0);
 // Rabat w groszach: kwotowy albo procentowy (kody akcji promocyjnych z panelu).
-const discountFor = (c, pkg, n, ad, returning, langs) => (c.percent ? Math.round((calcTotal(pkg, n, ad, returning, langs, 0) * c.percent) / 100) : c.discount || 0);
+// Kod od instytucji (voucher) pokrywa cały pakiet; przy droższym pakiecie klient dopłaca różnicę.
+const discountFor = (c, pkg, n, ad, returning, langs) => c.voucher ? (PRICES[pkg] <= PRICES[c.voucher] ? 'voucher' : PRICES[c.voucher]) : (c.percent ? Math.round((calcTotal(pkg, n, ad, returning, langs, 0) * c.percent) / 100) : c.discount || 0);
+const discountGr = (disc, pkg) => (disc === 'voucher' ? PRICES[pkg] : disc); // do zapisu w zamówieniu (grosze)
 const newCode = (prefix) => `${prefix}-${crypto.randomBytes(4).toString('hex').toUpperCase().slice(0, 6)}`;
 const cleanAddons = (a = {}) => Object.fromEntries(Object.keys(ADDONS).map((k) => [k, !!a[k]]));
 // Edytowane przez klienta CV: ten sam kształt co z generatora, przycięte długości.
@@ -127,7 +132,7 @@ app.get('/api/config', (_req, res) => res.json({
 app.get('/api/code/:code', async (req, res) => {
   const r = await checkCode(req.params.code, req.query.email);
   if (r.error) return res.status(404).json({ error: r.error });
-  res.json({ code: r.code, discount: r.discount / 100, percent: r.percent || 0, label: r.owner ? 'Twój kod z saldem poleceń' : 'Kod rabatowy' });
+  res.json({ code: r.code, discount: r.discount / 100, percent: r.percent || 0, voucher: r.voucher, label: r.voucher ? 'Kod od instytucji' : r.owner ? 'Twój kod z saldem poleceń' : 'Kod rabatowy' });
 });
 
 // Asystent: krótkie odpowiedzi na pytania o CV (limit na IP).
@@ -137,6 +142,59 @@ app.post('/api/assistant', async (req, res) => {
   if (!history.length || history[history.length - 1].role !== 'user') return res.status(400).json({ error: 'Zadaj pytanie.' });
   try { res.json({ answer: await assistant(history) }); }
   catch (e) { console.error('Asystent', e.message); logEvent('asystent', e.message); res.status(502).json({ error: 'Asystent jest chwilowo niedostępny. Zajrzyj do FAQ albo poradnika.' }); }
+});
+
+// Zapytanie od firmy lub instytucji (paczka kodów dla podopiecznych, pracowników, absolwentów).
+app.post('/api/b2b', async (req, res) => {
+  if (!fetchLimit(req)) return res.status(429).json({ error: 'Zbyt wiele prób. Spróbuj za kilka minut.' });
+  const b = req.body || {}, s = (v, n) => String(v || '').trim().slice(0, n);
+  const lead = { id: crypto.randomUUID(), org: s(b.org, 150), name: s(b.name, 100), email: s(b.email, 150), phone: s(b.phone, 40), count: Math.max(0, Math.min(100000, parseInt(b.count, 10) || 0)), msg: s(b.msg, 2000), uiLang: s(b.uiLang, 2), created: Date.now() };
+  if (!lead.org || !lead.name || !/^\S+@\S+\.\S+$/.test(lead.email)) return res.status(400).json({ error: 'Podaj nazwę instytucji, imię i nazwisko oraz poprawny e-mail.' });
+  if (!b.consent) return res.status(400).json({ error: 'Zaznacz zgodę na kontakt w sprawie zapytania.' });
+  await leads.save(lead);
+  logEvent('firma', `Zapytanie: ${lead.org} (${lead.count || '?'} osób)`, { email: lead.email });
+  res.json({ ok: true });
+});
+
+// Przykładowe CV w PDF (fikcyjna osoba, znak wodny „PRZYKŁAD”) w wybranym szablonie i kolorze.
+app.get('/api/sample.pdf', async (req, res) => {
+  try {
+    const l = String(req.query.lang || 'pl'), pdf = await samplePdf(l, { tpl: String(req.query.tpl || ''), color: String(req.query.color || '') });
+    const name = { en: 'sample-cv', uk: 'zrazok-reziume', de: 'muster-lebenslauf' }[l] || 'przykladowe-cv';
+    res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="${name}.pdf"`, 'Cache-Control': 'public, max-age=86400' }).send(pdf);
+  } catch (e) { console.error('Przykładowy PDF', e.message); res.status(500).json({ error: 'Nie udało się przygotować przykładu.' }); }
+});
+
+// Symulator rozmowy (dodatek): jedna tura = pytanie rekrutera i ocena ostatniej odpowiedzi; limit tur na zamówienie.
+const SIM_LIMIT = 120;
+app.post('/api/orders/:id/sim', async (req, res) => {
+  const o = await getOrder(req.params.id);
+  if (!o || o.status !== 'done' || !o.addons?.sim) return res.status(404).json({ error: 'Symulator nie jest dostępny dla tego zamówienia.' });
+  const i = Number(req.body?.i) || 0, r = o.results?.[i];
+  if (!r) return res.status(400).json({ error: 'Nie znaleziono ogłoszenia.' });
+  if ((o.simTurns || 0) >= SIM_LIMIT) return res.status(429).json({ error: 'Wykorzystano limit rozmów w symulatorze dla tego zamówienia.' });
+  try {
+    const out = await simTurn({ result: r, ad: o.ads[i] || {}, uiLang: o.uiLang, history: req.body?.history, finish: !!req.body?.finish });
+    await updateOrder(o.id, (x) => ({ ...x, simTurns: (x.simTurns || 0) + 1 }));
+    res.json(out);
+  } catch (e) {
+    if (!(e instanceof SimError)) { console.error('Symulator', e.message); logEvent('symulator', e.message, { order: o.id }); }
+    res.status(e instanceof SimError ? 400 : 502).json({ error: e instanceof SimError ? e.message : 'Symulator jest chwilowo niedostępny. Spróbuj za chwilę.' });
+  }
+});
+
+// Ogłoszenie ze zdjęcia: bez AI w trybie DEMO wstawiamy przykład, na prawdziwej stronie odsyłamy do wklejenia treści.
+app.post('/api/ad-image', express.json({ limit: '8mb' }), async (req, res) => {
+  if (!fetchLimit(req)) return res.status(429).json({ error: 'Zbyt wiele prób. Spróbuj za kilka minut lub wklej treść ogłoszenia.' });
+  if (!aiEnabled()) {
+    if (DEMO) return res.json({ demo: true, title: 'Magazynier', company: 'Hurtownia Sigma', text: 'Poszukujemy magazyniera do pracy w hurtowni. Zakres: przyjmowanie i wydawanie towaru, inwentaryzacja, praca z dokumentacją magazynową. Wymagamy rzetelności i gotowości do pracy zmianowej. Mile widziane uprawnienia na wózki widłowe. Oferujemy umowę o pracę.' });
+    return res.status(503).json({ error: 'Odczyt zdjęć jest chwilowo niedostępny.' });
+  }
+  try { res.json(await adFromImage(req.body?.image)); }
+  catch (e) {
+    logEvent('ogłoszenie-zdjęcie', e.message);
+    res.status(422).json({ error: e instanceof AdImageError ? e.message : e instanceof AiRefusal ? 'Nie udało się odczytać tego zdjęcia.' : 'Nie udało się odczytać zdjęcia.' });
+  }
 });
 
 app.post('/api/fetch-ad', async (req, res) => {
@@ -151,6 +209,8 @@ app.post('/api/fetch-ad', async (req, res) => {
 
 // Płatność przez Przelewy24. sessionId = numer zamówienia + numer próby, więc wpłatę zawsze da się przypisać do zamówienia.
 async function checkout(order, lang) {
+  // Zamówienie za 0 zł (kod od instytucji): bez płatności, dokumenty powstają od razu.
+  if (order.total === 0) { await updateOrder(order.id, { payment: { provider: 'kod', code: order.code, at: Date.now() } }); markPaidAndGenerate(order.id).catch(console.error); return { id: order.id, free: true }; }
   if (DEMO) return { id: order.id, demo: true };
   const attempt = (order.payAttempts || 0) + 1, sessionId = `${order.id}.${attempt}`;
   const { token, url } = await p24Register({
@@ -186,7 +246,7 @@ app.post('/api/orders/:id/pay', async (req, res) => {
 
 app.post('/api/orders', async (req, res) => {
   try {
-    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, reviewAsk, uiLang, createAccount } = req.body || {};
+    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, reviewAsk, payReminder, uiLang, createAccount } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
     const a = cleanAds(ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
@@ -197,7 +257,7 @@ app.post('/api/orders', async (req, res) => {
     const c = await checkCode(code, p.email);
     if (c.error) return res.status(400).json({ error: c.error });
     const disc = discountFor(c, pkg, a.length, ad, false, langs), total = calcTotal(pkg, a.length, ad, false, langs, disc);
-    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, reviewAsk: { consent: !!reviewAsk, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -215,7 +275,7 @@ app.post('/api/orders/:id/followup', async (req, res) => {
     if (c.error) return res.status(400).json({ error: c.error });
     const pkg = ['cv', 'cv_letter', 'pack3'].includes(req.body?.pkg) ? req.body.pkg : parent.pkg;
     const disc = discountFor(c, pkg, a.length, ad, true, langs), total = calcTotal(pkg, a.length, ad, true, langs, disc);
-    const order = { id: crypto.randomUUID(), uiLang: parent.uiLang, parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: disc, creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, true, langs, 0), total), total, profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const order = { id: crypto.randomUUID(), uiLang: parent.uiLang, parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, true, langs, 0), total), total, profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -426,6 +486,7 @@ adminRoutes(app, { DEMO, BASE_URL, markPaidAndGenerate, trySend, retentionMs: RE
 
 // Dane zamówień (w tym zdjęcia) kasujemy po 30 dniach.
 // Co godzinę: kasowanie starych zamówień i kodów oraz jednorazowe przypomnienie po 7 dniach (tylko za zgodą klienta).
+const PAY_REMINDER_AFTER = 3 * 3600_000;
 async function hourly() {
   try {
     const n = await deleteOlderThan(RETENTION_MS);
@@ -438,6 +499,7 @@ async function hourly() {
     }
     await cleanupEvents(RETENTION_MS);
     await cleanupLeads().catch(() => {});
+    await leads.deleteWhere((l) => Date.now() - l.created > 365 * 864e5);
     await cleanupAnalytics().catch(() => {});
     await accountHourly(BASE_URL).catch((e) => console.error('Konta', e.message));
     if (!mailEnabled()) return;
@@ -450,6 +512,15 @@ async function hourly() {
       if (o.status !== 'done' || !o.reviewAsk?.consent || o.reviewAsk.sent || Date.now() - o.created < REVIEW_AFTER || (await reviews.get(o.id))) continue;
       try { await sendReviewAsk(o, BASE_URL); await updateOrder(o.id, (x) => ({ ...x, reviewAsk: { ...x.reviewAsk, sent: true, at: Date.now() } })); }
       catch (e) { console.error('Prośba o opinię', o.id, e.message); }
+    }
+    // Niedokończona płatność: jeden e-mail po ok. 3 h (za zgodą), o ile klient nie zapłacił w międzyczasie za inne zamówienie.
+    const all = Object.values(await allOrders());
+    for (const o of all) {
+      const age = Date.now() - o.created;
+      if (o.status !== 'pending' || !o.payReminder?.consent || o.payReminder.sent || age < PAY_REMINDER_AFTER || age > 48 * 3600_000) continue;
+      if (all.some((x) => x.status === 'done' && x.profile?.email === o.profile.email && x.created > o.created)) continue;
+      try { await sendPayReminder(o, BASE_URL); await updateOrder(o.id, (x) => ({ ...x, payReminder: { ...x.payReminder, sent: true, at: Date.now() } })); }
+      catch (e) { console.error('Przypomnienie o płatności', o.id, e.message); }
     }
   } catch (e) { console.error('Zadanie cogodzinne', e); }
 }

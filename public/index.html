@@ -5,6 +5,9 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%232548E8%22/%3E%3Crect x=%229%22 y=%228%22 width=%2214%22 height=%2216%22 rx=%222%22 fill=%22%23fff%22/%3E%3Crect x=%2212%22 y=%2213%22 width=%228%22 height=%222.4%22 fill=%22%23FFE45C%22/%3E%3Crect x=%2212%22 y=%2217.5%22 width=%226%22 height=%221.6%22 fill=%22%232548E8%22/%3E%3C/svg%3E">
 <meta property="og:title" content="CV Pod Ogłoszenie"><meta property="og:description" content="CV i list motywacyjny pisane pod konkretne ogłoszenie o pracę, ze słowami kluczowymi z oferty i raportem dopasowania. Darmowy skaner CV. CV od 39 zł, bez abonamentu.">
 <meta name="theme-color" content="#2548E8">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="CV Pod Ogł.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Caladea:wght@400;700&family=Instrument+Sans:wght@400;500;600&display=swap">
 <link rel="alternate" hreflang="pl" href="/"><link rel="alternate" hreflang="en" href="/en"><link rel="alternate" hreflang="uk" href="/uk"><link rel="alternate" hreflang="de" href="/de">
@@ -96,6 +99,7 @@
   <p class="sub2">Dwanaście oryginalnych układów i sześć kolorów. Wybierasz w kreatorze, a po zakupie możesz zmienić wygląd w każdej chwili, bez dopłaty. Kliknij miniaturę, aby zobaczyć pełne CV.</p>
   <div class="dp-colors" id="galColors" role="group" aria-label="Kolor szablonów"></div>
   <div class="gal-grid" id="galGrid"></div>
+  <p class="gal-sample" id="galSample"></p>
   <p class="gal-hint">Przesuń w bok, aby zobaczyć wszystkie 12 szablonów →</p>
 </div></section>
 
@@ -117,7 +121,7 @@
     <div class="price-card feat"><span class="badge">Najczęściej wybierany</span><h3>CV + list motywacyjny</h3><div class="amt">49 zł</div><ul><li>CV i list pod to samo ogłoszenie</li><li>List na jedną stronę A4, bez ogólników</li><li>PDF na stronie i w e-mailu</li></ul><button class="btn" data-open data-pkg="cv_letter">Wybierz komplet</button></div>
     <div class="price-card"><span class="badge alt">Najlepsza cena</span><h3>Pakiet 3 CV + listy</h3><div class="amt">79 zł</div><ul><li>3 CV pod ten sam zawód, każde pod inne ogłoszenie</li><li>List motywacyjny do każdego CV</li><li>Dane wpisujesz tylko raz</li></ul><button class="btn ghost" data-open data-pkg="pack3">Wybierz pakiet</button></div>
   </div>
-  <div class="addons-row"><b>Dodatki:</b><span>Przygotowanie do rozmowy <b>+50 zł</b></span><span>Wiadomość do rekrutera i e-mail z aplikacją <b>+9 zł</b></span><span>Profil LinkedIn <b>+19 zł</b></span><span>Wersja Word (.docx) <b>+9 zł</b></span><span>Język ogłoszenia <b>w cenie</b></span><span>Tłumaczenie na inny język <b>+5 zł</b></span></div>
+  <div class="addons-row"><b>Dodatki:</b><span>Przygotowanie do rozmowy <b>+50 zł</b></span><span>Wiadomość do rekrutera i e-mail z aplikacją <b>+9 zł</b></span><span>Profil LinkedIn <b>+19 zł</b></span><span>Symulator rozmowy <b>+29 zł</b></span><span>Wersja Word (.docx) <b>+9 zł</b></span><span>Język ogłoszenia <b>w cenie</b></span><span>Tłumaczenie na inny język <b>+5 zł</b></span></div>
   <p class="sub2 small">W każdym pakiecie: raport dopasowania, darmowa poprawka, edycja tekstu, 12 szablonów i PDF w e-mailu.</p>
   <div class="paychips" aria-label="Metody płatności"><span>Bezpieczna płatność Przelewy24</span><span>BLIK</span><span>Karta</span><span>Szybki przelew</span><span>Google Pay</span><span>Apple Pay</span><span>Bez abonamentu</span></div>
   <div class="perk"><b>Polecaj i zbieraj 10 zł za każdego znajomego.</b> Po zakupie dostajesz swój kod: znajomi płacą z nim 10 zł mniej, a Ty za każdego, kto zapłaci, dostajesz 10 zł na kolejne zamówienia (do 50 zł). <a href="/program-polecen" data-page="program-polecen">Jak działa program poleceń</a></div>
@@ -181,19 +185,24 @@
   </div>
 </div></section>
 
-<section class="sec alt b2b-teaser" id="dla-firm"><div class="inner b2b-grid">
+<section class="sec alt" id="firmy"><div class="inner b2b-grid">
   <div>
-    <p class="eyebrow">Dla firm i uczelni</p>
-    <h2>Pomagasz ludziom znaleźć pracę? Współpracujmy.</h2>
-    <p class="sub2">Biura karier, szkoły, urzędy pracy, fundacje i działy HR przy outplacemencie: dajcie swoim podopiecznym CV pisane pod konkretne ogłoszenie, po polsku, angielsku albo ukraińsku.</p>
-    <ul class="ticks col"><li>Bezpłatny kod zniżkowy dla Waszych studentów lub uczestników</li><li>Pakiety dokumentów opłacone przez organizację, na fakturę</li><li>Darmowy skaner CV i poradnik do wykorzystania na zajęciach</li></ul>
-    <div class="cta"><a class="btn" href="/dla-firm" data-page="dla-firm">Zobacz ofertę</a><a class="btn ghost" href="/dla-firm#zapytanie" data-page="dla-firm">Zapytaj o współpracę</a></div>
+    <h2>Dla firm i instytucji</h2>
+    <p class="sub2">Urzędy pracy, agencje pracy, szkoły, fundacje i działy HR mogą kupić CV dla swoich podopiecznych, absolwentów lub zwalnianych pracowników. Każda osoba dostaje kod i sama zamawia CV pod swoje ogłoszenie – bez płatności.</p>
+    <ul class="checks"><li>Paczka kodów na wybrany pakiet: CV, CV z listem albo Pakiet 3.</li><li>Każda osoba zamawia sama, kiedy znajdzie ogłoszenie. Wy płacicie tylko za uzgodnioną liczbę osób.</li><li>Rabat od liczby osób. Cenę i formę rozliczenia ustalamy indywidualnie.</li></ul>
+    <p><a class="btn ghost" href="/dla-firm" data-page="dla-firm">Cała oferta: partnerstwo z kodem zniżkowym, warsztaty, pakiety</a></p>
   </div>
-  <div class="b2b-cards">
-    <div class="b2b-card"><b>Uczelnie i szkoły</b><span>Kod dla studentów i absolwentów, link na stronie biura karier.</span></div>
-    <div class="b2b-card"><b>Urzędy pracy i fundacje</b><span>CV dla uczestników projektów, także w języku ukraińskim.</span></div>
-    <div class="b2b-card"><b>Firmy i HR</b><span>Outplacement i benefit dla pracowników: pakiety na fakturę.</span></div>
-  </div>
+  <form class="b2b-form" id="b2bForm">
+    <label class="f">Nazwa instytucji lub firmy<input type="text" id="bOrg" required maxlength="150"></label>
+    <label class="f">Imię i nazwisko<input type="text" id="bName" required maxlength="100" autocomplete="name"></label>
+    <label class="f">E-mail<input type="email" id="bEmail" required maxlength="150" autocomplete="email"></label>
+    <label class="f">Telefon (opcjonalnie)<input type="tel" id="bPhone" maxlength="40" autocomplete="tel"></label>
+    <label class="f">Ile osób (w przybliżeniu)<input type="number" id="bCount" min="1" max="100000" inputmode="numeric"></label>
+    <label class="f">Wiadomość (opcjonalnie)<textarea id="bMsg" maxlength="2000" rows="3"></textarea></label>
+    <label class="check"><input type="checkbox" id="bConsent" required> <span>Zgadzam się na kontakt w sprawie tego zapytania. Dane usuwamy po 12 miesiącach.</span></label>
+    <button class="btn" type="submit">Wyślij zapytanie</button>
+    <p class="fstatus" id="bMsgOut" role="status"></p>
+  </form>
 </div></section>
 
 <section class="sec" id="faq"><div class="inner narrow">
@@ -212,6 +221,7 @@
   <details><summary>Czy to abonament?</summary><p>Nie. Płacisz jednorazowo za konkretne zamówienie, bez okresu próbnego i bez automatycznych opłat. Nie musisz niczego anulować.</p></details>
   <details><summary>Czy CV przejdzie przez systemy ATS?</summary><p>CV zawiera słowa kluczowe z ogłoszenia (tylko te, które są prawdą o Tobie) i standardowe nazwy sekcji. Jeśli firma korzysta z ATS, wybierz szablon „Klasyczny ATS”: jest najprostszy do odczytania przez programy.</p></details>
   <details><summary>Co dokładnie zawiera przygotowanie do rozmowy?</summary><p>12 pytań, które mogą paść przy tym ogłoszeniu, z przykładowymi odpowiedziami opartymi na Twoim doświadczeniu i informacją, co rekruter sprawdza. Do tego gotowa odpowiedź na „Proszę opowiedzieć o sobie”, Twoje mocne strony i braki wobec wymagań, 5 pytań do pracodawcy, wskazówki do rozmowy o wynagrodzeniu i lista kontrolna. Dostajesz to na stronie i jako PDF.</p></details>
+  <details><summary>Jak działa symulator rozmowy kwalifikacyjnej?</summary><p>To próbna rozmowa z AI, które gra rekrutera firmy z Twojego ogłoszenia. Zadaje do 8 pytań, po jednym, w języku ogłoszenia: o Tobie, o doświadczeniu z CV, o wymaganiach i sytuacyjne. Po każdej odpowiedzi dostajesz ocenę od 1 do 5, co było dobre, co poprawić i przykład lepszej odpowiedzi. Na koniec widzisz podsumowanie. Rozmowę możesz powtarzać. Dodatek kosztuje 29 zł.</p></details>
   <details><summary>W jakim formacie dostanę dokumenty?</summary><p>Zobaczysz je na stronie i zapiszesz jako PDF jednym kliknięciem. Gotowe PDF-y wysyłamy też automatycznie na e-mail podany w zamówieniu.</p></details>
 </div></section>
 
@@ -263,7 +273,7 @@
 <h2>Dwa modele współpracy</h2>
 <div class="prices">
   <div class="price-card"><h3>Partner</h3><div class="amt">0 zł</div><ul><li>Własny kod zniżkowy dla Waszych podopiecznych</li><li>Gotowy opis i link do strony, newslettera lub na zajęcia</li><li>Każdy płaci sam, mniej niż w cenniku</li><li>Zestawienie, ile osób skorzystało z kodu</li></ul><a class="btn ghost" href="#zapytanie">Zostań partnerem</a></div>
-  <div class="price-card feat"><span class="badge">Na fakturę</span><h3>Pakiet dla organizacji</h3><div class="amt">wycena</div><ul><li>Organizacja opłaca określoną liczbę dokumentów</li><li>Uczestnicy dostają kody, z których korzystają sami</li><li>Rabat ilościowy zależny od liczby osób</li><li>Faktura VAT, rozliczenie po wykorzystaniu lub z góry</li></ul><a class="btn" href="#zapytanie">Poproś o wycenę</a></div>
+  <div class="price-card feat"><span class="badge">Na fakturę</span><h3>Pakiet dla organizacji</h3><div class="amt">wycena</div><ul><li>Paczka kodów na wybrany pakiet: CV, CV z listem albo Pakiet 3</li><li>Każda osoba zamawia sama, kiedy znajdzie ogłoszenie, bez płatności</li><li>Płacicie tylko za uzgodnioną liczbę osób, rabat od liczby osób</li><li>Cenę i formę rozliczenia ustalamy indywidualnie</li></ul><a class="btn" href="#zapytanie">Poproś o wycenę</a></div>
 </div>
 <h2>Co dostaje każdy uczestnik</h2>
 <ol class="tips">
@@ -279,19 +289,19 @@
 <form class="scan-card lead-form b2b-form" data-lead="firma" novalidate>
   <div class="grid2"><label class="f">Nazwa organizacji<input type="text" name="org" maxlength="160" required autocomplete="organization"></label>
   <label class="f">Rodzaj<select name="orgType"><option value="uczelnia">Uczelnia / biuro karier</option><option value="szkola">Szkoła</option><option value="urzad">Urząd pracy / instytucja publiczna</option><option value="ngo">Fundacja / stowarzyszenie</option><option value="firma">Firma (outplacement, HR, benefity)</option><option value="agencja">Agencja rekrutacyjna / pracy</option><option value="inne">Inne</option></select></label></div>
-  <div class="grid2"><label class="f">Imię i nazwisko<input type="text" name="name" maxlength="100" autocomplete="name"></label>
+  <div class="grid2"><label class="f">Imię i nazwisko<input type="text" name="name" maxlength="100" required autocomplete="name"></label>
   <label class="f">Służbowy e-mail<input type="email" name="email" maxlength="160" required autocomplete="email"></label></div>
   <div class="grid2"><label class="f">Telefon <span class="h">opcjonalnie</span><input type="tel" name="phone" maxlength="40" autocomplete="tel"></label>
-  <label class="f">Ile osób mniej więcej?<select name="size"><option>do 20</option><option>20–100</option><option>100–500</option><option>ponad 500</option><option>nie wiem jeszcze</option></select></label></div>
+  <label class="f">Ile osób (w przybliżeniu) <span class="h">opcjonalnie</span><input type="number" name="count" min="1" max="100000" inputmode="numeric"></label></div>
   <label class="f">Czego potrzebujecie? <span class="h">opcjonalnie</span><textarea name="message" rows="4" maxlength="4000" placeholder="np. kod dla absolwentów kierunku…, projekt dla 60 uczestników od marca"></textarea></label>
   <label class="hp" aria-hidden="true">Strona www<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
-  <label class="check"><input type="checkbox" name="consent" required><span>Zgadzam się na przetwarzanie podanych danych w celu odpowiedzi na zapytanie i przedstawienia oferty. Szczegóły w <a href="/#prywatnosc">polityce prywatności</a>.</span></label>
+  <label class="check"><input type="checkbox" name="consent" required><span>Zgadzam się na kontakt w sprawie tego zapytania. Dane usuwamy po 12 miesiącach. Szczegóły w <a href="/#prywatnosc">polityce prywatności</a>.</span></label>
   <button class="btn" type="submit">Wyślij zapytanie</button>
   <p class="fstatus" role="status"></p>
 </form>
 <h2>Pytania</h2>
 <details><summary>Czy partnerstwo coś kosztuje?</summary><p>Nie. Dostajecie kod zniżkowy dla swoich podopiecznych, a każdy uczestnik płaci za swoje zamówienie sam, taniej niż w cenniku.</p></details>
-<details><summary>Czy uczestnicy muszą zakładać konto?</summary><p>Nie. Wpisują kod w podsumowaniu zamówienia. Dokumenty dostają na stronie i e-mailem.</p></details>
+<details><summary>Czy uczestnicy muszą zakładać konto?</summary><p>Nie. Wpisują kod w podsumowaniu zamówienia. Przy kodzie z pakietu opłaconego przez organizację zamawiają bez płatności. Dokumenty dostają na stronie i e-mailem.</p></details>
 <details><summary>Co z danymi osobowymi uczestników?</summary><p>Każdy uczestnik sam podaje swoje dane i jest naszym klientem; organizacja nie przekazuje nam żadnych danych. Dane zamówień usuwamy automatycznie po 30 dniach.</p></details>
 <details><summary>Czy dokumenty mogą być po ukraińsku lub angielsku?</summary><p>Tak. Dokumenty powstają w języku ogłoszenia: polskim, angielskim, niemieckim, ukraińskim, hiszpańskim lub francuskim. Strona działa po polsku, angielsku i ukraińsku.</p></details>
 </div></template>
@@ -339,7 +349,7 @@
 <li><b>Jeżeli Serwis nie przetworzy ogłoszenia z linku albo pobierze je niekompletnie, Klient musi wkleić treść ogłoszenia samodzielnie.</b> Bez treści ogłoszenia zamówienia nie można opłacić.</li>
 <li>Klient odpowiada za to, że treść ogłoszenia, którą wkleił lub zatwierdził, jest właściwa i że ma prawo jej użyć w tym celu.</li></ol>
 <h2>§4 Ceny i płatności</h2>
-<ol><li>Ceny są podane w złotych i zawierają podatek VAT, o ile Usługodawca jest jego płatnikiem: CV pod jedno ogłoszenie – 39 zł, CV z listem motywacyjnym pod jedno ogłoszenie – 49 zł, Pakiet 3 (trzy CV pod ten sam zawód, każde pod inne ogłoszenie, z listem motywacyjnym do każdego) – 79 zł. Dodatki: przygotowanie do rozmowy – 50 zł, wiadomość do rekrutera i e-mail z aplikacją – 9 zł, profil LinkedIn – 19 zł, CV i list w formacie Word – 9 zł; dodatek obejmuje wszystkie ogłoszenia w zamówieniu. Dokumenty w języku ogłoszenia lub w języku wybranym przy ogłoszeniu (polski, angielski, niemiecki, ukraiński, hiszpański lub francuski) nie wymagają dopłaty; tłumaczenie tych samych dokumentów na każdy kolejny język kosztuje 5 zł, przy czym nie pobiera się opłaty za tłumaczenie na język, w którym powstają wszystkie dokumenty zamówienia.</li>
+<ol><li>Ceny są podane w złotych i zawierają podatek VAT, o ile Usługodawca jest jego płatnikiem: CV pod jedno ogłoszenie – 39 zł, CV z listem motywacyjnym pod jedno ogłoszenie – 49 zł, Pakiet 3 (trzy CV pod ten sam zawód, każde pod inne ogłoszenie, z listem motywacyjnym do każdego) – 79 zł. Dodatki: przygotowanie do rozmowy – 50 zł, wiadomość do rekrutera i e-mail z aplikacją – 9 zł, profil LinkedIn – 19 zł, symulator rozmowy kwalifikacyjnej – 29 zł, CV i list w formacie Word – 9 zł; dodatek obejmuje wszystkie ogłoszenia w zamówieniu. Dokumenty w języku ogłoszenia lub w języku wybranym przy ogłoszeniu (polski, angielski, niemiecki, ukraiński, hiszpański lub francuski) nie wymagają dopłaty; tłumaczenie tych samych dokumentów na każdy kolejny język kosztuje 5 zł, przy czym nie pobiera się opłaty za tłumaczenie na język, w którym powstają wszystkie dokumenty zamówienia.</li>
 <li>Kody rabatowe obniżają cenę zgodnie z §5b. Rabat nie podlega wymianie na gotówkę.</li>
 <li>Płatności obsługuje PayPro SA, operator serwisu Przelewy24 (m.in. BLIK, karta, szybki przelew, Google Pay, Apple Pay). Płatność następuje z góry, przed wykonaniem usługi.</li></ol>
 <h2>§5 Realizacja</h2>
@@ -393,7 +403,7 @@
 <li><b>Verarbeitet der Dienst die Stellenanzeige aus dem Link nicht oder ruft er sie nur unvollständig ab, muss der Kunde den Inhalt der Anzeige selbst einfügen.</b> Ohne den Inhalt der Anzeige kann die Bestellung nicht bezahlt werden.</li>
 <li>Der Kunde ist dafür verantwortlich, dass der von ihm eingefügte oder bestätigte Inhalt der Anzeige zutreffend ist und dass er berechtigt ist, ihn zu diesem Zweck zu verwenden.</li></ol>
 <h2>§4 Preise und Zahlungen</h2>
-<ol><li>Die Preise sind in polnischen Złoty (PLN) angegeben und enthalten die Mehrwertsteuer (VAT), sofern der Dienstleister umsatzsteuerpflichtig ist: Lebenslauf für eine Stellenanzeige – 39 PLN, Lebenslauf mit Anschreiben für eine Stellenanzeige – 49 PLN, Paket 3 (drei Lebensläufe für denselben Beruf, jeweils für eine andere Stellenanzeige, mit einem Anschreiben zu jedem) – 79 PLN. Zusatzleistungen: Vorbereitung auf das Vorstellungsgespräch – 50 PLN, Nachricht an den Recruiter und Bewerbungs-E-Mail – 9 PLN, LinkedIn-Profil – 19 PLN, Lebenslauf und Anschreiben im Word-Format – 9 PLN; eine Zusatzleistung umfasst alle Stellenanzeigen der Bestellung. Unterlagen in der Sprache der Stellenanzeige oder in der bei der Anzeige gewählten Sprache (Polnisch, Englisch, Deutsch, Ukrainisch, Spanisch oder Französisch) sind ohne Aufpreis erhältlich; die Übersetzung derselben Unterlagen in jede weitere Sprache kostet 5 PLN, wobei für die Übersetzung in die Sprache, in der sämtliche Unterlagen der Bestellung erstellt werden, keine Gebühr erhoben wird.</li>
+<ol><li>Die Preise sind in polnischen Złoty (PLN) angegeben und enthalten die Mehrwertsteuer (VAT), sofern der Dienstleister umsatzsteuerpflichtig ist: Lebenslauf für eine Stellenanzeige – 39 PLN, Lebenslauf mit Anschreiben für eine Stellenanzeige – 49 PLN, Paket 3 (drei Lebensläufe für denselben Beruf, jeweils für eine andere Stellenanzeige, mit einem Anschreiben zu jedem) – 79 PLN. Zusatzleistungen: Vorbereitung auf das Vorstellungsgespräch – 50 PLN, Nachricht an den Recruiter und Bewerbungs-E-Mail – 9 PLN, LinkedIn-Profil – 19 PLN, Simulator für Vorstellungsgespräche – 29 PLN, Lebenslauf und Anschreiben im Word-Format – 9 PLN; eine Zusatzleistung umfasst alle Stellenanzeigen der Bestellung. Unterlagen in der Sprache der Stellenanzeige oder in der bei der Anzeige gewählten Sprache (Polnisch, Englisch, Deutsch, Ukrainisch, Spanisch oder Französisch) sind ohne Aufpreis erhältlich; die Übersetzung derselben Unterlagen in jede weitere Sprache kostet 5 PLN, wobei für die Übersetzung in die Sprache, in der sämtliche Unterlagen der Bestellung erstellt werden, keine Gebühr erhoben wird.</li>
 <li>Rabattcodes mindern den Preis gemäß §5b. Ein Rabatt kann nicht in Bargeld umgetauscht werden.</li>
 <li>Zahlungen werden von PayPro SA, dem Betreiber des Dienstes Przelewy24, abgewickelt (u. a. BLIK, Karte, Sofortüberweisung, Google Pay, Apple Pay). Die Zahlung erfolgt im Voraus, vor Erbringung der Dienstleistung.</li></ol>
 <h2>§5 Ausführung</h2>
@@ -447,7 +457,7 @@
 <li><b>If the Service fails to process the job advertisement from the link or retrieves it incompletely, the Client must paste the content of the advertisement themselves.</b> An order cannot be paid for without the content of the advertisement.</li>
 <li>The Client is responsible for ensuring that the content of the advertisement they have pasted or approved is correct and that they have the right to use it for this purpose.</li></ol>
 <h2>§4 Prices and payments</h2>
-<ol><li>Prices are stated in Polish zloty (PLN) and include VAT, insofar as the Service Provider is liable for it: CV for one job advertisement – PLN 39, CV with a cover letter for one job advertisement – PLN 49, Package 3 (three CVs for the same occupation, each for a different job advertisement, with a cover letter for each) – PLN 79. Add-ons: interview preparation – PLN 50, message to the recruiter and application e-mail – PLN 9, LinkedIn profile – PLN 19, CV and cover letter in Word format – PLN 9; an add-on covers all job advertisements in the order. Documents in the language of the advertisement or in the language selected for the advertisement (Polish, English, German, Ukrainian, Spanish or French) incur no additional charge; translation of the same documents into each further language costs PLN 5, provided that no fee is charged for translation into the language in which all documents of the order are produced.</li>
+<ol><li>Prices are stated in Polish zloty (PLN) and include VAT, insofar as the Service Provider is liable for it: CV for one job advertisement – PLN 39, CV with a cover letter for one job advertisement – PLN 49, Package 3 (three CVs for the same occupation, each for a different job advertisement, with a cover letter for each) – PLN 79. Add-ons: interview preparation – PLN 50, message to the recruiter and application e-mail – PLN 9, LinkedIn profile – PLN 19, job interview simulator – PLN 29, CV and cover letter in Word format – PLN 9; an add-on covers all job advertisements in the order. Documents in the language of the advertisement or in the language selected for the advertisement (Polish, English, German, Ukrainian, Spanish or French) incur no additional charge; translation of the same documents into each further language costs PLN 5, provided that no fee is charged for translation into the language in which all documents of the order are produced.</li>
 <li>Discount codes reduce the price in accordance with §5b. The discount cannot be exchanged for cash.</li>
 <li>Payments are handled by PayPro SA, the operator of the Przelewy24 service (including BLIK, card, fast bank transfer, Google Pay, Apple Pay). Payment is made in advance, before the service is performed.</li></ol>
 <h2>§5 Performance</h2>
@@ -501,7 +511,7 @@
 <li><b>Якщо Сервіс не обробить оголошення за посиланням або завантажить його не повністю, Клієнт повинен самостійно вставити текст оголошення.</b> Без тексту оголошення замовлення неможливо оплатити.</li>
 <li>Клієнт відповідає за те, що вставлений або затверджений ним текст оголошення є належним і що він має право використовувати його з цією метою.</li></ol>
 <h2>§4 Ціни та оплата</h2>
-<ol><li>Ціни вказано в злотих, і вони включають податок на додану вартість (VAT), якщо Постачальник послуг є його платником: резюме під одне оголошення — 39 zł, резюме із супровідним листом під одне оголошення — 49 zł, Пакет 3 (три резюме для тієї самої професії, кожне під інше оголошення, із супровідним листом до кожного) — 79 zł. Додаткові послуги: підготовка до співбесіди — 50 zł, повідомлення рекрутеру та електронний лист із заявкою — 9 zł, профіль LinkedIn — 19 zł, резюме та лист у форматі Word — 9 zł; додаткова послуга охоплює всі оголошення в замовленні. Документи мовою оголошення або мовою, обраною для оголошення (польська, англійська, німецька, українська, іспанська чи французька), не потребують доплати; переклад тих самих документів кожною наступною мовою коштує 5 zł, при цьому плата не стягується за переклад мовою, якою створюються всі документи замовлення.</li>
+<ol><li>Ціни вказано в злотих, і вони включають податок на додану вартість (VAT), якщо Постачальник послуг є його платником: резюме під одне оголошення — 39 zł, резюме із супровідним листом під одне оголошення — 49 zł, Пакет 3 (три резюме для тієї самої професії, кожне під інше оголошення, із супровідним листом до кожного) — 79 zł. Додаткові послуги: підготовка до співбесіди — 50 zł, повідомлення рекрутеру та електронний лист із заявкою — 9 zł, профіль LinkedIn — 19 zł, симулятор співбесіди — 29 zł, резюме та лист у форматі Word — 9 zł; додаткова послуга охоплює всі оголошення в замовленні. Документи мовою оголошення або мовою, обраною для оголошення (польська, англійська, німецька, українська, іспанська чи французька), не потребують доплати; переклад тих самих документів кожною наступною мовою коштує 5 zł, при цьому плата не стягується за переклад мовою, якою створюються всі документи замовлення.</li>
 <li>Коди знижки зменшують ціну відповідно до §5b. Знижка не підлягає обміну на готівку.</li>
 <li>Платежі обробляє PayPro SA, оператор сервісу Przelewy24 (зокрема BLIK, картка, швидкий переказ, Google Pay, Apple Pay). Оплата здійснюється наперед, до виконання послуги.</li></ol>
 <h2>§5 Виконання</h2>
@@ -555,20 +565,20 @@
 <ul><li>Wykonanie zamówienia i obsługa płatności – art. 6 ust. 1 lit. b RODO (umowa).</li>
 <li>Rozliczenia i księgowość – art. 6 ust. 1 lit. c RODO (obowiązek prawny).</li>
 <li>Bezpieczeństwo, obrona przed nadużyciami i dochodzenie roszczeń – art. 6 ust. 1 lit. f RODO (uzasadniony interes).</li>
-<li>Jednorazowa prośba o ocenę dokumentów (e-mail po 4 dniach) – art. 6 ust. 1 lit. a RODO (Twoja zgoda zaznaczona w zamówieniu).</li>
+<li>Jednorazowa prośba o ocenę dokumentów (e-mail po 4 dniach) – art. 6 ust. 1 lit. a RODO (Twoja zgoda zaznaczona w zamówieniu).</li><li>Jednorazowe przypomnienie o niedokończonej płatności (e-mail po ok. 3 godzinach, tylko gdy zamówienie nie zostało opłacone) – art. 6 ust. 1 lit. a RODO (Twoja zgoda zaznaczona w zamówieniu).</li><li>Odpowiedź na zapytanie firmy lub instytucji z formularza „Dla firm i instytucji” – art. 6 ust. 1 lit. b i f RODO; dane usuwamy po 12 miesiącach.</li>
 <li>Jednorazowe przypomnienie e-mail po 7 dniach – art. 6 ust. 1 lit. a RODO (Twoja zgoda, którą możesz wycofać, pisząc na [E-MAIL]).</li>
 <li>Kod rabatowy i program poleceń – art. 6 ust. 1 lit. b RODO.</li>
-<li>Odpowiedź na wiadomość z formularza kontaktowego lub zapytanie organizacji o współpracę – art. 6 ust. 1 lit. a RODO (Twoja zgoda zaznaczona w formularzu) oraz art. 6 ust. 1 lit. f RODO (prowadzenie korespondencji, a w przypadku organizacji – przedstawienie oferty, o którą prosisz).</li>
+<li>Odpowiedź na wiadomość z formularza kontaktowego – art. 6 ust. 1 lit. a RODO (Twoja zgoda zaznaczona w formularzu) oraz art. 6 ust. 1 lit. f RODO (prowadzenie korespondencji).</li>
 <li>Newsletter – art. 6 ust. 1 lit. a RODO (Twoja zgoda potwierdzona kliknięciem w link z e-maila). Zgodę możesz wycofać w każdej chwili linkiem w każdej wiadomości; wycofanie nie wpływa na zgodność z prawem wysyłek sprzed wycofania.</li>
 <li>Konto klienta, lista aplikacji i przypomnienie dzień przed rozmową (tylko gdy je włączysz) – art. 6 ust. 1 lit. b RODO (umowa o świadczenie usługi konta).</li>
 <li>Publikacja opinii na stronie – art. 6 ust. 1 lit. a RODO (Twoja zgoda zaznaczona przy opinii, którą możesz wycofać, pisząc na [E-MAIL]); sama ocena bez publikacji treści – art. 6 ust. 1 lit. f RODO (ocena jakości usługi).</li></ul>
 <h2>4. Odbiorcy danych</h2>
 <ul><li>PayPro SA (Przelewy24) – obsługa płatności.</li>
-<li>Dostawca narzędzi AI (Anthropic) – otrzymuje Twoje dane i treść ogłoszenia wyłącznie po to, aby przygotować dokumenty. Dane mogą być przetwarzane poza Europejskim Obszarem Gospodarczym (USA) na podstawie standardowych klauzul umownych lub innego mechanizmu zgodnego z RODO.</li>
+<li>Dostawca narzędzi AI (Anthropic) – otrzymuje Twoje dane i treść ogłoszenia (także odczytaną ze zdjęcia ogłoszenia, jeśli je wgrasz) wyłącznie po to, aby przygotować dokumenty. Dane mogą być przetwarzane poza Europejskim Obszarem Gospodarczym (USA) na podstawie standardowych klauzul umownych lub innego mechanizmu zgodnego z RODO.</li>
 <li>Dostawca poczty e-mail ([DOSTAWCA SMTP]) – wysyła Ci gotowe dokumenty na podany adres.</li>
 <li>Dostawca hostingu: [HOSTING]. Biuro rachunkowe: [BIURO].</li></ul>
 <h2>5. Jak długo przechowujemy dane</h2>
-<p>Dane zamówienia, w tym dokumenty i zdjęcie: 30 dni od złożenia zamówienia, potem są automatycznie usuwane. Szkic formularza zapisuje się tylko w Twojej przeglądarce i znika po złożeniu zamówienia. Kody rabatowe: 90 dni (kod klienta: 90 dni od ostatniego polecenia), potem są automatycznie usuwane. Przy kodzie nie zapisujemy adresów e-mail, tylko ich nieodwracalny skrót, żeby każda osoba mogła użyć kodu raz, a właściciel kodu dostał saldo za polecenia. Wiadomości z formularza kontaktowego i zapytania organizacji: 180 dni, potem są automatycznie usuwane. Newsletter: adres i data zgody do czasu wypisania (adres usuwamy z listy od razu po wypisaniu); niepotwierdzone zapisy usuwamy po 7 dniach. Konto i lista aplikacji: do czasu usunięcia konta przez Ciebie (przycisk na stronie konta) albo automatycznie po 12 miesiącach bez logowania. Opinie: do czasu wycofania zgody lub usunięcia opinii; nie zawierają adresu e-mail ani danych z zamówienia, tylko podpis, który sam wpiszesz. Dokumenty księgowe: 5 lat od końca roku podatkowego.</p>
+<p>Dane zamówienia, w tym dokumenty i zdjęcie: 30 dni od złożenia zamówienia, potem są automatycznie usuwane. Szkic formularza zapisuje się tylko w Twojej przeglądarce i znika po złożeniu zamówienia. Kody rabatowe: 90 dni (kod klienta: 90 dni od ostatniego polecenia), potem są automatycznie usuwane. Przy kodzie nie zapisujemy adresów e-mail, tylko ich nieodwracalny skrót, żeby każda osoba mogła użyć kodu raz, a właściciel kodu dostał saldo za polecenia. Wiadomości z formularza kontaktowego: 180 dni, potem są automatycznie usuwane. Newsletter: adres i data zgody do czasu wypisania (adres usuwamy z listy od razu po wypisaniu); niepotwierdzone zapisy usuwamy po 7 dniach. Konto i lista aplikacji: do czasu usunięcia konta przez Ciebie (przycisk na stronie konta) albo automatycznie po 12 miesiącach bez logowania. Opinie: do czasu wycofania zgody lub usunięcia opinii; nie zawierają adresu e-mail ani danych z zamówienia, tylko podpis, który sam wpiszesz. Dokumenty księgowe: 5 lat od końca roku podatkowego.</p>
 <h2>6. Twoje prawa</h2>
 <p>Masz prawo dostępu do danych, ich sprostowania, usunięcia, ograniczenia przetwarzania, przenoszenia oraz sprzeciwu wobec przetwarzania opartego na uzasadnionym interesie. Napisz na [E-MAIL]. Możesz też złożyć skargę do Prezesa Urzędu Ochrony Danych Osobowych (uodo.gov.pl).</p>
 <h2>7. Dobrowolność i zautomatyzowane decyzje</h2>
@@ -589,20 +599,20 @@
 <ul><li>Ausführung der Bestellung und Zahlungsabwicklung – Art. 6 Abs. 1 lit. b DSGVO (Vertrag).</li>
 <li>Abrechnung und Buchhaltung – Art. 6 Abs. 1 lit. c DSGVO (rechtliche Verpflichtung).</li>
 <li>Sicherheit, Schutz vor Missbrauch und Geltendmachung von Ansprüchen – Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse).</li>
-<li>Einmalige Bitte um Bewertung der Unterlagen (E-Mail nach 4 Tagen) – Art. 6 Abs. 1 lit. a DSGVO (Ihre in der Bestellung erteilte Einwilligung).</li>
+<li>Einmalige Bitte um Bewertung der Unterlagen (E-Mail nach 4 Tagen) – Art. 6 Abs. 1 lit. a DSGVO (Ihre in der Bestellung erteilte Einwilligung).</li><li>Einmalige Erinnerung an eine nicht abgeschlossene Zahlung (E-Mail nach ca. 3 Stunden, nur wenn die Bestellung nicht bezahlt wurde) – Art. 6 Abs. 1 lit. a DSGVO (Ihre in der Bestellung erteilte Einwilligung).</li><li>Beantwortung einer Anfrage eines Unternehmens oder einer Einrichtung über das Formular „Für Unternehmen und Einrichtungen“ – Art. 6 Abs. 1 lit. b und f DSGVO; die Daten werden nach 12 Monaten gelöscht.</li>
 <li>Einmalige Erinnerung per E-Mail nach 7 Tagen – Art. 6 Abs. 1 lit. a DSGVO (Ihre Einwilligung, die Sie durch eine Nachricht an [E-MAIL] widerrufen können).</li>
 <li>Rabattcode und Empfehlungsprogramm – Art. 6 Abs. 1 lit. b DSGVO.</li>
-<li>Antwort auf eine Nachricht über das Kontaktformular oder eine Kooperationsanfrage einer Organisation – Art. 6 Abs. 1 lit. a DSGVO (Ihre Einwilligung im Formular) sowie Art. 6 Abs. 1 lit. f DSGVO (Korrespondenz und, bei Organisationen, Vorstellung des angefragten Angebots).</li>
+<li>Antwort auf eine Nachricht über das Kontaktformular – Art. 6 Abs. 1 lit. a DSGVO (Ihre Einwilligung im Formular) sowie Art. 6 Abs. 1 lit. f DSGVO (Korrespondenz).</li>
 <li>Newsletter – Art. 6 Abs. 1 lit. a DSGVO (Ihre per Klick auf den Link aus der E-Mail bestätigte Einwilligung). Sie können sie jederzeit über den Link in jeder Nachricht widerrufen; der Widerruf berührt nicht die Rechtmäßigkeit früherer Versendungen.</li>
 <li>Kundenkonto, Bewerbungsliste und Erinnerung am Tag vor dem Vorstellungsgespräch (nur wenn Sie diese aktivieren) – Art. 6 Abs. 1 lit. b DSGVO (Vertrag über die Bereitstellung des Kontos).</li>
 <li>Veröffentlichung von Bewertungen auf der Website – Art. 6 Abs. 1 lit. a DSGVO (Ihre bei der Bewertung erteilte Einwilligung, die Sie durch eine Nachricht an [E-MAIL] widerrufen können); bloße Bewertung ohne Veröffentlichung des Textes – Art. 6 Abs. 1 lit. f DSGVO (Bewertung der Dienstleistungsqualität).</li></ul>
 <h2>4. Empfänger der Daten</h2>
 <ul><li>PayPro SA (Przelewy24) – Zahlungsabwicklung.</li>
-<li>Anbieter von KI-Werkzeugen (Anthropic) – erhält Ihre Daten und den Inhalt der Stellenanzeige ausschließlich zur Erstellung der Unterlagen. Die Daten können außerhalb des Europäischen Wirtschaftsraums (USA) auf Grundlage von Standardvertragsklauseln oder eines anderen DSGVO-konformen Mechanismus verarbeitet werden.</li>
+<li>Anbieter von KI-Werkzeugen (Anthropic) – erhält Ihre Daten und den Inhalt der Stellenanzeige (auch aus einem hochgeladenen Foto der Anzeige) ausschließlich zur Erstellung der Unterlagen. Die Daten können außerhalb des Europäischen Wirtschaftsraums (USA) auf Grundlage von Standardvertragsklauseln oder eines anderen DSGVO-konformen Mechanismus verarbeitet werden.</li>
 <li>E-Mail-Dienstleister ([DOSTAWCA SMTP]) – versendet die fertigen Unterlagen an die von Ihnen angegebene Adresse.</li>
 <li>Hosting-Anbieter: [HOSTING]. Buchhaltungsbüro: [BIURO].</li></ul>
 <h2>5. Speicherdauer</h2>
-<p>Bestelldaten einschließlich Unterlagen und Foto: 30 Tage ab Aufgabe der Bestellung, danach werden sie automatisch gelöscht. Ein Entwurf des Formulars wird nur in Ihrem Browser gespeichert und nach Aufgabe der Bestellung entfernt. Rabattcodes: 90 Tage (Kundencode: 90 Tage ab der letzten Empfehlung), danach werden sie automatisch gelöscht. Nachrichten aus dem Kontaktformular und Anfragen von Organisationen: 180 Tage, danach werden sie automatisch gelöscht. Newsletter: Adresse und Datum der Einwilligung bis zur Abmeldung (nach der Abmeldung löschen wir die Adresse sofort); unbestätigte Anmeldungen löschen wir nach 7 Tagen. Zum Code speichern wir keine E-Mail-Adressen, sondern nur deren nicht umkehrbaren Hashwert, damit jede Person den Code einmal verwenden kann. Konto und Bewerbungsliste: bis zur Löschung des Kontos durch Sie (Schaltfläche auf der Kontoseite) oder automatisch nach 12 Monaten ohne Anmeldung. Bewertungen: bis zum Widerruf der Einwilligung oder zur Löschung der Bewertung; sie enthalten weder die E-Mail-Adresse noch Daten aus der Bestellung, sondern nur die Signatur, die Sie selbst eingeben. Buchhaltungsunterlagen: 5 Jahre ab dem Ende des Steuerjahres.</p>
+<p>Bestelldaten einschließlich Unterlagen und Foto: 30 Tage ab Aufgabe der Bestellung, danach werden sie automatisch gelöscht. Ein Entwurf des Formulars wird nur in Ihrem Browser gespeichert und nach Aufgabe der Bestellung entfernt. Rabattcodes: 90 Tage (Kundencode: 90 Tage ab der letzten Empfehlung), danach werden sie automatisch gelöscht. Nachrichten aus dem Kontaktformular: 180 Tage, danach werden sie automatisch gelöscht. Newsletter: Adresse und Datum der Einwilligung bis zur Abmeldung (nach der Abmeldung löschen wir die Adresse sofort); unbestätigte Anmeldungen löschen wir nach 7 Tagen. Zum Code speichern wir keine E-Mail-Adressen, sondern nur deren nicht umkehrbaren Hashwert, damit jede Person den Code einmal verwenden kann. Konto und Bewerbungsliste: bis zur Löschung des Kontos durch Sie (Schaltfläche auf der Kontoseite) oder automatisch nach 12 Monaten ohne Anmeldung. Bewertungen: bis zum Widerruf der Einwilligung oder zur Löschung der Bewertung; sie enthalten weder die E-Mail-Adresse noch Daten aus der Bestellung, sondern nur die Signatur, die Sie selbst eingeben. Buchhaltungsunterlagen: 5 Jahre ab dem Ende des Steuerjahres.</p>
 <h2>6. Ihre Rechte</h2>
 <p>Sie haben das Recht auf Auskunft über Ihre Daten, auf Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit sowie auf Widerspruch gegen eine auf berechtigtem Interesse beruhende Verarbeitung. Schreiben Sie an [E-MAIL]. Sie können außerdem Beschwerde beim Präsidenten der polnischen Datenschutzbehörde (UODO, uodo.gov.pl) einlegen.</p>
 <h2>7. Freiwilligkeit und automatisierte Entscheidungen</h2>
@@ -623,20 +633,20 @@
 <ul><li>Performance of the order and handling of payments – Article 6(1)(b) GDPR (contract).</li>
 <li>Settlements and accounting – Article 6(1)(c) GDPR (legal obligation).</li>
 <li>Security, protection against abuse and pursuit of claims – Article 6(1)(f) GDPR (legitimate interest).</li>
-<li>One-time request to rate the documents (e-mail after 4 days) – Article 6(1)(a) GDPR (your consent ticked in the order).</li>
+<li>One-time request to rate the documents (e-mail after 4 days) – Article 6(1)(a) GDPR (your consent ticked in the order).</li><li>One-time reminder about an unfinished payment (e-mail after about 3 hours, only if the order was not paid) – Article 6(1)(a) GDPR (your consent ticked in the order).</li><li>Answering an enquiry from a company or institution sent via the “For companies and institutions” form – Article 6(1)(b) and (f) GDPR; the data is deleted after 12 months.</li>
 <li>One-time e-mail reminder after 7 days – Article 6(1)(a) GDPR (your consent, which you may withdraw by writing to [E-MAIL]).</li>
 <li>Discount code and referral programme – Article 6(1)(b) GDPR.</li>
-<li>Replying to a message from the contact form or a cooperation enquiry from an organisation – Article 6(1)(a) GDPR (your consent given in the form) and Article 6(1)(f) GDPR (correspondence and, for organisations, presenting the offer you asked for).</li>
+<li>Replying to a message from the contact form – Article 6(1)(a) GDPR (your consent given in the form) and Article 6(1)(f) GDPR (correspondence).</li>
 <li>Newsletter – Article 6(1)(a) GDPR (your consent confirmed by clicking the link in the e-mail). You can withdraw it at any time using the link in every message; withdrawal does not affect the lawfulness of mailings sent before it.</li>
 <li>Client account, list of applications and reminder the day before an interview (only if you enable them) – Article 6(1)(b) GDPR (contract for the provision of the account service).</li>
 <li>Publication of reviews on the website – Article 6(1)(a) GDPR (your consent ticked when leaving the review, which you may withdraw by writing to [E-MAIL]); the rating alone without publication of the text – Article 6(1)(f) GDPR (assessment of service quality).</li></ul>
 <h2>4. Recipients of data</h2>
 <ul><li>PayPro SA (Przelewy24) – payment handling.</li>
-<li>AI tools provider (Anthropic) – receives your data and the content of the job advertisement solely in order to prepare the documents. Data may be processed outside the European Economic Area (USA) on the basis of standard contractual clauses or another GDPR-compliant mechanism.</li>
+<li>AI tools provider (Anthropic) – receives your data and the content of the job advertisement (including a photo of the ad, if you upload one) solely in order to prepare the documents. Data may be processed outside the European Economic Area (USA) on the basis of standard contractual clauses or another GDPR-compliant mechanism.</li>
 <li>E-mail provider ([DOSTAWCA SMTP]) – sends you the finished documents to the address provided.</li>
 <li>Hosting provider: [HOSTING]. Accounting office: [BIURO].</li></ul>
 <h2>5. How long we keep data</h2>
-<p>Order data, including the documents and the photograph: 30 days from the placing of the order, after which they are automatically deleted. The form draft is saved only in your browser and disappears once the order is placed. Discount codes: 90 days (customer code: 90 days from the last referral), after which they are automatically deleted. Messages from the contact form and enquiries from organisations: 180 days, after which they are automatically deleted. Newsletter: address and date of consent until you unsubscribe (we delete the address immediately after unsubscribing); unconfirmed sign-ups are deleted after 7 days. We do not store e-mail addresses with a code, only an irreversible hash of them, so that each person can use the code once. Account and list of applications: until you delete the account (button on the account page) or automatically after 12 months without logging in. Reviews: until consent is withdrawn or the review is deleted; they contain no e-mail address or order data, only the signature you enter yourself. Accounting documents: 5 years from the end of the tax year.</p>
+<p>Order data, including the documents and the photograph: 30 days from the placing of the order, after which they are automatically deleted. The form draft is saved only in your browser and disappears once the order is placed. Discount codes: 90 days (customer code: 90 days from the last referral), after which they are automatically deleted. Messages from the contact form: 180 days, after which they are automatically deleted. Newsletter: address and date of consent until you unsubscribe (we delete the address immediately after unsubscribing); unconfirmed sign-ups are deleted after 7 days. We do not store e-mail addresses with a code, only an irreversible hash of them, so that each person can use the code once. Account and list of applications: until you delete the account (button on the account page) or automatically after 12 months without logging in. Reviews: until consent is withdrawn or the review is deleted; they contain no e-mail address or order data, only the signature you enter yourself. Accounting documents: 5 years from the end of the tax year.</p>
 <h2>6. Your rights</h2>
 <p>You have the right to access your data, to rectification, erasure, restriction of processing, data portability and to object to processing based on legitimate interest. Write to [E-MAIL]. You may also lodge a complaint with the Polish data protection authority (UODO, President of the Personal Data Protection Office) (uodo.gov.pl).</p>
 <h2>7. Voluntary provision of data and automated decisions</h2>
@@ -657,20 +667,20 @@
 <ul><li>Виконання замовлення та обробка платежів — ст. 6 ч. 1 п. b GDPR (RODO) (договір).</li>
 <li>Розрахунки та бухгалтерський облік — ст. 6 ч. 1 п. c GDPR (RODO) (юридичний обов’язок).</li>
 <li>Безпека, захист від зловживань і пред’явлення вимог — ст. 6 ч. 1 п. f GDPR (RODO) (законний інтерес).</li>
-<li>Одноразове прохання оцінити документи (електронний лист через 4 дні) — ст. 6 ч. 1 п. a GDPR (RODO) (ваша згода, позначена в замовленні).</li>
+<li>Одноразове прохання оцінити документи (електронний лист через 4 дні) — ст. 6 ч. 1 п. a GDPR (RODO) (ваша згода, позначена в замовленні).</li><li>Одноразове нагадування про незавершену оплату (електронний лист приблизно через 3 години, лише якщо замовлення не оплачено) — ст. 6 ч. 1 п. a GDPR (ваша згода, позначена в замовленні).</li><li>Відповідь на запит компанії чи установи з форми «Для компаній та установ» — ст. 6 ч. 1 п. b і f GDPR; дані видаляються через 12 місяців.</li>
 <li>Одноразове нагадування електронною поштою через 7 днів — ст. 6 ч. 1 п. a GDPR (RODO) (ваша згода, яку ви можете відкликати, написавши на [E-MAIL]).</li>
 <li>Код знижки та реферальна програма — ст. 6 ч. 1 п. b GDPR (RODO).</li>
-<li>Відповідь на повідомлення з контактної форми або запит організації щодо співпраці — ст. 6 ч. 1 п. a GDPR (ваша згода у формі) та ст. 6 ч. 1 п. f GDPR (листування, а для організацій — представлення запитаної пропозиції).</li>
+<li>Відповідь на повідомлення з контактної форми — ст. 6 ч. 1 п. a GDPR (ваша згода у формі) та ст. 6 ч. 1 п. f GDPR (листування).</li>
 <li>Розсилка — ст. 6 ч. 1 п. a GDPR (ваша згода, підтверджена переходом за посиланням із листа). Ви можете відкликати її будь-коли за посиланням у кожному листі; відкликання не впливає на законність розсилок до нього.</li>
 <li>Обліковий запис клієнта, список заявок і нагадування за день до співбесіди (лише якщо ви їх увімкнете) — ст. 6 ч. 1 п. b GDPR (RODO) (договір про надання послуги облікового запису).</li>
 <li>Публікація відгуку на сайті — ст. 6 ч. 1 п. a GDPR (RODO) (ваша згода, позначена під час залишення відгуку, яку ви можете відкликати, написавши на [E-MAIL]); сама оцінка без публікації тексту — ст. 6 ч. 1 п. f GDPR (RODO) (оцінювання якості послуги).</li></ul>
 <h2>4. Одержувачі даних</h2>
 <ul><li>PayPro SA (Przelewy24) — обробка платежів.</li>
-<li>Постачальник інструментів ШІ (Anthropic) — отримує ваші дані та текст оголошення виключно для підготовки документів. Дані можуть оброблятися за межами Європейської економічної зони (США) на підставі стандартних договірних положень або іншого механізму, що відповідає GDPR (RODO).</li>
+<li>Постачальник інструментів ШІ (Anthropic) — отримує ваші дані та текст оголошення (зокрема з фото оголошення, якщо ви його завантажите) виключно для підготовки документів. Дані можуть оброблятися за межами Європейської економічної зони (США) на підставі стандартних договірних положень або іншого механізму, що відповідає GDPR (RODO).</li>
 <li>Постачальник електронної пошти ([DOSTAWCA SMTP]) — надсилає вам готові документи на вказану адресу.</li>
 <li>Постачальник хостингу: [HOSTING]. Бухгалтерська фірма: [BIURO].</li></ul>
 <h2>5. Як довго ми зберігаємо дані</h2>
-<p>Дані замовлення, зокрема документи та фотографія: 30 днів від дати оформлення замовлення, після чого вони автоматично видаляються. Чернетка форми зберігається лише у вашому браузері й зникає після оформлення замовлення. Коди знижки: 90 днів (код клієнта: 90 днів від останньої рекомендації), після чого вони автоматично видаляються. Повідомлення з контактної форми та запити організацій: 180 днів, після чого вони автоматично видаляються. Розсилка: адреса та дата згоди до відписки (після відписки ми одразу видаляємо адресу); непідтверджені підписки видаляємо через 7 днів. Разом із кодом ми не зберігаємо адреси електронної пошти, а лише їхній незворотний хеш, щоб кожна особа могла використати код один раз. Обліковий запис і список заявок: до видалення облікового запису вами (кнопка на сторінці облікового запису) або автоматично через 12 місяців без входу. Відгуки: до відкликання згоди або видалення відгуку; вони не містять адреси електронної пошти чи даних замовлення, лише підпис, який ви введете самостійно. Бухгалтерські документи: 5 років від кінця податкового року.</p>
+<p>Дані замовлення, зокрема документи та фотографія: 30 днів від дати оформлення замовлення, після чого вони автоматично видаляються. Чернетка форми зберігається лише у вашому браузері й зникає після оформлення замовлення. Коди знижки: 90 днів (код клієнта: 90 днів від останньої рекомендації), після чого вони автоматично видаляються. Повідомлення з контактної форми: 180 днів, після чого вони автоматично видаляються. Розсилка: адреса та дата згоди до відписки (після відписки ми одразу видаляємо адресу); непідтверджені підписки видаляємо через 7 днів. Разом із кодом ми не зберігаємо адреси електронної пошти, а лише їхній незворотний хеш, щоб кожна особа могла використати код один раз. Обліковий запис і список заявок: до видалення облікового запису вами (кнопка на сторінці облікового запису) або автоматично через 12 місяців без входу. Відгуки: до відкликання згоди або видалення відгуку; вони не містять адреси електронної пошти чи даних замовлення, лише підпис, який ви введете самостійно. Бухгалтерські документи: 5 років від кінця податкового року.</p>
 <h2>6. Ваші права</h2>
 <p>Ви маєте право на доступ до даних, їх виправлення, видалення, обмеження обробки, перенесення, а також право заперечити проти обробки, що ґрунтується на законному інтересі. Напишіть на [E-MAIL]. Ви також можете подати скаргу до Голови польського органу із захисту персональних даних (UODO) (uodo.gov.pl).</p>
 <h2>7. Добровільність і автоматизовані рішення</h2>
@@ -684,7 +694,7 @@
 
 <footer class="foot" id="foot"><div class="inner">
   <div class="foot-brand"><a class="logo" href="/" data-page=""><svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--brand)"/><path d="M10 6.5h8.5l5.5 5.5v13.5a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-17a2 2 0 0 1 2-2z" fill="#fff"/><rect x="10.5" y="14.5" width="11" height="3.2" rx="1" fill="#FFE45C"/><rect x="10.5" y="20" width="8" height="1.8" rx=".9" fill="#2548E8" opacity=".55"/><rect x="10.5" y="10" width="5" height="1.8" rx=".9" fill="#2548E8" opacity=".55"/></svg><span class="wm">CV<span>Pod</span>Ogłoszenie</span></a><p>CV i listy motywacyjne pisane pod konkretne ogłoszenie. Darmowa poprawka, dane usuwane po 30 dniach.</p></div>
-  <div class="foot-cols"><div><b>Usługa</b><a href="/konto" data-acct>Moje konto</a><a href="#cennik">Cennik</a><a href="#szablony">Szablony</a><a href="#faq">FAQ</a></div><div><b>Zawody</b><span id="footProf"></span></div><div><b>Informacje</b><a href="/dla-firm" data-page="dla-firm">Dla firm i uczelni</a><a href="/program-polecen" data-page="program-polecen">Program poleceń</a><a href="/#kontakt">Kontakt</a><a href="/#newsletter">Newsletter</a><a href="#regulamin">Regulamin</a><a href="#prywatnosc">Polityka prywatności</a></div></div>
+  <div class="foot-cols"><div><b>Usługa</b><a href="/konto" data-acct>Moje konto</a><a href="#cennik">Cennik</a><a href="/dla-firm" data-page="dla-firm">Dla firm</a><a href="#szablony">Szablony</a><a href="#faq">FAQ</a><a href="#" id="installApp" hidden>Zainstaluj aplikację</a></div><div><b>Zawody</b><span id="footProf"></span></div><div><b>Informacje</b><a href="/program-polecen" data-page="program-polecen">Program poleceń</a><a href="/#kontakt">Kontakt</a><a href="/#newsletter">Newsletter</a><a href="#regulamin">Regulamin</a><a href="#prywatnosc">Polityka prywatności</a></div></div>
 </div></footer>
 
 <!-- Kreator -->
@@ -703,6 +713,7 @@
       <h3 class="sh">Dodatki <span class="h">(opcjonalnie, raz na całe zamówienie)</span></h3>
       <div class="opts addons">
         <label class="opt"><input type="checkbox" id="adInterview"><span class="o-t">Przygotowanie do rozmowy<b data-price="interview">+50 zł</b></span><span class="o-d">12 pytań do tego ogłoszenia z przykładowymi odpowiedziami z Twojego doświadczenia, gotowe „Opowiedz o sobie”, pytania do pracodawcy, rozmowa o pieniądzach i lista kontrolna. PDF.</span></label>
+        <label class="opt"><input type="checkbox" id="adSim"><span class="o-t">Symulator rozmowy kwalifikacyjnej<b data-price="sim">+29 zł</b></span><span class="o-d">Próbna rozmowa z AI-rekruterem pod to ogłoszenie: do 8 pytań, ocena każdej odpowiedzi i wskazówki, na koniec podsumowanie</span></label>
         <label class="opt"><input type="checkbox" id="adMessages"><span class="o-t">Wiadomość do rekrutera<b data-price="messages">+9 zł</b></span><span class="o-d">Krótka wiadomość na LinkedIn i gotowy e-mail z aplikacją</span></label>
         <label class="opt"><input type="checkbox" id="adLinkedin"><span class="o-t">Profil LinkedIn<b data-price="linkedin">+19 zł</b></span><span class="o-d">Nagłówek, sekcja „Informacje”, 15 umiejętności i opisy stanowisk pod to ogłoszenie, do skopiowania</span></label>
         <label class="opt"><input type="checkbox" id="adDocx"><span class="o-t">Wersja Word (.docx)<b data-price="docx">+9 zł</b></span><span class="o-d">CV i list w edytowalnym pliku Word, gdy pracodawca prosi o .doc/.docx</span></label>
@@ -746,7 +757,7 @@
       <label class="f">Uwagi dla autora <span class="h">np. zmiana branży, przerwa w pracy</span><textarea id="notes"></textarea></label>
     </section>
     <section data-step="5" hidden>
-      <p class="hint">Dla <b>każdego</b> ogłoszenia powstanie osobne CV. Wklej link, a spróbujemy pobrać treść oferty.</p>
+      <p class="hint">Dla <b>każdego</b> ogłoszenia powstanie osobne CV. Wklej link, wgraj zdjęcie ogłoszenia albo wklej jego treść.</p>
       <div class="note"><b>Ważne:</b> jeśli strona nie przetworzy ogłoszenia z linku (np. serwis blokuje pobieranie), <b>musisz wkleić treść ogłoszenia samodzielnie</b>. Bez treści nie przejdziesz do płatności.</div>
       <div id="ads"></div><button type="button" class="btn ghost sm" id="addAd">+ Dodaj ogłoszenie (w pakiecie do 3)</button>
       <p class="note" id="packTip" hidden>Masz więcej ogłoszeń w tym samym zawodzie? <button type="button" class="link" id="toPack">Wybierz Pakiet 3 za 79 zł</button>: trzy CV i list do każdego.</p>
@@ -756,6 +767,7 @@
       <div class="codebox"><label class="f">Kod rabatowy<span class="urlrow"><input type="text" id="codeInput" autocomplete="off" placeholder="np. KOD-AB12CD"><button type="button" class="btn ghost sm" id="codeApply">Zastosuj</button></span></label><p class="fstatus" id="codeMsg" role="status"></p></div>
       <label class="check"><input type="checkbox" id="createAccount"> <span><b>Załóż darmowe konto</b> na ten e-mail (opcjonalnie): wszystkie zamówienia w jednym miejscu i lista aplikacji z przypomnieniem przed rozmową. Możesz też kupić bez konta.</span></label>
       <label class="check"><input type="checkbox" id="reviewAsk"> <span>Poproś mnie raz o ocenę dokumentów (jeden e-mail po 4 dniach, opcjonalnie).</span></label>
+      <label class="check"><input type="checkbox" id="payRem"> <span>Jeśli nie dokończę płatności, przypomnijcie mi raz e-mailem (opcjonalnie).</span></label>
       <label class="check"><input type="checkbox" id="reminder"> <span>Przypomnij mi raz po 7 dniach o możliwości zamówienia CV pod kolejne ogłoszenie (opcjonalnie, jedna wiadomość e-mail).</span></label>
       <p class="perk small">Po opłaceniu dostaniesz <b>swój kod −10 zł</b> (ważny 90 dni): na kolejne zamówienie dla Ciebie i dla Twoich znajomych.</p>
       <p class="hint trust-mini">W cenie: raport dopasowania, darmowa poprawka i edycja tekstu. Dane usuwamy automatycznie po 30 dniach.</p>
@@ -785,7 +797,7 @@
     <div class="changes" id="exChanges"></div>
    </div>
   </div>
-  <div class="exv-foot"><span class="exv-cta-txt">Zamów takie dokumenty pod swoje ogłoszenie.</span><button class="btn" id="exCta">Zamów CV od 39 zł</button></div>
+  <div class="exv-foot"><span class="exv-cta-txt">Zamów takie dokumenty pod swoje ogłoszenie.</span><span id="exSample"></span><button class="btn" id="exCta">Zamów CV od 39 zł</button></div>
  </div>
 </div>
 
@@ -830,5 +842,6 @@
   <div class="chat-sugg" id="chatSugg"></div>
   <form class="chat-form" id="chatForm"><input type="text" id="chatInput" maxlength="1000" placeholder="Np. jak opisać przerwę w pracy?" aria-label="Twoje pytanie" autocomplete="off"><button class="btn sm" type="submit">Wyślij</button></form>
 </div>
+<p class="offline" id="offline" role="status" hidden>Brak internetu – widzisz zapisaną wersję strony. Zamówienie i płatność zadziałają po połączeniu.</p>
 <script src="/app.js"></script>
 </body></html>
