@@ -675,5 +675,5 @@ html:not([lang="pl"]) .nav nav{gap:16px}
 @media(max-width:360px){.nav .inner{gap:8px}.logo{font-size:16px;gap:6px}.logo .mark{width:26px;height:26px}.langsw a{padding:4px 5px;font-size:12px}}
 /* Regulamin i polityka: na wersjach EN / UA / DE tłumaczenie zamiast tekstu polskiego */
 .legal-tr{display:none}
-html[lang="de"] .legal-tr[lang="de"]{display:block}
-html[lang="de"] .legal-pl{display:none}
+html[lang="en"] .legal-tr[lang="en"],html[lang="uk"] .legal-tr[lang="uk"],html[lang="de"] .legal-tr[lang="de"]{display:block}
+html[lang="en"] .legal-pl,html[lang="uk"] .legal-pl,html[lang="de"] .legal-pl{display:none}
