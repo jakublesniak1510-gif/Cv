@@ -239,13 +239,147 @@ Chętnie opowiem o swoim doświadczeniu na rozmowie. Dziękuję za rozważenie m
 Z poważaniem,
 Anna Nowak` },
 ];
+// Przykład (Anna Nowak) w języku strony: na wersji EN i UA szablony, podgląd i sekcja „Przykład” pokazują dokumenty po angielsku / ukraińsku.
+const EX_LOC = {
+  en: {
+    base: {
+      contact: ['+48 600 100 200', 'anna.nowak@example.com', 'Kraków', 'linkedin.com/in/anna-nowak'],
+      jobs: [{ title: 'Customer Service Specialist', company: 'Nova Serwis Sp. z o.o.', period: '03.2022 – present' }, { title: 'Sales Assistant / Cashier', company: 'Market Dom', period: '06.2019 – 02.2022' }],
+      edu: [{ school: 'Cracow University of Economics', degree: 'Management, BA', period: '2016 – 2019' }],
+      skills: 'customer service, cash register handling, communication skills, shift work, CRM, complaint handling, ticket handling, Excel, stocktaking',
+      langs: ['English B2', 'German A2'], certs: ['B2B Customer Service Course'],
+      facts: ['Handling 40–50 customer tickets a day in a CRM system', 'Resolving customer complaints', 'Contact with international clients in English', 'Operating the cash register and end-of-shift cash-up', 'Customer service and complaints at the checkout', 'Stocktaking', 'Shift work in a team of 8'],
+      clause: 'I hereby consent to the processing of my personal data for the purposes of the recruitment process in accordance with Art. 6(1)(a) of Regulation (EU) 2016/679 (GDPR).',
+    },
+    ex: [
+      { tab: 'Cashier / Sales Assistant', title: 'Cashier / Sales Assistant', company: 'Zielony Rynek Supermarket',
+        ad: 'We are looking for a person to provide customer service and operate the cash register in our supermarket. We require good communication skills, honesty and readiness for shift work. We offer an employment contract and a benefits package.',
+        kws: ['customer service', 'cash register', 'communication skills', 'shift work'],
+        sum: 'Applying for the position of Cashier / Sales Assistant. For almost three years I operated the cash register and served customers at Market Dom, working shifts in a team of 8. I have good communication skills and experience in stocktaking.',
+        skills: ['customer service', 'cash register handling', 'communication skills', 'shift work', 'stocktaking', 'CRM', 'Excel'],
+        changes: ['Headline changed to “Cashier / Sales Assistant”.', 'Skills from the ad come first: cash register handling and shift work.', 'In the Market Dom job, the cash register comes first, because that is what the offer is about.', 'The point about contact in English was left out, as the offer does not require it.'],
+        letter: `Dear Hiring Manager,
+
+I am writing to apply for the position of Cashier / Sales Assistant at Zielony Rynek Supermarket. I started working in retail in 2019 at Market Dom, where for almost three years I operated the cash register, cashed up at the end of each shift and talked to customers every day.
+
+You are looking for someone with good communication skills who is ready to work shifts. I worked shifts in a team of eight and also handled complaints at the checkout and stocktaking.
+
+I currently work in customer service at Nova Serwis, where I resolve complaints and handle tickets in a CRM system.
+
+I would be glad to tell you more about my experience at an interview. Thank you for considering my application.
+
+Yours faithfully,
+Anna Nowak` },
+      { tab: 'Customer Service Specialist', title: 'Customer Service Specialist', company: 'Telko Group',
+        ad: 'We are looking for a specialist to join our customer service office. Responsibilities: ticket handling, resolving complaints, working in a CRM system. We require at least 2 years of experience and knowledge of English. We offer an employment contract and flexible hours.',
+        kws: ['ticket handling', 'tickets', 'complaints', 'CRM', 'English', 'customer service'],
+        sum: 'Applying for the position of Customer Service Specialist. Since 2022 I have been handling customer tickets and complaints in a CRM system, and I speak English with international clients.',
+        skills: ['CRM', 'complaint handling', 'ticket handling', 'customer service', 'English B2', 'Excel'],
+        changes: ['Headline changed to “Customer Service Specialist”.', 'CRM, complaints and tickets at the top of the skills list, just like in the offer.', 'English highlighted in the profile and in the current job.', 'From the shop job, only the points about customers and shifts remain.'],
+        letter: `Dear Hiring Manager,
+
+I am writing to apply for the position of Customer Service Specialist at Telko Group. Since March 2022 I have been working as a Customer Service Specialist at Nova Serwis, where every day I handle 40–50 tickets in a CRM system and resolve customer complaints. This is exactly the scope of duties described in your advertisement.
+
+You require knowledge of English. In my current job I communicate in English with international clients at B2 level. Before that, at Market Dom, I worked directly with customers for almost three years and handled complaints.
+
+I would be glad to present my experience at an interview and learn more about the team. Thank you for considering my application.
+
+Yours faithfully,
+Anna Nowak` },
+      { tab: 'Warehouse Operative', title: 'Warehouse Operative', company: 'Sigma Wholesale',
+        ad: 'We are looking for a warehouse operative to work in our wholesale warehouse. Responsibilities: receiving and dispatching goods, stocktaking, working with warehouse documentation. We require reliability and readiness for shift work. A forklift licence is an advantage.',
+        kws: ['stocktaking', 'shift work'],
+        sum: 'Applying for the position of Warehouse Operative. I have hands-on experience in stocktaking and shift work in a team of 8. I know Excel and CRM systems.',
+        skills: ['stocktaking', 'shift work', 'Excel', 'CRM', 'customer service'],
+        changes: ['Headline changed to “Warehouse Operative”.', 'Stocktaking and shift work at the top, because that is what the offer is looking for.', 'Only one point remains from the current job; the rest is about customer service.'],
+        notAdded: 'a forklift licence, because it was not provided. If you have one, add it in the order form and it will appear in your CV.',
+        letter: `Dear Hiring Manager,
+
+I am writing to apply for the position of Warehouse Operative at Sigma Wholesale. You require reliability and readiness for shift work. At Market Dom, between 2019 and 2022, I worked shifts in a team of eight and was responsible for stocktaking, which is directly related to part of the duties described in your advertisement.
+
+You also mention working with warehouse documentation. I work with documents and data every day: I cashed up at the checkout, and I now handle tickets in a CRM system and use Excel.
+
+I would be glad to tell you more about my experience at an interview. Thank you for considering my application.
+
+Yours faithfully,
+Anna Nowak` },
+    ],
+  },
+  uk: {
+    base: {
+      contact: ['+48 600 100 200', 'anna.nowak@example.com', 'Краків', 'linkedin.com/in/anna-nowak'],
+      jobs: [{ title: 'Спеціалістка з обслуговування клієнтів', company: 'Nova Serwis Sp. z o.o.', period: '03.2022 – дотепер' }, { title: 'Продавчиня-касирка', company: 'Market Dom', period: '06.2019 – 02.2022' }],
+      edu: [{ school: 'Краківський економічний університет', degree: 'Менеджмент, бакалавр', period: '2016 – 2019' }],
+      skills: 'обслуговування клієнтів, робота з касовим апаратом, комунікабельність, змінна робота, CRM, розгляд скарг, обробка звернень, Excel, інвентаризація',
+      langs: ['англійська B2', 'німецька A2'], certs: ['Курс обслуговування клієнтів B2B'],
+      facts: ['Обробка 40–50 звернень щодня в системі CRM', 'Розгляд скарг клієнтів', 'Спілкування з іноземними клієнтами англійською', 'Робота з касовим апаратом і закриття зміни', 'Обслуговування клієнтів і скарги на касі', 'Інвентаризація товару', 'Змінна робота в команді з 8 осіб'],
+      clause: 'Я даю згоду на обробку моїх персональних даних для цілей процесу рекрутингу відповідно до ст. 6 ч. 1 п. a Регламенту (ЄС) 2016/679 (GDPR).',
+    },
+    ex: [
+      { tab: 'Касир / Продавець', title: 'Касир / Продавець', company: 'Супермаркет Zielony Rynek',
+        ad: 'Шукаємо людину для обслуговування клієнтів і роботи з касовим апаратом у супермаркеті. Вимагаємо комунікабельності, чесності та готовності до змінної роботи. Пропонуємо трудовий договір і пакет бенефітів.',
+        kws: ['обслуговування клієнтів', 'касовим апаратом', 'комунікабельності', 'комунікабельність', 'змінної роботи', 'змінна робота'],
+        sum: 'Претендую на посаду: Касир / Продавець. Майже три роки працювала з касовим апаратом і обслуговувала клієнтів у Market Dom, працюючи позмінно в команді з 8 осіб. Я комунікабельна і маю досвід інвентаризації товару.',
+        skills: ['обслуговування клієнтів', 'робота з касовим апаратом', 'комунікабельність', 'змінна робота', 'інвентаризація', 'CRM', 'Excel'],
+        changes: ['Заголовок змінено на «Касир / Продавець».', 'На початку навички з оголошення: робота з касовим апаратом і змінна робота.', 'У роботі в Market Dom на першому місці каса, бо саме про неї йдеться в оголошенні.', 'Пропущено пункт про спілкування англійською, бо оголошення цього не вимагає.'],
+        letter: `Шановні пані та панове,
+
+з цікавістю відповідаю на оголошення на посаду касира / продавця в супермаркеті Zielony Rynek. Я почала працювати в торгівлі у 2019 році в Market Dom, де майже три роки працювала з касовим апаратом, закривала зміни та щодня спілкувалася з клієнтами.
+
+Ви шукаєте комунікабельну людину, готову до змінної роботи. Я працювала позмінно в команді з восьми осіб, а також займалася скаргами на касі та інвентаризацією товару.
+
+Зараз я працюю в обслуговуванні клієнтів у компанії Nova Serwis, де розглядаю скарги та веду звернення в системі CRM.
+
+Із задоволенням розповім про свій досвід на співбесіді. Дякую за розгляд моєї кандидатури.
+
+З повагою,
+Anna Nowak` },
+      { tab: 'Спеціаліст з обслуговування клієнтів', title: 'Спеціаліст з обслуговування клієнтів', company: 'Telko Group',
+        ad: 'Шукаємо спеціаліста до відділу обслуговування клієнтів. Обов’язки: обробка звернень, розгляд скарг, робота в системі CRM. Вимагаємо щонайменше 2 роки досвіду та знання англійської мови. Пропонуємо трудовий договір і гнучкий графік.',
+        kws: ['обробка звернень', 'звернень', 'скарг', 'CRM', 'англійської', 'англійською', 'англійська', 'обслуговування клієнтів'],
+        sum: 'Претендую на посаду: Спеціаліст з обслуговування клієнтів. З 2022 року обробляю звернення та скарги в системі CRM, а з іноземними клієнтами спілкуюся англійською.',
+        skills: ['CRM', 'розгляд скарг', 'обробка звернень', 'обслуговування клієнтів', 'англійська B2', 'Excel'],
+        changes: ['Заголовок змінено на «Спеціаліст з обслуговування клієнтів».', 'CRM, скарги та звернення на початку навичок, як в оголошенні.', 'Англійську виділено в профілі та в поточній роботі.', 'З роботи в магазині залишилися лише пункти про клієнтів і зміни.'],
+        letter: `Шановні пані та панове,
+
+відповідаю на оголошення на посаду спеціаліста з обслуговування клієнтів у Telko Group. З березня 2022 року я працюю спеціалісткою з обслуговування клієнтів у Nova Serwis, де щодня обробляю 40–50 звернень у системі CRM і розглядаю скарги клієнтів. Це саме той обсяг обов’язків, який описано у вашому оголошенні.
+
+Ви вимагаєте знання англійської мови. На поточній роботі я спілкуюся англійською з іноземними клієнтами на рівні B2. Раніше, у Market Dom, я майже три роки працювала безпосередньо з клієнтами та займалася скаргами.
+
+Із задоволенням представлю свій досвід на співбесіді та дізнаюся більше про команду. Дякую за розгляд моєї кандидатури.
+
+З повагою,
+Anna Nowak` },
+      { tab: 'Комірник', title: 'Комірник', company: 'Оптовий склад Sigma',
+        ad: 'Шукаємо комірника для роботи на оптовому складі. Обов’язки: приймання та видача товару, інвентаризація, робота зі складською документацією. Вимагаємо сумлінності та готовності до змінної роботи. Посвідчення водія навантажувача буде перевагою.',
+        kws: ['інвентаризація', 'інвентаризації', 'змінної роботи', 'змінна робота'],
+        sum: 'Претендую на посаду: Комірник. Маю практичний досвід інвентаризації товару та змінної роботи в команді з 8 осіб. Знаю Excel і систему CRM.',
+        skills: ['інвентаризація', 'змінна робота', 'Excel', 'CRM', 'обслуговування клієнтів'],
+        changes: ['Заголовок змінено на «Комірник».', 'На початку інвентаризація та змінна робота, бо саме це шукає роботодавець.', 'З поточної роботи залишився один пункт, решта стосується обслуговування клієнтів.'],
+        notAdded: 'посвідчення водія навантажувача, бо його не вказано. Якщо воно у вас є, додайте його у формі замовлення, і воно з’явиться в резюме.',
+        letter: `Шановні пані та панове,
+
+з цікавістю відповідаю на оголошення на посаду комірника на оптовому складі Sigma. Ви вимагаєте сумлінності та готовності до змінної роботи. У Market Dom у 2019–2022 роках я працювала позмінно в команді з восьми осіб і займалася інвентаризацією товару, що безпосередньо пов’язано з частиною обов’язків, описаних в оголошенні.
+
+Ви також згадуєте роботу зі складською документацією. Я щодня працюю з документами та даними: закривала зміни на касі, а зараз веду звернення в системі CRM і користуюся Excel.
+
+Із задоволенням розповім про свій досвід на співбесіді. Дякую за розгляд моєї кандидатури.
+
+З повагою,
+Anna Nowak` },
+    ],
+  },
+};
+const EX_UI = { pl: ['Ogłoszenie', 'Słowa kluczowe, których szuka rekruter'], en: ['Job ad', 'Keywords the recruiter is looking for'], uk: ['Оголошення', 'Ключові слова, які шукає рекрутер'] };
+const EX_LANG = EX_LOC[window.I18N?.lang] ? window.I18N.lang : 'pl';
+if (EX_LANG !== 'pl') { Object.assign(BASE, EX_LOC[EX_LANG].base); EX_LOC[EX_LANG].ex.forEach((x, i) => Object.assign(EX[i], x)); }
 const exResult = (i) => {
   const e = EX[i];
-  return { position: e.title, keywords: e.kws, letter: e.letter, cv: {
+  return { position: e.title, lang: EX_LANG, keywords: e.kws, letter: e.letter, cv: {
     name: BASE.name, headline: e.title, contact: BASE.contact, summary: e.sum,
     experience: BASE.jobs.map((j, k) => ({ ...j, bullets: e.bullets[k].map((n) => BASE.facts[n]) })),
     education: BASE.edu, skills: e.skills, languages: BASE.langs, certificates: BASE.certs, interests: '',
-    clause: 'Wyrażam zgodę na przetwarzanie moich danych osobowych dla potrzeb niezbędnych do realizacji procesu rekrutacji zgodnie z art. 6 ust. 1 lit. a Rozporządzenia Parlamentu Europejskiego i Rady (UE) 2016/679.' } };
+    clause: BASE.clause || 'Wyrażam zgodę na przetwarzanie moich danych osobowych dla potrzeb niezbędnych do realizacji procesu rekrutacji zgodnie z art. 6 ust. 1 lit. a Rozporządzenia Parlamentu Europejskiego i Rady (UE) 2016/679.' } };
 };
 const changesList = (e) => [el('h3', { textContent: 'Co zmieniliśmy w tym CV' }), el('ul', {}, ...e.changes.map((c) => el('li', { textContent: c }))), e.notAdded && el('p', { className: 'notadded' }, el('b', { textContent: 'Czego nie dopisaliśmy: ' }), e.notAdded)].filter(Boolean);
 function drawEx(i) {
@@ -253,14 +387,14 @@ function drawEx(i) {
   const isKw = (x) => e.kws.some((k) => x.toLowerCase().includes(k.toLowerCase()));
   $$('#exTabs button').forEach((b, j) => b.setAttribute('aria-selected', j === i));
   $('#exAd').replaceChildren(
-    el('div', { className: 'ad-top' }, el('span', { className: 'ad-logo', textContent: e.company.split(/\s+/).map((w) => w[0]).join('').slice(0, 2) }), el('div', {}, el('small', { textContent: 'Ogłoszenie' }), el('b', { textContent: e.company }))),
+    el('div', { className: 'ad-top' }, el('span', { className: 'ad-logo', textContent: e.company.split(/\s+/).map((w) => w[0]).join('').slice(0, 2) }), el('div', {}, el('small', { textContent: EX_UI[EX_LANG][0] }), el('b', { textContent: e.company }))),
     el('h4', { textContent: e.title }), el('p', { className: 'ad-txt' }, hl(e.ad, e.kws)),
-    el('div', { className: 'ad-kws' }, el('small', { textContent: 'Słowa kluczowe, których szuka rekruter' }), el('div', {}, ...[...new Map(e.kws.map((k) => [k.toLowerCase().split(/\s+/).map((w) => w.slice(0, Math.max(3, Math.min(5, w.length - 1)))).join(' '), k])).values()].map((k) => el('span', { textContent: k })))));
+    el('div', { className: 'ad-kws' }, el('small', { textContent: EX_UI[EX_LANG][1] }), el('div', {}, ...[...new Map(e.kws.map((k) => [k.toLowerCase().split(/\s+/).map((w) => w.slice(0, Math.max(3, Math.min(5, w.length - 1)))).join(' '), k])).values()].map((k) => el('span', { textContent: k })))));
   $('#exCv').replaceChildren(
     el('div', { className: 'mcv-head' }, el('span', { className: 'mcv-ini', textContent: 'AN' }), el('div', {}, el('b', { textContent: 'Anna Nowak' }), el('span', { textContent: e.title }))),
-    el('div', { className: 'mcv-sec' }, el('h5', { textContent: 'Profil zawodowy' }), el('p', {}, hl(e.sum, e.kws))),
-    el('div', { className: 'mcv-sec' }, el('h5', { textContent: 'Umiejętności' }), el('div', { className: 'mcv-chips' }, ...e.skills.map((x) => el('span', { className: isKw(x) ? 'kw' : '', textContent: x })))),
-    el('div', { className: 'mcv-sec' }, el('h5', { textContent: 'Doświadczenie' }), el('div', { className: 'mcv-job' }, el('b', { textContent: job.title }), el('span', { textContent: `${job.company} · ${job.period}` })),
+    el('div', { className: 'mcv-sec' }, el('h5', { textContent: LBL[EX_LANG].summary }), el('p', {}, hl(e.sum, e.kws))),
+    el('div', { className: 'mcv-sec' }, el('h5', { textContent: LBL[EX_LANG].skills }), el('div', { className: 'mcv-chips' }, ...e.skills.map((x) => el('span', { className: isKw(x) ? 'kw' : '', textContent: x })))),
+    el('div', { className: 'mcv-sec' }, el('h5', { textContent: LBL[EX_LANG].exp }), el('div', { className: 'mcv-job' }, el('b', { textContent: job.title }), el('span', { textContent: `${job.company} · ${job.period}` })),
       el('ul', {}, ...job.bullets.map((b) => el('li', {}, hl(b, e.kws))))));
   $('#exChg').replaceChildren(...changesList(e));
 }
