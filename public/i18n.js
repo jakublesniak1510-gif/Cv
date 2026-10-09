@@ -1,10 +1,10 @@
-// Wersje językowe interfejsu (EN, UK). Strona jest pisana po polsku; ten skrypt podmienia teksty interfejsu
+// Wersje językowe interfejsu (EN, UK, DE). Strona jest pisana po polsku; ten skrypt podmienia teksty interfejsu
 // według słownika (klucz = polski tekst). Dokumenty klienta, przykłady CV, poradnik i dokumenty prawne zostają po polsku.
 (() => {
-  const LANGS = ['pl', 'en', 'uk'];
+  const LANGS = ['pl', 'en', 'uk', 'de'];
   const pick = () => {
-    const fromPath = /^\/(en|uk)(\/|$)/.exec(location.pathname)?.[1];
-    if (fromPath) return fromPath;
+    const fromPath = /^\/(en|uk|de)(\/|$)/.exec(location.pathname)?.[1];
+    if (fromPath) { try { localStorage.setItem('cvpo-lang', fromPath); } catch {} return fromPath; }
     if (window.__LANG) return window.__LANG;
     try { const s = localStorage.getItem('cvpo-lang'); if (LANGS.includes(s)) return s; } catch {}
     return 'pl';
@@ -35,7 +35,7 @@
     return null;
   };
   I.t = (s) => tr(s) ?? s;
-  const skip = (n) => { const e = n.nodeType === 1 ? n : n.parentElement; return !e || !!e.closest(SKIP); };
+  const skip = (n) => { const e = n.nodeType === 1 ? n : n.parentElement; return !e || (!!e.closest(SKIP) && !e.closest('[data-i18n]')); };
   const ATTRS = ['placeholder', 'aria-label', 'title', 'alt'];
   const doText = (n) => {
     if (skip(n)) return;
@@ -62,7 +62,7 @@
   const start = (d) => {
     load(d);
     const go = () => {
-      walk(document.head.querySelector('title') || document.head); walk(document.body);
+      walk(document.head.querySelector('title') || document.head); walk(document.body); document.querySelectorAll('[data-i18n]').forEach(walk);
       obs.observe(html, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ATTRS });
       html.classList.remove('i18n-wait');
     };

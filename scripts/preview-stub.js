@@ -13,6 +13,7 @@
     const m = (opts.method || 'GET').toUpperCase(), body = opts.body ? JSON.parse(opts.body) : {};
     if (url === '/api/config') return json({ demo: true, preview: true, ai: false, maxAds: 3, noPrint: true, fakeFetch: true, maxRevisions: MAXREV, prices: Object.fromEntries(Object.entries(P).map(([k, v]) => [k, v / 100])) });
     if (url === '/content.json') return json({ INDEX: PROFESSIONS.map(({ slug, name, category, keywords }) => ({ slug, name, category, keywords })), POPULAR: PROFESSIONS.filter((p) => POPULAR_SLUGS.includes(p.slug)), ARTICLES, CITIES, TOOLS });
+    { const m = /^\/content\/articles-(\w+)\.json$/.exec(url); if (m && ART_LANGS[m[1]]) return json(ART_LANGS[m[1]].data); }
     { const c = /^\/content\/cv\/([\w-]+)\.json$/.exec(url); if (c) { const p = PROFESSIONS.find((x) => x.slug === c[1]); return p ? json(p) : json({}, 404); } }
     // Podgląd nie pokazuje żadnych opinii: na prawdziwej stronie pojawią się dopiero opinie prawdziwych klientów.
     // Konto w podglądzie: logowanie bez e-maila, wszystko w pamięci przeglądarki.

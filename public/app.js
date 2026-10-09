@@ -239,7 +239,7 @@ Chętnie opowiem o swoim doświadczeniu na rozmowie. Dziękuję za rozważenie m
 Z poważaniem,
 Anna Nowak` },
 ];
-// Przykład (Anna Nowak) w języku strony: na wersji EN i UA szablony, podgląd i sekcja „Przykład” pokazują dokumenty po angielsku / ukraińsku.
+// Przykład (Anna Nowak) w języku strony: na wersji EN, UA i DE szablony, podgląd i sekcja „Przykład” pokazują dokumenty po angielsku / ukraińsku.
 const EX_LOC = {
   en: {
     base: {
@@ -369,8 +369,72 @@ Anna Nowak` },
 Anna Nowak` },
     ],
   },
+  de: {
+    base: {
+      contact: ['+48 600 100 200', 'anna.nowak@example.com', 'Krakau', 'linkedin.com/in/anna-nowak'],
+      jobs: [{ title: 'Kundenservice-Spezialistin', company: 'Nova Serwis Sp. z o.o.', period: '03.2022 – heute' }, { title: 'Verkäuferin / Kassiererin', company: 'Market Dom', period: '06.2019 – 02.2022' }],
+      edu: [{ school: 'Wirtschaftsuniversität Krakau', degree: 'Management, Bachelor', period: '2016 – 2019' }],
+      skills: 'Kundenservice, Kassenbedienung, Kommunikationsstärke, Schichtarbeit, CRM, Reklamationsbearbeitung, Ticketbearbeitung, Excel, Inventur',
+      langs: ['Englisch B2', 'Deutsch A2'], certs: ['Kurs Kundenservice B2B'],
+      facts: ['Bearbeitung von 40–50 Tickets pro Tag im CRM-System', 'Bearbeitung von Reklamationen der Kunden', 'Kontakt mit internationalen Kunden auf Englisch', 'Kassenbedienung und Kassenabrechnung zum Schichtende', 'Kundenservice und Reklamationen an der Kasse', 'Inventur', 'Schichtarbeit in einem Team von 8 Personen'],
+      clause: 'Ich willige in die Verarbeitung meiner personenbezogenen Daten für die Zwecke des Bewerbungsverfahrens gemäß Art. 6 Abs. 1 lit. a der Verordnung (EU) 2016/679 (DSGVO) ein.',
+    },
+    ex: [
+      { tab: 'Kassierer/in / Verkäufer/in', title: 'Kassierer/in / Verkäufer/in', company: 'Supermarkt Zielony Rynek',
+        ad: 'Wir suchen eine Person für den Kundenservice und die Kassenbedienung in unserem Supermarkt. Wir erwarten Kommunikationsstärke, Ehrlichkeit und Bereitschaft zur Schichtarbeit. Wir bieten einen Arbeitsvertrag und ein Benefit-Paket.',
+        kws: ['Kundenservice', 'Kassenbedienung', 'Kommunikationsstärke', 'Schichtarbeit'],
+        sum: 'Bewerbung als Kassierer/in / Verkäufer/in. Fast drei Jahre lang habe ich bei Market Dom die Kasse bedient und Kunden betreut, im Schichtbetrieb in einem Team von 8 Personen. Ich bringe Kommunikationsstärke und Erfahrung mit Inventuren mit.',
+        skills: ['Kundenservice', 'Kassenbedienung', 'Kommunikationsstärke', 'Schichtarbeit', 'Inventur', 'CRM', 'Excel'],
+        changes: ['Überschrift geändert in „Kassierer/in / Verkäufer/in“.', 'Fähigkeiten aus der Anzeige stehen vorne: Kassenbedienung und Schichtarbeit.', 'Bei Market Dom steht die Kasse an erster Stelle, weil es in der Anzeige darum geht.', 'Der Punkt zum Kontakt auf Englisch wurde weggelassen, weil die Anzeige ihn nicht verlangt.'],
+        letter: `Sehr geehrte Damen und Herren,
+
+mit Interesse bewerbe ich mich auf Ihre Anzeige als Kassiererin / Verkäuferin im Supermarkt Zielony Rynek. Im Handel habe ich 2019 bei Market Dom angefangen, wo ich fast drei Jahre lang die Kasse bedient, Schichten abgerechnet und täglich mit Kunden gesprochen habe.
+
+Sie suchen eine kommunikationsstarke Person, die zur Schichtarbeit bereit ist. Ich habe im Schichtbetrieb in einem Team von acht Personen gearbeitet und mich außerdem um Reklamationen an der Kasse und um Inventuren gekümmert.
+
+Derzeit arbeite ich im Kundenservice bei Nova Serwis, wo ich Reklamationen bearbeite und Tickets im CRM-System betreue.
+
+Gerne erzähle ich Ihnen in einem persönlichen Gespräch mehr über meine Erfahrung. Vielen Dank für die Berücksichtigung meiner Bewerbung.
+
+Mit freundlichen Grüßen
+Anna Nowak` },
+      { tab: 'Kundenservice-Spezialist/in', title: 'Kundenservice-Spezialist/in', company: 'Telko Group',
+        ad: 'Für unser Kundenservice-Büro suchen wir eine/n Spezialist/in. Aufgaben: Ticketbearbeitung, Bearbeitung von Reklamationen, Arbeit im CRM-System. Wir erwarten mindestens 2 Jahre Erfahrung und Englischkenntnisse. Wir bieten einen Arbeitsvertrag und flexible Arbeitszeiten.',
+        kws: ['Ticketbearbeitung', 'Tickets', 'Reklamationen', 'CRM', 'Englisch', 'Kundenservice'],
+        sum: 'Bewerbung als Kundenservice-Spezialist/in. Seit 2022 bearbeite ich Tickets und Reklamationen von Kunden im CRM-System und spreche mit internationalen Kunden Englisch.',
+        skills: ['CRM', 'Reklamationsbearbeitung', 'Ticketbearbeitung', 'Kundenservice', 'Englisch B2', 'Excel'],
+        changes: ['Überschrift geändert in „Kundenservice-Spezialist/in“.', 'CRM, Reklamationen und Tickets stehen oben in den Fähigkeiten, wie in der Anzeige.', 'Englisch im Profil und in der aktuellen Stelle hervorgehoben.', 'Aus dem Job im Geschäft sind nur die Punkte zu Kunden und Schichten geblieben.'],
+        letter: `Sehr geehrte Damen und Herren,
+
+hiermit bewerbe ich mich als Kundenservice-Spezialistin bei Telko Group. Seit März 2022 arbeite ich als Kundenservice-Spezialistin bei Nova Serwis, wo ich täglich 40–50 Tickets im CRM-System bearbeite und Kundenreklamationen löse. Das entspricht genau den Aufgaben aus Ihrer Anzeige.
+
+Sie erwarten Englischkenntnisse. In meiner aktuellen Stelle kommuniziere ich auf Englisch mit internationalen Kunden, auf Niveau B2. Zuvor habe ich bei Market Dom fast drei Jahre direkt mit Kunden gearbeitet und Reklamationen bearbeitet.
+
+Gerne stelle ich Ihnen meine Erfahrung in einem Gespräch vor und erfahre mehr über das Team. Vielen Dank für die Berücksichtigung meiner Bewerbung.
+
+Mit freundlichen Grüßen
+Anna Nowak` },
+      { tab: 'Lagermitarbeiter/in', title: 'Lagermitarbeiter/in', company: 'Großhandel Sigma',
+        ad: 'Wir suchen eine/n Lagermitarbeiter/in für unseren Großhandel. Aufgaben: Warenannahme und -ausgabe, Inventur, Arbeit mit Lagerdokumenten. Wir erwarten Zuverlässigkeit und Bereitschaft zur Schichtarbeit. Ein Staplerschein ist von Vorteil.',
+        kws: ['Inventur', 'Schichtarbeit'],
+        sum: 'Bewerbung als Lagermitarbeiter/in. Ich habe praktische Erfahrung mit Inventuren und Schichtarbeit in einem Team von 8 Personen. Ich kenne Excel und CRM-Systeme.',
+        skills: ['Inventur', 'Schichtarbeit', 'Excel', 'CRM', 'Kundenservice'],
+        changes: ['Überschrift geändert in „Lagermitarbeiter/in“.', 'Inventur und Schichtarbeit stehen oben, weil die Anzeige danach sucht.', 'Aus der aktuellen Stelle ist ein Punkt geblieben, der Rest betrifft den Kundenservice.'],
+        notAdded: 'einen Staplerschein, weil er nicht angegeben wurde. Wenn Sie einen haben, tragen Sie ihn im Bestellformular ein, dann erscheint er im Lebenslauf.',
+        letter: `Sehr geehrte Damen und Herren,
+
+mit Interesse bewerbe ich mich auf Ihre Anzeige als Lagermitarbeiterin im Großhandel Sigma. Sie erwarten Zuverlässigkeit und Bereitschaft zur Schichtarbeit. Bei Market Dom habe ich von 2019 bis 2022 im Schichtbetrieb in einem Team von acht Personen gearbeitet und war für Inventuren zuständig, was direkt zu einem Teil der beschriebenen Aufgaben passt.
+
+Sie erwähnen auch die Arbeit mit Lagerdokumenten. Ich arbeite täglich mit Dokumenten und Daten: An der Kasse habe ich Schichten abgerechnet, heute betreue ich Tickets im CRM-System und arbeite mit Excel.
+
+Gerne erzähle ich Ihnen in einem persönlichen Gespräch mehr über meine Erfahrung. Vielen Dank für die Berücksichtigung meiner Bewerbung.
+
+Mit freundlichen Grüßen
+Anna Nowak` },
+    ],
+  },
 };
-const EX_UI = { pl: ['Ogłoszenie', 'Słowa kluczowe, których szuka rekruter'], en: ['Job ad', 'Keywords the recruiter is looking for'], uk: ['Оголошення', 'Ключові слова, які шукає рекрутер'] };
+const EX_UI = { pl: ['Ogłoszenie', 'Słowa kluczowe, których szuka rekruter'], en: ['Job ad', 'Keywords the recruiter is looking for'], uk: ['Оголошення', 'Ключові слова, які шукає рекрутер'], de: ['Stellenanzeige', 'Schlüsselwörter, nach denen der Recruiter sucht'] };
 const EX_LANG = EX_LOC[window.I18N?.lang] ? window.I18N.lang : 'pl';
 if (EX_LANG !== 'pl') { Object.assign(BASE, EX_LOC[EX_LANG].base); EX_LOC[EX_LANG].ex.forEach((x, i) => Object.assign(EX[i], x)); }
 const exResult = (i) => {
@@ -1171,6 +1235,12 @@ addEventListener('scroll', () => { const show = scrollY > 500 && $('#result').hi
 
 async function loadContent() {
   if (!CONTENT) { try { CONTENT = await (await fetch('/content.json')).json(); } catch { CONTENT = { INDEX: [], POPULAR: [], ARTICLES: [], CITIES: [] }; } }
+  // Poradnik w języku strony (EN / UA / DE): tłumaczenia artykułów ładujemy tylko dla tego języka.
+  const l = window.I18N?.lang;
+  if (ART_SEG[l] && !CONTENT.artLang) {
+    CONTENT.artLang = l;
+    try { const tr = await (await fetch(`/content/articles-${l}.json`)).json(); CONTENT.ARTICLES = CONTENT.ARTICLES.map((a) => ({ ...a, ...(tr[a.slug] || {}) })); } catch {}
+  }
   return CONTENT;
 }
 async function loadProf(slug) {
@@ -1187,7 +1257,16 @@ const profResult = (p) => ({ position: p.sample.headline, lang: 'pl', keywords: 
 // Podstrony bez danych z content.json: treść w <template id="pg-…"> w index.html (serwer renderuje ją też dla wyszukiwarek).
 const STATIC_PAGES = ['dla-firm', 'program-polecen'];
 const HOME_TITLE = 'CV pod ogłoszenie i list motywacyjny od 39 zł | CV Pod Ogłoszenie';
-const pageHref = (r) => (cfg.preview ? (r ? '#/' + r : '#top') : '/' + r);
+// Publiczny adres podstrony: na wersjach EN / UA / DE strona główna to /<język>, a przetłumaczone artykuły mają własne adresy.
+const ART_SEG = { de: 'ratgeber', en: 'guides', uk: 'porady' };
+const pubPath = (r) => {
+  const l = window.I18N?.lang;
+  if (!ART_SEG[l]) return r;
+  if (!r) return l;
+  const m = /^poradnik\/([\w-]+)$/.exec(r), a = m && CONTENT?.ARTICLES.find((x) => x.slug === m[1]);
+  return a?.slugLang ? `${l}/${ART_SEG[l]}/${a.slugLang}` : r;
+};
+const pageHref = (r) => (cfg.preview ? (r ? '#/' + r : '#top') : '/' + pubPath(r));
 const pageLink = (r, props, ...kids) => { const a = el('a', { href: pageHref(r), ...props }, ...kids); a.dataset.page = r; return a; };
 const openBtn = (t, cls = 'btn') => { const b = el('button', { type: 'button', className: cls, textContent: t }); b.dataset.open = ''; return b; };
 
@@ -1327,21 +1406,24 @@ function cityPage(p, c, C) {
       el('aside', { className: 'side-card' }, el('b', { textContent: `CV: ${p.name}, ${c.name}` }), el('div', { className: 'side-thumb' }, thumb(r, d, false, '')), openBtn('Zamów CV pod swoje ogłoszenie'), el('p', { className: 'hint', textContent: 'Raport dopasowania, darmowa poprawka, PDF w e-mailu.' }))));
 }
 function articlePage(a, C) {
-  return el('div', { className: 'inner narrow article' },
-    el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', el('a', { href: '#poradnik', textContent: 'Poradnik' }), '›', el('span', { textContent: a.title })),
-    el('h1', { textContent: a.title }), el('p', { className: 'meta', textContent: `${a.readMinutes} min czytania` }), el('p', { className: 'lead', textContent: a.lead }),
+  // Przetłumaczony artykuł (EN / UA / DE): tłumaczymy też elementy wokół niego (reszta podstron zostaje po polsku).
+  const L = a.slugLang ? window.I18N.lang : 'pl', T = (s) => (L === 'pl' ? s : window.I18N.t(s));
+  return el('div', { className: 'inner narrow article', lang: L },
+    el('nav', { className: 'crumbs', ariaLabel: T('Ścieżka') }, pageLink('', { textContent: T('Strona główna') }), '›', el('a', { href: L !== 'pl' && !cfg.preview ? `/${L}#poradnik` : '#poradnik', textContent: T('Poradnik'), onclick: (e) => { e.preventDefault(); showHome(true); $('#poradnik').scrollIntoView(); } }), '›', el('span', { textContent: a.title })),
+    el('h1', { textContent: a.title }), el('p', { className: 'meta', textContent: T(`${a.readMinutes} min czytania`) }), el('p', { className: 'lead', textContent: a.lead }),
     ...a.sections.flatMap((sec) => [el('h2', { textContent: sec.h }), ...sec.p.map((t) => el('p', { textContent: t }))]),
-    el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Zrób CV pod swoje ogłoszenie' }), el('p', { className: 'hint', textContent: 'Wklejasz link, dostajesz CV z raportem dopasowania. Od 39 zł.' })), openBtn('Zamów CV')),
-    el('h2', { textContent: 'Przeczytaj też' }), el('div', { className: 'more' }, ...C.ARTICLES.filter((x) => x.slug !== a.slug).map((x) => pageLink(`poradnik/${x.slug}`, { textContent: x.title })), ...C.POPULAR.slice(0, 4).map((x) => pageLink(`cv/${x.slug}`, { textContent: `CV: ${x.name}` }))));
+    el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: T('Zrób CV pod swoje ogłoszenie') }), el('p', { className: 'hint', textContent: T('Wklejasz link, dostajesz CV z raportem dopasowania. Od 39 zł.') })), openBtn(T('Zamów CV'))),
+    el('h2', { textContent: T('Przeczytaj też') }), el('div', { className: 'more' }, ...C.ARTICLES.filter((x) => x.slug !== a.slug).map((x) => pageLink(`poradnik/${x.slug}`, { textContent: x.title })), ...C.POPULAR.slice(0, 4).map((x) => pageLink(`cv/${x.slug}`, { textContent: T(`CV: ${x.name}`) }))));
 }
 function setMeta(desc) { let m = document.querySelector('meta[name=description]'); if (!m) { m = el('meta', { name: 'description' }); document.head.append(m); } m.content = desc; }
 function navTo(r) {
   try {
     if (cfg.preview) history.pushState(null, '', r ? '#/' + r : '#top');
-    else history.pushState(null, '', '/' + r);
+    else history.pushState(null, '', '/' + pubPath(r));
   } catch {}
 }
 async function showPage(r, push = true) {
+  if (r.startsWith('art/')) { const a = (await loadContent()).ARTICLES.find((x) => x.slugLang === r.slice(4)); r = a ? 'poradnik/' + a.slug : ''; }
   const C = await loadContent(), [kind, slug, sub] = r.split('/');
   let item = null, node = null;
   if (kind === 'cv') {
@@ -1353,7 +1435,7 @@ async function showPage(r, push = true) {
   else if (!slug && STATIC_PAGES.includes(kind)) { const t = $('#pg-' + kind); item = { title: t.dataset.title, metaDescription: t.dataset.desc }; node = () => t.content.cloneNode(true); }
   if (!item) return showHome(push);
   $('#landing').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#account').hidden = true;
-  $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl';
+  $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl' || (kind === 'poradnik' && !!item.slugLang);
   $('#page').replaceChildren(node());
   try { document.title = `${item.title} | CV Pod Ogłoszenie`; } catch {}
   setMeta(item.metaDescription);
@@ -1371,7 +1453,7 @@ document.addEventListener('click', (e) => {
   const a = e.target.closest('a[data-page]');
   if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
   e.preventDefault();
-  if (!$('#result').hidden) { location.href = cfg.preview ? '#top' : '/' + a.dataset.page; return; }
+  if (!$('#result').hidden) { location.href = cfg.preview ? '#top' : '/' + pubPath(a.dataset.page); return; }
   // Link do miejsca na podstronie (np. /dla-firm#zapytanie): po wyrenderowaniu przewijamy do niego.
   const anchor = a.hash && a.pathname === '/' + a.dataset.page ? a.hash.slice(1) : '';
   (a.dataset.page ? showPage(a.dataset.page) : Promise.resolve(showHome(true))).then(() => { if (anchor) document.getElementById(anchor)?.scrollIntoView(); });
@@ -1497,7 +1579,7 @@ function accDash(d) {
   return wrap;
 }
 
-// Przełącznik języka strony (PL / EN / UA).
+// Przełącznik języka strony (PL / EN / UA / DE).
 $$('.langsw a').forEach((a) => {
   a.classList.toggle('on', a.dataset.lang === (window.I18N?.lang || 'pl'));
   a.onclick = (e) => { e.preventDefault(); window.I18N?.set(a.dataset.lang); if (cfg.preview) location.reload(); else location.href = a.getAttribute('href'); };
@@ -1512,6 +1594,8 @@ function route() {
   if (hm) return showPage(hm[1], false);
   const anchor = h.length > 1 && document.getElementById(h.slice(1));
   if (pm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage(pm[1], false);
+  const dm = /^\/(de|en|uk)\/(\w+)\/([\w-]+)\/?$/.exec(location.pathname);
+  if (dm && ART_SEG[dm[1]] === dm[2] && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage('art/' + dm[3], false);
   $('#page').hidden = $('#pageNote').hidden = true;
   const id = LEGAL[h];
   $('#landing').hidden = !!id;
