@@ -30,7 +30,7 @@
     const s = norm(raw); if (!s || !/[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]/.test(s)) return null;
     if (dict.has(s)) return dict.get(s);
     if (done.has(s)) return null;
-    for (const [re, v] of pats) { const m = re.exec(s); if (m) return v.replace(/\{(\d)\}/g, (_, i) => m[+i + 1]); }
+    for (const [re, v] of pats) { const m = re.exec(s); if (m) return v.replace(/\{(\d)\}/g, (_, i) => dict.get(m[+i + 1]) ?? m[+i + 1]); }
     if (window.__I18N_MISS) window.__I18N_MISS.add(s);
     return null;
   };
