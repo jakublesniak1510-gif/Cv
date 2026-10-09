@@ -1410,7 +1410,7 @@ async function showPage(r, push = true) {
   else if (kind === 'narzedzia' && C.TOOLS?.[slug]) { item = C.TOOLS[slug]; node = () => toolPage(slug, C); }
   if (!item) return showHome(push);
   $('#landing').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#account').hidden = true;
-  $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl';
+  $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl' || (kind === 'poradnik' && window.I18N?.lang === 'de');
   $('#page').replaceChildren(node());
   try { document.title = `${item.title} | CV Pod Ogłoszenie`; } catch {}
   setMeta(item.metaDescription);
