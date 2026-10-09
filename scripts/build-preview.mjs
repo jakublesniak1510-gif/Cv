@@ -15,4 +15,7 @@ ${strip(r('lib/cities.js'))}
 ${strip(r('lib/tools.js'))}
 ${strip(r('lib/content-articles.js'))}
 ${strip(r('lib/articles-de.js'))}
+${strip(r('lib/articles-en.js'))}
+${strip(r('lib/articles-uk.js'))}
+${strip(r('lib/articles-i18n.js'))}
 ${strip(r('lib/content.js'))}\n${strip(r('lib/tailor.js'))}\n${r('scripts/preview-stub.js')}\n${r('public/app.js')}\n</script>\n`);

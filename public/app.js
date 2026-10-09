@@ -1225,10 +1225,11 @@ addEventListener('scroll', () => { const show = scrollY > 500 && $('#result').hi
 
 async function loadContent() {
   if (!CONTENT) { try { CONTENT = await (await fetch('/content.json')).json(); } catch { CONTENT = { INDEX: [], POPULAR: [], ARTICLES: [], CITIES: [] }; } }
-  // Poradnik po niemiecku: tłumaczenia artykułów ładujemy tylko na wersji DE.
-  if (window.I18N?.lang === 'de' && !CONTENT.deArticles) {
-    CONTENT.deArticles = true;
-    try { const de = await (await fetch('/content/articles-de.json')).json(); CONTENT.ARTICLES = CONTENT.ARTICLES.map((a) => ({ ...a, ...(de[a.slug] || {}) })); } catch {}
+  // Poradnik w języku strony (EN / UA / DE): tłumaczenia artykułów ładujemy tylko dla tego języka.
+  const l = window.I18N?.lang;
+  if (ART_SEG[l] && !CONTENT.artLang) {
+    CONTENT.artLang = l;
+    try { const tr = await (await fetch(`/content/articles-${l}.json`)).json(); CONTENT.ARTICLES = CONTENT.ARTICLES.map((a) => ({ ...a, ...(tr[a.slug] || {}) })); } catch {}
   }
   return CONTENT;
 }
@@ -1243,12 +1244,14 @@ const profResult = (p) => ({ position: p.sample.headline, lang: 'pl', keywords: 
   name: p.sample.name, headline: p.sample.headline, contact: p.sample.contact, summary: p.sample.summary,
   experience: p.sample.jobs.map((j) => ({ title: j.title, company: j.company, period: j.period, bullets: j.bullets })),
   education: [p.sample.education], skills: p.sample.skills, languages: p.sample.languages || [], certificates: [], interests: '', clause: CLAUSE } });
-// Publiczny adres podstrony: na wersji DE strona główna to /de, a artykuły mają własne adresy /de/ratgeber/<slugDe>.
+// Publiczny adres podstrony: na wersjach EN / UA / DE strona główna to /<język>, a przetłumaczone artykuły mają własne adresy.
+const ART_SEG = { de: 'ratgeber', en: 'guides', uk: 'porady' };
 const pubPath = (r) => {
-  if (window.I18N?.lang !== 'de') return r;
-  if (!r) return 'de';
+  const l = window.I18N?.lang;
+  if (!ART_SEG[l]) return r;
+  if (!r) return l;
   const m = /^poradnik\/([\w-]+)$/.exec(r), a = m && CONTENT?.ARTICLES.find((x) => x.slug === m[1]);
-  return a?.slugDe ? 'de/ratgeber/' + a.slugDe : r;
+  return a?.slugLang ? `${l}/${ART_SEG[l]}/${a.slugLang}` : r;
 };
 const pageHref = (r) => (cfg.preview ? (r ? '#/' + r : '#top') : '/' + pubPath(r));
 const pageLink = (r, props, ...kids) => { const a = el('a', { href: pageHref(r), ...props }, ...kids); a.dataset.page = r; return a; };
@@ -1390,10 +1393,10 @@ function cityPage(p, c, C) {
       el('aside', { className: 'side-card' }, el('b', { textContent: `CV: ${p.name}, ${c.name}` }), el('div', { className: 'side-thumb' }, thumb(r, d, false, '')), openBtn('Zamów CV pod swoje ogłoszenie'), el('p', { className: 'hint', textContent: 'Raport dopasowania, darmowa poprawka, PDF w e-mailu.' }))));
 }
 function articlePage(a, C) {
-  // Na wersji DE artykuły są przetłumaczone, więc tłumaczymy też elementy wokół nich (reszta podstron zostaje po polsku).
-  const T = (s) => (window.I18N?.lang === 'de' ? window.I18N.t(s) : s);
-  return el('div', { className: 'inner narrow article', lang: window.I18N?.lang === 'de' ? 'de' : 'pl' },
-    el('nav', { className: 'crumbs', ariaLabel: T('Ścieżka') }, pageLink('', { textContent: T('Strona główna') }), '›', el('a', { href: window.I18N?.lang === 'de' && !cfg.preview ? '/de#poradnik' : '#poradnik', textContent: T('Poradnik'), onclick: (e) => { e.preventDefault(); showHome(true); $('#poradnik').scrollIntoView(); } }), '›', el('span', { textContent: a.title })),
+  // Przetłumaczony artykuł (EN / UA / DE): tłumaczymy też elementy wokół niego (reszta podstron zostaje po polsku).
+  const L = a.slugLang ? window.I18N.lang : 'pl', T = (s) => (L === 'pl' ? s : window.I18N.t(s));
+  return el('div', { className: 'inner narrow article', lang: L },
+    el('nav', { className: 'crumbs', ariaLabel: T('Ścieżka') }, pageLink('', { textContent: T('Strona główna') }), '›', el('a', { href: L !== 'pl' && !cfg.preview ? `/${L}#poradnik` : '#poradnik', textContent: T('Poradnik'), onclick: (e) => { e.preventDefault(); showHome(true); $('#poradnik').scrollIntoView(); } }), '›', el('span', { textContent: a.title })),
     el('h1', { textContent: a.title }), el('p', { className: 'meta', textContent: T(`${a.readMinutes} min czytania`) }), el('p', { className: 'lead', textContent: a.lead }),
     ...a.sections.flatMap((sec) => [el('h2', { textContent: sec.h }), ...sec.p.map((t) => el('p', { textContent: t }))]),
     el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: T('Zrób CV pod swoje ogłoszenie') }), el('p', { className: 'hint', textContent: T('Wklejasz link, dostajesz CV z raportem dopasowania. Od 39 zł.') })), openBtn(T('Zamów CV'))),
@@ -1407,7 +1410,7 @@ function navTo(r) {
   } catch {}
 }
 async function showPage(r, push = true) {
-  if (r.startsWith('ratgeber/')) { const a = (await loadContent()).ARTICLES.find((x) => x.slugDe === r.slice(9)); r = a ? 'poradnik/' + a.slug : ''; }
+  if (r.startsWith('art/')) { const a = (await loadContent()).ARTICLES.find((x) => x.slugLang === r.slice(4)); r = a ? 'poradnik/' + a.slug : ''; }
   const C = await loadContent(), [kind, slug, sub] = r.split('/');
   let item = null, node = null;
   if (kind === 'cv') {
@@ -1418,7 +1421,7 @@ async function showPage(r, push = true) {
   else if (kind === 'narzedzia' && C.TOOLS?.[slug]) { item = C.TOOLS[slug]; node = () => toolPage(slug, C); }
   if (!item) return showHome(push);
   $('#landing').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#account').hidden = true;
-  $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl' || (kind === 'poradnik' && window.I18N?.lang === 'de');
+  $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl' || (kind === 'poradnik' && !!item.slugLang);
   $('#page').replaceChildren(node());
   try { document.title = `${item.title} | CV Pod Ogłoszenie`; } catch {}
   setMeta(item.metaDescription);
@@ -1555,8 +1558,8 @@ function route() {
   if (hm) return showPage(hm[1], false);
   const anchor = h.length > 1 && document.getElementById(h.slice(1));
   if (pm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage(pm[1], false);
-  const dm = /^\/de\/ratgeber\/([\w-]+)\/?$/.exec(location.pathname);
-  if (dm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage('ratgeber/' + dm[1], false);
+  const dm = /^\/(de|en|uk)\/(\w+)\/([\w-]+)\/?$/.exec(location.pathname);
+  if (dm && ART_SEG[dm[1]] === dm[2] && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage('art/' + dm[3], false);
   $('#page').hidden = $('#pageNote').hidden = true;
   const id = LEGAL[h];
   $('#landing').hidden = !!id;
