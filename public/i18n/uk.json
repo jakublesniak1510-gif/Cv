@@ -53,7 +53,7 @@
 "Jedna osoba aplikuje na trzy stanowiska. Zmienia się nagłówek, profil, kolejność umiejętności i punktów w opisie pracy. Żółte są słowa z ogłoszenia. Niczego nie dopisujemy, czego nie podałeś.": "Одна людина подається на три посади. Змінюється заголовок, профіль, порядок навичок і пунктів в описі роботи. Жовтим позначено слова з оголошення. Ми нічого не додаємо від себе, чого ви не вказали.",
 "Przykładowe ogłoszenia": "Приклади оголошень",
 "Kasjer / Sprzedawca": "Kasjer / Sprzedawca",
-"Specjalista ds. obsługi klienta": "Specjalista ds. obsługi klienta",
+"Specjalista ds. obsługi klienta": "Спеціаліст з обслуговування клієнтів",
 "Magazynier": "Magazynier",
 "Co zmieniliśmy w tym CV": "Що ми змінили в цьому резюме",
 "Nagłówek zmieniony na „Kasjer / Sprzedawca”.": "Заголовок змінено на «Kasjer / Sprzedawca».",
@@ -487,7 +487,7 @@
 "Wykształcenie i umiejętności": "Освіта та навички",
 "Podsumowanie": "Підсумок",
 "Profil zawodowy": "Profil zawodowy",
-"Doświadczenie zawodowe": "Doświadczenie zawodowe",
+"Doświadczenie zawodowe": "Досвід роботи",
 "Kontakt": "Kontakt",
 "Professional summary": "Professional summary",
 "Work experience": "Work experience",
@@ -866,5 +866,8 @@
 "Tłumaczenie: {0}": "Переклад: {0}",
 "Tak. Dokumenty powstają w języku ogłoszenia i ten język jest w cenie: polski, angielski, niemiecki, ukraiński, hiszpański lub francuski. Język możesz też ustawić ręcznie przy ogłoszeniu. Tłumaczenie tych samych dokumentów na każdy kolejny język kosztuje 5 zł.": "Так. Документи створюються мовою оголошення, і ця мова входить у ціну: польська, англійська, німецька, українська, іспанська або французька. Мову можна також вибрати вручну для кожного оголошення. Переклад тих самих документів кожною наступною мовою коштує 5 zł.",
 "Przesuń w bok, aby zobaczyć wszystkie 10 szablonów →": "Гортайте вбік, щоб побачити всі 10 шаблонів →",
-"1 · Wklejasz ogłoszenie": "1 · Ви вставляєте оголошення"
+"1 · Wklejasz ogłoszenie": "1 · Ви вставляєте оголошення",
+"Pozostało poprawek: {0}": "Залишилося виправлень: {0}",
+"Podgląd: płatność jest symulowana.": "Попередній перегляд: оплата імітується.",
+"{0} zł": "{0} зл"
 }
