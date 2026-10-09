@@ -871,5 +871,7 @@
 "Podgląd: płatność jest symulowana.": "Попередній перегляд: оплата імітується.",
 "{0} zł": "{0} зл",
 "Niemiecki układ: dane osobowe w tabeli, zdjęcie, daty w kolumnie, miejsce, data i podpis. Do pracy w Niemczech i Austrii.": "Німецький формат: особисті дані в таблиці, фото, дати в колонці, місце, дата й підпис. Для роботи в Німеччині та Австрії.",
-"Układ wzorowany na unijnym CV Europass, z tabelą języków. Do ofert z UE i pracy za granicą.": "Макет за зразком європейського резюме Europass, з таблицею мов. Для вакансій у ЄС і роботи за кордоном."
+"Układ wzorowany na unijnym CV Europass, z tabelą języków. Do ofert z UE i pracy za granicą.": "Макет за зразком європейського резюме Europass, з таблицею мов. Для вакансій у ЄС і роботи за кордоном.",
+"Przykład: {0}": "Приклад: {0}",
+"CV: {0}": "Резюме: {0}"
 }

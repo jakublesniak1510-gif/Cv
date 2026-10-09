@@ -871,5 +871,7 @@
 "Podgląd: płatność jest symulowana.": "Vorschau: Die Zahlung wird simuliert.",
 "{0} zł": "{0} PLN",
 "Niemiecki układ: dane osobowe w tabeli, zdjęcie, daty w kolumnie, miejsce, data i podpis. Do pracy w Niemczech i Austrii.": "Deutsches Format: persönliche Daten in Tabellenform, Foto, Daten in einer Spalte, Ort, Datum und Unterschrift. Für Stellen in Deutschland und Österreich.",
-"Układ wzorowany na unijnym CV Europass, z tabelą języków. Do ofert z UE i pracy za granicą.": "Ein Layout nach dem Vorbild des EU-Lebenslaufs Europass, mit Sprachtabelle. Für Stellen in der EU und Arbeit im Ausland."
+"Układ wzorowany na unijnym CV Europass, z tabelą języków. Do ofert z UE i pracy za granicą.": "Ein Layout nach dem Vorbild des EU-Lebenslaufs Europass, mit Sprachtabelle. Für Stellen in der EU und Arbeit im Ausland.",
+"Przykład: {0}": "Beispiel: {0}",
+"CV: {0}": "Lebenslauf: {0}"
 }

@@ -711,3 +711,4 @@ html[lang="en"] .legal-pl,html[lang="uk"] .legal-pl,html[lang="de"] .legal-pl{di
 .t-europass .lt th{background:var(--soft);color:var(--acc);text-align:left;font-weight:600;padding:5px 10px}
 .t-europass .lt td{padding:5px 10px;border-bottom:1px solid #EEF0F3}
 @container (max-width:560px){.t-lebenslauf .pg,.t-europass .pg{padding:24px 18px}.t-lebenslauf .kv,.t-lebenslauf .row{grid-template-columns:96px minmax(0,1fr);gap:4px 10px}.t-lebenslauf .pic{width:64px;height:84px}.t-europass .pic{width:64px;height:64px}.t-lebenslauf .sign{flex-direction:column;align-items:stretch;gap:16px}}
+.kw span small{display:block;font-size:11px;opacity:.7;font-weight:400}

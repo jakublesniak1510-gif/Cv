@@ -14,7 +14,11 @@
     if (url === '/api/config') return json({ demo: true, preview: true, ai: false, maxAds: 3, noPrint: true, fakeFetch: true, maxRevisions: MAXREV, prices: Object.fromEntries(Object.entries(P).map(([k, v]) => [k, v / 100])) });
     if (url === '/content.json') return json({ INDEX: PROFESSIONS.map(({ slug, name, category, keywords }) => ({ slug, name, category, keywords })), POPULAR: PROFESSIONS.filter((p) => POPULAR_SLUGS.includes(p.slug)), ARTICLES, CITIES, TOOLS });
     { const m = /^\/content\/articles-(\w+)\.json$/.exec(url); if (m && ART_LANGS[m[1]]) return json(ART_LANGS[m[1]].data); }
-    { const c = /^\/content\/cv\/([\w-]+)\.json$/.exec(url); if (c) { const p = PROFESSIONS.find((x) => x.slug === c[1]); return p ? json(p) : json({}, 404); } }
+    { const m = /^\/content\/prof-(\w+)\.json$/.exec(url), x = m && PROF_LANGS[m[1]];
+      if (x) { const tr = (p) => ({ ...p, ...x.prof[p.slug], kwPl: p.keywords, lang: m[1] });
+        return json({ seg: x.seg, tpl: PAGE_T[m[1]], index: Object.fromEntries(Object.entries(x.prof).map(([pl, t]) => [pl, { slugLang: t.slugLang, name: t.name }])),
+          popular: Object.fromEntries(PROFESSIONS.filter((p) => POPULAR_SLUGS.includes(p.slug)).map((p) => [p.slug, tr(p)])), cities: Object.fromEntries(CITIES.map((c) => [c.slug, { ...c, ...x.cities[c.slug] }])) }); } }
+    { const c = /^\/content\/cv\/([\w-]+)\.json(?:\?lang=(\w+))?$/.exec(url); if (c) { const p = PROFESSIONS.find((x) => x.slug === c[1]), x = c[2] && PROF_LANGS[c[2]]; return p ? json(x && x.prof[p.slug] ? { ...p, ...x.prof[p.slug], kwPl: p.keywords, lang: c[2] } : p) : json({}, 404); } }
     // Podgląd nie pokazuje żadnych opinii: na prawdziwej stronie pojawią się dopiero opinie prawdziwych klientów.
     // Konto w podglądzie: logowanie bez e-maila, wszystko w pamięci przeglądarki.
     if (url.startsWith('/api/account')) {

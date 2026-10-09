@@ -871,5 +871,7 @@
 "Podgląd: płatność jest symulowana.": "Preview: the payment is simulated.",
 "{0} zł": "{0} PLN",
 "Niemiecki układ: dane osobowe w tabeli, zdjęcie, daty w kolumnie, miejsce, data i podpis. Do pracy w Niemczech i Austrii.": "German layout: personal details in a table, photo, dates in a column, place, date and signature. For jobs in Germany and Austria.",
-"Układ wzorowany na unijnym CV Europass, z tabelą języków. Do ofert z UE i pracy za granicą.": "A layout modelled on the EU Europass CV, with a language table. For EU job offers and work abroad."
+"Układ wzorowany na unijnym CV Europass, z tabelą języków. Do ofert z UE i pracy za granicą.": "A layout modelled on the EU Europass CV, with a language table. For EU job offers and work abroad.",
+"Przykład: {0}": "Example: {0}",
+"CV: {0}": "CV: {0}"
 }

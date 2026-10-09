@@ -1270,28 +1270,38 @@ async function loadContent() {
   if (ART_SEG[l] && !CONTENT.artLang) {
     CONTENT.artLang = l;
     try { const tr = await (await fetch(`/content/articles-${l}.json`)).json(); CONTENT.ARTICLES = CONTENT.ARTICLES.map((a) => ({ ...a, ...(tr[a.slug] || {}) })); } catch {}
+    // Zawody i miasta w języku strony: nazwy i adresy w indeksie, pełne dane popularnych zawodów, miasta i wzory zdań.
+    try {
+      const pr = await (await fetch(`/content/prof-${l}.json`)).json();
+      CONTENT.prof = pr;
+      CONTENT.INDEX = CONTENT.INDEX.map((p) => (pr.index[p.slug] ? { ...p, ...pr.index[p.slug] } : p));
+      CONTENT.POPULAR = CONTENT.POPULAR.map((p) => pr.popular[p.slug] || p);
+      CONTENT.CITIES = (CONTENT.CITIES || []).map((c) => pr.cities[c.slug] || c);
+    } catch {}
   }
   return CONTENT;
 }
 async function loadProf(slug) {
   const C = await loadContent(), p = C.POPULAR.find((x) => x.slug === slug);
   if (p) return p;
-  try { const r = await fetch(`/content/cv/${slug}.json`); if (r.ok) return await r.json(); } catch {}
+  try { const r = await fetch(`/content/cv/${slug}.json${C.prof ? '?lang=' + C.artLang : ''}`); if (r.ok) return await r.json(); } catch {}
   return null;
 }
 const fold = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ł/g, 'l');
-const profResult = (p) => ({ position: p.sample.headline, lang: 'pl', keywords: [], cv: {
+const profResult = (p) => ({ position: p.sample.headline, lang: p.lang || 'pl', keywords: [], cv: {
   name: p.sample.name, headline: p.sample.headline, contact: p.sample.contact, summary: p.sample.summary,
   experience: p.sample.jobs.map((j) => ({ title: j.title, company: j.company, period: j.period, bullets: j.bullets })),
   education: [p.sample.education], skills: p.sample.skills, languages: p.sample.languages || [], certificates: [], interests: '', clause: CLAUSE } });
 // Publiczny adres podstrony: na wersjach EN / UA / DE strona główna to /<język>, a przetłumaczone artykuły mają własne adresy.
-const ART_SEG = { de: 'ratgeber', en: 'guides', uk: 'porady' };
+const ART_SEG = { de: 'ratgeber', en: 'guides', uk: 'porady' }, PROF_SEG = { de: 'lebenslauf', en: 'cv', uk: 'rezyume' };
 const pubPath = (r) => {
   const l = window.I18N?.lang;
   if (!ART_SEG[l]) return r;
   if (!r) return l;
   const m = /^poradnik\/([\w-]+)$/.exec(r), a = m && CONTENT?.ARTICLES.find((x) => x.slug === m[1]);
-  return a?.slugLang ? `${l}/${ART_SEG[l]}/${a.slugLang}` : r;
+  if (a?.slugLang) return `${l}/${ART_SEG[l]}/${a.slugLang}`;
+  const pm = /^cv\/([\w-]+)(?:\/([\w-]+))?$/.exec(r), P = CONTENT?.prof, ps = pm && P?.index[pm[1]]?.slugLang, cs = pm?.[2] && P?.cities[pm[2]]?.slugLang;
+  return ps && (!pm[2] || cs) ? `${l}/${P.seg}/${ps}${cs ? '/' + cs : ''}` : r;
 };
 const pageHref = (r) => (cfg.preview ? (r ? '#/' + r : '#top') : '/' + pubPath(r));
 const pageLink = (r, props, ...kids) => { const a = el('a', { href: pageHref(r), ...props }, ...kids); a.dataset.page = r; return a; };
@@ -1326,25 +1336,30 @@ async function runSearch() {
     el('button', { type: 'button', className: 'btn', textContent: 'Stwórz CV samodzielnie', onclick: () => { if (!$('#headline').value.trim()) $('#headline').value = raw; openWiz(); } })));
 }
 
+// Zdania z miastem w języku strony (wzory przychodzą z serwera razem z tłumaczeniem zawodów).
+const fillT = (s, p, c) => s.replace(/\{(\w+)\}/g, (_, k) => ({ name: p?.name, low: p?.name?.toLowerCase(), loc: c?.loc, gen: c?.gen, city: c?.name, near: (c?.near || []).join(', ') })[k] ?? '');
+// Tłumaczenie elementów strony zawodu, gdy zawód ma tłumaczenie (p.lang); w przeciwnym razie zostaje po polsku.
+const pT = (p) => (s) => (p.lang ? window.I18N.t(s) : s);
+const kwChips = (p) => el('div', { className: 'kw' }, ...p.keywords.map((k, i) => el('span', {}, k, p.kwPl?.[i] ? el('small', { textContent: p.kwPl[i] }) : null)));
 function profPage(p, C) {
-  const d = { tpl: 'nowoczesny', color: 'niebieski' }, r = profResult(p);
+  const d = { tpl: 'nowoczesny', color: 'niebieski' }, r = profResult(p), T = pT(p), PT = p.lang && C.prof?.tpl;
   const side = el('div', { className: 'side-thumb' }), full = el('div', { className: 'side-full' });
   const paint = () => { side.replaceChildren(thumb(r, d, false, '')); full.replaceChildren(cvNode(r, false, d, '')); };
   const picker = el('div'); designPicker(picker, d, paint, { thumbs: false }); paint();
-  return el('div', { className: 'inner' },
-    el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', el('a', { href: '#zawody', textContent: 'CV dla zawodów' }), '›', el('span', { textContent: p.name })),
+  return el('div', { className: 'inner', lang: p.lang || 'pl' },
+    el('nav', { className: 'crumbs', ariaLabel: T('Ścieżka') }, pageLink('', { textContent: T('Strona główna') }), '›', el('a', { href: '#zawody', textContent: T('CV dla zawodów') }), '›', el('span', { textContent: p.name })),
     el('h1', { textContent: p.title }), el('p', { className: 'lead', textContent: p.intro }),
     el('div', { className: 'page-grid' },
       el('div', {},
-        el('h2', { textContent: 'Słowa kluczowe z ogłoszeń' }), el('p', { className: 'hint', textContent: 'Te sformułowania często pojawiają się w ofertach. Jeśli to prawda o Tobie, użyj ich w CV w takim samym brzmieniu.' }),
-        el('div', { className: 'kw' }, ...p.keywords.map((k) => el('span', { textContent: k }))),
-        el('h2', { textContent: 'Wskazówki do CV' }), el('ol', { className: 'tips' }, ...p.tips.map((t) => el('li', { textContent: t }))),
-        el('h2', { textContent: 'Przykładowe CV' }), el('p', { className: 'hint', textContent: 'Dane w przykładzie są fikcyjne. Szablon i kolor zmienisz w panelu obok.' }), full,
-        el('h2', { textContent: 'Pytania' }), ...p.faq.map((f) => el('details', {}, el('summary', { textContent: f.q }), el('p', { textContent: f.a }))),
-        el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Masz konkretne ogłoszenie?' }), el('p', { className: 'hint', textContent: 'Wklej link, a przygotujemy CV pisane pod nie. Od 39 zł, z darmową poprawką.' })), openBtn('Zamów CV')),
-        ...(C.POPULAR.some((x) => x.slug === p.slug) && C.CITIES?.length ? [el('h2', { textContent: `${p.name} w Twoim mieście` }), el('div', { className: 'more' }, ...C.CITIES.map((x) => pageLink(`cv/${p.slug}/${x.slug}`, { textContent: x.name })))] : []),
-        el('h2', { textContent: 'Podobne zawody' }), el('div', { className: 'more' }, ...C.INDEX.filter((x) => x.slug !== p.slug && x.category === p.category).slice(0, 10).map((x) => pageLink(`cv/${x.slug}`, { textContent: x.name })), el('a', { href: '#zawody', textContent: 'Wszystkie zawody' }))),
-      el('aside', { className: 'side-card' }, el('b', { textContent: `Przykład: ${p.sample.name}` }), side, picker, openBtn('Zamów CV pod swoje ogłoszenie'), el('p', { className: 'hint', textContent: 'Raport dopasowania, darmowa poprawka, PDF w e-mailu.' }))));
+        el('h2', { textContent: T('Słowa kluczowe z ogłoszeń') }), el('p', { className: 'hint', textContent: T('Te sformułowania często pojawiają się w ofertach. Jeśli to prawda o Tobie, użyj ich w CV w takim samym brzmieniu.') + (PT ? ' ' + PT.kwPl : '') }),
+        kwChips(p),
+        el('h2', { textContent: T('Wskazówki do CV') }), el('ol', { className: 'tips' }, ...p.tips.map((t) => el('li', { textContent: t }))),
+        el('h2', { textContent: T('Przykładowe CV') }), el('p', { className: 'hint', textContent: T('Dane w przykładzie są fikcyjne. Szablon i kolor zmienisz w panelu obok.') }), full,
+        el('h2', { textContent: T('Pytania') }), ...p.faq.map((f) => el('details', {}, el('summary', { textContent: f.q }), el('p', { textContent: f.a }))),
+        el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: T('Masz konkretne ogłoszenie?') }), el('p', { className: 'hint', textContent: T('Wklej link, a przygotujemy CV pisane pod nie. Od 39 zł, z darmową poprawką.') })), openBtn(T('Zamów CV'))),
+        ...(C.POPULAR.some((x) => x.slug === p.slug) && C.CITIES?.length ? [el('h2', { textContent: PT ? fillT(PT.inCity, p) : `${p.name} w Twoim mieście` }), el('div', { className: 'more' }, ...C.CITIES.map((x) => pageLink(`cv/${p.slug}/${x.slug}`, { textContent: x.name })))] : []),
+        el('h2', { textContent: T('Podobne zawody') }), el('div', { className: 'more' }, ...C.INDEX.filter((x) => x.slug !== p.slug && x.category === p.category).slice(0, 10).map((x) => pageLink(`cv/${x.slug}`, { textContent: x.name })), el('a', { href: '#zawody', textContent: T('Wszystkie zawody') }))),
+      el('aside', { className: 'side-card' }, el('b', { textContent: p.lang ? T(`Przykład: ${p.sample.name}`) : `Przykład: ${p.sample.name}` }), side, picker, openBtn(T('Zamów CV pod swoje ogłoszenie')), el('p', { className: 'hint', textContent: T('Raport dopasowania, darmowa poprawka, PDF w e-mailu.') }))));
 }
 // --- Darmowe narzędzia ---
 const CLAUSES = {
@@ -1415,22 +1430,23 @@ const copyBtn2 = (node) => el('button', { type: 'button', className: 'btn sm', t
 // Strona zawodu w konkretnym mieście: dane zawodu + lokalny rynek pracy.
 const cityMeta = (p, c) => ({ title: `${p.name} ${c.loc}: CV pod lokalne ogłoszenia`, metaDescription: `Jak napisać CV na stanowisko ${p.name.toLowerCase()} ${c.loc}: słowa kluczowe z ogłoszeń, wskazówki dla rynku pracy ${c.gen} i przykładowe CV. CV pod ogłoszenie od 39 zł.` });
 function cityPage(p, c, C) {
-  const d = { tpl: 'nowoczesny', color: 'niebieski' }, r = profResult(p), m = cityMeta(p, c);
-  return el('div', { className: 'inner' },
-    el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', pageLink(`cv/${p.slug}`, { textContent: p.name }), '›', el('span', { textContent: c.name })),
-    el('h1', { textContent: m.title }), el('p', { className: 'lead', textContent: `${c.intro}` }),
+  const d = { tpl: 'nowoczesny', color: 'niebieski' }, r = profResult(p), T = pT(p), PT = p.lang && C.prof?.tpl;
+  const F = (k, pl) => (PT ? fillT(PT[k], p, c) : pl);
+  return el('div', { className: 'inner', lang: p.lang || 'pl' },
+    el('nav', { className: 'crumbs', ariaLabel: T('Ścieżka') }, pageLink('', { textContent: T('Strona główna') }), '›', pageLink(`cv/${p.slug}`, { textContent: p.name }), '›', el('span', { textContent: c.name })),
+    el('h1', { textContent: F('title', cityMeta(p, c).title) }), el('p', { className: 'lead', textContent: `${c.intro}` }),
     el('div', { className: 'page-grid' },
       el('div', {},
-        el('h2', { textContent: `Szukasz pracy jako ${p.name.toLowerCase()} ${c.loc}?` }), el('p', { textContent: p.intro }),
-        el('h2', { textContent: `Wskazówki dla rynku pracy ${c.gen}` }), el('ol', { className: 'tips' }, ...c.tips.map((t) => el('li', { textContent: t }))),
-        c.near?.length ? el('p', { className: 'hint', textContent: `Szukając ofert, sprawdź też okolice: ${c.near.join(', ')}. Jeśli możesz dojeżdżać, napisz to w CV.` }) : null,
-        el('h2', { textContent: 'Słowa kluczowe z ogłoszeń' }), el('div', { className: 'kw' }, ...p.keywords.map((k) => el('span', { textContent: k }))),
-        el('h2', { textContent: 'Wskazówki do CV' }), el('ol', { className: 'tips' }, ...p.tips.map((t) => el('li', { textContent: t }))),
-        el('h2', { textContent: 'Przykładowe CV' }), el('p', { className: 'hint', textContent: 'Dane w przykładzie są fikcyjne.' }), cvNode(r, false, d, ''),
-        el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: `Masz ogłoszenie ${c.loc}?` }), el('p', { className: 'hint', textContent: 'Wklej link, a przygotujemy CV pisane pod nie. Od 39 zł, z darmową poprawką.' })), openBtn('Zamów CV')),
-        el('h2', { textContent: `${p.name} w innych miastach` }), el('div', { className: 'more' }, ...(C.CITIES || []).filter((x) => x.slug !== c.slug).map((x) => pageLink(`cv/${p.slug}/${x.slug}`, { textContent: x.name }))),
-        el('h2', { textContent: `Inne zawody ${c.loc}` }), el('div', { className: 'more' }, ...C.POPULAR.filter((x) => x.slug !== p.slug).map((x) => pageLink(`cv/${x.slug}/${c.slug}`, { textContent: x.name })))),
-      el('aside', { className: 'side-card' }, el('b', { textContent: `CV: ${p.name}, ${c.name}` }), el('div', { className: 'side-thumb' }, thumb(r, d, false, '')), openBtn('Zamów CV pod swoje ogłoszenie'), el('p', { className: 'hint', textContent: 'Raport dopasowania, darmowa poprawka, PDF w e-mailu.' }))));
+        el('h2', { textContent: F('seek', `Szukasz pracy jako ${p.name.toLowerCase()} ${c.loc}?`) }), el('p', { textContent: p.intro }),
+        el('h2', { textContent: F('market', `Wskazówki dla rynku pracy ${c.gen}`) }), el('ol', { className: 'tips' }, ...c.tips.map((t) => el('li', { textContent: t }))),
+        c.near?.length ? el('p', { className: 'hint', textContent: F('near', `Szukając ofert, sprawdź też okolice: ${c.near.join(', ')}. Jeśli możesz dojeżdżać, napisz to w CV.`) }) : null,
+        el('h2', { textContent: T('Słowa kluczowe z ogłoszeń') }), PT ? el('p', { className: 'hint', textContent: PT.kwPl }) : null, kwChips(p),
+        el('h2', { textContent: T('Wskazówki do CV') }), el('ol', { className: 'tips' }, ...p.tips.map((t) => el('li', { textContent: t }))),
+        el('h2', { textContent: T('Przykładowe CV') }), el('p', { className: 'hint', textContent: T('Dane w przykładzie są fikcyjne.') }), cvNode(r, false, d, ''),
+        el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: F('cta', `Masz ogłoszenie ${c.loc}?`) }), el('p', { className: 'hint', textContent: T('Wklej link, a przygotujemy CV pisane pod nie. Od 39 zł, z darmową poprawką.') })), openBtn(T('Zamów CV'))),
+        el('h2', { textContent: F('otherCities', `${p.name} w innych miastach`) }), el('div', { className: 'more' }, ...(C.CITIES || []).filter((x) => x.slug !== c.slug).map((x) => pageLink(`cv/${p.slug}/${x.slug}`, { textContent: x.name }))),
+        el('h2', { textContent: F('otherProf', `Inne zawody ${c.loc}`) }), el('div', { className: 'more' }, ...C.POPULAR.filter((x) => x.slug !== p.slug).map((x) => pageLink(`cv/${x.slug}/${c.slug}`, { textContent: x.name })))),
+      el('aside', { className: 'side-card' }, el('b', { textContent: F('side', `CV: ${p.name}, ${c.name}`) }), el('div', { className: 'side-thumb' }, thumb(r, d, false, '')), openBtn(T('Zamów CV pod swoje ogłoszenie')), el('p', { className: 'hint', textContent: T('Raport dopasowania, darmowa poprawka, PDF w e-mailu.') }))));
 }
 function articlePage(a, C) {
   // Przetłumaczony artykuł (EN / UA / DE): tłumaczymy też elementy wokół niego (reszta podstron zostaje po polsku).
@@ -1451,17 +1467,21 @@ function navTo(r) {
 }
 async function showPage(r, push = true) {
   if (r.startsWith('art/')) { const a = (await loadContent()).ARTICLES.find((x) => x.slugLang === r.slice(4)); r = a ? 'poradnik/' + a.slug : ''; }
+  if (r.startsWith('prof/')) {
+    const C0 = await loadContent(), [, ps, cs] = r.split('/'), pl = Object.keys(C0.prof?.index || {}).find((k) => C0.prof.index[k].slugLang === ps), city = cs && C0.CITIES.find((c) => c.slugLang === cs);
+    r = pl && (!cs || city) ? `cv/${pl}${city ? '/' + city.slug : ''}` : '';
+  }
   const C = await loadContent(), [kind, slug, sub] = r.split('/');
   let item = null, node = null;
   if (kind === 'cv') {
     const p = await loadProf(slug), city = sub && (C.CITIES || []).find((c) => c.slug === sub);
-    if (p && sub && city && C.POPULAR.some((x) => x.slug === p.slug)) { item = cityMeta(p, city); node = () => cityPage(p, city, C); }
+    if (p && sub && city && C.POPULAR.some((x) => x.slug === p.slug)) { item = p.lang && C.prof ? { title: fillT(C.prof.tpl.title, p, city), metaDescription: fillT(C.prof.tpl.desc, p, city) } : cityMeta(p, city); node = () => cityPage(p, city, C); }
     else if (p && !sub) { item = p; node = () => profPage(p, C); }
   } else if (kind === 'poradnik') { item = C.ARTICLES.find((a) => a.slug === slug); node = () => articlePage(item, C); }
   else if (kind === 'narzedzia' && C.TOOLS?.[slug]) { item = C.TOOLS[slug]; node = () => toolPage(slug, C); }
   if (!item) return showHome(push);
   $('#landing').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#account').hidden = true;
-  $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl' || (kind === 'poradnik' && !!item.slugLang);
+  $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl' || (kind === 'poradnik' && !!item.slugLang) || (kind === 'cv' && !!C.prof);
   $('#page').replaceChildren(node());
   try { document.title = `${item.title} | CV Pod Ogłoszenie`; } catch {}
   setMeta(item.metaDescription);
@@ -1598,8 +1618,11 @@ function route() {
   if (hm) return showPage(hm[1], false);
   const anchor = h.length > 1 && document.getElementById(h.slice(1));
   if (pm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage(pm[1], false);
-  const dm = /^\/(de|en|uk)\/(\w+)\/([\w-]+)\/?$/.exec(location.pathname);
-  if (dm && ART_SEG[dm[1]] === dm[2] && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage('art/' + dm[3], false);
+  const dm = /^\/(de|en|uk)\/(\w+)\/([\w-]+)(?:\/([\w-]+))?\/?$/.exec(location.pathname);
+  if (dm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) {
+    if (ART_SEG[dm[1]] === dm[2] && !dm[4]) return showPage('art/' + dm[3], false);
+    if (PROF_SEG[dm[1]] === dm[2]) return showPage('prof/' + dm[3] + (dm[4] ? '/' + dm[4] : ''), false);
+  }
   $('#page').hidden = $('#pageNote').hidden = true;
   const id = LEGAL[h];
   $('#landing').hidden = !!id;
