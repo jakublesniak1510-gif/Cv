@@ -27,6 +27,8 @@ const TPLS = [
   ['kreatywny', 'Kreatywny', 'Ukośny kolorowy nagłówek i żółte akcenty. Do marketingu, sprzedaży i branż kreatywnych.'],
   ['kompetencje', 'Kompetencje', 'Jasna kolumna z umiejętnościami i poziomem języków. Do IT, logistyki i pracy technicznej.'],
   ['wstega', 'Wstęga', 'Kolorowa wstęga u góry, zdjęcie na jej krawędzi i wyśrodkowane sekcje.'],
+  ['lebenslauf', 'Lebenslauf', 'Niemiecki układ: dane osobowe w tabeli, zdjęcie, daty w kolumnie, miejsce, data i podpis. Do pracy w Niemczech i Austrii.'],
+  ['europass', 'Europass', 'Układ wzorowany na unijnym CV Europass, z tabelą języków. Do ofert z UE i pracy za granicą.'],
 ];
 const LEGACY = { wyrazisty: 'geometria' };
 const COLORS = { niebieski: '#2548E8', granat: '#1E3A5F', morski: '#0F766E', bordo: '#9F1239', fiolet: '#6D28D9', grafit: '#374151' };
@@ -46,6 +48,19 @@ const LBL = {
   es: { summary: 'Perfil profesional', exp: 'Experiencia laboral', edu: 'Formación', skills: 'Habilidades', langs: 'Idiomas', certs: 'Certificados y cursos', interests: 'Intereses', contact: 'Contacto', locale: 'es-ES' },
   fr: { summary: 'Profil professionnel', exp: 'Expérience professionnelle', edu: 'Formation', skills: 'Compétences', langs: 'Langues', certs: 'Certifications et formations', interests: "Centres d'intérêt", contact: 'Contact', locale: 'fr-FR' },
 };
+// Etykiety szablonów Lebenslauf i Europass (dane osobowe, miejsce i data, podpis, poziom języka).
+const LBL2 = {
+  pl: { cvTitle: 'Życiorys', personal: 'Dane osobowe', phone: 'Telefon', email: 'E-mail', city: 'Miejsce zamieszkania', web: 'Profil', more: 'Umiejętności i języki', native: 'ojczysty', placeDate: 'Miejscowość, data', sign: 'Podpis', level: 'Poziom' },
+  en: { cvTitle: 'Curriculum Vitae', personal: 'Personal details', phone: 'Phone', email: 'Email', city: 'Location', web: 'Profile', more: 'Skills and languages', native: 'native', placeDate: 'Place, date', sign: 'Signature', level: 'Level' },
+  de: { cvTitle: 'Lebenslauf', personal: 'Persönliche Daten', phone: 'Telefon', email: 'E-Mail', city: 'Wohnort', web: 'Profil', more: 'Kenntnisse und Fähigkeiten', native: 'Muttersprache', placeDate: 'Ort, Datum', sign: 'Unterschrift', level: 'Niveau' },
+  uk: { cvTitle: 'Резюме', personal: 'Особисті дані', phone: 'Телефон', email: 'E-mail', city: 'Місце проживання', web: 'Профіль', more: 'Навички та мови', native: 'рідна', placeDate: 'Місто, дата', sign: 'Підпис', level: 'Рівень' },
+  es: { cvTitle: 'Currículum vitae', personal: 'Datos personales', phone: 'Teléfono', email: 'Correo', city: 'Residencia', web: 'Perfil', more: 'Habilidades e idiomas', native: 'nativo', placeDate: 'Lugar y fecha', sign: 'Firma', level: 'Nivel' },
+  fr: { cvTitle: 'Curriculum vitae', personal: 'Informations personnelles', phone: 'Téléphone', email: 'E-mail', city: 'Domicile', web: 'Profil', more: 'Compétences et langues', native: 'langue maternelle', placeDate: 'Lieu, date', sign: 'Signature', level: 'Niveau' },
+};
+// Rodzaj pozycji kontaktowej (do tabel danych osobowych) i podział „język + poziom CEFR”.
+const contactKind = (x) => (/@/.test(x) ? 'email' : /^\+?[\d\s()./-]{7,}$/.test(x) ? 'phone' : /https?:|www\.|\.(com|pl|de|io|net|org|eu)\b|linkedin|github/i.test(x) ? 'web' : 'city');
+const NATIVE = /\s*[(,–-]?\s*(język ojczysty|ojczysty|native( speaker)?|muttersprache|рідна( мова)?|nativo|langue maternelle)\)?\s*/i;
+const langLevel = (t, M) => { const m = /^(.*?)[\s,–-]*\b([ABC][12])\b(.*)$/i.exec(t); return m ? [(m[1] + m[3]).trim(), m[2].toUpperCase()] : NATIVE.test(t) ? [t.replace(NATIVE, ' ').trim(), M?.native || ''] : [t, '']; };
 const LANGS = { pl: 'polski', en: 'angielski', de: 'niemiecki', uk: 'ukraiński', es: 'hiszpański', fr: 'francuski' };
 // Rozpoznanie języka ogłoszenia — kopia lib/lang.js (serwer liczy cenę tą samą metodą).
 const W = (s) => new RegExp(`(?<!\\p{L})(${s})(?!\\p{L})`, 'gu');
@@ -70,7 +85,7 @@ const mainLang = (ad) => (ad.lang && ad.lang !== 'auto' ? ad.lang : detectLang(a
 // Tłumaczenie na język, w którym i tak powstaną wszystkie dokumenty, nie ma sensu — nie liczymy go.
 const usefulExtraLangs = (langs, ads) => langs.filter((l) => !ads.length || !ads.every((a) => mainLang(a) === l));
 function parts(c, kw, lang = 'pl', photo = '') {
-  const L = LBL[lang] || LBL.pl;
+  const L = LBL[lang] || LBL.pl, M = LBL2[lang] || LBL2.pl;
   const contact = (c.contact || []).filter(Boolean);
   const [first = '', ...rest] = String(c.name || '').split(/\s+/);
   const sec = (t, ...k) => el('section', {}, el('h3', { textContent: t }), el('div', { className: 'cnt' }, ...k));
@@ -101,6 +116,29 @@ function parts(c, kw, lang = 'pl', photo = '') {
       return el('div', { className: 'lv' }, el('span', { textContent: t }), n ? el('div', { className: 'dots', ariaHidden: 'true' }, ...[1, 2, 3, 4, 5].map((i) => el('i', { className: i <= n ? 'f' : '' }))) : null);
     })) : null),
     contactSec: () => sec(L.contact, el('ul', { className: 'clist' }, ...contact.map((x) => el('li', { textContent: x })))),
+    // Lebenslauf: dane osobowe w tabeli, daty w lewej kolumnie, miejsce/data/podpis na końcu.
+    persData: () => (contact.length ? sec(M.personal, el('dl', { className: 'kv' }, ...contact.flatMap((x) => [el('dt', { textContent: M[contactKind(x)] }), el('dd', { textContent: x })]))) : null),
+    tRows: (items, titleOf, orgOf) => items.map((e) => el('div', { className: 'row' }, el('div', { className: 'd', textContent: e.period || '' }),
+      el('div', { className: 'c' }, el('b', { textContent: titleOf(e) || '' }), orgOf(e) ? el('div', { className: 'co', textContent: orgOf(e) }) : null,
+        e.bullets?.length ? el('ul', {}, ...e.bullets.map((b) => el('li', {}, hl(b, kw)))) : null))),
+    tExp: function () { return c.experience?.length ? sec(L.exp, ...this.tRows(c.experience, (e) => e.title, (e) => e.company)) : null; },
+    tEdu: function () { return c.education?.length ? sec(L.edu, ...this.tRows(c.education, (e) => e.school, (e) => e.degree)) : null; },
+    tMore: () => {
+      const rows = [[L.skills, c.skills], [L.langs, c.languages], [L.certsShort || L.certs, c.certificates], [L.interests, c.interests ? [c.interests] : []]].filter(([, v]) => v?.length);
+      return rows.length ? sec(M.more, el('dl', { className: 'kv' }, ...rows.flatMap(([t, v]) => [el('dt', { textContent: t }), el('dd', {}, hl(v.join(', '), kw))]))) : null;
+    },
+    sign: () => el('div', { className: 'sign' }, el('div', {}, el('span', { textContent: `${contact.find((x) => contactKind(x) === 'city') || ''}${contact.some((x) => contactKind(x) === 'city') ? ', ' : ''}${new Date().toLocaleDateString(L.locale || 'pl-PL')}` }), el('small', { textContent: M.placeDate })),
+      el('div', {}, el('span', { className: 'line' }), el('small', { textContent: M.sign }))),
+    kicker: () => el('div', { className: 'kick', textContent: M.cvTitle }),
+    // Europass: dane kontaktowe z etykietami, wpisy z datą nad stanowiskiem, tabela języków z poziomem.
+    persLine: () => el('ul', { className: 'pl' }, ...contact.map((x) => el('li', {}, el('small', { textContent: M[contactKind(x)] + ': ' }), x))),
+    eRows: (items, titleOf, orgOf) => items.map((e) => el('div', { className: 'ent' }, e.period ? el('div', { className: 'dt', textContent: e.period }) : null,
+      el('div', { className: 'ttl', textContent: titleOf(e) || '' }), orgOf(e) ? el('div', { className: 'co', textContent: orgOf(e) }) : null,
+      e.bullets?.length ? el('ul', {}, ...e.bullets.map((b) => el('li', {}, hl(b, kw)))) : null)),
+    eExp: function () { return c.experience?.length ? sec(L.exp, ...this.eRows(c.experience, (e) => e.title, (e) => e.company)) : null; },
+    eEdu: function () { return c.education?.length ? sec(L.edu, ...this.eRows(c.education, (e) => e.degree || e.school, (e) => (e.degree ? e.school : ''))) : null; },
+    eLangs: () => (c.languages?.length ? sec(L.langs, el('table', { className: 'lt' }, el('tr', {}, el('th', { textContent: L.langs }), el('th', { textContent: M.level + ' (CEFR)' })),
+      ...c.languages.map((t) => { const [n, lv] = langLevel(t, M); return el('tr', {}, el('td', { textContent: n }), el('td', { textContent: lv || '—' })); }))) : null),
   };
 }
 const CV_LAYOUT = {
@@ -121,6 +159,8 @@ const CV_LAYOUT = {
   kompetencje: (k) => [el('div', { className: 'mainc' }, el('header', { className: 'top' }, k.name(), k.head()), k.summary(), k.exp(), k.edu(), k.clause()),
     el('aside', { className: 'side' }, k.pic(), k.contactSec(), k.skills(), k.langsLv(), k.certs(), k.intr())],
   wstega: (k) => [el('div', { className: 'band' }, k.mono()), el('header', { className: 'top' }, k.name(), k.head(), k.ct()), k.summary(), k.exp(), k.edu(), k.skills(), k.langs(), k.certs(), k.intr(), k.clause()],
+  lebenslauf: (k) => [el('header', { className: 'top' }, el('div', { className: 'who' }, k.kicker(), k.name(), k.head()), k.pic()), k.persData(), k.summary(), k.tExp(), k.tEdu(), k.tMore(), k.clause(), k.sign()],
+  europass: (k) => [el('header', { className: 'top' }, k.pic(), el('div', { className: 'who' }, k.name(), k.head(), k.persLine())), k.summary(), k.eExp(), k.eEdu(), k.eLangs(), k.skills(), k.certs(), k.intr(), k.clause()],
 };
 const LETTER_HEAD = {
   geometria: (k) => el('header', { className: 'band' }, el('div', {}, k.name(), k.ct()), k.mono()),

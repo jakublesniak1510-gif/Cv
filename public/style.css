@@ -677,3 +677,37 @@ html:not([lang="pl"]) .nav nav{gap:16px}
 .legal-tr{display:none}
 html[lang="en"] .legal-tr[lang="en"],html[lang="uk"] .legal-tr[lang="uk"],html[lang="de"] .legal-tr[lang="de"]{display:block}
 html[lang="en"] .legal-pl,html[lang="uk"] .legal-pl,html[lang="de"] .legal-pl{display:none}
+/* Lebenslauf: niemiecki układ tabelaryczny */
+.t-lebenslauf .pg{padding:50px 56px}
+.t-lebenslauf .top{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;padding-bottom:14px;border-bottom:2px solid var(--acc);margin-bottom:6px}
+.t-lebenslauf .kick{font:700 11px var(--f-b);letter-spacing:.2em;text-transform:uppercase;color:var(--acc);margin-bottom:6px}
+.t-lebenslauf h1{font-size:30px;line-height:1.1}
+.t-lebenslauf .pic{width:96px;height:124px;border-radius:4px;flex:none}
+.t-lebenslauf h3{color:var(--acc);border-bottom:1px solid #D9E0EC}
+.t-lebenslauf .kv{display:grid;grid-template-columns:150px minmax(0,1fr);gap:4px 18px;margin:0}
+.t-lebenslauf .kv dt{color:#546178}.t-lebenslauf .kv dd{margin:0}
+.t-lebenslauf .row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:18px;margin-bottom:12px}
+.t-lebenslauf .row .d{color:#546178;font-size:13px;padding-top:1px}
+.t-lebenslauf .row .co{color:var(--acc)}
+.t-lebenslauf .row ul{margin:4px 0 0;padding-left:18px}
+.t-lebenslauf .sign{display:flex;justify-content:space-between;gap:30px;margin-top:34px;align-items:flex-end}
+.t-lebenslauf .sign>div{display:grid;gap:3px;min-width:180px}
+.t-lebenslauf .sign small{color:#7A8599;font-size:11px;border-top:1px solid #9AA4B5;padding-top:3px}
+.t-lebenslauf .sign .line{display:block;height:22px}
+/* Europass: układ wzorowany na unijnym CV */
+.t-europass .pg{padding:46px 52px}
+.t-europass .top{display:flex;gap:22px;align-items:flex-start;padding-bottom:16px;border-bottom:3px solid var(--acc);margin-bottom:4px}
+.t-europass .pic{width:96px;height:96px;border-radius:50%;flex:none}
+.t-europass h1{font-size:28px;line-height:1.1;color:var(--acc)}
+.t-europass .pl{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px}
+.t-europass .pl small{color:#546178;font-weight:600}
+.t-europass h3{color:var(--acc);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--soft2)}
+.t-europass .ent{margin-bottom:12px}
+.t-europass .ent .dt{font-size:12px;color:#546178;letter-spacing:.04em}
+.t-europass .ent .ttl{font-weight:700;text-transform:uppercase;letter-spacing:.02em}
+.t-europass .ent .co{color:var(--acc)}
+.t-europass .ent ul{margin:4px 0 0;padding-left:18px}
+.t-europass .lt{border-collapse:collapse;width:100%;max-width:420px;font-size:13px}
+.t-europass .lt th{background:var(--soft);color:var(--acc);text-align:left;font-weight:600;padding:5px 10px}
+.t-europass .lt td{padding:5px 10px;border-bottom:1px solid #EEF0F3}
+@container (max-width:560px){.t-lebenslauf .pg,.t-europass .pg{padding:24px 18px}.t-lebenslauf .kv,.t-lebenslauf .row{grid-template-columns:96px minmax(0,1fr);gap:4px 10px}.t-lebenslauf .pic{width:64px;height:84px}.t-europass .pic{width:64px;height:64px}.t-lebenslauf .sign{flex-direction:column;align-items:stretch;gap:16px}}

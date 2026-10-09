@@ -62,7 +62,7 @@
 "Pominięty punkt o kontakcie po angielsku, bo oferta go nie wymaga.": "Der Punkt zur Kommunikation auf Englisch wurde weggelassen, da die Anzeige sie nicht verlangt.",
 "Zobacz pełne CV i list": "Vollständigen Lebenslauf und Anschreiben ansehen",
 "Szablony, które przyciągają wzrok": "Vorlagen, die ins Auge fallen",
-"Dziesięć oryginalnych układów i sześć kolorów. Wybierasz w kreatorze, a po zakupie możesz zmienić wygląd w każdej chwili, bez dopłaty. Kliknij miniaturę, aby zobaczyć pełne CV.": "Zehn originelle Layouts und sechs Farben. Sie wählen im Assistenten und können das Aussehen nach dem Kauf jederzeit ändern, ohne Aufpreis. Klicken Sie auf eine Miniatur, um den vollständigen Lebenslauf zu sehen.",
+"Dwanaście oryginalnych układów i sześć kolorów. Wybierasz w kreatorze, a po zakupie możesz zmienić wygląd w każdej chwili, bez dopłaty. Kliknij miniaturę, aby zobaczyć pełne CV.": "Zwölf originelle Layouts und sechs Farben. Sie wählen im Assistenten und können das Aussehen nach dem Kauf jederzeit ändern, ohne Aufpreis. Klicken Sie auf eine Miniatur, um den vollständigen Lebenslauf zu sehen.",
 "Kolor szablonów": "Farbe der Vorlagen",
 "Kolor:": "Farbe:",
 "Kolor niebieski": "Farbe Blau",
@@ -193,7 +193,7 @@
 "Wersja Word (.docx)": "Word-Version (.docx)",
 "+5 zł": "+5 PLN",
 "w cenie": "inklusive",
-"W każdym pakiecie: raport dopasowania, darmowa poprawka, edycja tekstu, 10 szablonów i PDF w e-mailu.": "In jedem Paket: Abgleich-Bericht, kostenlose Korrektur, Textbearbeitung, 10 Vorlagen und PDF per E-Mail.",
+"W każdym pakiecie: raport dopasowania, darmowa poprawka, edycja tekstu, 12 szablonów i PDF w e-mailu.": "In jedem Paket: Abgleich-Bericht, kostenlose Korrektur, Textbearbeitung, 12 Vorlagen und PDF per E-Mail.",
 "Metody płatności": "Zahlungsmethoden",
 "Bezpieczna płatność Przelewy24": "Sichere Zahlung über Przelewy24",
 "Karta": "Karte",
@@ -865,9 +865,11 @@
 "Język ogłoszenia": "Sprache der Stellenanzeige",
 "Tłumaczenie: {0}": "Übersetzung: {0}",
 "Tak. Dokumenty powstają w języku ogłoszenia i ten język jest w cenie: polski, angielski, niemiecki, ukraiński, hiszpański lub francuski. Język możesz też ustawić ręcznie przy ogłoszeniu. Tłumaczenie tych samych dokumentów na każdy kolejny język kosztuje 5 zł.": "Ja. Die Dokumente werden in der Sprache der Stellenanzeige erstellt, und diese Sprache ist im Preis enthalten: Polnisch, Englisch, Deutsch, Ukrainisch, Spanisch oder Französisch. Sie können die Sprache auch manuell bei der Anzeige festlegen. Die Übersetzung derselben Dokumente in jede weitere Sprache kostet 5 PLN.",
-"Przesuń w bok, aby zobaczyć wszystkie 10 szablonów →": "Seitlich wischen, um alle 10 Vorlagen zu sehen →",
+"Przesuń w bok, aby zobaczyć wszystkie 12 szablonów →": "Seitlich wischen, um alle 12 Vorlagen zu sehen →",
 "1 · Wklejasz ogłoszenie": "1 · Sie fügen eine Stellenanzeige ein",
 "Pozostało poprawek: {0}": "Verbleibende Korrekturen: {0}",
 "Podgląd: płatność jest symulowana.": "Vorschau: Die Zahlung wird simuliert.",
-"{0} zł": "{0} PLN"
+"{0} zł": "{0} PLN",
+"Niemiecki układ: dane osobowe w tabeli, zdjęcie, daty w kolumnie, miejsce, data i podpis. Do pracy w Niemczech i Austrii.": "Deutsches Format: persönliche Daten in Tabellenform, Foto, Daten in einer Spalte, Ort, Datum und Unterschrift. Für Stellen in Deutschland und Österreich.",
+"Układ wzorowany na unijnym CV Europass, z tabelą języków. Do ofert z UE i pracy za granicą.": "Ein Layout nach dem Vorbild des EU-Lebenslaufs Europass, mit Sprachtabelle. Für Stellen in der EU und Arbeit im Ausland."
 }
