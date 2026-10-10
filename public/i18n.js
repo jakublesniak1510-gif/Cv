@@ -44,7 +44,7 @@
     const out = lead + v + tail; if (n.nodeValue !== out) n.nodeValue = out;
   };
   const doEl = (e) => {
-    if (e.closest(SKIP)) return;
+    if (skip(e)) return;
     for (const a of ATTRS) if (e.hasAttribute(a)) { const v = tr(e.getAttribute(a)); if (v != null && v !== e.getAttribute(a)) e.setAttribute(a, v); }
     if ((e.tagName === 'INPUT' && (e.type === 'button' || e.type === 'submit'))) { const v = tr(e.value); if (v != null) e.value = v; }
   };

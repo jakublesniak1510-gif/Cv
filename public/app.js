@@ -1601,12 +1601,12 @@ async function showPage(r, push = true) {
     else if (p && !sub) { item = p; node = () => profPage(p, C); }
   } else if (kind === 'poradnik') { item = C.ARTICLES.find((a) => a.slug === slug); node = () => articlePage(item, C); }
   else if (kind === 'narzedzia' && C.TOOLS?.[slug]) { item = C.TOOLS[slug]; node = () => toolPage(slug, C); }
-  else if (!slug && STATIC_PAGES.includes(kind)) { const t = $('#pg-' + kind); item = { title: t.dataset.title, metaDescription: t.dataset.desc }; node = () => t.content.cloneNode(true); }
+  else if (!slug && STATIC_PAGES.includes(kind)) { const t = $('#pg-' + kind); item = { title: t.dataset.title, metaDescription: t.dataset.desc }; node = () => { const d = el('div', {}, t.content.cloneNode(true)); d.setAttribute('data-i18n', ''); return d; }; }
   if (!item) return showHome(push);
   $('#landing').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#account').hidden = true;
-  $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl' || (kind === 'poradnik' && !!item.slugLang) || (kind === 'cv' && !!C.prof);
+  $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl' || (kind === 'poradnik' && !!item.slugLang) || (kind === 'cv' && !!C.prof) || STATIC_PAGES.includes(kind);
   $('#page').replaceChildren(node());
-  try { document.title = `${item.title} | CV Pod Ogłoszenie`; } catch {}
+  try { document.title = `${STATIC_PAGES.includes(kind) ? window.I18N.t(item.title) : item.title} | CV Pod Ogłoszenie`; } catch {}
   setMeta(item.metaDescription);
   if (push) { navTo(r); track('pv'); }
   const target = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
