@@ -1076,5 +1076,15 @@
 "Program poleceń: 10 zł za każdego znajomego": "Referral programme: 10 PLN for every friend",
 "Tak. Biura karier, szkoły, urzędy pracy, fundacje i firmy (np. przy outplacemencie) mogą dać swoim podopiecznym kod zniżkowy albo opłacić pakiet kodów, z którym zamawiają bez płatności. Szczegóły na stronie": "Yes. Career offices, schools, job centres, foundations and companies (e.g. for outplacement) can give the people they support a discount code or pay for a package of codes they can order with at no cost. Details on the page",
 "Pytanie o zamówienie albo współpracę? Odpowiadamy zwykle w ciągu jednego dnia roboczego.": "A question about an order or working together? We usually reply within one business day.",
-"Opłaca organizacja": "Paid by the organisation"
+"Opłaca organizacja": "Paid by the organisation",
+"Ceny końcowe. Sprzedawca zwolniony z VAT – na życzenie wystawiamy fakturę bez VAT.": "Final prices. The seller is exempt from VAT – on request we issue an invoice without VAT.",
+"Faktura bez VAT (sprzedawca zwolniony z VAT)": "Invoice without VAT (seller exempt from VAT)",
+"Potrzebuję faktury (bez VAT – sprzedawca jest zwolniony z VAT).": "I need an invoice (without VAT – the seller is exempt from VAT).",
+"Nazwa firmy albo imię i nazwisko": "Company name or full name",
+"Adres": "Address",
+"ulica i numer, kod pocztowy, miasto": "street and number, postcode, city",
+"NIP (pomiń, jeśli kupujesz prywatnie)": "Tax number (NIP) – skip if buying privately",
+"Fakturę wyślemy na e-mail podany w zamówieniu.": "We will send the invoice to the e-mail address given in the order.",
+"Do faktury podaj nazwę (albo imię i nazwisko) oraz adres.": "For the invoice, enter a name (or full name) and an address.",
+"Sprawdź NIP do faktury – powinien mieć 10 cyfr.": "Check the tax number (NIP) for the invoice – it should have 10 digits."
 }

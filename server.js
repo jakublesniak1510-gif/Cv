@@ -244,9 +244,19 @@ app.post('/api/orders/:id/pay', async (req, res) => {
   try { res.json(await checkout(o)); } catch (e) { logEvent('płatność', e.message, { orderId: o.id }); res.status(502).json({ error: 'Nie udało się otworzyć płatności. Spróbuj za chwilę.' }); }
 });
 
+// Dane do faktury (na życzenie klienta, faktura bez VAT). NIP jest opcjonalny (osoba prywatna), ale jeśli jest, musi być poprawny.
+const nipOk = (n) => /^\d{10}$/.test(n) && [6, 5, 7, 2, 3, 4, 5, 6, 7].reduce((s, w, i) => s + w * +n[i], 0) % 11 === +n[9];
+function cleanInvoice(v) {
+  if (!v || typeof v !== 'object') return null;
+  const nip = str(v.nip, 20).replace(/^PL/i, '').replace(/[\s-]/g, ''), name = str(v.name, 200), address = str(v.address, 250);
+  if (name.length < 3 || address.length < 5) return { error: 'Do faktury podaj nazwę (albo imię i nazwisko) oraz adres.' };
+  if (nip && !nipOk(nip)) return { error: 'Sprawdź NIP do faktury – powinien mieć 10 cyfr.' };
+  return { nip, name, address, issued: false };
+}
+
 app.post('/api/orders', async (req, res) => {
   try {
-    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, reviewAsk, payReminder, uiLang, createAccount } = req.body || {};
+    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, reviewAsk, payReminder, uiLang, createAccount, invoice } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
     const a = cleanAds(ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
@@ -256,8 +266,10 @@ app.post('/api/orders', async (req, res) => {
     const ad = cleanAddons(addons), langs = usefulExtraLangs(cleanLangs(extraLangs), a);
     const c = await checkCode(code, p.email);
     if (c.error) return res.status(400).json({ error: c.error });
+    const inv = cleanInvoice(invoice);
+    if (inv?.error) return res.status(400).json({ error: inv.error });
     const disc = discountFor(c, pkg, a.length, ad, false, langs), total = calcTotal(pkg, a.length, ad, false, langs, disc);
-    const order = { id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const order = { invoice: total > 0 ? inv : null, id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }

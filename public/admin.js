@@ -65,12 +65,13 @@ loaders.dash = async () => {
     ...Object.entries(s.byPkg).map(([k, n]) => [PK[k] || k, `${n} (${Math.round((100 * n) / total)}%)`]),
     ['Z dodatkami', `${s.addonsShare}%`], ['Z kodem rabatowym', `${s.codesShare}%`],
     ['Czeka na płatność', String(s.pending)],
+    ['Faktury do wystawienia', String(s.invoicesTodo || 0)],
     ['Przygotowane CV (od startu)', `${s.totals.cvs}${s.totals.cvs < 1000 ? ` · licznik na stronie od 1000` : ' · licznik widoczny na stronie'}`],
     ['Konta klientów', String(s.accounts)],
     ['Ocena klientów', s.reviews.count ? `${String(s.reviews.avg).replace('.', ',')} / 5 (${s.reviews.count})` : 'brak ocen'], [`Koszt AI (${s.ai.month})`, `$${s.ai.usd.toFixed(2)} · ${s.ai.calls} wywołań`],
   ].map(([k, v]) => el('div', {}, el('dt', { textContent: k }), el('dd', { textContent: v }))));
   drawChart(s.byDay);
-  setBadge(s.problems); setRvBadge(s.reviews.waiting); setMsgBadge(s.newMessages);
+  setBadge(s.problems); setRvBadge(s.reviews.waiting); setMsgBadge(s.newMessages); $('#invBadge').hidden = !s.invoicesTodo; $('#invBadge').textContent = s.invoicesTodo;
   $('#dashUpd').textContent = 'Stan na ' + new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
   const r = await api('/orders?page=0');
   $('#recent').replaceChildren(orderTable(r.rows.slice(0, 6), true));
@@ -140,7 +141,7 @@ function orderTable(rows, compact = false) {
     el('tbody', {}, rows.map((o) => {
       const tr = el('tr', { className: 'click', tabIndex: 0 },
         el('td', { className: 'num', textContent: dt(o.created) }), el('td', { className: 'ell', textContent: o.email, title: o.email }),
-        el('td', {}, o.pkgName, o.followup ? el('span', { className: 'tag', textContent: 'kolejne', style: 'margin-left:6px' }) : null),
+        el('td', {}, o.pkgName, o.followup ? el('span', { className: 'tag', textContent: 'kolejne', style: 'margin-left:6px' }) : null, o.invoice ? el('span', { className: 'tag', textContent: o.invoice === 'todo' ? 'faktura do wystawienia' : 'faktura ✓', style: 'margin-left:6px' }) : null),
         compact ? null : el('td', { className: 'mono', textContent: o.code || '—' }), el('td', { className: 'r', textContent: zl(o.total) }),
         el('td', {}, status(o.status)), compact ? null : el('td', {}, mailSt(o.mail)));
       tr.addEventListener('click', () => openOrder(o.id));
@@ -214,9 +215,23 @@ async function openOrder(id) {
       const r = o.results[i];
       return el('li', {}, `${a.title || 'Bez tytułu'} · ${LANG[r?.lang || a.lang] || a.lang}`, r?.score != null ? ` · dopasowanie ${r.score}%` : '', r?.variants.length ? ` · +${r.variants.map((v) => LANG[v] || v).join(', ')}` : '');
     }))),
+    invoiceBox(o, reload),
     o.mailInfo ? el('div', {}, el('h3', { textContent: 'E-mail' }), kv([['Do', o.mailInfo.to], ['Status', MAIL[o.mailInfo.status] || o.mailInfo.status], ['Kiedy', dt(o.mailInfo.at)]])) : null,
   ].filter(Boolean));
   x.focus();
+}
+// Faktura bez VAT na życzenie: dane nabywcy do przepisania w programie do faktur i odhaczenie z numerem.
+function invoiceBox(o, reload) {
+  const f = o.invoiceData; if (!f) return null;
+  const copy = el('button', { className: 'btn ghost sm', textContent: 'Kopiuj dane' });
+  copy.onclick = async () => { try { await navigator.clipboard.writeText([f.name, f.address, f.nip && 'NIP ' + f.nip].filter(Boolean).join('\n')); toast('Skopiowano.'); } catch { toast('Nie udało się skopiować.'); } };
+  const num = el('input', { placeholder: 'Numer faktury, np. FV 1/10/2026', maxLength: 60, value: f.number || '', style: 'max-width:240px' });
+  const b = el('button', { className: 'btn sm', textContent: f.issued ? 'Cofnij: nie wystawiona' : 'Faktura wystawiona' });
+  b.onclick = async () => { b.disabled = true; try { await post(`/orders/${o.id}/invoice`, { issued: !f.issued, number: num.value }); toast(f.issued ? 'Oznaczono jako do wystawienia.' : 'Oznaczono jako wystawioną.'); reload(); } catch (x) { toast(x.message); b.disabled = false; } };
+  return el('div', {}, el('h3', { textContent: 'Faktura (bez VAT, zw. art. 113)' }), kv([
+    ['Status', f.issued ? `wystawiona${f.number ? ' · ' + f.number : ''} (${dt(f.issuedAt)})` : o.status === 'pending' ? 'czeka na płatność' : 'do wystawienia'],
+    ['Nabywca', f.name], ['Adres', f.address], ['NIP', f.nip || '— (osoba prywatna)'], ['Kwota', zl(o.total)],
+  ]), el('div', { className: 'actions' }, f.issued ? null : num, b, copy));
 }
 const current = () => $('#nav [aria-current]')?.dataset.v || 'dash';
 
@@ -240,11 +255,20 @@ $('#codeForm').addEventListener('submit', async (e) => {
     loaders.codes();
   } catch (x) { m.className = 'msg bad'; m.textContent = x.message; }
 });
+// Przy kodzie od organizacji: czy organizacja dostała już fakturę (bez VAT) za pakiet.
+function codeInvoice(c) {
+  if (c.kind !== 'instytucja') return el('span', { className: 'mute', textContent: '—' });
+  const set = async (issued, number) => { try { await post(`/codes/${encodeURIComponent(c.code)}/invoice`, { issued, number }); toast(issued ? 'Faktura oznaczona jako wystawiona.' : 'Cofnięto oznaczenie faktury.'); loaders.codes(); } catch (x) { toast(x.message); } };
+  if (c.invoice) { const b = el('button', { className: 'btn ghost sm', textContent: 'Cofnij' }); b.onclick = () => set(false); return el('span', {}, el('span', { className: 'tag', textContent: `✓ ${c.invoice.number || 'wystawiona'}` }), ' ', b); }
+  const b = el('button', { className: 'btn sm', textContent: 'Wystawiona' });
+  b.onclick = () => { const n = prompt('Numer faktury dla organizacji (opcjonalnie):', ''); if (n !== null) set(true, n); };
+  return b;
+}
 loaders.codes = async () => {
   const list = (await api('/codes')).filter((c) => !codeFilter || c.kind === codeFilter);
   if (!list.length) return $('#codeTable').replaceChildren(el('div', { className: 'empty', textContent: 'Brak kodów.' }));
   $('#codeTable').replaceChildren(el('table', {},
-    el('thead', {}, el('tr', {}, ['Kod', 'Rodzaj', 'Rabat', 'Użycia', 'Ważny do', 'Notatka', ''].map((t, i) => el('th', { className: i === 2 || i === 3 ? 'r' : '', textContent: t })))),
+    el('thead', {}, el('tr', {}, ['Kod', 'Rodzaj', 'Rabat', 'Użycia', 'Ważny do', 'Notatka', 'Faktura', ''].map((t, i) => el('th', { className: i === 2 || i === 3 ? 'r' : '', textContent: t })))),
     el('tbody', {}, list.map((c) => {
       const del = el('button', { className: 'btn danger sm', textContent: 'Usuń' });
       del.onclick = async () => {
@@ -254,7 +278,7 @@ loaders.codes = async () => {
       return el('tr', {}, el('td', { className: 'mono', textContent: c.code }), el('td', {}, el('span', { className: 'tag', textContent: c.kind }), c.referrals ? el('div', { className: 'mute', style: 'font-size:12px', textContent: `${c.referrals} pol. · saldo ${c.credit}` }) : null),
         el('td', { className: 'r', textContent: c.voucher ? `${{ cv: 'CV', cv_letter: 'CV + list', pack3: 'Pakiet 3' }[c.voucher]} gratis` : c.percent ? `−${c.percent}%` : `−${zl(c.amount)}` }),
         el('td', { className: 'r', textContent: c.maxUses ? `${c.uses} / ${c.maxUses}` : String(c.uses) }),
-        el('td', { className: 'num', textContent: dd(c.expires) }), el('td', { className: 'ell mute', textContent: c.note || '—' }), el('td', { className: 'r' }, del));
+        el('td', { className: 'num', textContent: dd(c.expires) }), el('td', { className: 'ell mute', textContent: c.note || '—' }), el('td', {}, codeInvoice(c)), el('td', { className: 'r' }, del));
     }))));
 };
 

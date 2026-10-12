@@ -25,7 +25,7 @@
     <nav id="nav" aria-label="Sekcje panelu">
       <button data-v="dash"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Pulpit</button>
       <button data-v="traffic"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-8"/><path d="M15 8h5v5"/></svg>Ruch</button>
-      <button data-v="orders"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg>Zamówienia</button>
+      <button data-v="orders"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg>Zamówienia<span class="badge info" id="invBadge" hidden title="Faktury do wystawienia"></span></button>
       <button data-v="codes"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/></svg>Kody rabatowe</button>
       <button data-v="reviews"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Opinie<span class="badge info" id="rvBadge" hidden></span></button>
       <button data-v="messages"><svg viewBox="0 0 24 24"><path d="M3 5h18v12H8l-5 4z"/></svg>Wiadomości<span class="badge info" id="msgBadge" hidden></span></button>
@@ -72,7 +72,7 @@
         <input id="q" type="search" placeholder="Szukaj: e-mail, numer zamówienia, kod" aria-label="Szukaj zamówień">
         <select id="stFilter" aria-label="Status">
           <option value="">Wszystkie statusy</option><option value="done">Gotowe</option><option value="pending">Czeka na płatność</option>
-          <option value="generating">Generuje się</option><option value="problem">Wymaga uwagi</option>
+          <option value="generating">Generuje się</option><option value="problem">Wymaga uwagi</option><option value="invoice">Do zafakturowania</option>
         </select>
       </div>
       <div class="tbl-wrap" id="ordTable"></div>
