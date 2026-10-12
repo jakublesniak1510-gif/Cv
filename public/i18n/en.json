@@ -1086,5 +1086,8 @@
 "NIP (pomiń, jeśli kupujesz prywatnie)": "Tax number (NIP) – skip if buying privately",
 "Fakturę wyślemy na e-mail podany w zamówieniu.": "We will send the invoice to the e-mail address given in the order.",
 "Do faktury podaj nazwę (albo imię i nazwisko) oraz adres.": "For the invoice, enter a name (or full name) and an address.",
-"Sprawdź NIP do faktury – powinien mieć 10 cyfr.": "Check the tax number (NIP) for the invoice – it should have 10 digits."
+"Sprawdź NIP do faktury – powinien mieć 10 cyfr.": "Check the tax number (NIP) for the invoice – it should have 10 digits.",
+"Strona w przygotowaniu – zamówienia ruszą za kilka dni.": "Site in preparation – orders will open in a few days.",
+"Zamówienia ruszą za kilka dni. Możesz obejrzeć formularz, ale nie da się jeszcze zamówić. Zapisz się do newslettera na dole strony, a damy znać o starcie.": "Orders will open in a few days. You can look around the form, but ordering isn’t possible yet. Sign up for the newsletter at the bottom of the page and we’ll let you know when we launch.",
+"Zamówienia ruszą za kilka dni. Zapisz się do newslettera na dole strony, a damy znać o starcie.": "Orders will open in a few days. Sign up for the newsletter at the bottom of the page and we’ll let you know when we launch."
 }

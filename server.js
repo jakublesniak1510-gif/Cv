@@ -16,7 +16,7 @@ import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes } from './lib/seo.js';
 import { p24Enabled, p24Register, p24NotificationOk, p24Verify, p24BySession } from './lib/p24.js';
 import { renderDocx } from './lib/docx.js';
-import { adminRoutes } from './lib/admin.js';
+import { adminRoutes, isAdmin } from './lib/admin.js';
 import { accountRoutes, accountHourly } from './lib/account.js';
 import { analyticsRoutes, cleanupAnalytics } from './lib/analytics.js';
 import { logEvent, cleanupEvents } from './lib/events.js';
@@ -26,6 +26,11 @@ import { emailHash, codeDiscount, applyPaidCode, isOwner, CODE_TTL } from './lib
 const PORT = process.env.PORT || 3000;
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
 const DEMO = !p24Enabled();
+// Na produkcji bez Przelewy24 sprzedaż jest zamknięta: zamawiać (w trybie demo) może tylko zalogowany administrator,
+// żeby nikt nie dostał dokumentów z AI za darmo. DEMO_OPEN=1 otwiera tryb demo dla wszystkich (np. do prezentacji).
+const SALES_CLOSED = DEMO && process.env.NODE_ENV === 'production' && process.env.DEMO_OPEN !== '1';
+const salesClosedFor = (req) => SALES_CLOSED && !isAdmin(req);
+const CLOSED_MSG = 'Zamówienia ruszą za kilka dni. Zapisz się do newslettera na dole strony, a damy znać o starcie.';
 const RETENTION_MS = 30 * 24 * 3600 * 1000;
 const MAX_REVISIONS = 10;
 
@@ -124,8 +129,8 @@ const cleanCv = (c = {}) => ({
   certificates: arr(c.certificates, 15).map((x) => str(x, 160)).filter(Boolean), interests: str(c.interests, 400), clause: str(c.clause, 600),
 });
 
-app.get('/api/config', (_req, res) => res.json({
-  demo: DEMO, ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
+app.get('/api/config', (req, res) => res.json({
+  demo: DEMO, salesClosed: salesClosedFor(req), ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
   prices: Object.fromEntries(Object.entries(PRICES).map(([k, v]) => [k, v / 100])),
 }));
 
@@ -255,6 +260,7 @@ function cleanInvoice(v) {
 }
 
 app.post('/api/orders', async (req, res) => {
+  if (salesClosedFor(req)) return res.status(503).json({ error: CLOSED_MSG });
   try {
     const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, reviewAsk, payReminder, uiLang, createAccount, invoice } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
@@ -277,6 +283,7 @@ app.post('/api/orders', async (req, res) => {
 
 // Kolejne zamówienie klienta, który już kupował: dane są zapisane, wybiera pakiet (1 ogłoszenie albo Pakiet 3).
 app.post('/api/orders/:id/followup', async (req, res) => {
+  if (salesClosedFor(req)) return res.status(503).json({ error: CLOSED_MSG });
   try {
     const parent = await getOrder(req.params.id);
     if (!parent || parent.status !== 'done') return res.status(409).json({ error: 'Najpierw dokończ poprzednie zamówienie.' });
@@ -351,7 +358,7 @@ app.get('/api/public-stats', async (_req, res) => {
 
 // Tylko tryb DEMO: symulacja płatności.
 app.post('/api/orders/:id/demo-pay', async (req, res) => {
-  if (!DEMO) return res.sendStatus(404);
+  if (!DEMO || salesClosedFor(req)) return res.sendStatus(404);
   const o = await getOrder(req.params.id);
   if (!o) return res.sendStatus(404);
   await markPaidAndGenerate(o.id);
@@ -491,8 +498,9 @@ app.post('/api/orders/:id/retry', async (req, res) => {
   res.json({ ok: true });
 });
 
-accountRoutes(app, { BASE_URL, DEMO });
-leadRoutes(app, { BASE_URL, DEMO });
+// Linki logowania/potwierdzenia na ekranie (bez e-maila) tylko w lokalnym demo, nigdy na produkcji.
+accountRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
+leadRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 analyticsRoutes(app, BASE_URL);
 adminRoutes(app, { DEMO, BASE_URL, markPaidAndGenerate, trySend, retentionMs: RETENTION_MS });
 

@@ -764,3 +764,4 @@ html[lang="en"] .legal-pl,html[lang="uk"] .legal-pl,html[lang="de"] .legal-pl{di
 @media(max-width:560px){.refstats{grid-template-columns:1fr}}
 .refshare{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
 .invbox{margin:4px 0 12px 30px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}.invbox .hint{margin:4px 0 0}@media(max-width:560px){.invbox{margin-left:0}}
+.soon{margin:0 20px 8px;padding:10px 14px;border-radius:10px;background:#FFF4CC;color:#5A4500;font-size:14px;line-height:1.45}
