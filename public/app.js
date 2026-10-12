@@ -1810,4 +1810,14 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.ser
   const net = () => ($('#offline').hidden = navigator.onLine);
   addEventListener('online', net); addEventListener('offline', net); net();
 }
+/* menu na telefonie */
+{
+  const btn = $('#menuBtn'), menu = $('#mnav');
+  const set = (open) => { menu.hidden = !open; btn.setAttribute('aria-expanded', open); document.body.classList.toggle('menu-open', open); };
+  btn.onclick = (e) => { e.stopPropagation(); set(menu.hidden); };
+  menu.addEventListener('click', (e) => { if (e.target.closest('a,button')) set(false); });
+  document.addEventListener('click', (e) => { if (!menu.hidden && !e.target.closest('#mnav,#menuBtn')) set(false); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hidden) { set(false); btn.focus(); } });
+  addEventListener('resize', () => { if (innerWidth > 1000 && !menu.hidden) set(false); });
+}
 })();
