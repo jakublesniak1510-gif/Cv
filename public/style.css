@@ -326,8 +326,8 @@ textarea{min-height:88px;resize:vertical}
 .res-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}.res-top h2{font-size:32px;font-weight:800}
 .res-tools{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px}.tog{font-size:14px;color:var(--mute);display:flex;gap:6px;align-items:center}
 /* ---------- dokumenty: wspólne ---------- */
-.paper{--acc:#2548E8;--soft:color-mix(in srgb,var(--acc) 9%,#fff);--soft2:color-mix(in srgb,var(--acc) 28%,#fff);background:#fff;color:#16233A;width:100%;max-width:794px;margin:18px auto;box-shadow:var(--shadow);font:14px/1.55 var(--f-b);overflow-wrap:anywhere;text-align:left;container-type:inline-size;aspect-ratio:210/297;display:flex;flex-direction:column;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.paper .pg{flex:1;padding:48px 52px}
+.paper{--acc:#2548E8;--soft:color-mix(in srgb,var(--acc) 9%,#fff);--soft2:color-mix(in srgb,var(--acc) 28%,#fff);background:#fff;color:#16233A;width:100%;max-width:794px;margin:18px auto;box-shadow:var(--shadow);font:14px/1.55 var(--f-b);overflow-wrap:anywhere;text-align:left;container-type:inline-size;display:flex;flex-direction:column;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.paper .pg{flex:1;padding:48px 52px;min-height:141.42cqw}/* A4 od szerokości kartki; bez aspect-ratio, które Safari ucinało */
 @container (max-width:560px){.paper .pg{padding:26px 20px}}
 .paper h1{font:800 30px/1.1 var(--f-d);letter-spacing:-.01em;margin:0}
 .paper .hl{color:var(--acc);font:600 16px var(--f-b);margin:4px 0 2px}
@@ -462,7 +462,7 @@ textarea{min-height:88px;resize:vertical}
 @media print{
  body{background:#fff}.noprint,.nav,#landing,.foot,.wiz,.gen,.demobar,.exv{display:none!important}
  .result{padding:0}.result .inner{padding:0;max-width:none}.paper{box-shadow:none;margin:0;max-width:none;padding:0}
- mark{background:none!important}.paper{aspect-ratio:auto}@page{size:A4;margin:0}
+ mark{background:none!important}.paper .pg{min-height:0}@page{size:A4;margin:0}
 }
 /* porównanie */
 .cmp-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
