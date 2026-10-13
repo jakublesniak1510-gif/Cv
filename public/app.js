@@ -1765,6 +1765,9 @@ $$('.langsw a').forEach((a) => {
 
 const LEGAL = { '#regulamin': 'legal-regulamin', '#prywatnosc': 'legal-prywatnosc' };
 function route() {
+  // Strona 404 z serwera zostaje, dopóki ktoś nie kliknie linku do sekcji strony głównej.
+  if (window.__NOTFOUND && !location.hash) return;
+  window.__NOTFOUND = 0;
   if (!$('#result').hidden || !$('#gen').hidden) return;
   if (location.pathname === '/konto' || location.hash === '#konto') return showAccount();
   $('#account').hidden = true;

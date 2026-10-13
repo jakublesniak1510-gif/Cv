@@ -13,7 +13,7 @@ import { importCv, extractText, ImportError } from './lib/importCv.js';
 import { mailEnabled, sendOrderMail, sendReminder, sendReviewAsk, sendPayReminder } from './lib/mail.js';
 import { cleanDesign } from './lib/designs.js';
 import { usefulExtraLangs } from './lib/lang.js';
-import { seoRoutes } from './lib/seo.js';
+import { seoRoutes, sendNotFound } from './lib/seo.js';
 import { p24Enabled, p24Register, p24NotificationOk, p24Verify, p24BySession } from './lib/p24.js';
 import { renderDocx } from './lib/docx.js';
 import { adminRoutes, isAdmin } from './lib/admin.js';
@@ -545,5 +545,8 @@ async function hourly() {
   } catch (e) { console.error('Zadanie cogodzinne', e); }
 }
 hourly(); setInterval(hourly, 3600_000).unref();
+
+// Nieznane adresy: API odpowiada JSON-em, a strony – stroną 404 w wyglądzie serwisu.
+app.use((req, res) => (req.path.startsWith('/api/') || req.method !== 'GET' ? res.status(404).json({ error: 'Nie ma takiego adresu.' }) : sendNotFound(req, res, BASE_URL)));
 
 app.listen(PORT, () => console.log(`http://localhost:${PORT}  ${DEMO ? '[TRYB DEMO – brak konfiguracji Przelewy24]' : ''}${aiEnabled() ? '' : ' [bez AI – brak ANTHROPIC_API_KEY]'}`));

@@ -781,3 +781,4 @@ html[lang="en"] .legal-pl,html[lang="uk"] .legal-pl,html[lang="de"] .legal-pl{di
 .mlang{display:none;margin:10px 0 4px;align-self:start;width:max-content}.mlang a{padding:8px 14px;font-size:14px;border:0;border-bottom:0}
 @media(max-width:400px){.nav .inner>.langsw{display:none}.nav .menubtn{margin-left:auto}.mlang{display:flex}}
 .menu-open .chat-fab,.menu-open .mcta{display:none!important}
+.nf{padding-block:56px 72px}.nf h1{font-size:clamp(28px,5vw,40px);margin:4px 0 12px}.nf-act{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
