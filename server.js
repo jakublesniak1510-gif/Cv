@@ -35,6 +35,14 @@ const RETENTION_MS = 30 * 24 * 3600 * 1000;
 const MAX_REVISIONS = 10;
 
 const app = express();
+app.disable('x-powered-by');
+// Podstawowe nagłówki bezpieczeństwa: bez osadzania strony w cudzych ramkach (np. podszywanie się pod panel),
+// bez zgadywania typu plików, ograniczony Referer, a na https wymuszenie bezpiecznego połączenia.
+app.use((req, res, next) => {
+  res.set({ 'X-Frame-Options': 'DENY', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin', 'Permissions-Policy': 'camera=(), microphone=(), geolocation=()' });
+  if (BASE_URL.startsWith('https')) res.set('Strict-Transport-Security', 'max-age=15552000');
+  next();
+});
 app.set('trust proxy', 1);
 
 
