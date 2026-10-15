@@ -3,7 +3,7 @@ import express from 'express';
 import crypto from 'node:crypto';
 import { activePromo, ensurePromoCode } from './lib/promos.js';
 import { checkPhoto, recruiterAnswer, ToolError } from './lib/freeTools.js';
-import { alertRoutes, alertsHourly } from './lib/alerts.js';
+import { alertRoutes, alertsHourly, addAlertFromOrder } from './lib/alerts.js';
 import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUNDLE_OFF, withLetter as hasLetter } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads } from './lib/store.js';
 import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
@@ -288,7 +288,7 @@ function cleanInvoice(v) {
 app.post('/api/orders', async (req, res) => {
   if (salesClosedFor(req)) return res.status(503).json({ error: CLOSED_MSG });
   try {
-    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, followUp, reviewAsk, payReminder, uiLang, createAccount, invoice } = req.body || {};
+    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, followUp, jobAlerts, reviewAsk, payReminder, uiLang, createAccount, invoice } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
     const a = cleanAds(ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
@@ -301,7 +301,7 @@ app.post('/api/orders', async (req, res) => {
     const inv = cleanInvoice(invoice);
     if (inv?.error) return res.status(400).json({ error: inv.error });
     const disc = discountFor(c, pkg, a.length, ad, false, langs), total = calcTotal(pkg, a.length, ad, false, langs, disc);
-    const order = { invoice: total > 0 ? inv : null, id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const order = { invoice: total > 0 ? inv : null, id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -430,6 +430,7 @@ async function markPaidAndGenerate(id) {
       return r;
     }));
     const myCode = await afterPaid(o);
+    if (o.jobAlerts) addAlertFromOrder({ email: o.profile.email, ...o.jobAlerts, lang: o.uiLang }).catch((e) => logEvent('oferty', e.message, { orderId: id }));
     const mail = await trySend({ ...o, results, myCode });
     await updateOrder(id, { status: 'done', results, mail, myCode });
     stats.upsert('totals', (p = {}) => ({ cvs: (p.cvs || 0) + results.length, orders: (p.orders || 0) + 1 })).catch(() => {});

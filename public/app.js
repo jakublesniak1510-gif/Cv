@@ -805,6 +805,12 @@ function drawSummary() {
     el('div', { className: 'sumrow' }, el('span', { textContent: 'Razem' }), el('span', { textContent: total() + ' zł' })));
 }
 const nipOk = (n) => /^\d{10}$/.test(n) && [6, 5, 7, 2, 3, 4, 5, 6, 7].reduce((s, w, i) => s + w * +n[i], 0) % 11 === +n[9];
+// Oferty pracy na e-mail przy zamówieniu: zawód z pierwszego ogłoszenia, miasto z danych kandydata.
+$('#wantAlerts').onchange = () => {
+  $('#alertBox').hidden = !$('#wantAlerts').checked; if (!$('#wantAlerts').checked) return;
+  if (!$('#alJob').value) $('#alJob').value = (rows('ads')[0]?.title || $('#headline').value || '').split(/\s*[/|,(]\s*/)[0].trim();
+  if (!$('#alCity').value) $('#alCity').value = $('#city').value.trim();
+};
 $('#wantInv').onchange = () => { $('#invBox').hidden = !$('#wantInv').checked; if ($('#wantInv').checked) $('#invName').focus(); };
 function validate(n) {
   const v = (id) => $('#' + id).value.trim();
@@ -821,6 +827,7 @@ function validate(n) {
     if ($('#invName').value.trim().length < 3 || $('#invAddr').value.trim().length < 5) return 'Do faktury podaj nazwę (albo imię i nazwisko) oraz adres.';
     if (nip && !nipOk(nip)) return 'Sprawdź NIP do faktury – powinien mieć 10 cyfr.';
   }
+  if (n === 6 && $('#wantAlerts').checked && $('#alJob').value.trim().length < 2) return 'Wpisz zawód do ofert pracy na e-mail albo odznacz tę opcję.';
   if (n === 6 && !$('#consent').checked) return 'Zaakceptuj Regulamin i Politykę prywatności.';
   if (n === 6 && !$('#waiver').checked) return 'Zaznacz zgodę na wykonanie usługi od razu po płatności.';
   return '';
@@ -849,7 +856,7 @@ $('#wizForm').onsubmit = async (e) => {
   if (step < 6) return go(step + 1);
   const v = (id) => $('#' + id).value;
   const body = {
-    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, followUp: $('#followUp').checked, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   $('#next').disabled = true;
