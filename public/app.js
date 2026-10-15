@@ -502,8 +502,14 @@ function drawEx(i) {
       el('ul', {}, ...job.bullets.map((b) => el('li', {}, hl(b, e.kws))))));
   $('#exChg').replaceChildren(...changesList(e));
 }
+// Sekcje niżej na stronie rysujemy dopiero, gdy użytkownik się do nich zbliża (szybsze pierwsze wyświetlenie na telefonie).
+function whenNear(sel, fn) {
+  const e = $(sel); if (!e || !('IntersectionObserver' in window)) return fn();
+  const io = new IntersectionObserver((es) => { if (es.some((x) => x.isIntersecting)) { io.disconnect(); fn(); } }, { rootMargin: '800px 0px' });
+  io.observe(e);
+}
 EX.forEach((e, i) => $('#exTabs').append(el('button', { type: 'button', role: 'tab', textContent: e.tab, onclick: () => drawEx(i) })));
-drawEx(0);
+whenNear('#przyklad', () => drawEx(0));
 
 /* galeria szablonów i hero */
 const gal = { tpl: 'nowoczesny', color: 'niebieski' };
@@ -582,7 +588,7 @@ document.addEventListener('click', (e) => { const b = e.target.closest('[data-ex
 $('#exClose').onclick = closeEx;
 $('#exCta').onclick = () => { closeEx(); lastFocus = null; openWiz(); };
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#exview').hidden) closeEx(); });
-drawGallery();
+whenNear('#szablony', drawGallery);
 
 /* ---------- Kreator ---------- */
 const rowT = {
@@ -840,6 +846,7 @@ const modal = (open) => {
 };
 const openWiz = (p) => {
   if (p) { $(`input[name=pkg][value=${p}]`).checked = true; refresh(); }
+  if (!$('#wizDesign').children.length) drawWizDesign();
   track('start'); modal(true); $('#wiz').hidden = false; $('#mcta').hidden = true; document.body.classList.remove('mcta-on'); go(step === 7 ? 6 : step);
   setTimeout(() => $('#wizClose').focus(), 0);
 };
@@ -1429,6 +1436,11 @@ async function loadContent() {
   }
   return CONTENT;
 }
+// Pełna treść artykułu (w języku strony, jeśli jest tłumaczenie); lista w content.json ma tylko tytuły i opisy.
+async function loadArticle(meta) {
+  try { const r = await fetch(`/content/art/${meta.slug}.json${meta.slugLang && CONTENT.artLang ? '?lang=' + CONTENT.artLang : ''}`); if (r.ok) return { ...meta, ...(await r.json()) }; } catch {}
+  return { ...meta, sections: [] };
+}
 async function loadProf(slug) {
   const C = await loadContent(), p = C.POPULAR.find((x) => x.slug === slug);
   if (p) return p;
@@ -1494,6 +1506,8 @@ const pT = (p) => (s) => (p.lang ? window.I18N.t(s) : s);
 const kwChips = (p) => el('div', { className: 'kw' }, ...p.keywords.map((k, i) => el('span', {}, k, p.kwPl?.[i] ? el('small', { textContent: p.kwPl[i] }) : null)));
 // Odnośnik do powiadomień o ofertach z wpisanym zawodem (i miastem).
 const alertLink = (p, c, T) => el('p', { className: 'alert-link' }, '🔔 ', pageLink('narzedzia/oferty-pracy-na-maila', { textContent: T('Dostawaj co tydzień linki do nowych ofert na e-mail'), onclick: () => { window.__alertPrefill = { job: p.name.split(' / ')[0], city: c?.name || '' }; } }), el('span', { className: 'hint', textContent: ' · ' + T('za darmo, 12 tygodni') }));
+// Artykuły powiązane z zawodem (pole related w artykułach) + ogólne poradniki; to samo liczy serwer (lib/seo.js).
+const articlesFor = (slug, C) => { const own = C.ARTICLES.filter((a) => a.related?.includes(slug)); return [...own, ...C.ARTICLES.filter((a) => ['jak-dopasowac-cv-do-ogloszenia', 'czym-jest-ats', 'jak-napisac-list-motywacyjny'].includes(a.slug) && !own.includes(a))].slice(0, 5); };
 function profPage(p, C) {
   const d = { tpl: 'nowoczesny', color: 'niebieski' }, r = profResult(p), T = pT(p), PT = p.lang && C.prof?.tpl;
   const side = el('div', { className: 'side-thumb' }), full = el('div', { className: 'side-full' });
@@ -1512,6 +1526,7 @@ function profPage(p, C) {
         el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: T('Masz konkretne ogłoszenie?') }), el('p', { className: 'hint', textContent: T('Wklej link, a przygotujemy CV pisane pod nie. Od 39 zł, z darmową poprawką.') })), openBtn(T('Zamów CV'))),
         alertLink(p, null, T),
         ...(C.POPULAR.some((x) => x.slug === p.slug) && C.CITIES?.length ? [el('h2', { textContent: PT ? fillT(PT.inCity, p) : `${p.name} w Twoim mieście` }), el('div', { className: 'more' }, ...C.CITIES.map((x) => pageLink(`cv/${p.slug}/${x.slug}`, { textContent: x.name })))] : []),
+        el('h2', { textContent: T('Przeczytaj w poradniku') }), el('div', { className: 'more' }, ...articlesFor(p.slug, C).map((x) => pageLink(`poradnik/${x.slug}`, { textContent: x.title }))),
         el('h2', { textContent: T('Podobne zawody') }), el('div', { className: 'more' }, ...C.INDEX.filter((x) => x.slug !== p.slug && x.category === p.category).slice(0, 10).map((x) => pageLink(`cv/${x.slug}`, { textContent: x.name })), el('a', { href: '#zawody', textContent: T('Wszystkie zawody') }))),
       el('aside', { className: 'side-card' }, el('b', { textContent: p.lang ? T(`Przykład: ${p.sample.name}`) : `Przykład: ${p.sample.name}` }), side, picker, openBtn(T('Zamów CV pod swoje ogłoszenie')), el('p', { className: 'hint', textContent: T('Raport dopasowania, darmowa poprawka, PDF w e-mailu.') }))));
 }
@@ -1763,6 +1778,7 @@ function cityPage(p, c, C) {
         el('h2', { textContent: T('Przykładowe CV') }), el('p', { className: 'hint', textContent: T('Dane w przykładzie są fikcyjne.') }), cvNode(r, false, d, ''),
         el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: F('cta', `Masz ogłoszenie ${c.loc}?`) }), el('p', { className: 'hint', textContent: T('Wklej link, a przygotujemy CV pisane pod nie. Od 39 zł, z darmową poprawką.') })), openBtn(T('Zamów CV'))),
         alertLink(p, c, T),
+        el('h2', { textContent: T('Przeczytaj w poradniku') }), el('div', { className: 'more' }, ...articlesFor(p.slug, C).map((x) => pageLink(`poradnik/${x.slug}`, { textContent: x.title }))),
         el('h2', { textContent: F('otherCities', `${p.name} w innych miastach`) }), el('div', { className: 'more' }, ...(C.CITIES || []).filter((x) => x.slug !== c.slug).map((x) => pageLink(`cv/${p.slug}/${x.slug}`, { textContent: x.name }))),
         el('h2', { textContent: F('otherProf', `Inne zawody ${c.loc}`) }), el('div', { className: 'more' }, ...C.POPULAR.filter((x) => x.slug !== p.slug).map((x) => pageLink(`cv/${x.slug}/${c.slug}`, { textContent: x.name })))),
       el('aside', { className: 'side-card' }, el('b', { textContent: F('side', `CV: ${p.name}, ${c.name}`) }), el('div', { className: 'side-thumb' }, thumb(r, d, false, '')), openBtn(T('Zamów CV pod swoje ogłoszenie')), el('p', { className: 'hint', textContent: T('Raport dopasowania, darmowa poprawka, PDF w e-mailu.') }))));
@@ -1774,7 +1790,11 @@ function articlePage(a, C) {
     el('nav', { className: 'crumbs', ariaLabel: T('Ścieżka') }, pageLink('', { textContent: T('Strona główna') }), '›', el('a', { href: L !== 'pl' && !cfg.preview ? `/${L}#poradnik` : '#poradnik', textContent: T('Poradnik'), onclick: (e) => { e.preventDefault(); showHome(true); $('#poradnik').scrollIntoView(); } }), '›', el('span', { textContent: a.title })),
     el('h1', { textContent: a.title }), el('p', { className: 'meta', textContent: T(`${a.readMinutes} min czytania`) }), el('p', { className: 'lead', textContent: a.lead }),
     ...a.sections.flatMap((sec) => [el('h2', { textContent: sec.h }), ...sec.p.map((t) => el('p', { textContent: t }))]),
+    ...(a.templates ? [el('h2', { textContent: T('Wzory CV do pobrania (PDF)') }), el('p', { textContent: T('Przykładowe CV w każdym szablonie, ze znakiem wodnym PRZYKŁAD. Pobierz, porównaj i wybierz wygląd, a treść dopasujemy do Twojego ogłoszenia.') }),
+      el('div', { className: 'more' }, ...TPLS.map(([k, n]) => el('a', { href: `/api/sample.pdf?tpl=${k}&lang=${L}`, rel: 'nofollow', download: '', textContent: `${T('Wzór CV')}: ${T(tplName(k))}` })))] : []),
+    ...(a.faq?.length ? [el('h2', { textContent: T('Pytania i odpowiedzi') }), ...a.faq.map((f) => el('details', {}, el('summary', { textContent: f.q }), el('p', { textContent: f.a })))] : []),
     el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: T('Zrób CV pod swoje ogłoszenie') }), el('p', { className: 'hint', textContent: T('Wklejasz link, dostajesz CV z raportem dopasowania. Od 39 zł.') })), openBtn(T('Zamów CV'))),
+    ...(a.related?.length ? [el('h2', { textContent: T('CV dla zawodów') }), el('div', { className: 'more' }, ...a.related.map((x) => C.INDEX.find((p) => p.slug === x)).filter(Boolean).map((p) => pageLink(`cv/${p.slug}`, { textContent: p.name })))] : []),
     el('h2', { textContent: T('Przeczytaj też') }), el('div', { className: 'more' }, ...C.ARTICLES.filter((x) => x.slug !== a.slug).map((x) => pageLink(`poradnik/${x.slug}`, { textContent: x.title })), ...C.POPULAR.slice(0, 4).map((x) => pageLink(`cv/${x.slug}`, { textContent: T(`CV: ${x.name}`) }))));
 }
 function setMeta(desc) { let m = document.querySelector('meta[name=description]'); if (!m) { m = el('meta', { name: 'description' }); document.head.append(m); } m.content = desc; }
@@ -1796,7 +1816,7 @@ async function showPage(r, push = true) {
     const p = await loadProf(slug), city = sub && (C.CITIES || []).find((c) => c.slug === sub);
     if (p && sub && city && C.POPULAR.some((x) => x.slug === p.slug)) { item = p.lang && C.prof ? { title: fillT(C.prof.tpl.title, p, city), metaDescription: fillT(C.prof.tpl.desc, p, city) } : cityMeta(p, city); node = () => cityPage(p, city, C); }
     else if (p && !sub) { item = p; node = () => profPage(p, C); }
-  } else if (kind === 'poradnik') { item = C.ARTICLES.find((a) => a.slug === slug); node = () => articlePage(item, C); }
+  } else if (kind === 'poradnik') { item = C.ARTICLES.find((a) => a.slug === slug); if (item) { item = await loadArticle(item); node = () => articlePage(item, C); } }
   else if (kind === 'narzedzia' && C.TOOLS?.[slug]) { item = C.TOOLS[slug]; node = () => toolPage(slug, C); }
   else if (!slug && STATIC_PAGES.includes(kind)) { const t = $('#pg-' + kind); item = { title: t.dataset.title, metaDescription: t.dataset.desc }; node = () => { const d = el('div', {}, t.content.cloneNode(true)); d.setAttribute('data-i18n', ''); return d; }; }
   if (!item) return showHome(push);
@@ -1974,6 +1994,10 @@ function route() {
   const id = LEGAL[h];
   $('#landing').hidden = !!id;
   Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = l !== id));
+  if (id && !$('#' + id).children.length) {
+    $('#' + id).replaceChildren(el('div', { className: 'inner narrow', textContent: '…' }));
+    fetch(`/legal/${id.slice(6)}.html`).then((r) => r.text()).then((h) => { $('#' + id).innerHTML = h; }).catch(() => { $('#' + id).replaceChildren(el('div', { className: 'inner narrow' }, el('p', { textContent: 'Nie udało się wczytać dokumentu. Odśwież stronę.' }))); });
+  }
   if (id) { window.scrollTo(0, 0); try { document.title = location.hash === '#regulamin' ? 'Regulamin – CV Pod Ogłoszenie' : 'Polityka prywatności – CV Pod Ogłoszenie'; } catch {} }
   else { try { document.title = HOME_TITLE; } catch {} const t = location.hash.length > 1 && document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
 }
@@ -1981,7 +2005,7 @@ window.addEventListener('hashchange', route); route();
 
 addRow('exp'); addRow('edu'); addRow('ads');
 if (restoreDraft()) $('#draftNote').hidden = false;
-refresh(); go(1); drawWizDesign();
+refresh(); go(1);
 $('#clearDraft').onclick = () => { clearDraft(); resetWizard(); $('#draftNote').hidden = true; };
 const q = new URLSearchParams(location.search);
 if (window.__ROUTE) showPage(window.__ROUTE, false);

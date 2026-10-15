@@ -83,7 +83,8 @@ app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
 
 app.use(express.json({ limit: '700kb' }));
 seoRoutes(app, BASE_URL);
-app.use(express.static('public'));
+// Pliki z wersją w adresie (?v=…, wstawiana przez lib/seo.js) i czcionki można trzymać w pamięci przeglądarki na stałe.
+app.use(express.static('public', { setHeaders: (res, path) => { if (res.req.query.v || /\/fonts\//.test(path)) res.set('Cache-Control', 'public, max-age=31536000, immutable'); } }));
 
 const str = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 const arr = (v, n) => (Array.isArray(v) ? v.slice(0, n) : []);
