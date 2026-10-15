@@ -11,6 +11,10 @@ services:
     envVars:
       - key: ANTHROPIC_API_KEY
         sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
       - key: P24_MERCHANT_ID
         sync: false
       - key: P24_POS_ID

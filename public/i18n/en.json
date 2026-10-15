@@ -1147,5 +1147,7 @@
 "CV po angielsku": "CV in English",
 "CV dla studenta": "CV for students",
 "CV do pracy w Niemczech": "CV for a job in Germany",
-"Opiekun osób starszych": "Elderly carer"
+"Opiekun osób starszych": "Elderly carer",
+"Bezpieczna płatność Stripe": "Secure payment via Stripe",
+"Płacisz przez bezpieczną bramkę Stripe: BLIK-iem, kartą, przez Przelewy24 albo Google Pay / Apple Pay. Dane karty i logowania do banku trafiają tylko do operatora płatności, nie do nas. Dokumenty generują się zaraz po potwierdzeniu płatności.": "You pay through the secure Stripe gateway: with BLIK, by card, via Przelewy24 or with Google Pay / Apple Pay. Your card details and bank login go only to the payment provider, not to us. The documents are generated as soon as the payment is confirmed."
 }
