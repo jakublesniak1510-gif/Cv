@@ -10,7 +10,7 @@ import { adFromImage, AdImageError } from './lib/adImage.js';
 import { simTurn, SimError } from './lib/sim.js';
 import { samplePdf } from './lib/sample.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
-import { mailEnabled, sendOrderMail, sendReminder, sendReviewAsk, sendPayReminder } from './lib/mail.js';
+import { mailEnabled, sendOrderMail, sendReminder, sendReviewAsk, sendPayReminder, sendAdminAlert } from './lib/mail.js';
 import { cleanDesign } from './lib/designs.js';
 import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes, sendNotFound } from './lib/seo.js';
@@ -418,9 +418,32 @@ async function markPaidAndGenerate(id) {
   } catch (e) {
     console.error('Generowanie nie powiodło się', id, e);
     logEvent('generowanie', e.message, { orderId: id });
-    await updateOrder(id, { status: 'paid', error: 'Generowanie nie powiodło się. Spróbuj ponownie.' });
+    // Płatność zostaje; strona sama ponawia generowanie (retryFailed), a gotowe dokumenty idą e-mailem.
+    await updateOrder(id, (x) => ({ ...x, status: 'paid', attempts: (x.attempts || 0) + 1, error: 'Generowanie nie powiodło się.' }));
+    alertOwner(`Zamówienie ${id} jest opłacone, ale nie udało się wygenerować dokumentów.\n\nBłąd: ${e.message}\n\nStrona ponawia generowanie co 15 minut przez 3 dni, a klient dostanie dokumenty e-mailem. Jeśli błąd mówi o środkach (credit balance / billing), doładuj konto na console.anthropic.com. Szczegóły: panel → Problemy.`);
   } finally { inFlight.delete(id); }
 }
+
+// Mail do właściciela najwyżej raz na godzinę, żeby przy awarii nie zasypać skrzynki.
+let lastAlert = 0;
+function alertOwner(text) {
+  if (!mailEnabled() || !process.env.CONTACT_EMAIL || Date.now() - lastAlert < 3600_000) return;
+  lastAlert = Date.now();
+  sendAdminAlert('Problem z generowaniem dokumentów', text).catch((e) => logEvent('e-mail', `Ostrzeżenie: ${e.message}`));
+}
+
+// Automatyczne ponawianie: opłacone zamówienia z błędem (np. brak środków na koncie AI) – co 15 minut, przez 3 dni.
+const RETRY_FOR = 3 * 864e5, RETRY_MAX = 300;
+async function retryFailed() {
+  try {
+    for (const o of Object.values(await allOrders())) {
+      if (o.status !== 'paid' || inFlight.has(o.id) || (o.attempts || 0) >= RETRY_MAX || Date.now() - (o.paidAt || o.created) > RETRY_FOR) continue;
+      await updateOrder(o.id, { status: 'pending', error: null });
+      await markPaidAndGenerate(o.id);
+    }
+  } catch (e) { console.error('Ponawianie', e); }
+}
+setInterval(retryFailed, (Number(process.env.RETRY_MINUTES) || 15) * 60_000).unref();
 
 const doneOrder = async (req, res) => {
   const o = await getOrder(req.params.id);

@@ -983,7 +983,7 @@ async function poll() {
   data = await r.json();
   data.design = data.design || { ...design };
   if (data.status === 'done') { $('#gen').hidden = true; return showResult(); }
-  if (data.status === 'paid') { $('#genTitle').textContent = 'Coś poszło nie tak'; $('#genMsg').textContent = data.error || 'Generowanie nie powiodło się. Płatność jest zachowana.'; $('#retry').hidden = false; return; }
+  if (data.status === 'paid') { $('#genTitle').textContent = 'Dokumenty są w przygotowaniu'; $('#genMsg').textContent = 'Mamy chwilowe opóźnienie. Płatność jest zachowana, a gotowe dokumenty wyślemy na Twój e-mail, zwykle w ciągu kilku godzin. Możesz zamknąć tę stronę albo spróbować ponownie.'; $('#retry').hidden = false; timer = setTimeout(poll, 60000); return; }
   if (data.status === 'pending' && data.canPay && ++pendingPolls >= 4) { $('#genTitle').textContent = 'Płatność nie jest jeszcze potwierdzona'; $('#genMsg').textContent = 'Jeśli przerwałeś płatność albo zamknąłeś okno banku, możesz ją dokończyć. Jeśli zapłaciłeś, poczekaj chwilę: potwierdzenie może przyjść z opóźnieniem.'; $('#payAgain').hidden = false; timer = setTimeout(poll, 5000); return; }
   $('#genMsg').textContent = data.status === 'pending' ? 'Czekamy na potwierdzenie płatności…' : 'To zajmie około minuty. Nie zamykaj tej strony. Gotowe dokumenty wyślemy też na Twój e-mail.';
   timer = setTimeout(poll, cfg.demo ? 800 : 2500);
