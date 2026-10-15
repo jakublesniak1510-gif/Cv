@@ -36,7 +36,10 @@ const DEMO = PROVIDER === 'demo';
 // żeby nikt nie dostał dokumentów z AI za darmo. DEMO_OPEN=1 otwiera tryb demo dla wszystkich (np. do prezentacji).
 // Klucz testowy Stripe (sk_test_…) na produkcji: płatności próbne tylko dla admina, sprzedaż dla klientów zamknięta.
 const STRIPE_TEST = PROVIDER === 'stripe' && /^sk_test_/.test(process.env.STRIPE_SECRET_KEY || '');
-const SALES_CLOSED = (DEMO || STRIPE_TEST) && process.env.NODE_ENV === 'production' && process.env.DEMO_OPEN !== '1';
+// Zły rodzaj klucza (np. publiczny pk_…): Stripe odrzuci każdą płatność, więc sprzedaż zostaje zamknięta, a w logach jest ostrzeżenie.
+const STRIPE_BAD = PROVIDER === 'stripe' && !/^(sk|rk)_(live|test)_/.test(process.env.STRIPE_SECRET_KEY || '');
+if (STRIPE_BAD) console.error('STRIPE_SECRET_KEY nie jest kluczem tajnym (sk_live_…): sprzedaż zamknięta.');
+const SALES_CLOSED = STRIPE_BAD || ((DEMO || STRIPE_TEST) && process.env.NODE_ENV === 'production' && process.env.DEMO_OPEN !== '1');
 const salesClosedFor = (req) => SALES_CLOSED && !isAdmin(req);
 const CLOSED_MSG = 'Zamówienia ruszą za kilka dni. Zapisz się do newslettera na dole strony, a damy znać o starcie.';
 const RETENTION_MS = 30 * 24 * 3600 * 1000;
