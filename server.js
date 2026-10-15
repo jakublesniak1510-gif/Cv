@@ -1,7 +1,10 @@
 import 'dotenv/config';
 import express from 'express';
 import crypto from 'node:crypto';
-import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, withLetter as hasLetter } from './lib/pricing.js';
+import { activePromo, ensurePromoCode } from './lib/promos.js';
+import { checkPhoto, recruiterAnswer, ToolError } from './lib/freeTools.js';
+import { alertRoutes, alertsHourly } from './lib/alerts.js';
+import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUNDLE_OFF, withLetter as hasLetter } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads } from './lib/store.js';
 import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
@@ -10,7 +13,7 @@ import { adFromImage, AdImageError } from './lib/adImage.js';
 import { simTurn, SimError } from './lib/sim.js';
 import { samplePdf } from './lib/sample.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
-import { mailEnabled, sendOrderMail, sendReminder, sendReviewAsk, sendPayReminder, sendAdminAlert } from './lib/mail.js';
+import { mailEnabled, sendOrderMail, sendReminder, sendFollowUp, sendReviewAsk, sendPayReminder, sendAdminAlert } from './lib/mail.js';
 import { cleanDesign } from './lib/designs.js';
 import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes, sendNotFound } from './lib/seo.js';
@@ -48,8 +51,8 @@ app.set('trust proxy', 1);
 
 // Prosty limit zapytań na adres IP.
 const limiter = (max, windowMs) => { const hits = new Map(); return (req) => { const now = Date.now(), h = (hits.get(req.ip) || []).filter((t) => now - t < windowMs); if (h.length >= max) return false; hits.set(req.ip, [...h, now]); return true; }; };
-const importLimit = limiter(10, 600_000), fetchLimit = limiter(20, 600_000), scanLimit = limiter(6, 3600_000), chatLimit = limiter(30, 3600_000);
-const REMINDER_AFTER = 7 * 24 * 3600 * 1000, REVIEW_AFTER = 4 * 24 * 3600 * 1000;
+const photoLimit = limiter(5, 3600_000), answerLimit = limiter(8, 3600_000), importLimit = limiter(10, 600_000), fetchLimit = limiter(20, 600_000), scanLimit = limiter(6, 3600_000), chatLimit = limiter(30, 3600_000);
+const FOLLOWUP_AFTER = 29 * 24 * 3600 * 1000, REMINDER_AFTER = 7 * 24 * 3600 * 1000, REVIEW_AFTER = 4 * 24 * 3600 * 1000;
 
 // --- Import starego CV (większy limit body, więc przed globalnym parserem) ---
 app.post('/api/import', express.json({ limit: '8mb' }), async (req, res) => {
@@ -113,6 +116,7 @@ const normCode = (c) => str(c, 20).toUpperCase().replace(/[^A-Z0-9-]/g, '');
 async function checkCode(raw, email) {
   const code = normCode(raw);
   if (!code) return { discount: 0 };
+  if (code === activePromo()?.code) await ensurePromoCode();
   const c = await codes.get(code);
   if (!c || Date.now() > c.expires) return { error: 'Ten kod nie istnieje albo wygasł.' };
   const d = codeDiscount(c, email);
@@ -139,13 +143,27 @@ const cleanCv = (c = {}) => ({
 
 app.get('/api/config', (req, res) => res.json({
   demo: DEMO, salesClosed: salesClosedFor(req), ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
-  prices: Object.fromEntries(Object.entries(PRICES).map(([k, v]) => [k, v / 100])),
+  promo: salesClosedFor(req) ? null : activePromo(),
+  prices: { ...Object.fromEntries(Object.entries(PRICES).map(([k, v]) => [k, v / 100])), bundleOff: BUNDLE_OFF / 100 },
 }));
 
 app.get('/api/code/:code', async (req, res) => {
   const r = await checkCode(req.params.code, req.query.email);
   if (r.error) return res.status(404).json({ error: r.error });
   res.json({ code: r.code, discount: r.discount / 100, percent: r.percent || 0, voucher: r.voucher, label: r.voucher ? 'Kod od instytucji' : r.owner ? 'Twój kod z saldem poleceń' : 'Kod rabatowy' });
+});
+
+// Darmowe narzędzia z AI (lib/freeTools.js): ocena zdjęcia do CV (zdjęcia nie zapisujemy) i odpowiedź na pytanie rekrutera.
+const toolLang = (l) => (['en', 'uk', 'de'].includes(l) ? l : 'pl');
+app.post('/api/tools/photo', express.json({ limit: '8mb' }), async (req, res) => {
+  if (!photoLimit(req)) return res.status(429).json({ error: 'Wykorzystano limit ocen zdjęć na godzinę. Spróbuj później.' });
+  try { res.json(await checkPhoto(req.body?.image, toolLang(req.body?.lang))); }
+  catch (e) { if (!(e instanceof ToolError)) { console.error('Ocena zdjęcia', e.message); logEvent('zdjęcie-cv', e.message); } res.status(e instanceof ToolError ? 422 : 502).json({ error: e instanceof ToolError ? e.message : e instanceof AiRefusal ? 'Nie udało się ocenić tego zdjęcia.' : 'Ocena jest chwilowo niedostępna. Spróbuj za chwilę.' }); }
+});
+app.post('/api/tools/answer', async (req, res) => {
+  if (!answerLimit(req)) return res.status(429).json({ error: 'Wykorzystano limit odpowiedzi na godzinę. Spróbuj później.' });
+  try { res.json(await recruiterAnswer({ ...req.body, lang: toolLang(req.body?.lang) })); }
+  catch (e) { if (!(e instanceof ToolError)) { console.error('Odpowiedź rekruterowi', e.message); logEvent('pytanie-rekrutera', e.message); } res.status(e instanceof ToolError ? 400 : 502).json({ error: e instanceof ToolError ? e.message : 'Generator jest chwilowo niedostępny. Spróbuj za chwilę.' }); }
 });
 
 // Asystent: krótkie odpowiedzi na pytania o CV (limit na IP).
@@ -270,7 +288,7 @@ function cleanInvoice(v) {
 app.post('/api/orders', async (req, res) => {
   if (salesClosedFor(req)) return res.status(503).json({ error: CLOSED_MSG });
   try {
-    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, reviewAsk, payReminder, uiLang, createAccount, invoice } = req.body || {};
+    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, followUp, reviewAsk, payReminder, uiLang, createAccount, invoice } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
     const a = cleanAds(ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
@@ -283,7 +301,7 @@ app.post('/api/orders', async (req, res) => {
     const inv = cleanInvoice(invoice);
     if (inv?.error) return res.status(400).json({ error: inv.error });
     const disc = discountFor(c, pkg, a.length, ad, false, langs), total = calcTotal(pkg, a.length, ad, false, langs, disc);
-    const order = { invoice: total > 0 ? inv : null, id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const order = { invoice: total > 0 ? inv : null, id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now() };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -532,6 +550,7 @@ app.post('/api/orders/:id/retry', async (req, res) => {
 // Linki logowania/potwierdzenia na ekranie (bez e-maila) tylko w lokalnym demo, nigdy na produkcji.
 accountRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 leadRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
+alertRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 analyticsRoutes(app, BASE_URL);
 adminRoutes(app, { DEMO, BASE_URL, markPaidAndGenerate, trySend, retentionMs: RETENTION_MS });
 
@@ -552,12 +571,20 @@ async function hourly() {
     await cleanupLeads().catch(() => {});
     await leads.deleteWhere((l) => Date.now() - l.created > 365 * 864e5);
     await cleanupAnalytics().catch(() => {});
+    await ensurePromoCode().catch((e) => console.error('Promocja', e.message));
+    await alertsHourly(BASE_URL).catch((e) => console.error('Powiadomienia o ofertach', e.message));
     await accountHourly(BASE_URL).catch((e) => console.error('Konta', e.message));
     if (!mailEnabled()) return;
     for (const o of Object.values(await allOrders())) {
       if (o.status !== 'done' || !o.reminder?.consent || o.reminder.sent || Date.now() - o.created < REMINDER_AFTER) continue;
       try { await sendReminder(o, BASE_URL); await updateOrder(o.id, (x) => ({ ...x, reminder: { ...x.reminder, sent: true, at: Date.now() } })); }
       catch (e) { console.error('Przypomnienie', o.id, e.message); }
+    }
+    // Po miesiącu (dzień przed usunięciem danych): jak poszła rekrutacja + kod rabatowy (jeden e-mail, za zgodą).
+    for (const o of Object.values(await allOrders())) {
+      if (o.status !== 'done' || !o.followUp?.consent || o.followUp.sent || Date.now() - o.created < FOLLOWUP_AFTER) continue;
+      try { await sendFollowUp(o, BASE_URL); await updateOrder(o.id, (x) => ({ ...x, followUp: { ...x.followUp, sent: true, at: Date.now() } })); }
+      catch (e) { console.error('E-mail po miesiącu', o.id, e.message); }
     }
     for (const o of Object.values(await allOrders())) {
       if (o.status !== 'done' || !o.reviewAsk?.consent || o.reviewAsk.sent || Date.now() - o.created < REVIEW_AFTER || (await reviews.get(o.id))) continue;

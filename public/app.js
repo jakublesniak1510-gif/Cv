@@ -2,7 +2,7 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const el = (t, p = {}, ...k) => { const e = Object.assign(document.createElement(t), p); e.append(...k.filter((x) => x != null && x !== false)); return e; };
-let PRICE = { cv: 39, cv_letter: 49, pack3: 79, interview: 50, messages: 9, linkedin: 19, sim: 29, docx: 9, extraLang: 5 };
+let PRICE = { cv: 39, cv_letter: 49, pack3: 79, interview: 50, messages: 9, linkedin: 19, sim: 29, docx: 9, extraLang: 5, bundleOff: 19 };
 const ADDON_KEYS = { interview: ['#adInterview', 'Przygotowanie do rozmowy'], messages: ['#adMessages', 'Wiadomość do rekrutera i e-mail z aplikacją'], linkedin: ['#adLinkedin', 'Profil LinkedIn'], sim: ['#adSim', 'Symulator rozmowy kwalifikacyjnej'], docx: ['#adDocx', 'Wersja Word (.docx)'] };
 const PKG_ADS = { cv: 1, cv_letter: 1, pack3: 3 };
 const PKG_NAME = { cv: 'CV', cv_letter: 'CV + list motywacyjny', pack3: 'Pakiet 3 CV + listy motywacyjne' };
@@ -211,7 +211,7 @@ function hl(text, kws) {
 }
 
 fetch('/api/config').then((r) => r.json()).then((c) => {
-  cfg = c; track('pv'); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; if (c.salesClosed) $('#demoBar').textContent = 'Strona w przygotowaniu – zamówienia ruszą za kilka dni.'; $('#soonNote').hidden = !c.salesClosed; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
+  cfg = c; track('pv'); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; drawPromo(c.promo); if (c.salesClosed) $('#demoBar').textContent = 'Strona w przygotowaniu – zamówienia ruszą za kilka dni.'; $('#soonNote').hidden = !c.salesClosed; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
 }).catch(() => drawLists().catch(() => {})); // bez internetu (aplikacja na telefonie): treści z pamięci
 
 /* ---------- Przykład dopasowania ---------- */
@@ -677,7 +677,9 @@ const pkg = () => $('input[name=pkg]:checked').value;
 const nAds = () => Math.max(1, $('#ads').children.length);
 const addons = () => Object.fromEntries(Object.entries(ADDON_KEYS).map(([k, [sel]]) => [k, $(sel).checked]));
 const extraLangs = () => $$('#langPick input:checked').map((i) => i.value);
-const addonsTotal = () => Object.entries(addons()).reduce((s, [k, on]) => s + (on ? PRICE[k] : 0), 0) + PRICE.extraLang * extraLangs().length;
+// Pakiet „Pewna rozmowa”: list + przygotowanie do rozmowy + symulator razem taniej (tak samo liczy serwer, lib/pricing.js).
+const bundleOn = () => pkg() !== 'cv' && addons().interview && addons().sim;
+const addonsTotal = () => Object.entries(addons()).reduce((s, [k, on]) => s + (on ? PRICE[k] : 0), 0) + PRICE.extraLang * extraLangs().length - (bundleOn() ? PRICE.bundleOff : 0);
 const discount = () => (promo?.voucher ? Math.min(PRICE[pkg()], PRICE[promo.voucher]) : promo ? Math.min(promo.percent ? Math.round((PRICE[pkg()] + addonsTotal()) * promo.percent) / 100 : promo.discount, PRICE[pkg()] - 2) : 0);
 const total = () => PRICE[pkg()] + addonsTotal() - discount();
 
@@ -708,6 +710,8 @@ function refresh() {
   if ($('#langPick').children.length) syncLangPick();
   saveDraft();
   $('#total').textContent = total() + ' zł';
+  $('#bundleTip').textContent = pkg() === 'cv' ? '' : bundleOn() ? `Masz pakiet „Pewna rozmowa”: ${PRICE.bundleOff} zł taniej.` : `Pakiet „Pewna rozmowa”: zaznacz przygotowanie do rozmowy i symulator, a zapłacisz ${PRICE.bundleOff} zł mniej.`;
+  $('#bundleTip').hidden = pkg() === 'cv';
   $('#brk').textContent = [addonsTotal() ? `dodatki ${addonsTotal()} zł` : '', discount() ? `rabat −${discount()} zł` : ''].filter(Boolean).join(' · ');
   $$('.opt b[data-price]').forEach((b) => (b.textContent = `+${PRICE[b.dataset.price]} zł`));
   const maxA = PKG_ADS[pkg()];
@@ -741,6 +745,15 @@ $('#ads').addEventListener('change', refresh);
 
 /* kod rabatowy */
 const REF_KEY = 'cvpo-ref';
+// Przed i po: suwak (range) przesuwa granicę między zwykłym CV a CV pod ogłoszenie.
+{ const r = $('#baRange'); if (r) r.addEventListener('input', () => $('#ba').style.setProperty('--p', r.value + '%')); }
+// Pasek promocji z kalendarza (lib/promos.js): kod wpisuje się sam w kreatorze.
+function drawPromo(p) {
+  const bar = $('#promoBar'); bar.hidden = !p; if (!p) return;
+  const until = new Date(p.until - 3600_000).toLocaleDateString('pl-PL', { day: 'numeric', month: 'numeric' });
+  bar.replaceChildren(el('span', { textContent: `${p.label}: −${p.percent}% z kodem ${p.code} do ${until}.` }), el('button', { type: 'button', className: 'btn sm', textContent: 'Zamów z rabatem', onclick: () => { $('#codeInput').value = p.code; openWiz(); } }));
+  if (!$('#codeInput').value) $('#codeInput').value = p.code;
+}
 async function applyCode(raw, quiet) {
   const code = String(raw || '').trim().toUpperCase(), st = $('#codeMsg');
   if (!code) { promo = null; refresh(); st.textContent = ''; return; }
@@ -787,6 +800,7 @@ function drawSummary() {
     ...ads.map((a, i) => el('div', { className: 'sumrow' }, el('span', { textContent: `Ogłoszenie ${i + 1}: ${a.title}${a.lang === 'en' ? ' (po angielsku)' : ''}` }), el('span', { textContent: 'w cenie' }))),
     ...Object.entries(addons()).filter(([, on]) => on).map(([k]) => el('div', { className: 'sumrow' }, el('span', { textContent: ADDON_KEYS[k][1] }), el('span', { textContent: '+' + PRICE[k] + ' zł' }))),
     ...extraLangs().map((l) => el('div', { className: 'sumrow' }, el('span', { textContent: `Tłumaczenie: ${LANGS[l]}` }), el('span', { textContent: '+' + PRICE.extraLang + ' zł' }))),
+    ...(bundleOn() ? [el('div', { className: 'sumrow' }, el('span', { textContent: 'Pakiet „Pewna rozmowa”' }), el('span', { textContent: '−' + PRICE.bundleOff + ' zł' }))] : []),
     ...(discount() ? [el('div', { className: 'sumrow' }, el('span', {}, el('span', { textContent: promo.label }), ' ' + promo.code), el('span', { textContent: '−' + discount() + ' zł' }))] : []),
     el('div', { className: 'sumrow' }, el('span', { textContent: 'Razem' }), el('span', { textContent: total() + ' zł' })));
 }
@@ -823,7 +837,7 @@ const openWiz = (p) => {
   setTimeout(() => $('#wizClose').focus(), 0);
 };
 const closeWiz = () => { $('#wiz').hidden = true; modal(false); };
-document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (!b) return; e.preventDefault(); if (b.dataset.addon) { $('#ad' + b.dataset.addon).checked = true; saveDraft(); } openWiz(b.dataset.pkg); });
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (!b) return; e.preventDefault(); if (b.dataset.addon) { b.dataset.addon.split(',').forEach((a) => ($('#ad' + a).checked = true)); saveDraft(); } openWiz(b.dataset.pkg); });
 $('#wizClose').onclick = closeWiz;
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#wiz').hidden) closeWiz(); });
 $('#back').onclick = () => go(step - 1);
@@ -835,7 +849,7 @@ $('#wizForm').onsubmit = async (e) => {
   if (step < 6) return go(step + 1);
   const v = (id) => $('#' + id).value;
   const body = {
-    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, followUp: $('#followUp').checked, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   $('#next').disabled = true;
@@ -1332,6 +1346,7 @@ function showResult() {
   drawFollowup(); drawMyCode(); drawRate(); drawAcctOffer();
   draw();
   if (location.hash === '#ocena') setTimeout(() => $('#rate').scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+  if (location.hash === '#kolejne') setTimeout(() => $('#followup').scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
 }
 $('#newOrder').onclick = () => {
   try { history.replaceState(null, '', location.pathname); } catch {}
@@ -1470,6 +1485,8 @@ const fillT = (s, p, c) => s.replace(/\{(\w+)\}/g, (_, k) => ({ name: p?.name, l
 // Tłumaczenie elementów strony zawodu, gdy zawód ma tłumaczenie (p.lang); w przeciwnym razie zostaje po polsku.
 const pT = (p) => (s) => (p.lang ? window.I18N.t(s) : s);
 const kwChips = (p) => el('div', { className: 'kw' }, ...p.keywords.map((k, i) => el('span', {}, k, p.kwPl?.[i] ? el('small', { textContent: p.kwPl[i] }) : null)));
+// Odnośnik do powiadomień o ofertach z wpisanym zawodem (i miastem).
+const alertLink = (p, c, T) => el('p', { className: 'alert-link' }, '🔔 ', pageLink('narzedzia/oferty-pracy-na-maila', { textContent: T('Dostawaj co tydzień linki do nowych ofert na e-mail'), onclick: () => { window.__alertPrefill = { job: p.name.split(' / ')[0], city: c?.name || '' }; } }), el('span', { className: 'hint', textContent: ' · ' + T('za darmo, 12 tygodni') }));
 function profPage(p, C) {
   const d = { tpl: 'nowoczesny', color: 'niebieski' }, r = profResult(p), T = pT(p), PT = p.lang && C.prof?.tpl;
   const side = el('div', { className: 'side-thumb' }), full = el('div', { className: 'side-full' });
@@ -1486,6 +1503,7 @@ function profPage(p, C) {
         el('h2', { textContent: T('Przykładowe CV') }), el('p', { className: 'hint', textContent: T('Dane w przykładzie są fikcyjne. Szablon i kolor zmienisz w panelu obok.') }), full,
         el('h2', { textContent: T('Pytania') }), ...p.faq.map((f) => el('details', {}, el('summary', { textContent: f.q }), el('p', { textContent: f.a }))),
         el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: T('Masz konkretne ogłoszenie?') }), el('p', { className: 'hint', textContent: T('Wklej link, a przygotujemy CV pisane pod nie. Od 39 zł, z darmową poprawką.') })), openBtn(T('Zamów CV'))),
+        alertLink(p, null, T),
         ...(C.POPULAR.some((x) => x.slug === p.slug) && C.CITIES?.length ? [el('h2', { textContent: PT ? fillT(PT.inCity, p) : `${p.name} w Twoim mieście` }), el('div', { className: 'more' }, ...C.CITIES.map((x) => pageLink(`cv/${p.slug}/${x.slug}`, { textContent: x.name })))] : []),
         el('h2', { textContent: T('Podobne zawody') }), el('div', { className: 'more' }, ...C.INDEX.filter((x) => x.slug !== p.slug && x.category === p.category).slice(0, 10).map((x) => pageLink(`cv/${x.slug}`, { textContent: x.name })), el('a', { href: '#zawody', textContent: T('Wszystkie zawody') }))),
       el('aside', { className: 'side-card' }, el('b', { textContent: p.lang ? T(`Przykład: ${p.sample.name}`) : `Przykład: ${p.sample.name}` }), side, picker, openBtn(T('Zamów CV pod swoje ogłoszenie')), el('p', { className: 'hint', textContent: T('Raport dopasowania, darmowa poprawka, PDF w e-mailu.') }))));
@@ -1504,6 +1522,165 @@ function netOf(gross, { young = false, commute = false } = {}) {
   const health = r((gross - zusSum) * 0.09), base = Math.max(0, Math.round(gross - zusSum - (commute ? 300 : 250)));
   const pit = young ? 0 : Math.max(0, Math.round(base * 0.12 - 300));
   return { zus, zusSum, health, pit, net: r(gross - zusSum - health - pit), yearly: gross * 12 };
+}
+// --- Wypowiedzenie umowy o pracę (art. 34 i 36 KP) ---
+const dPL = (d) => d.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+const parseD = (v) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ''); return m ? new Date(+m[1], m[2] - 1, +m[3]) : null; };
+const isoD = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+// Okres w tygodniach kończy się w sobotę, w miesiącach ostatniego dnia miesiąca (art. 30 § 2¹ KP).
+function noticeOf(kind, from, letter, trial) {
+  if (kind === 'proba') return trial === 'short' ? { text: '3 dni robocze', end: null } : trial === 'mid' ? { text: '1 tydzień', weeks: 1 } : { text: '2 tygodnie', weeks: 2 };
+  const months = from && letter ? (letter.getFullYear() - from.getFullYear()) * 12 + (letter.getMonth() - from.getMonth()) - (letter.getDate() < from.getDate() ? 1 : 0) : 0;
+  return months < 6 ? { text: '2 tygodnie', weeks: 2 } : months < 36 ? { text: '1 miesiąc', months: 1 } : { text: '3 miesiące', months: 3 };
+}
+function noticeEnd(n, letter) {
+  if (!letter || (!n.weeks && !n.months)) return null;
+  if (n.months) return new Date(letter.getFullYear(), letter.getMonth() + n.months + 1, 0);
+  const d = new Date(letter); d.setDate(d.getDate() + 7 * n.weeks); while (d.getDay() !== 6) d.setDate(d.getDate() + 1); return d;
+}
+const printText = (title, text) => {
+  const w = window.open('', '_blank'); if (!w) return alert('Przeglądarka zablokowała okno wydruku. Skopiuj tekst i wklej go do edytora.');
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>${title}</title><style>body{font:12pt/1.6 Georgia,serif;margin:2.5cm;white-space:pre-wrap}</style>`); w.document.body.textContent = text; w.document.close(); w.focus(); w.print();
+};
+function toolNotice(box, out, field) {
+  const today = isoD(new Date());
+  const v = { name: el('input', { type: 'text', placeholder: 'Anna Kowalska', autocomplete: 'name' }), addr: el('input', { type: 'text', placeholder: 'ul. Lipowa 5, 65-001 Zielona Góra (opcjonalnie)' }), place: el('input', { type: 'text', placeholder: 'Zielona Góra' }), date: el('input', { type: 'date', value: today }),
+    firm: el('input', { type: 'text', placeholder: 'ABC Sp. z o.o.' }), firmAddr: el('input', { type: 'text', placeholder: 'ul. Przemysłowa 1, 65-001 Zielona Góra (opcjonalnie)' }),
+    kind: el('select', {}, ...[['nieokreslony', 'na czas nieokreślony'], ['okreslony', 'na czas określony'], ['proba', 'na okres próbny'], ['porozumienie', 'za porozumieniem stron (wniosek)']].map(([a, b]) => el('option', { value: a, textContent: b }))),
+    signed: el('input', { type: 'date' }), since: el('input', { type: 'date' }), trial: el('select', {}, ...[['short', 'do 2 tygodni'], ['mid', 'dłuższy niż 2 tygodnie'], ['long', '3 miesiące']].map(([a, b]) => el('option', { value: a, textContent: b }))),
+    endAgreed: el('input', { type: 'date' }), leave: el('input', { type: 'checkbox' }), shorten: el('input', { type: 'checkbox' }) };
+  const fSince = field('Pracuję u tego pracodawcy od', v.since), fTrial = field('Okres próbny trwa', v.trial), fEnd = field('Proponowana data rozwiązania umowy', v.endAgreed);
+  const info = el('p', { className: 'perk small' }), cShorten = el('label', { className: 'check' }, v.shorten, el('span', { textContent: 'Zaproponuj pracodawcy skrócenie okresu wypowiedzenia (porozumienie stron)' })), cLeave = el('label', { className: 'check' }, v.leave, el('span', { textContent: 'Poproś o wykorzystanie zaległego urlopu w okresie wypowiedzenia' }));
+  const draw = () => {
+    const k = v.kind.value, letter = parseD(v.date.value), since = parseD(v.since.value) || parseD(v.signed.value), agreed = k === 'porozumienie';
+    fSince.hidden = agreed || k === 'proba'; fTrial.hidden = k !== 'proba'; fEnd.hidden = !agreed && !v.shorten.checked; cShorten.hidden = agreed; cLeave.hidden = agreed;
+    const n = noticeOf(k, since, letter, v.trial.value), end = noticeEnd(n, letter), signed = parseD(v.signed.value);
+    info.textContent = agreed ? 'Rozwiązanie za porozumieniem stron wymaga zgody pracodawcy: umowa kończy się w dniu, na który się zgodzicie.' : `Okres wypowiedzenia: ${n.text}${end ? `, koniec umowy: ${dPL(end)}` : ''}.${k !== 'proba' ? ' Liczy się cały staż u tego pracodawcy, także na wcześniejszych umowach.' : ''}`;
+    const kindTxt = { nieokreslony: 'na czas nieokreślony', okreslony: 'na czas określony', proba: 'na okres próbny', porozumienie: '' }[k];
+    const head = [`${v.place.value.trim() || '[miejscowość]'}, ${letter ? dPL(letter) : '[data]'}`, '', v.name.value.trim() || '[imię i nazwisko]', v.addr.value.trim(), '', '', v.firm.value.trim() || '[nazwa pracodawcy]', v.firmAddr.value.trim(), ''].filter((x, i, a) => x !== '' || a[i - 1] !== '');
+    const contract = `umowy o pracę zawartej w dniu ${signed ? dPL(signed) : '[data zawarcia umowy]'}`;
+    const endAgreed = parseD(v.endAgreed.value) ? dPL(parseD(v.endAgreed.value)) : '[data]';
+    const body = agreed
+      ? ['Wniosek o rozwiązanie umowy o pracę za porozumieniem stron', '', `Zwracam się z prośbą o rozwiązanie ${contract} za porozumieniem stron z dniem ${endAgreed}.`]
+      : ['Wypowiedzenie umowy o pracę', '', `Niniejszym wypowiadam umowę o pracę ${kindTxt} zawartą w dniu ${signed ? dPL(signed) : '[data zawarcia umowy]'}, z zachowaniem okresu wypowiedzenia wynoszącego ${n.text}${end ? `, który upływa w dniu ${dPL(end)}` : ''}.`,
+        ...(v.leave.checked ? ['', 'Proszę o udzielenie mi przysługującego urlopu wypoczynkowego w okresie wypowiedzenia.'] : []),
+        ...(v.shorten.checked ? ['', `Jednocześnie proponuję rozwiązanie umowy za porozumieniem stron z dniem ${endAgreed}.`] : [])];
+    out.textContent = [...head, ...body, '', '', '', '.................................................', '(podpis pracownika)', '', '', 'Potwierdzam odbiór w dniu ........................', '', '.................................................', '(podpis i pieczęć pracodawcy)'].join('\n');
+  };
+  Object.values(v).forEach((i) => i.addEventListener('input', draw)); draw();
+  box.append(el('div', { className: 'tool-form' }, field('Imię i nazwisko', v.name), field('Twój adres', v.addr), field('Miejscowość', v.place), field('Data pisma', v.date), field('Pracodawca', v.firm), field('Adres pracodawcy', v.firmAddr), field('Rodzaj umowy', v.kind), field('Data zawarcia umowy', v.signed), fSince, fTrial, fEnd),
+    cShorten, cLeave, info, out, el('div', { className: 'tool-btns' }, copyBtn2(out), el('button', { type: 'button', className: 'btn sm', textContent: 'Drukuj', onclick: () => printText('Wypowiedzenie umowy o pracę', out.textContent) })),
+    el('p', { className: 'hint', textContent: 'Złóż pismo w dwóch egzemplarzach i poproś o potwierdzenie odbioru na Twojej kopii albo wyślij je listem poleconym. Okres wypowiedzenia liczy się od dnia, w którym pracodawca odebrał pismo. Wzór ma charakter informacyjny i nie zastępuje porady prawnej; w razie wątpliwości zapytaj w kadrach albo w Państwowej Inspekcji Pracy.' }));
+}
+
+// --- Ocena zdjęcia do CV (AI, zdjęcia nie zapisujemy) ---
+function toolPhoto(box, out) {
+  const prev = el('div', { className: 'ph-prev', hidden: true }), status = el('p', { className: 'fstatus', role: 'status' });
+  const file = el('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp', hidden: true });
+  out.hidden = true;
+  file.onchange = async () => {
+    const f = file.files[0]; if (!f) return;
+    status.className = 'fstatus'; status.textContent = 'Oceniamy zdjęcie…'; out.hidden = true;
+    try {
+      const img = await shrinkImage(f, 1000);
+      prev.hidden = false; prev.replaceChildren(el('img', { src: img, alt: 'Twoje zdjęcie' }));
+      const r = await fetch('/api/tools/photo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: img, lang: window.I18N?.lang || 'pl' }) });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      status.textContent = '';
+      out.hidden = false;
+      out.replaceChildren(el('div', { className: 'net-big' }, el('small', { textContent: 'Ocena zdjęcia do CV' }), el('b', { textContent: `${j.score}/10` })), el('p', { textContent: j.verdict }),
+        j.good.length ? el('div', {}, el('b', { textContent: 'Co jest dobrze' }), el('ul', {}, ...j.good.map((t) => el('li', { textContent: t })))) : '',
+        j.improve.length ? el('div', {}, el('b', { textContent: 'Co poprawić' }), el('ul', {}, ...j.improve.map((t) => el('li', { textContent: t })))) : '');
+    } catch (e) { status.className = 'fstatus bad'; status.textContent = e.message; }
+    file.value = '';
+  };
+  box.append(el('div', { className: 'ph-row' }, prev, el('div', {}, el('label', { className: 'btn filebtn' }, 'Wgraj zdjęcie', file), el('p', { className: 'hint', textContent: 'JPG, PNG lub WebP. Zdjęcie jest oceniane i od razu odrzucane, nie zapisujemy go. Limit: 5 ocen na godzinę.' }))), status, out,
+    el('details', { className: 'tips-more' }, el('summary', { textContent: 'Jak zrobić dobre zdjęcie do CV telefonem' }), el('ol', { className: 'tips' }, ...['Stań przodem do okna, w dzień, bez lampy błyskowej.', 'Tło: jasna, gładka ściana albo drzwi.', 'Poproś kogoś o zdjęcie z odległości ok. 1,5 m, telefon na wysokości oczu (nie selfie z ręki).', 'Kadr: głowa i ramiona, wzrok w obiektyw, lekki uśmiech.', 'Strój jak na rozmowę w tej branży: gładka koszula, bluzka lub sweter.', 'Bez filtrów i retuszu: zdjęcie ma Cię przypominać na rozmowie.'].map((t) => el('li', { textContent: t })))));
+}
+
+// --- Pytania rekrutera (AI): przykładowa odpowiedź pod stanowisko ---
+function toolAnswer(box, out, field, questions) {
+  const q = el('select', {}, ...questions.map((x) => el('option', { value: x, textContent: x }))), pos = el('input', { type: 'text', placeholder: 'np. magazynier, sprzedawca, księgowa' }), facts = el('textarea', { rows: 4, placeholder: 'np. 3 lata pracy w hurtowni, kompletacja zamówień ze skanerem, uprawnienia UDT; chcę pracować bliżej domu' });
+  const status = el('p', { className: 'fstatus', role: 'status' }), go = el('button', { type: 'button', className: 'btn', textContent: 'Pokaż przykładową odpowiedź' });
+  out.hidden = true;
+  go.onclick = async () => {
+    status.className = 'fstatus'; status.textContent = 'Piszemy odpowiedź…'; go.disabled = true;
+    try {
+      const r = await fetch('/api/tools/answer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: q.value, position: pos.value, facts: facts.value, lang: window.I18N?.lang || 'pl' }) });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      status.textContent = ''; out.hidden = false;
+      out.replaceChildren(el('p', { className: 'hint', textContent: `Co sprawdza rekruter: ${j.why}` }), el('p', { textContent: j.answer }), j.tips.length ? el('div', {}, el('b', { textContent: 'Czego unikać' }), el('ul', {}, ...j.tips.map((t) => el('li', { textContent: t })))) : '');
+    } catch (e) { status.className = 'fstatus bad'; status.textContent = e.message; }
+    go.disabled = false;
+  };
+  box.append(el('div', { className: 'tool-form' }, field('Pytanie rekrutera', q), field('Stanowisko', pos)), field('Kilka faktów o Tobie (opcjonalnie)', facts), el('div', {}, go), status, out,
+    el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Chcesz komplet odpowiedzi pod konkretne ogłoszenie?' }), el('p', { className: 'hint', textContent: 'Przygotowanie do rozmowy: 12 pytań, które mogą paść przy Twoim ogłoszeniu, z odpowiedziami z Twojego doświadczenia. Dodatek do CV.' })), (() => { const b = openBtn('Zamów z przygotowaniem'); b.dataset.pkg = 'cv_letter'; b.dataset.addon = 'Interview'; return b; })()));
+}
+
+// --- Quiz „Jaki zawód do mnie pasuje?” ---
+// Cechy: P ludzie, S sprzedaż, C opieka, H praca fizyczna i ręczna, M ruch i teren, T technologie, O porządek i liczby, K kreatywność, L kierowanie.
+const TRAITS = { P: 'praca z ludźmi', S: 'sprzedaż i negocjacje', C: 'pomaganie innym', H: 'praca fizyczna i ręczna', M: 'praca w ruchu i w terenie', T: 'technologie i komputer', O: 'dokładność i porządek', K: 'kreatywność', L: 'kierowanie zespołem' };
+const PROF_T = { kasjer: 'P2O1', sprzedawca: 'P2S1', 'obsluga-klienta': 'P2T1', 'przedstawiciel-handlowy': 'S2M2P1', 'kierownik-sklepu': 'L2P1S1', merchandiser: 'M1K1H1', 'konsultant-call-center': 'P1S1T1', 'doradca-bankowy': 'P1S1O1', 'agent-nieruchomosci': 'S2M1P1',
+  magazynier: 'H2O1', kierowca: 'M2H1', 'operator-wozka-widlowego': 'H2O1', kurier: 'M2H1', spedytor: 'O1T1P1', 'kierownik-magazynu': 'L2O1', 'specjalista-zakupow': 'O1S1T1',
+  pielegniarka: 'C2O1', 'opiekun-osob-starszych': 'C2H1', fizjoterapeuta: 'C2H1', 'ratownik-medyczny': 'C2M1', 'technik-farmaceutyczny': 'O2C1', 'opiekunka-dziecieca': 'C2K1',
+  ksiegowa: 'O2T1', recepcjonistka: 'P2O1', 'asystentka-biura': 'O2P1', 'specjalista-kadr-i-plac': 'O2T1', rekruter: 'P2S1', programista: 'T2O1', 'analityk-danych': 'T2O2', 'tester-oprogramowania': 'T2O1', 'kierownik-projektu': 'L2T1', 'specjalista-helpdesk': 'T2P1',
+  elektryk: 'H2T1', hydraulik: 'H2M1', 'pracownik-budowlany': 'H2M1', 'inzynier-budowy': 'L1T1H1O1', fryzjer: 'K2P1H1', 'pracownik-sprzatajacy': 'H2O1', 'pracownik-ochrony': 'M1O1', nauczyciel: 'P2C1L1',
+  kucharz: 'K1H2', kelner: 'P2H1', barista: 'P1K1H1', pokojowka: 'H2O1', 'pracownik-produkcji': 'H2O1', spawacz: 'H2T1', 'mechanik-samochodowy': 'H2T1', grafik: 'K2T1', 'specjalista-marketingu': 'K1S1T1', 'social-media-manager': 'K2T1P1' };
+const QUIZ = [
+  ['Co daje Ci najwięcej satysfakcji w pracy?', [['Rozmowa z ludźmi i pomoc im', 'P1C1'], ['Coś, co zrobiłem własnymi rękami', 'H2'], ['Rozwiązany problem na komputerze', 'T2'], ['Coś, co sam wymyśliłem i zaprojektowałem', 'K2']]],
+  ['Gdzie wolisz pracować?', [['W biurze, przy biurku', 'O1T1'], ['W ruchu, w terenie, za kółkiem', 'M2'], ['Wśród ludzi: sklep, restauracja, recepcja', 'P2'], ['W warsztacie, magazynie lub na budowie', 'H2']]],
+  ['Jak podchodzisz do liczb i dokumentów?', [['Lubię, kiedy wszystko zgadza się co do grosza', 'O2'], ['Mogą być, ale bez przesady', 'O1'], ['Wolę ich unikać', 'H1P1']]],
+  ['Klient jest niezadowolony. Co robisz?', [['Spokojnie przekonuję go do rozwiązania', 'S2P1'], ['Cierpliwie słucham i pomagam', 'C2P1'], ['Wolę pracę bez kontaktu z klientami', 'H1T1O1']]],
+  ['Czy chcesz kierować innymi?', [['Tak, lubię organizować pracę zespołu', 'L2'], ['Może kiedyś', 'L1'], ['Nie, wolę robić swoje', 'H1T1']]],
+  ['Jak podchodzisz do pracy fizycznej?', [['Lubię być w ruchu i się zmęczyć', 'H2'], ['Trochę ruchu jest w porządku', 'M1H1'], ['Wolę pracę siedzącą', 'T1O1']]],
+  ['Jak radzisz sobie z nowymi technologiami?', [['Świetnie, sam się uczę nowych programów', 'T2'], ['Obsługuję to, czego potrzebuję', 'T1'], ['Wolę pracę, w której ich nie potrzebuję', 'H1C1']]],
+  ['Co jest dla Ciebie najważniejsze?', [['Pomaganie i sens pracy', 'C2'], ['Wynik, cel i premia za sprzedaż', 'S2'], ['Spokój i przewidywalność', 'O2'], ['Możliwość tworzenia', 'K2']]],
+  ['Ile chcesz się uczyć, zanim zaczniesz pracę?', [['Chcę zacząć od razu i uczyć się na miejscu', 'H1P1'], ['Kurs lub uprawnienia, kilka tygodni', 'M1H1'], ['Mogę uczyć się dłużej, np. w szkole lub na studiach', 'T1C1O1']]],
+  ['Które zdanie najlepiej Cię opisuje?', [['Jestem dokładny i systematyczny', 'O2'], ['Jestem towarzyski i łatwo nawiązuję kontakty', 'P1S1'], ['Jestem zaradny i dobrze mi idzie praca rękami', 'H2'], ['Jestem kreatywny i mam dobre oko', 'K2']]],
+];
+const traitVec = (s) => { const v = {}; for (const [, k, n] of String(s).matchAll(/([A-Z])(\d)/g)) v[k] = (v[k] || 0) + +n; return v; };
+function toolQuiz(box, out, C) {
+  const picked = new Array(QUIZ.length).fill(null), status = el('p', { className: 'fstatus', role: 'status' });
+  out.hidden = true;
+  const qs = QUIZ.map(([q, answers], i) => el('fieldset', { className: 'quiz-q' }, el('legend', { textContent: `${i + 1}. ${q}` }),
+    ...answers.map(([a, t], j) => el('label', { className: 'check' }, el('input', { type: 'radio', name: `quiz${i}`, value: j, onchange: () => { picked[i] = t; status.textContent = ''; } }), el('span', { textContent: a })))));
+  const show = () => {
+    if (picked.some((x) => !x)) { status.className = 'fstatus bad'; status.textContent = `Odpowiedz na wszystkie pytania (brakuje: ${picked.filter((x) => !x).length}).`; return; }
+    const me = {}; picked.forEach((t) => Object.entries(traitVec(t)).forEach(([k, n]) => (me[k] = (me[k] || 0) + n)));
+    const norm = (v) => Math.sqrt(Object.values(v).reduce((s, n) => s + n * n, 0)) || 1;
+    const ranked = (C.INDEX || []).filter((p) => PROF_T[p.slug]).map((p) => { const v = traitVec(PROF_T[p.slug]); return { p, v, s: Object.entries(v).reduce((s, [k, n]) => s + n * (me[k] || 0), 0) / norm(v) / norm(me) }; }).sort((a, b) => b.s - a.s).slice(0, 3);
+    const mine = Object.entries(me).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => TRAITS[k]);
+    out.hidden = false;
+    out.replaceChildren(el('p', {}, el('b', { textContent: 'Twoje mocne preferencje: ' }), mine.join(', ') + '.'),
+      el('div', { className: 'quiz-res' }, ...ranked.map(({ p, v, s }, i) => el('div', { className: 'quiz-card' }, el('small', { textContent: `${i + 1}. dopasowanie ${Math.round(s * 100)}%` }), el('b', { textContent: p.name }),
+        el('p', { className: 'hint', textContent: 'Ten zawód to: ' + Object.keys(v).map((k) => TRAITS[k]).join(', ') + '.' }), pageLink(`cv/${p.slug}`, { className: 'btn ghost sm', textContent: 'Jak napisać CV' })))),
+      el('p', { className: 'hint', textContent: 'Wynik to podpowiedź, a nie test psychologiczny. Sprawdź ogłoszenia w tych zawodach i wybierz to, co Cię ciekawi.' }));
+    out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  box.append(...qs, el('div', {}, el('button', { type: 'button', className: 'btn', textContent: 'Pokaż wynik', onclick: show })), status, out);
+}
+
+// --- Oferty pracy na e-mail (lib/alerts.js): zapis z podwójną zgodą ---
+function toolAlerts(box, out, field) {
+  const pre = window.__alertPrefill || {}; window.__alertPrefill = null;
+  const job = el('input', { type: 'text', placeholder: 'np. magazynier', value: pre.job || '' }), city = el('input', { type: 'text', placeholder: 'np. Zielona Góra (opcjonalnie)', value: pre.city || '' }), email = el('input', { type: 'email', autocomplete: 'email', placeholder: 'twoj@email.pl' });
+  const consent = el('input', { type: 'checkbox' }), trap = el('input', { type: 'text', name: 'website', tabIndex: -1, autocomplete: 'off', className: 'hp', ariaHidden: 'true' }), status = el('p', { className: 'fstatus', role: 'status' });
+  const go = el('button', { type: 'button', className: 'btn', textContent: 'Włącz powiadomienia' });
+  out.hidden = true;
+  go.onclick = async () => {
+    status.className = 'fstatus'; status.textContent = 'Zapisujemy…'; go.disabled = true;
+    try {
+      const r = await fetch('/api/alerts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ job: job.value, city: city.value, email: email.value, consent: consent.checked, website: trap.value, lang: window.I18N?.lang || 'pl' }) });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      status.className = 'fstatus good'; status.textContent = 'Sprawdź skrzynkę i kliknij link w e-mailu, żeby włączyć powiadomienia. Bez potwierdzenia nic nie wyślemy.';
+      if (j.demoLink) status.append(' ', el('a', { href: j.demoLink, textContent: '(podgląd: potwierdź)' }));
+    } catch (e) { status.className = 'fstatus bad'; status.textContent = e.message; }
+    go.disabled = false;
+  };
+  box.append(el('div', { className: 'tool-form' }, field('Zawód lub stanowisko', job), field('Miasto', city), field('E-mail', email)), trap,
+    el('label', { className: 'check' }, consent, el('span', { textContent: 'Chcę dostawać raz w tygodniu e-mail z linkami do ofert pracy dla wybranego zawodu i miasta oraz wskazówkami o CV, przez 12 tygodni. Zgodę mogę wycofać w każdej chwili linkiem w każdej wiadomości.' })),
+    el('div', {}, go), status,
+    el('p', { className: 'hint', textContent: 'Nie pobieramy ofert z portali: w e-mailu są linki do aktualnych wyników wyszukiwania na Pracuj.pl, OLX i Indeed, ustawione na Twój zawód i miasto. Możesz mieć do 3 takich powiadomień.' }));
 }
 function toolPage(slug, C) {
   const t = C.TOOLS[slug], box = el('div', { className: 'tool-box' });
@@ -1529,7 +1706,12 @@ function toolPage(slug, C) {
       el('label', { className: 'check' }, young, el('span', { textContent: 'Mam mniej niż 26 lat (ulga dla młodych, bez PIT do limitu rocznego)' })),
       el('label', { className: 'check' }, commute, el('span', { textContent: 'Dojeżdżam z innej miejscowości (koszty 300 zł zamiast 250 zł)' })), out,
       el('p', { className: 'hint', textContent: 'Wynik szacunkowy dla umowy o pracę, według zasad podatkowych obowiązujących od 2022 r. (skala 12% i 32%, kwota wolna 30 000 zł). Nie uwzględnia PPK, limitu składek ZUS przy bardzo wysokich zarobkach ani innych ulg. Przed decyzją sprawdź aktualne przepisy lub zapytaj pracodawcę.' }));
-  } else {
+  } else if (slug === 'wypowiedzenie-umowy-o-prace') toolNotice(box, out, field);
+  else if (slug === 'zdjecie-do-cv') toolPhoto(box, out);
+  else if (slug === 'odpowiedzi-na-pytania-rekrutera') toolAnswer(box, out, field, t.questions || []);
+  else if (slug === 'jaki-zawod-dla-mnie') toolQuiz(box, out, C);
+  else if (slug === 'oferty-pracy-na-maila') toolAlerts(box, out, field);
+  else {
     const name = el('input', { type: 'text', placeholder: 'Anna Kowalska' }), pos = el('input', { type: 'text', placeholder: 'Specjalista ds. obsługi klienta' }), firm = el('input', { type: 'text', placeholder: 'ABC Sp. z o.o.' }), who = el('input', { type: 'text', placeholder: 'np. Pani Magdaleno (opcjonalnie)' }), topic = el('input', { type: 'text', placeholder: 'np. wdrożeniu nowego systemu CRM (opcjonalnie)' });
     const draw = () => {
       const p = pos.value.trim() || '[stanowisko]', f = firm.value.trim() || '[firma]', n = name.value.trim() || '[imię i nazwisko]';
@@ -1573,6 +1755,7 @@ function cityPage(p, c, C) {
         el('h2', { textContent: T('Wskazówki do CV') }), el('ol', { className: 'tips' }, ...p.tips.map((t) => el('li', { textContent: t }))),
         el('h2', { textContent: T('Przykładowe CV') }), el('p', { className: 'hint', textContent: T('Dane w przykładzie są fikcyjne.') }), cvNode(r, false, d, ''),
         el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: F('cta', `Masz ogłoszenie ${c.loc}?`) }), el('p', { className: 'hint', textContent: T('Wklej link, a przygotujemy CV pisane pod nie. Od 39 zł, z darmową poprawką.') })), openBtn(T('Zamów CV'))),
+        alertLink(p, c, T),
         el('h2', { textContent: F('otherCities', `${p.name} w innych miastach`) }), el('div', { className: 'more' }, ...(C.CITIES || []).filter((x) => x.slug !== c.slug).map((x) => pageLink(`cv/${p.slug}/${x.slug}`, { textContent: x.name }))),
         el('h2', { textContent: F('otherProf', `Inne zawody ${c.loc}`) }), el('div', { className: 'more' }, ...C.POPULAR.filter((x) => x.slug !== p.slug).map((x) => pageLink(`cv/${x.slug}/${c.slug}`, { textContent: x.name })))),
       el('aside', { className: 'side-card' }, el('b', { textContent: F('side', `CV: ${p.name}, ${c.name}`) }), el('div', { className: 'side-thumb' }, thumb(r, d, false, '')), openBtn(T('Zamów CV pod swoje ogłoszenie')), el('p', { className: 'hint', textContent: T('Raport dopasowania, darmowa poprawka, PDF w e-mailu.') }))));

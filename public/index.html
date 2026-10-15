@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="/style.css"></head>
 <body>
 <div id="demoBar" class="demobar" hidden>Tryb DEMO: płatność jest symulowana.</div>
+<div id="promoBar" class="promobar" hidden></div>
 <div id="refBanner" class="refbar" hidden>Masz kod −10 zł od znajomego. Wpiszemy go automatycznie w podsumowaniu zamówienia.</div>
 
 <header class="nav" id="nav"><div class="inner">
@@ -92,6 +93,35 @@
   <p class="sub2 small">Opinie wystawiają wyłącznie osoby, które kupiły dokumenty, na stronie swojego zamówienia. Średnia obejmuje wszystkie oceny.</p>
 </div></section>
 
+<section class="sec" id="przed-po"><div class="inner">
+  <h2>Przed i po: to samo doświadczenie</h2>
+  <p class="sub2">Przesuń suwak. Po lewej zwykłe CV, po prawej to samo CV napisane pod ogłoszenie na magazyniera. Żółte są słowa z ogłoszenia, których szuka rekruter i system ATS, a procent to dopasowanie do ogłoszenia.</p>
+  <div class="ba" id="ba" style="--p:50%">
+    <div class="ba-layer ba-before doc" aria-hidden="true">
+      <div class="ba-tag">Zwykłe CV · 38%</div>
+      <div class="ba-name">Anna Nowak</div><div class="ba-role">Pracownik</div>
+      <div class="ba-h">O mnie</div><p>Jestem osobą sumienną, pracowitą i komunikatywną. Szukam stabilnej pracy, w której będę mogła się rozwijać.</p>
+      <div class="ba-h">Doświadczenie</div>
+      <p><b>Pomocnik magazyniera</b>, Hurtownia Beta · 2022–obecnie</p><ul><li>praca na magazynie</li><li>różne obowiązki</li><li>pomoc przy dostawach</li></ul>
+      <p><b>Kasjer</b>, Market Dom · 2019–2022</p><ul><li>obsługa kasy</li><li>praca z klientami</li></ul>
+      <div class="ba-h">Umiejętności</div><p>Pakiet Office, prawo jazdy kat. B, komunikatywność</p>
+    </div>
+    <div class="ba-layer ba-after doc" aria-hidden="true">
+      <div class="ba-tag good">Pod ogłoszenie · 86%</div>
+      <div class="ba-name">Anna Nowak</div><div class="ba-role"><mark>Magazynier</mark> | <mark>kompletacja zamówień</mark>, <mark>WMS</mark>, <mark>wózki widłowe UDT</mark></div>
+      <div class="ba-h">Profil</div><p>Od 2022 r. pracuję w magazynie hurtowni: <mark>kompletuję zamówienia</mark> ze <mark>skanerem</mark>, <mark>przyjmuję dostawy</mark> i biorę udział w <mark>inwentaryzacji</mark>. Mam <mark>uprawnienia UDT</mark> i jestem gotowa do <mark>pracy zmianowej</mark>.</p>
+      <div class="ba-h">Doświadczenie</div>
+      <p><b>Pomocnik magazyniera</b>, Hurtownia Beta · 2022–obecnie</p><ul><li><mark>Kompletuję zamówienia</mark> ze <mark>skanerem</mark> w systemie <mark>WMS</mark>.</li><li><mark>Przyjmuję i wydaję towar</mark>, sprawdzam zgodność z dokumentami.</li><li>Uczestniczę w <mark>inwentaryzacji</mark> co kwartał.</li></ul>
+      <p><b>Kasjer</b>, Market Dom · 2019–2022</p><ul><li>Rozliczałam kasę bez różnic, pracowałam w <mark>systemie zmianowym</mark>.</li></ul>
+      <div class="ba-h">Umiejętności</div><p><mark>Wózki widłowe (UDT)</mark> · <mark>WMS</mark> · <mark>skaner</mark> · <mark>dokumenty magazynowe</mark> · prawo jazdy kat. B</p>
+    </div>
+    <div class="ba-line" aria-hidden="true"><span>⟷</span></div>
+    <input type="range" class="ba-range" id="baRange" min="0" max="100" value="50" aria-label="Porównaj CV: przesuń, aby zobaczyć zwykłe CV albo CV pod ogłoszenie">
+  </div>
+  <div class="ba-legend"><span>← Zwykłe CV</span><span>CV pod ogłoszenie →</span></div>
+  <p style="margin-top:18px"><button class="btn" data-open>Zrób CV pod swoje ogłoszenie</button></p>
+</div></section>
+
 <section class="sec alt" id="przyklad"><div class="inner">
   <h2>To samo doświadczenie, trzy różne CV</h2>
   <p class="sub2">Jedna osoba aplikuje na trzy stanowiska. Zmienia się nagłówek, profil, kolejność umiejętności i punktów w opisie pracy. Żółte są słowa z ogłoszenia. Niczego nie dopisujemy, czego nie podałeś.</p>
@@ -127,6 +157,7 @@
     <div class="price-card"><h3>CV</h3><div class="amt">39 zł</div><ul><li>CV dopasowane do jednego ogłoszenia</li><li>Słowa kluczowe pod systemy ATS</li><li>PDF na stronie i w e-mailu</li></ul><button class="btn ghost" data-open data-pkg="cv">Wybierz CV</button></div>
     <div class="price-card feat"><span class="badge">Najczęściej wybierany</span><h3>CV + list motywacyjny</h3><div class="amt">49 zł</div><ul><li>CV i list pod to samo ogłoszenie</li><li>List na jedną stronę A4, bez ogólników</li><li>PDF na stronie i w e-mailu</li></ul><button class="btn" data-open data-pkg="cv_letter">Wybierz komplet</button></div>
     <div class="price-card"><span class="badge alt">Najlepsza cena</span><h3>Pakiet 3 CV + listy</h3><div class="amt">79 zł</div><ul><li>3 CV pod ten sam zawód, każde pod inne ogłoszenie</li><li>List motywacyjny do każdego CV</li><li>Dane wpisujesz tylko raz</li></ul><button class="btn ghost" data-open data-pkg="pack3">Wybierz pakiet</button></div>
+    <div class="price-card"><span class="badge alt">Oszczędzasz 19 zł</span><h3>Pewna rozmowa</h3><div class="amt">109 zł</div><ul><li>CV i list motywacyjny pod ogłoszenie</li><li>Przygotowanie do rozmowy: 12 pytań z odpowiedziami</li><li>Symulator rozmowy z oceną odpowiedzi</li></ul><button class="btn ghost" data-open data-pkg="cv_letter" data-addon="Interview,Sim">Wybierz pakiet</button></div>
   </div>
   <div class="addons-row"><b>Dodatki:</b><span>Przygotowanie do rozmowy <b>+50 zł</b></span><span>Wiadomość do rekrutera i e-mail z aplikacją <b>+9 zł</b></span><span>Profil LinkedIn <b>+19 zł</b></span><span>Symulator rozmowy <b>+29 zł</b></span><span>Wersja Word (.docx) <b>+9 zł</b></span><span>Język ogłoszenia <b>w cenie</b></span><span>Tłumaczenie na inny język <b>+5 zł</b></span></div>
   <p class="sub2 small">W każdym pakiecie: raport dopasowania, darmowa poprawka, edycja tekstu, 12 szablonów i PDF w e-mailu.</p>
@@ -190,6 +221,11 @@
     <a class="tool-card" href="/narzedzia/klauzula-rodo" data-page="narzedzia/klauzula-rodo"><b>Klauzula RODO</b><span>Gotowe brzmienie zgody do CV, także po angielsku i niemiecku.</span></a>
     <a class="tool-card" href="/narzedzia/kalkulator-wynagrodzen" data-page="narzedzia/kalkulator-wynagrodzen"><b>Kalkulator brutto netto</b><span>Ile dostaniesz na rękę z oferty na umowie o pracę.</span></a>
     <a class="tool-card" href="/narzedzia/podziekowanie-po-rozmowie" data-page="narzedzia/podziekowanie-po-rozmowie"><b>Podziękowanie po rozmowie</b><span>Krótki e-mail do rekrutera, gotowy do wysłania.</span></a>
+    <a class="tool-card" href="/narzedzia/odpowiedzi-na-pytania-rekrutera" data-page="narzedzia/odpowiedzi-na-pytania-rekrutera"><b>Pytania rekrutera</b><span>Przykładowa odpowiedź na typowe pytanie, pod Twoje stanowisko.</span></a>
+    <a class="tool-card" href="/narzedzia/zdjecie-do-cv" data-page="narzedzia/zdjecie-do-cv"><b>Zdjęcie do CV</b><span>Wgraj zdjęcie, a powiemy, czy nadaje się do CV i co poprawić.</span></a>
+    <a class="tool-card" href="/narzedzia/jaki-zawod-dla-mnie" data-page="narzedzia/jaki-zawod-dla-mnie"><b>Jaki zawód do mnie pasuje?</b><span>Quiz: 10 pytań i 3 zawody dopasowane do Ciebie.</span></a>
+    <a class="tool-card" href="/narzedzia/oferty-pracy-na-maila" data-page="narzedzia/oferty-pracy-na-maila"><b>Oferty pracy na e-mail</b><span>Co poniedziałek linki do nowych ofert w Twoim zawodzie i mieście.</span></a>
+    <a class="tool-card" href="/narzedzia/wypowiedzenie-umowy-o-prace" data-page="narzedzia/wypowiedzenie-umowy-o-prace"><b>Wypowiedzenie umowy</b><span>Gotowe pismo z okresem wypowiedzenia liczonym automatycznie.</span></a>
   </div>
 </div></section>
 
@@ -357,7 +393,7 @@
 <li><b>Jeżeli Serwis nie przetworzy ogłoszenia z linku albo pobierze je niekompletnie, Klient musi wkleić treść ogłoszenia samodzielnie.</b> Bez treści ogłoszenia zamówienia nie można opłacić.</li>
 <li>Klient odpowiada za to, że treść ogłoszenia, którą wkleił lub zatwierdził, jest właściwa i że ma prawo jej użyć w tym celu.</li></ol>
 <h2>§4 Ceny i płatności</h2>
-<ol><li>Ceny są podane w złotych i są cenami końcowymi. Usługodawca korzysta ze zwolnienia z podatku VAT (art. 113 ustawy o podatku od towarów i usług), dlatego do cen nie dolicza się VAT: CV pod jedno ogłoszenie – 39 zł, CV z listem motywacyjnym pod jedno ogłoszenie – 49 zł, Pakiet 3 (trzy CV pod ten sam zawód, każde pod inne ogłoszenie, z listem motywacyjnym do każdego) – 79 zł. Dodatki: przygotowanie do rozmowy – 50 zł, wiadomość do rekrutera i e-mail z aplikacją – 9 zł, profil LinkedIn – 19 zł, symulator rozmowy kwalifikacyjnej – 29 zł, CV i list w formacie Word – 9 zł; dodatek obejmuje wszystkie ogłoszenia w zamówieniu. Dokumenty w języku ogłoszenia lub w języku wybranym przy ogłoszeniu (polski, angielski, niemiecki, ukraiński, hiszpański lub francuski) nie wymagają dopłaty; tłumaczenie tych samych dokumentów na każdy kolejny język kosztuje 5 zł, przy czym nie pobiera się opłaty za tłumaczenie na język, w którym powstają wszystkie dokumenty zamówienia.</li>
+<ol><li>Ceny są podane w złotych i są cenami końcowymi. Usługodawca korzysta ze zwolnienia z podatku VAT (art. 113 ustawy o podatku od towarów i usług), dlatego do cen nie dolicza się VAT: CV pod jedno ogłoszenie – 39 zł, CV z listem motywacyjnym pod jedno ogłoszenie – 49 zł, Pakiet 3 (trzy CV pod ten sam zawód, każde pod inne ogłoszenie, z listem motywacyjnym do każdego) – 79 zł. Dodatki: przygotowanie do rozmowy – 50 zł, wiadomość do rekrutera i e-mail z aplikacją – 9 zł, profil LinkedIn – 19 zł, symulator rozmowy kwalifikacyjnej – 29 zł, CV i list w formacie Word – 9 zł; dodatek obejmuje wszystkie ogłoszenia w zamówieniu. Przy zamówieniu z listem motywacyjnym, w którym wybrano jednocześnie przygotowanie do rozmowy i symulator rozmowy (pakiet „Pewna rozmowa”), łączna cena tych pozycji jest niższa o 19 zł. Dokumenty w języku ogłoszenia lub w języku wybranym przy ogłoszeniu (polski, angielski, niemiecki, ukraiński, hiszpański lub francuski) nie wymagają dopłaty; tłumaczenie tych samych dokumentów na każdy kolejny język kosztuje 5 zł, przy czym nie pobiera się opłaty za tłumaczenie na język, w którym powstają wszystkie dokumenty zamówienia.</li>
 <li>Kody rabatowe obniżają cenę zgodnie z §5b. Rabat nie podlega wymianie na gotówkę.</li>
 <li>Płatności obsługuje PayPro SA, operator serwisu Przelewy24 (m.in. BLIK, karta, szybki przelew, Google Pay, Apple Pay). Płatność następuje z góry, przed wykonaniem usługi.</li>
 <li>Na życzenie Klienta Usługodawca wystawia fakturę bez VAT (zwolnienie z art. 113 ustawy o VAT). Dane do faktury (nazwa lub imię i nazwisko, adres, NIP) Klient podaje w podsumowaniu zamówienia albo przesyła na adres [E-MAIL]. Faktura jest wysyłana e-mailem.</li></ol>
@@ -375,7 +411,8 @@
 <li>Kod może wykorzystać Klient przy kolejnym zamówieniu oraz osoby, którym Klient go przekaże. Każda osoba (adres e-mail) może użyć kodu jeden raz.</li>
 <li>W jednym zamówieniu można użyć jednego kodu.</li>
 <li>Program poleceń: za każdą osobę, która opłaci zamówienie z kodem Klienta (inny adres e-mail niż Klienta), Klient otrzymuje 10 zł salda. Saldo wynosi łącznie najwyżej 50 zł, obniża cenę kolejnych zamówień Klienta złożonych z tym samym adresem e-mail i z jego kodem, nie podlega wypłacie ani wymianie na gotówkę. Cena pakietu po rabacie wynosi co najmniej 2 zł.</li>
-<li>Kod i saldo są ważne 90 dni od ostatniego polecenia. Zabronione jest zdobywanie salda w sposób sprzeczny z celem programu, np. przez zamówienia składane przez Klienta z innych adresów e-mail; w takim przypadku saldo może zostać anulowane.</li></ol>
+<li>Kod i saldo są ważne 90 dni od ostatniego polecenia. Zabronione jest zdobywanie salda w sposób sprzeczny z celem programu, np. przez zamówienia składane przez Klienta z innych adresów e-mail; w takim przypadku saldo może zostać anulowane.</li>
+<li>Usługodawca może prowadzić okresowe promocje z kodem procentowym (np. na początku roku, w okresie zakończenia nauki, we wrześniu i w tygodniu Black Friday). Termin, wysokość rabatu i kod podaje się na Stronie w czasie trwania promocji. Każda osoba (adres e-mail) może użyć kodu promocyjnego jeden raz, a kodów nie łączy się w jednym zamówieniu.</li></ol>
 <h2>§5c Usługi bezpłatne</h2>
 <ol><li>Darmowy skaner CV ocenia, jak przesłane CV pasuje do wskazanego ogłoszenia. Wynik ma charakter pomocniczy.</li>
 <li>Asystent na stronie udziela ogólnych wskazówek dotyczących CV i rekrutacji. Odpowiedzi są generowane automatycznie i nie stanowią porady prawnej.</li>
@@ -412,7 +449,7 @@
 <li><b>Verarbeitet der Dienst die Stellenanzeige aus dem Link nicht oder ruft er sie nur unvollständig ab, muss der Kunde den Inhalt der Anzeige selbst einfügen.</b> Ohne den Inhalt der Anzeige kann die Bestellung nicht bezahlt werden.</li>
 <li>Der Kunde ist dafür verantwortlich, dass der von ihm eingefügte oder bestätigte Inhalt der Anzeige zutreffend ist und dass er berechtigt ist, ihn zu diesem Zweck zu verwenden.</li></ol>
 <h2>§4 Preise und Zahlungen</h2>
-<ol><li>Die Preise sind in polnischen Złoty (PLN) angegeben und sind Endpreise. Der Dienstleister ist von der Mehrwertsteuer befreit (Art. 113 des polnischen Umsatzsteuergesetzes), daher wird keine Mehrwertsteuer berechnet: Lebenslauf für eine Stellenanzeige – 39 PLN, Lebenslauf mit Anschreiben für eine Stellenanzeige – 49 PLN, Paket 3 (drei Lebensläufe für denselben Beruf, jeweils für eine andere Stellenanzeige, mit einem Anschreiben zu jedem) – 79 PLN. Zusatzleistungen: Vorbereitung auf das Vorstellungsgespräch – 50 PLN, Nachricht an den Recruiter und Bewerbungs-E-Mail – 9 PLN, LinkedIn-Profil – 19 PLN, Simulator für Vorstellungsgespräche – 29 PLN, Lebenslauf und Anschreiben im Word-Format – 9 PLN; eine Zusatzleistung umfasst alle Stellenanzeigen der Bestellung. Unterlagen in der Sprache der Stellenanzeige oder in der bei der Anzeige gewählten Sprache (Polnisch, Englisch, Deutsch, Ukrainisch, Spanisch oder Französisch) sind ohne Aufpreis erhältlich; die Übersetzung derselben Unterlagen in jede weitere Sprache kostet 5 PLN, wobei für die Übersetzung in die Sprache, in der sämtliche Unterlagen der Bestellung erstellt werden, keine Gebühr erhoben wird.</li>
+<ol><li>Die Preise sind in polnischen Złoty (PLN) angegeben und sind Endpreise. Der Dienstleister ist von der Mehrwertsteuer befreit (Art. 113 des polnischen Umsatzsteuergesetzes), daher wird keine Mehrwertsteuer berechnet: Lebenslauf für eine Stellenanzeige – 39 PLN, Lebenslauf mit Anschreiben für eine Stellenanzeige – 49 PLN, Paket 3 (drei Lebensläufe für denselben Beruf, jeweils für eine andere Stellenanzeige, mit einem Anschreiben zu jedem) – 79 PLN. Zusatzleistungen: Vorbereitung auf das Vorstellungsgespräch – 50 PLN, Nachricht an den Recruiter und Bewerbungs-E-Mail – 9 PLN, LinkedIn-Profil – 19 PLN, Simulator für Vorstellungsgespräche – 29 PLN, Lebenslauf und Anschreiben im Word-Format – 9 PLN; eine Zusatzleistung umfasst alle Stellenanzeigen der Bestellung. Bei einer Bestellung mit Anschreiben, in der zugleich die Vorbereitung auf das Vorstellungsgespräch und der Simulator gewählt werden (Paket „Sicheres Gespräch“), ist der Gesamtpreis dieser Positionen um 19 PLN niedriger. Unterlagen in der Sprache der Stellenanzeige oder in der bei der Anzeige gewählten Sprache (Polnisch, Englisch, Deutsch, Ukrainisch, Spanisch oder Französisch) sind ohne Aufpreis erhältlich; die Übersetzung derselben Unterlagen in jede weitere Sprache kostet 5 PLN, wobei für die Übersetzung in die Sprache, in der sämtliche Unterlagen der Bestellung erstellt werden, keine Gebühr erhoben wird.</li>
 <li>Rabattcodes mindern den Preis gemäß §5b. Ein Rabatt kann nicht in Bargeld umgetauscht werden.</li>
 <li>Zahlungen werden von PayPro SA, dem Betreiber des Dienstes Przelewy24, abgewickelt (u. a. BLIK, Karte, Sofortüberweisung, Google Pay, Apple Pay). Die Zahlung erfolgt im Voraus, vor Erbringung der Dienstleistung.</li>
 <li>Auf Wunsch des Kunden stellt der Dienstleister eine Rechnung ohne Mehrwertsteuer aus (Befreiung nach Art. 113 des polnischen Umsatzsteuergesetzes). Die Rechnungsdaten (Name oder Firma, Anschrift, Steuernummer) gibt der Kunde in der Bestellübersicht an oder sendet sie an [E-MAIL]. Die Rechnung wird per E-Mail versandt.</li></ol>
@@ -430,7 +467,8 @@
 <li>Der Code kann vom Kunden bei einer weiteren Bestellung sowie von Personen, an die der Kunde ihn weitergibt, verwendet werden. Jede Person (E-Mail-Adresse) kann den Code einmal verwenden.</li>
 <li>Pro Bestellung kann ein Code verwendet werden.</li>
 <li>Empfehlungsprogramm: Für jede Person, die eine Bestellung mit dem Code des Kunden bezahlt (andere E-Mail-Adresse als die des Kunden), erhält der Kunde ein Guthaben von 10 PLN. Das Guthaben beträgt insgesamt höchstens 50 PLN, mindert den Preis weiterer Bestellungen des Kunden mit derselben E-Mail-Adresse und seinem Code und kann weder ausgezahlt noch in Bargeld umgetauscht werden. Der Preis eines Pakets beträgt nach Rabatt mindestens 2 PLN.</li>
-<li>Code und Guthaben sind 90 Tage ab der letzten Empfehlung gültig. Es ist untersagt, Guthaben entgegen dem Zweck des Programms zu erlangen, z. B. durch Bestellungen des Kunden unter anderen E-Mail-Adressen; in diesem Fall kann das Guthaben storniert werden.</li></ol>
+<li>Code und Guthaben sind 90 Tage ab der letzten Empfehlung gültig. Es ist untersagt, Guthaben entgegen dem Zweck des Programms zu erlangen, z. B. durch Bestellungen des Kunden unter anderen E-Mail-Adressen; in diesem Fall kann das Guthaben storniert werden.</li>
+<li>Der Dienstleister kann regelmäßige Aktionen mit einem prozentualen Code durchführen (z. B. zu Jahresbeginn, zum Schul- und Studienende, im September und in der Black-Friday-Woche). Zeitraum, Rabatthöhe und Code werden während der Aktion auf der Website angegeben. Jede Person (E-Mail-Adresse) kann einen Aktionscode einmal nutzen; Codes werden in einer Bestellung nicht kombiniert.</li></ol>
 <h2>§5c Kostenlose Leistungen</h2>
 <ol><li>Der kostenlose CV-Scanner bewertet, wie gut ein übermittelter Lebenslauf zur angegebenen Stellenanzeige passt. Das Ergebnis dient lediglich als Orientierungshilfe.</li>
 <li>Der Assistent auf der Website gibt allgemeine Hinweise zu Lebensläufen und Bewerbungsverfahren. Die Antworten werden automatisch generiert und stellen keine Rechtsberatung dar.</li>
@@ -467,7 +505,7 @@
 <li><b>If the Service fails to process the job advertisement from the link or retrieves it incompletely, the Client must paste the content of the advertisement themselves.</b> An order cannot be paid for without the content of the advertisement.</li>
 <li>The Client is responsible for ensuring that the content of the advertisement they have pasted or approved is correct and that they have the right to use it for this purpose.</li></ol>
 <h2>§4 Prices and payments</h2>
-<ol><li>Prices are stated in Polish zloty (PLN) and are final prices. The Service Provider is exempt from VAT (Article 113 of the Polish VAT Act), so no VAT is added: CV for one job advertisement – PLN 39, CV with a cover letter for one job advertisement – PLN 49, Package 3 (three CVs for the same occupation, each for a different job advertisement, with a cover letter for each) – PLN 79. Add-ons: interview preparation – PLN 50, message to the recruiter and application e-mail – PLN 9, LinkedIn profile – PLN 19, job interview simulator – PLN 29, CV and cover letter in Word format – PLN 9; an add-on covers all job advertisements in the order. Documents in the language of the advertisement or in the language selected for the advertisement (Polish, English, German, Ukrainian, Spanish or French) incur no additional charge; translation of the same documents into each further language costs PLN 5, provided that no fee is charged for translation into the language in which all documents of the order are produced.</li>
+<ol><li>Prices are stated in Polish zloty (PLN) and are final prices. The Service Provider is exempt from VAT (Article 113 of the Polish VAT Act), so no VAT is added: CV for one job advertisement – PLN 39, CV with a cover letter for one job advertisement – PLN 49, Package 3 (three CVs for the same occupation, each for a different job advertisement, with a cover letter for each) – PLN 79. Add-ons: interview preparation – PLN 50, message to the recruiter and application e-mail – PLN 9, LinkedIn profile – PLN 19, job interview simulator – PLN 29, CV and cover letter in Word format – PLN 9; an add-on covers all job advertisements in the order. In an order with a cover letter in which both interview preparation and the interview simulator are selected (the “Confident Interview” package), the total price of these items is PLN 19 lower. Documents in the language of the advertisement or in the language selected for the advertisement (Polish, English, German, Ukrainian, Spanish or French) incur no additional charge; translation of the same documents into each further language costs PLN 5, provided that no fee is charged for translation into the language in which all documents of the order are produced.</li>
 <li>Discount codes reduce the price in accordance with §5b. The discount cannot be exchanged for cash.</li>
 <li>Payments are handled by PayPro SA, the operator of the Przelewy24 service (including BLIK, card, fast bank transfer, Google Pay, Apple Pay). Payment is made in advance, before the service is performed.</li>
 <li>At the Client’s request, the Service Provider issues an invoice without VAT (exemption under Article 113 of the Polish VAT Act). The Client provides the invoice details (name or company name, address, tax number) in the order summary or sends them to [E-MAIL]. The invoice is sent by e-mail.</li></ol>
@@ -485,7 +523,8 @@
 <li>The code may be used by the Client for a subsequent order and by persons to whom the Client passes it on. Each person (e-mail address) may use the code once.</li>
 <li>One code may be used per order.</li>
 <li>Referral programme: for each person who pays for an order with the Client's code (an e-mail address other than the Client's), the Client receives a PLN 10 credit. The credit totals no more than PLN 50, reduces the price of the Client's subsequent orders placed with the same e-mail address and the Client's code, and cannot be paid out or exchanged for cash. The price of a package after discount is at least PLN 2.</li>
-<li>The code and the credit are valid for 90 days from the last referral. Obtaining credit contrary to the purpose of the programme, e.g. through orders placed by the Client from other e-mail addresses, is prohibited; in such a case the credit may be cancelled.</li></ol>
+<li>The code and the credit are valid for 90 days from the last referral. Obtaining credit contrary to the purpose of the programme, e.g. through orders placed by the Client from other e-mail addresses, is prohibited; in such a case the credit may be cancelled.</li>
+<li>The Service Provider may run periodic promotions with a percentage code (e.g. at the beginning of the year, at the end of the school year, in September and in Black Friday week). The period, the discount and the code are stated on the Website while the promotion lasts. Each person (e-mail address) may use a promotional code once, and codes cannot be combined in one order.</li></ol>
 <h2>§5c Free services</h2>
 <ol><li>The free CV scanner assesses how well an uploaded CV matches the indicated job advertisement. The result is for guidance only.</li>
 <li>The assistant on the website provides general tips on CVs and recruitment. The answers are generated automatically and do not constitute legal advice.</li>
@@ -522,7 +561,7 @@
 <li><b>Якщо Сервіс не обробить оголошення за посиланням або завантажить його не повністю, Клієнт повинен самостійно вставити текст оголошення.</b> Без тексту оголошення замовлення неможливо оплатити.</li>
 <li>Клієнт відповідає за те, що вставлений або затверджений ним текст оголошення є належним і що він має право використовувати його з цією метою.</li></ol>
 <h2>§4 Ціни та оплата</h2>
-<ol><li>Ціни вказано в злотих, і вони є остаточними. Постачальник послуг звільнений від податку на додану вартість (ст. 113 Закону Польщі про ПДВ), тому ПДВ не нараховується: резюме під одне оголошення — 39 zł, резюме із супровідним листом під одне оголошення — 49 zł, Пакет 3 (три резюме для тієї самої професії, кожне під інше оголошення, із супровідним листом до кожного) — 79 zł. Додаткові послуги: підготовка до співбесіди — 50 zł, повідомлення рекрутеру та електронний лист із заявкою — 9 zł, профіль LinkedIn — 19 zł, симулятор співбесіди — 29 zł, резюме та лист у форматі Word — 9 zł; додаткова послуга охоплює всі оголошення в замовленні. Документи мовою оголошення або мовою, обраною для оголошення (польська, англійська, німецька, українська, іспанська чи французька), не потребують доплати; переклад тих самих документів кожною наступною мовою коштує 5 zł, при цьому плата не стягується за переклад мовою, якою створюються всі документи замовлення.</li>
+<ol><li>Ціни вказано в злотих, і вони є остаточними. Постачальник послуг звільнений від податку на додану вартість (ст. 113 Закону Польщі про ПДВ), тому ПДВ не нараховується: резюме під одне оголошення — 39 zł, резюме із супровідним листом під одне оголошення — 49 zł, Пакет 3 (три резюме для тієї самої професії, кожне під інше оголошення, із супровідним листом до кожного) — 79 zł. Додаткові послуги: підготовка до співбесіди — 50 zł, повідомлення рекрутеру та електронний лист із заявкою — 9 zł, профіль LinkedIn — 19 zł, симулятор співбесіди — 29 zł, резюме та лист у форматі Word — 9 zł; додаткова послуга охоплює всі оголошення в замовленні. У замовленні із супровідним листом, де одночасно обрано підготовку до співбесіди та симулятор співбесіди (пакет «Впевнена співбесіда»), загальна ціна цих позицій нижча на 19 zł. Документи мовою оголошення або мовою, обраною для оголошення (польська, англійська, німецька, українська, іспанська чи французька), не потребують доплати; переклад тих самих документів кожною наступною мовою коштує 5 zł, при цьому плата не стягується за переклад мовою, якою створюються всі документи замовлення.</li>
 <li>Коди знижки зменшують ціну відповідно до §5b. Знижка не підлягає обміну на готівку.</li>
 <li>Платежі обробляє PayPro SA, оператор сервісу Przelewy24 (зокрема BLIK, картка, швидкий переказ, Google Pay, Apple Pay). Оплата здійснюється наперед, до виконання послуги.</li>
 <li>На прохання Клієнта Постачальник послуг виставляє рахунок-фактуру без ПДВ (звільнення за ст. 113 Закону Польщі про ПДВ). Дані для рахунку (назва або ім’я та прізвище, адреса, податковий номер) Клієнт вказує в підсумку замовлення або надсилає на адресу [E-MAIL]. Рахунок надсилається електронною поштою.</li></ol>
@@ -540,7 +579,8 @@
 <li>Код може використати Клієнт під час наступного замовлення, а також особи, яким Клієнт його передасть. Кожна особа (адреса електронної пошти) може використати код один раз.</li>
 <li>В одному замовленні можна використати один код.</li>
 <li>Реферальна програма: за кожну особу, яка оплатить замовлення з кодом Клієнта (з іншою адресою e-mail, ніж у Клієнта), Клієнт отримує 10 zł на баланс. Баланс становить загалом не більше 50 zł, зменшує ціну наступних замовлень Клієнта, оформлених з тією самою адресою e-mail і його кодом, і не підлягає виплаті чи обміну на готівку. Ціна пакета після знижки становить щонайменше 2 zł.</li>
-<li>Код і баланс дійсні протягом 90 днів від останньої рекомендації. Заборонено отримувати баланс у спосіб, що суперечить меті програми, наприклад через замовлення Клієнта з інших адрес e-mail; у такому разі баланс може бути анульовано.</li></ol>
+<li>Код і баланс дійсні протягом 90 днів від останньої рекомендації. Заборонено отримувати баланс у спосіб, що суперечить меті програми, наприклад через замовлення Клієнта з інших адрес e-mail; у такому разі баланс може бути анульовано.</li>
+<li>Постачальник послуг може проводити періодичні акції з відсотковим кодом (наприклад, на початку року, наприкінці навчального року, у вересні та в тиждень Black Friday). Термін, розмір знижки та код зазначаються на Сторінці під час акції. Кожна особа (адреса e-mail) може використати промокод один раз; коди не поєднуються в одному замовленні.</li></ol>
 <h2>§5c Безкоштовні послуги</h2>
 <ol><li>Безкоштовний сканер резюме оцінює, наскільки надіслане резюме відповідає вказаному оголошенню. Результат має допоміжний характер.</li>
 <li>Асистент на сайті надає загальні поради щодо резюме та процесу найму. Відповіді генеруються автоматично і не є юридичною консультацією.</li>
@@ -579,10 +619,13 @@
 <li>Bezpieczeństwo, obrona przed nadużyciami i dochodzenie roszczeń – art. 6 ust. 1 lit. f RODO (uzasadniony interes).</li>
 <li>Jednorazowa prośba o ocenę dokumentów (e-mail po 4 dniach) – art. 6 ust. 1 lit. a RODO (Twoja zgoda zaznaczona w zamówieniu).</li><li>Jednorazowe przypomnienie o niedokończonej płatności (e-mail po ok. 3 godzinach, tylko gdy zamówienie nie zostało opłacone) – art. 6 ust. 1 lit. a RODO (Twoja zgoda zaznaczona w zamówieniu).</li><li>Odpowiedź na zapytanie firmy lub instytucji z formularza „Dla firm i instytucji” – art. 6 ust. 1 lit. b i f RODO; dane usuwamy po 12 miesiącach.</li>
 <li>Jednorazowe przypomnienie e-mail po 7 dniach – art. 6 ust. 1 lit. a RODO (Twoja zgoda, którą możesz wycofać, pisząc na [E-MAIL]).</li>
+<li>Jednorazowy e-mail po miesiącu z pytaniem o przebieg rekrutacji i kodem rabatowym – art. 6 ust. 1 lit. a RODO (Twoja zgoda, którą możesz wycofać, pisząc na [E-MAIL]).</li>
 <li>Wystawienie faktury na Twoje żądanie i przechowywanie dokumentów księgowych – art. 6 ust. 1 lit. c RODO (obowiązek wynikający z przepisów podatkowych).</li>
 <li>Kod rabatowy i program poleceń – art. 6 ust. 1 lit. b RODO.</li>
 <li>Odpowiedź na wiadomość z formularza kontaktowego – art. 6 ust. 1 lit. a RODO (Twoja zgoda zaznaczona w formularzu) oraz art. 6 ust. 1 lit. f RODO (prowadzenie korespondencji).</li>
 <li>Newsletter – art. 6 ust. 1 lit. a RODO (Twoja zgoda potwierdzona kliknięciem w link z e-maila). Zgodę możesz wycofać w każdej chwili linkiem w każdej wiadomości; wycofanie nie wpływa na zgodność z prawem wysyłek sprzed wycofania.</li>
+<li>Powiadomienia o ofertach pracy (zawód, miasto i e-mail) – art. 6 ust. 1 lit. a RODO (Twoja zgoda potwierdzona kliknięciem w link z e-maila). Dane usuwamy po 12 tygodniach albo od razu po wypisaniu się linkiem z wiadomości.</li>
+<li>Darmowa ocena zdjęcia do CV i przykładowe odpowiedzi na pytania rekrutera – art. 6 ust. 1 lit. b RODO (wykonanie usługi na Twoje żądanie). Zdjęcie albo wpisane informacje przekazujemy dostawcy AI tylko do przygotowania odpowiedzi i nie zapisujemy ich.</li>
 <li>Konto klienta, lista aplikacji i przypomnienie dzień przed rozmową (tylko gdy je włączysz) – art. 6 ust. 1 lit. b RODO (umowa o świadczenie usługi konta).</li>
 <li>Publikacja opinii na stronie – art. 6 ust. 1 lit. a RODO (Twoja zgoda zaznaczona przy opinii, którą możesz wycofać, pisząc na [E-MAIL]); sama ocena bez publikacji treści – art. 6 ust. 1 lit. f RODO (ocena jakości usługi).</li></ul>
 <h2>4. Odbiorcy danych</h2>
@@ -614,10 +657,13 @@
 <li>Sicherheit, Schutz vor Missbrauch und Geltendmachung von Ansprüchen – Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse).</li>
 <li>Einmalige Bitte um Bewertung der Unterlagen (E-Mail nach 4 Tagen) – Art. 6 Abs. 1 lit. a DSGVO (Ihre in der Bestellung erteilte Einwilligung).</li><li>Einmalige Erinnerung an eine nicht abgeschlossene Zahlung (E-Mail nach ca. 3 Stunden, nur wenn die Bestellung nicht bezahlt wurde) – Art. 6 Abs. 1 lit. a DSGVO (Ihre in der Bestellung erteilte Einwilligung).</li><li>Beantwortung einer Anfrage eines Unternehmens oder einer Einrichtung über das Formular „Für Unternehmen und Einrichtungen“ – Art. 6 Abs. 1 lit. b und f DSGVO; die Daten werden nach 12 Monaten gelöscht.</li>
 <li>Einmalige Erinnerung per E-Mail nach 7 Tagen – Art. 6 Abs. 1 lit. a DSGVO (Ihre Einwilligung, die Sie durch eine Nachricht an [E-MAIL] widerrufen können).</li>
+<li>Einmalige E-Mail nach einem Monat mit der Frage nach dem Verlauf der Bewerbung und einem Rabattcode – Art. 6 Abs. 1 lit. a DSGVO (Ihre Einwilligung, die Sie durch eine Nachricht an [E-MAIL] widerrufen können).</li>
 <li>Ausstellung einer Rechnung auf Ihren Wunsch und Aufbewahrung von Buchhaltungsunterlagen – Art. 6 Abs. 1 lit. c DSGVO (Pflicht aus steuerrechtlichen Vorschriften).</li>
 <li>Rabattcode und Empfehlungsprogramm – Art. 6 Abs. 1 lit. b DSGVO.</li>
 <li>Antwort auf eine Nachricht über das Kontaktformular – Art. 6 Abs. 1 lit. a DSGVO (Ihre Einwilligung im Formular) sowie Art. 6 Abs. 1 lit. f DSGVO (Korrespondenz).</li>
 <li>Newsletter – Art. 6 Abs. 1 lit. a DSGVO (Ihre per Klick auf den Link aus der E-Mail bestätigte Einwilligung). Sie können sie jederzeit über den Link in jeder Nachricht widerrufen; der Widerruf berührt nicht die Rechtmäßigkeit früherer Versendungen.</li>
+<li>Benachrichtigungen über Stellenangebote (Beruf, Ort und E-Mail-Adresse) – Art. 6 Abs. 1 lit. a DSGVO (Ihre per Klick auf den Link aus der E-Mail bestätigte Einwilligung). Die Daten löschen wir nach 12 Wochen oder sofort nach der Abmeldung über den Link in der Nachricht.</li>
+<li>Kostenlose Bewertung des Bewerbungsfotos und Beispielantworten auf Fragen von Recruitern – Art. 6 Abs. 1 lit. b DSGVO (Erbringung der von Ihnen angeforderten Leistung). Das Foto bzw. die eingegebenen Angaben übermitteln wir nur zur Erstellung der Antwort an den KI-Anbieter und speichern sie nicht.</li>
 <li>Kundenkonto, Bewerbungsliste und Erinnerung am Tag vor dem Vorstellungsgespräch (nur wenn Sie diese aktivieren) – Art. 6 Abs. 1 lit. b DSGVO (Vertrag über die Bereitstellung des Kontos).</li>
 <li>Veröffentlichung von Bewertungen auf der Website – Art. 6 Abs. 1 lit. a DSGVO (Ihre bei der Bewertung erteilte Einwilligung, die Sie durch eine Nachricht an [E-MAIL] widerrufen können); bloße Bewertung ohne Veröffentlichung des Textes – Art. 6 Abs. 1 lit. f DSGVO (Bewertung der Dienstleistungsqualität).</li></ul>
 <h2>4. Empfänger der Daten</h2>
@@ -649,10 +695,13 @@
 <li>Security, protection against abuse and pursuit of claims – Article 6(1)(f) GDPR (legitimate interest).</li>
 <li>One-time request to rate the documents (e-mail after 4 days) – Article 6(1)(a) GDPR (your consent ticked in the order).</li><li>One-time reminder about an unfinished payment (e-mail after about 3 hours, only if the order was not paid) – Article 6(1)(a) GDPR (your consent ticked in the order).</li><li>Answering an enquiry from a company or institution sent via the “For companies and institutions” form – Article 6(1)(b) and (f) GDPR; the data is deleted after 12 months.</li>
 <li>One-time e-mail reminder after 7 days – Article 6(1)(a) GDPR (your consent, which you may withdraw by writing to [E-MAIL]).</li>
+<li>One-time e-mail after a month asking how your job search went, with a discount code – Article 6(1)(a) GDPR (your consent, which you may withdraw by writing to [E-MAIL]).</li>
 <li>Issuing an invoice at your request and keeping accounting records – Article 6(1)(c) GDPR (obligation under tax law).</li>
 <li>Discount code and referral programme – Article 6(1)(b) GDPR.</li>
 <li>Replying to a message from the contact form – Article 6(1)(a) GDPR (your consent given in the form) and Article 6(1)(f) GDPR (correspondence).</li>
 <li>Newsletter – Article 6(1)(a) GDPR (your consent confirmed by clicking the link in the e-mail). You can withdraw it at any time using the link in every message; withdrawal does not affect the lawfulness of mailings sent before it.</li>
+<li>Job offer alerts (occupation, town and e-mail address) – Article 6(1)(a) GDPR (your consent confirmed by clicking the link in the e-mail). We delete the data after 12 weeks or immediately after you unsubscribe using the link in the message.</li>
+<li>Free CV photo check and sample answers to recruiter questions – Article 6(1)(b) GDPR (providing the service at your request). We pass the photo or the information you enter to the AI provider only to prepare the answer and do not store it.</li>
 <li>Client account, list of applications and reminder the day before an interview (only if you enable them) – Article 6(1)(b) GDPR (contract for the provision of the account service).</li>
 <li>Publication of reviews on the website – Article 6(1)(a) GDPR (your consent ticked when leaving the review, which you may withdraw by writing to [E-MAIL]); the rating alone without publication of the text – Article 6(1)(f) GDPR (assessment of service quality).</li></ul>
 <h2>4. Recipients of data</h2>
@@ -684,10 +733,13 @@
 <li>Безпека, захист від зловживань і пред’явлення вимог — ст. 6 ч. 1 п. f GDPR (RODO) (законний інтерес).</li>
 <li>Одноразове прохання оцінити документи (електронний лист через 4 дні) — ст. 6 ч. 1 п. a GDPR (RODO) (ваша згода, позначена в замовленні).</li><li>Одноразове нагадування про незавершену оплату (електронний лист приблизно через 3 години, лише якщо замовлення не оплачено) — ст. 6 ч. 1 п. a GDPR (ваша згода, позначена в замовленні).</li><li>Відповідь на запит компанії чи установи з форми «Для компаній та установ» — ст. 6 ч. 1 п. b і f GDPR; дані видаляються через 12 місяців.</li>
 <li>Одноразове нагадування електронною поштою через 7 днів — ст. 6 ч. 1 п. a GDPR (RODO) (ваша згода, яку ви можете відкликати, написавши на [E-MAIL]).</li>
+<li>Одноразовий лист через місяць із запитанням про хід пошуку роботи та кодом знижки — ст. 6 ч. 1 п. a GDPR (RODO) (ваша згода, яку ви можете відкликати, написавши на [E-MAIL]).</li>
 <li>Виставлення рахунку-фактури на ваш запит і зберігання бухгалтерських документів — ст. 6 ч. 1 п. c GDPR (RODO) (обов’язок за податковим законодавством).</li>
 <li>Код знижки та реферальна програма — ст. 6 ч. 1 п. b GDPR (RODO).</li>
 <li>Відповідь на повідомлення з контактної форми — ст. 6 ч. 1 п. a GDPR (ваша згода у формі) та ст. 6 ч. 1 п. f GDPR (листування).</li>
 <li>Розсилка — ст. 6 ч. 1 п. a GDPR (ваша згода, підтверджена переходом за посиланням із листа). Ви можете відкликати її будь-коли за посиланням у кожному листі; відкликання не впливає на законність розсилок до нього.</li>
+<li>Сповіщення про вакансії (професія, місто та e-mail) — ст. 6 ч. 1 п. a GDPR (RODO) (ваша згода, підтверджена переходом за посиланням з листа). Дані видаляємо через 12 тижнів або одразу після відписки за посиланням у листі.</li>
+<li>Безкоштовна оцінка фото для резюме та приклади відповідей на запитання рекрутера — ст. 6 ч. 1 п. b GDPR (RODO) (надання послуги на ваш запит). Фото або введену інформацію ми передаємо постачальнику ШІ лише для підготовки відповіді й не зберігаємо.</li>
 <li>Обліковий запис клієнта, список заявок і нагадування за день до співбесіди (лише якщо ви їх увімкнете) — ст. 6 ч. 1 п. b GDPR (RODO) (договір про надання послуги облікового запису).</li>
 <li>Публікація відгуку на сайті — ст. 6 ч. 1 п. a GDPR (RODO) (ваша згода, позначена під час залишення відгуку, яку ви можете відкликати, написавши на [E-MAIL]); сама оцінка без публікації тексту — ст. 6 ч. 1 п. f GDPR (RODO) (оцінювання якості послуги).</li></ul>
 <h2>4. Одержувачі даних</h2>
@@ -733,6 +785,7 @@
         <label class="opt"><input type="checkbox" id="adSim"><span class="o-t">Symulator rozmowy kwalifikacyjnej<b data-price="sim">+29 zł</b></span><span class="o-d">Próbna rozmowa z AI-rekruterem pod to ogłoszenie: do 8 pytań, ocena każdej odpowiedzi i wskazówki, na koniec podsumowanie</span></label>
         <label class="opt"><input type="checkbox" id="adMessages"><span class="o-t">Wiadomość do rekrutera<b data-price="messages">+9 zł</b></span><span class="o-d">Krótka wiadomość na LinkedIn i gotowy e-mail z aplikacją</span></label>
         <label class="opt"><input type="checkbox" id="adLinkedin"><span class="o-t">Profil LinkedIn<b data-price="linkedin">+19 zł</b></span><span class="o-d">Nagłówek, sekcja „Informacje”, 15 umiejętności i opisy stanowisk pod to ogłoszenie, do skopiowania</span></label>
+        <p class="perk small" id="bundleTip"></p>
         <label class="opt"><input type="checkbox" id="adDocx"><span class="o-t">Wersja Word (.docx)<b data-price="docx">+9 zł</b></span><span class="o-d">CV i list w edytowalnym pliku Word, gdy pracodawca prosi o .doc/.docx</span></label>
       </div>
       <h3 class="sh">Tłumaczenie na inny język <span class="h">(+5 zł za każdy język, dla wszystkich ogłoszeń)</span></h3>
@@ -793,6 +846,7 @@
        <p class="hint">Fakturę wyślemy na e-mail podany w zamówieniu.</p>
       </div>
       <label class="check"><input type="checkbox" id="reminder"> <span>Przypomnij mi raz po 7 dniach o możliwości zamówienia CV pod kolejne ogłoszenie (opcjonalnie, jedna wiadomość e-mail).</span></label>
+      <label class="check"><input type="checkbox" id="followUp"> <span>Zapytajcie mnie raz po miesiącu, jak poszła rekrutacja (jeden e-mail z kodem rabatowym na kolejne CV, opcjonalnie).</span></label>
       <p class="perk small">Po opłaceniu dostaniesz <b>swój kod −10 zł</b> (ważny 90 dni): na kolejne zamówienie dla Ciebie i dla Twoich znajomych.</p>
       <p class="hint trust-mini">W cenie: raport dopasowania, darmowa poprawka i edycja tekstu. Dane usuwamy automatycznie po 30 dniach.</p>
       <label class="check"><input type="checkbox" id="consent"> <span>Akceptuję <a href="#regulamin" target="_blank" rel="noopener">Regulamin</a> i zapoznałem/am się z <a href="#prywatnosc" target="_blank" rel="noopener">Polityką prywatności</a>. Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów.</span></label>
