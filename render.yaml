@@ -19,7 +19,9 @@ services:
         sync: false
       - key: P24_API_KEY
         sync: false
-      - key: SMTP_URL
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
         sync: false
       - key: MAIL_FROM
         sync: false

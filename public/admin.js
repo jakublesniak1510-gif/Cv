@@ -180,7 +180,7 @@ async function openOrder(id) {
   const reload = () => { openOrder(id); loaders[current()]?.(); };
   const run = async (b, fn, ok) => { b.disabled = true; try { await fn(); toast(ok); reload(); } catch (x) { toast(x.message); b.disabled = false; } };
   const bResend = el('button', { className: 'btn ghost sm', textContent: 'Wyślij e-mail ponownie', disabled: o.status !== 'done' });
-  bResend.onclick = () => run(bResend, async () => { const r = await post(`/orders/${id}/resend`); if (!r.ok) throw new Error(r.mail.status === 'skipped' ? 'Wysyłka e-mail jest wyłączona (brak SMTP_URL).' : 'E-mail nie doszedł. Sprawdź adres.'); }, 'E-mail wysłany.');
+  bResend.onclick = () => run(bResend, async () => { const r = await post(`/orders/${id}/resend`); if (!r.ok) throw new Error(r.mail.status === 'skipped' ? 'Wysyłka e-mail jest wyłączona (brak ustawień poczty SMTP_USER/SMTP_PASS).' : 'E-mail nie doszedł. Sprawdź adres.'); }, 'E-mail wysłany.');
   const bRegen = el('button', { className: 'btn ghost sm', textContent: 'Generuj ponownie', disabled: !['paid', 'done'].includes(o.status) });
   bRegen.onclick = () => confirmBox('Wygenerować dokumenty od nowa?', 'Obecne dokumenty i poprawki klienta zostaną zastąpione nowymi. Klient dostanie nowy e-mail.', 'Generuj ponownie', false, () => run(bRegen, () => post(`/orders/${id}/regenerate`), 'Generowanie rozpoczęte.'));
   const bDel = el('button', { className: 'btn danger sm', textContent: 'Usuń dane' });
@@ -327,7 +327,7 @@ loaders.messages = async () => {
 loaders.newsletter = async () => {
   const n = await api('/newsletter');
   $('#nlTiles').replaceChildren(tile('Potwierdzeni', String(n.confirmed), 'dostaną kolejne wydanie'), tile('Czekają na potwierdzenie', String(n.pending), 'usuwani po 7 dniach'),
-    tile('Wysyłka', n.sending ? `${n.sending.sent} / ${n.sending.total}` : '—', n.sending ? 'trwa…' : n.mail ? 'gotowa' : 'brak SMTP_URL'));
+    tile('Wysyłka', n.sending ? `${n.sending.sent} / ${n.sending.total}` : '—', n.sending ? 'trwa…' : n.mail ? 'gotowa' : 'brak ustawień poczty'));
   $('#nlTest').disabled = !n.mail || !n.testTo; $('#nlSend').disabled = !n.mail || !n.confirmed || !!n.sending;
   if (!n.list.length) return $('#nlTable').replaceChildren(el('div', { className: 'empty', textContent: 'Nikt się jeszcze nie zapisał.' }));
   $('#nlTable').replaceChildren(el('table', {},
