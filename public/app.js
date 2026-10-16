@@ -1459,7 +1459,7 @@ const profResult = (p) => ({ position: p.sample.headline, lang: p.lang || 'pl', 
   education: [p.sample.education], skills: p.sample.skills, languages: p.sample.languages || [], certificates: [], interests: '', clause: CLAUSE } });
 // Podstrony bez danych z content.json: treść w <template id="pg-…"> w index.html (serwer renderuje ją też dla wyszukiwarek).
 const STATIC_PAGES = ['dla-firm', 'program-polecen'];
-const HOME_TITLE = 'CV pod ogłoszenie i list motywacyjny od 39 zł | CV Pod Ogłoszenie';
+const HOME_TITLE = 'CV pod ogłoszenie i list motywacyjny od 39 zł';
 // Publiczny adres podstrony: na wersjach EN / UA / DE strona główna to /<język>, a przetłumaczone artykuły mają własne adresy.
 const ART_SEG = { de: 'ratgeber', en: 'guides', uk: 'porady' }, PROF_SEG = { de: 'lebenslauf', en: 'cv', uk: 'rezyume' };
 const pubPath = (r) => {
@@ -1760,13 +1760,15 @@ ${n}`;
   return el('div', { className: 'inner narrow' },
     el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', el('a', { href: '#poradnik', textContent: 'Darmowe narzędzia' }), '›', el('span', { textContent: t.title })),
     el('h1', { textContent: t.title }), el('p', { className: 'lead', textContent: t.lead }), box,
+    ...(t.about || []).map((x) => el('p', { textContent: x })),
+    ...(t.faq?.length ? [el('h2', { textContent: 'Pytania' }), ...t.faq.map((f) => el('details', {}, el('summary', { textContent: f.q }), el('p', { textContent: f.a })))] : []),
     el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Masz już ogłoszenie?' }), el('p', { className: 'hint', textContent: 'Przygotujemy CV i list pisane pod nie, z raportem dopasowania. Od 39 zł, bez abonamentu.' })), openBtn('Zamów CV')),
     el('h2', { textContent: 'Inne darmowe narzędzia' }), el('div', { className: 'more' }, ...Object.entries(C.TOOLS).filter(([k]) => k !== slug).map(([k, x]) => pageLink(`narzedzia/${k}`, { textContent: x.title })), el('a', { href: '#skaner', textContent: 'Skaner CV' })));
 }
 const copyBtn2 = (node) => el('button', { type: 'button', className: 'btn sm', textContent: 'Kopiuj', onclick: async (e) => { try { await navigator.clipboard.writeText(node.textContent); e.target.textContent = 'Skopiowano'; } catch { e.target.textContent = 'Zaznacz tekst i skopiuj'; } } });
 
 // Strona zawodu w konkretnym mieście: dane zawodu + lokalny rynek pracy.
-const cityMeta = (p, c) => ({ title: `${p.name} ${c.loc}: CV pod lokalne ogłoszenia`, metaDescription: `Jak napisać CV na stanowisko ${p.name.toLowerCase()} ${c.loc}: słowa kluczowe z ogłoszeń, wskazówki dla rynku pracy ${c.gen} i przykładowe CV. CV pod ogłoszenie od 39 zł.` });
+const cityMeta = (p, c) => ({ title: `${p.name} ${c.loc}: CV pod lokalne ogłoszenia`, seoTitle: `${p.name} ${c.loc}: CV pod ogłoszenie`, metaDescription: `Jak napisać CV na stanowisko ${p.name.toLowerCase()} ${c.loc}: słowa kluczowe z ogłoszeń, wskazówki dla rynku pracy ${c.gen} i przykładowe CV. CV pod ogłoszenie od 39 zł.` });
 function cityPage(p, c, C) {
   const d = { tpl: 'nowoczesny', color: 'niebieski' }, r = profResult(p), T = pT(p), PT = p.lang && C.prof?.tpl;
   const F = (k, pl) => (PT ? fillT(PT[k], p, c) : pl);
@@ -1819,7 +1821,7 @@ async function showPage(r, push = true) {
   let item = null, node = null;
   if (kind === 'cv') {
     const p = await loadProf(slug), city = sub && (C.CITIES || []).find((c) => c.slug === sub);
-    if (p && sub && city && C.POPULAR.some((x) => x.slug === p.slug)) { item = p.lang && C.prof ? { title: fillT(C.prof.tpl.title, p, city), metaDescription: fillT(C.prof.tpl.desc, p, city) } : cityMeta(p, city); node = () => cityPage(p, city, C); }
+    if (p && sub && city && C.POPULAR.some((x) => x.slug === p.slug)) { item = p.lang && C.prof ? { title: fillT(C.prof.tpl.title, p, city), seoTitle: C.prof.tpl.seo && fillT(C.prof.tpl.seo, p, city), metaDescription: fillT(C.prof.tpl.desc, p, city) } : cityMeta(p, city); node = () => cityPage(p, city, C); }
     else if (p && !sub) { item = p; node = () => profPage(p, C); }
   } else if (kind === 'poradnik') { item = C.ARTICLES.find((a) => a.slug === slug); if (item) { item = await loadArticle(item); node = () => articlePage(item, C); } }
   else if (kind === 'narzedzia' && C.TOOLS?.[slug]) { item = C.TOOLS[slug]; node = () => toolPage(slug, C); }
@@ -1828,7 +1830,8 @@ async function showPage(r, push = true) {
   $('#landing').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#account').hidden = true;
   $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl' || (kind === 'poradnik' && !!item.slugLang) || (kind === 'cv' && !!C.prof) || STATIC_PAGES.includes(kind);
   $('#page').replaceChildren(node());
-  try { document.title = `${STATIC_PAGES.includes(kind) ? window.I18N.t(item.title) : item.title} | CV Pod Ogłoszenie`; } catch {}
+  // Ten sam tytuł co z serwera: nazwę serwisu dopisujemy tylko, gdy całość mieści się w ok. 60 znakach (Google ucina dłuższe).
+  try { const t = STATIC_PAGES.includes(kind) ? window.I18N.t(item.title) : item.seoTitle || item.title; document.title = t.length <= 40 ? `${t} | CV Pod Ogłoszenie` : t; } catch {}
   setMeta(item.metaDescription);
   if (push) { navTo(r); track('pv'); }
   const target = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
