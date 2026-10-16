@@ -162,8 +162,10 @@ const cleanCv = (c = {}) => ({
 // Reklamy: identyfikatory Google Ads i Meta Pixel (skrypty ładują się w przeglądarce dopiero po zgodzie na cookie).
 const env = (k, re) => (re.test(process.env[k] || '') ? process.env[k] : '');
 const ADS = { gads: env('GADS_ID', /^AW-\d{6,15}$/), label: env('GADS_PURCHASE_LABEL', /^[\w-]{4,64}$/), pixel: env('META_PIXEL_ID', /^\d{6,20}$/) };
+// Link do opinii w Profilu Firmy w Google (pokazywany każdemu klientowi, bez względu na ocenę).
+const GOOGLE_REVIEW = env('GOOGLE_REVIEW_URL', /^https:\/\/(g\.page|search\.google\.com|www\.google\.com|maps\.app\.goo\.gl|g\.co)\/[^\s"'<>]{1,300}$/);
 app.get('/api/config', (req, res) => res.json({
-  ads: ADS, demo: DEMO, salesClosed: salesClosedFor(req), ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
+  ads: ADS, googleReview: GOOGLE_REVIEW, demo: DEMO, salesClosed: salesClosedFor(req), ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
   promo: salesClosedFor(req) ? null : activePromo(),
   prices: { ...Object.fromEntries(Object.entries(PRICES).map(([k, v]) => [k, v / 100])), bundleOff: BUNDLE_OFF / 100 },
 }));
@@ -446,7 +448,7 @@ async function trySend(order) {
 // Po opłaceniu: zapisujemy użycie kodu i dajemy klientowi jego kod (jeden na klienta, także przy kolejnych zamówieniach).
 async function afterPaid(o) {
   try {
-    if (o.code) await codes.update(o.code, (c) => applyPaidCode(c, { email: o.profile.email, creditUsed: o.creditUsed || 0 }));
+    if (o.code) await codes.update(o.code, (c) => applyPaidCode(c, { email: o.profile.email, creditUsed: o.creditUsed || 0, total: o.total || 0 }));
     const root = o.rootId || o.parentId || o.id;
     const existing = Object.values(await codes.all()).find((c) => c.ownerOrderId === root);
     if (existing) {
@@ -606,7 +608,7 @@ async function hourly() {
   try {
     const n = await deleteOlderThan(RETENTION_MS);
     if (n) console.log(`Usunięto ${n} zamówień starszych niż 30 dni`);
-    await codes.deleteWhere((c) => Date.now() > c.expires);
+    await codes.deleteWhere((c) => Date.now() > c.expires && !(c.due > 0)); // kod partnera z niewypłaconą prowizją zostaje do rozliczenia
     // Starsze kody klientów nie miały skrótu e-maila właściciela: uzupełniamy go, póki zamówienie jeszcze istnieje.
     for (const c of Object.values(await codes.all())) {
       const o = !c.ownerHash && c.ownerOrderId && (await getOrder(c.ownerOrderId));

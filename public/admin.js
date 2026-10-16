@@ -241,7 +241,7 @@ $('#cKind').addEventListener('click', (e) => {
   const b = e.target.closest('button'); if (!b) return; kind = b.dataset.k;
   $$('#cKind button').forEach((x) => x.setAttribute('aria-pressed', x === b));
   $('#cValLbl').textContent = kind === 'amount' ? 'Rabat (zł)' : 'Rabat (%)'; $('#cVal').max = kind === 'amount' ? 70 : 90;
-  $('#cValBox').hidden = kind === 'voucher'; $('#cVal').required = kind !== 'voucher'; $('#cPkgBox').hidden = kind !== 'voucher';
+  $('#cValBox').hidden = kind === 'voucher'; $('#cVal').required = kind !== 'voucher'; $('#cPkgBox').hidden = kind !== 'voucher'; $('#cComBox').hidden = kind === 'voucher';
 });
 $('#codeKind').addEventListener('click', (e) => {
   const b = e.target.closest('button'); if (!b) return; codeFilter = b.dataset.k;
@@ -250,13 +250,25 @@ $('#codeKind').addEventListener('click', (e) => {
 $('#codeForm').addEventListener('submit', async (e) => {
   e.preventDefault(); const m = $('#cMsg'); m.className = 'msg'; m.textContent = '';
   try {
-    await post('/codes', { code: $('#cCode').value, [kind]: kind === 'voucher' ? $('#cPkg').value : $('#cVal').value, days: $('#cDays').value, maxUses: $('#cMax').value, note: $('#cNote').value });
-    m.className = 'msg good'; m.textContent = `Kod ${$('#cCode').value.toUpperCase()} utworzony.`; $('#cCode').value = $('#cNote').value = $('#cMax').value = '';
+    await post('/codes', { code: $('#cCode').value, [kind]: kind === 'voucher' ? $('#cPkg').value : $('#cVal').value, days: $('#cDays').value, maxUses: $('#cMax').value, note: $('#cNote').value, commission: kind === 'voucher' ? 0 : $('#cCom').value });
+    m.className = 'msg good'; m.textContent = `Kod ${$('#cCode').value.toUpperCase()} utworzony.`; $('#cCode').value = $('#cNote').value = $('#cMax').value = $('#cCom').value = '';
     loaders.codes();
   } catch (x) { m.className = 'msg bad'; m.textContent = x.message; }
 });
+// Kod partnera: ile prowizji czeka na przelew; po przelewie „Wypłacono” zeruje kwotę do wypłaty.
+function codePayout(c) {
+  const info = el('div', { className: 'mute', style: 'font-size:12px', textContent: `wypłacono ${zl(c.paidOut)}` });
+  if (!c.due) return el('span', {}, el('span', { className: 'tag', textContent: 'do wypłaty 0 zł' }), info);
+  const b = el('button', { className: 'btn sm', textContent: `Wypłacono ${zl(c.due)}` });
+  b.onclick = async () => {
+    if (!confirm(`Czy przelew ${zl(c.due)} dla partnera ${c.code} jest już wysłany?`)) return;
+    try { await post(`/codes/${encodeURIComponent(c.code)}/payout`, {}); toast('Prowizja oznaczona jako wypłacona.'); loaders.codes(); } catch (x) { toast(x.message); }
+  };
+  return el('span', {}, b, info);
+}
 // Przy kodzie od organizacji: czy organizacja dostała już fakturę (bez VAT) za pakiet.
 function codeInvoice(c) {
+  if (c.kind === 'partner') return codePayout(c);
   if (c.kind !== 'instytucja') return el('span', { className: 'mute', textContent: '—' });
   const set = async (issued, number) => { try { await post(`/codes/${encodeURIComponent(c.code)}/invoice`, { issued, number }); toast(issued ? 'Faktura oznaczona jako wystawiona.' : 'Cofnięto oznaczenie faktury.'); loaders.codes(); } catch (x) { toast(x.message); } };
   if (c.invoice) { const b = el('button', { className: 'btn ghost sm', textContent: 'Cofnij' }); b.onclick = () => set(false); return el('span', {}, el('span', { className: 'tag', textContent: `✓ ${c.invoice.number || 'wystawiona'}` }), ' ', b); }
@@ -268,14 +280,15 @@ loaders.codes = async () => {
   const list = (await api('/codes')).filter((c) => !codeFilter || c.kind === codeFilter);
   if (!list.length) return $('#codeTable').replaceChildren(el('div', { className: 'empty', textContent: 'Brak kodów.' }));
   $('#codeTable').replaceChildren(el('table', {},
-    el('thead', {}, el('tr', {}, ['Kod', 'Rodzaj', 'Rabat', 'Użycia', 'Ważny do', 'Notatka', 'Faktura', ''].map((t, i) => el('th', { className: i === 2 || i === 3 ? 'r' : '', textContent: t })))),
+    el('thead', {}, el('tr', {}, ['Kod', 'Rodzaj', 'Rabat', 'Użycia', 'Ważny do', 'Notatka', 'Faktura / prowizja', ''].map((t, i) => el('th', { className: i === 2 || i === 3 ? 'r' : '', textContent: t })))),
     el('tbody', {}, list.map((c) => {
       const del = el('button', { className: 'btn danger sm', textContent: 'Usuń' });
       del.onclick = async () => {
         if (del.dataset.sure !== '1') { del.dataset.sure = '1'; del.textContent = 'Na pewno?'; setTimeout(() => { del.dataset.sure = ''; del.textContent = 'Usuń'; }, 3000); return; }
         try { await api('/codes/' + encodeURIComponent(c.code), { method: 'DELETE' }); toast(`Kod ${c.code} usunięty.`); loaders.codes(); } catch (x) { toast(x.message); }
       };
-      return el('tr', {}, el('td', { className: 'mono', textContent: c.code }), el('td', {}, el('span', { className: 'tag', textContent: c.kind }), c.referrals ? el('div', { className: 'mute', style: 'font-size:12px', textContent: `${c.referrals} pol. · saldo ${c.credit}` }) : null),
+      return el('tr', {}, el('td', { className: 'mono', textContent: c.code }), el('td', {}, el('span', { className: 'tag', textContent: c.kind }), c.referrals ? el('div', { className: 'mute', style: 'font-size:12px', textContent: `${c.referrals} pol. · saldo ${c.credit}` }) : null,
+          c.kind === 'partner' ? el('div', { className: 'mute', style: 'font-size:12px', textContent: `${c.commission}% · ${c.sales} sprzed. · ${zl(c.revenue)}` }) : null),
         el('td', { className: 'r', textContent: c.voucher ? `${{ cv: 'CV', cv_letter: 'CV + list', pack3: 'Pakiet 3' }[c.voucher]} gratis` : c.percent ? `−${c.percent}%` : `−${zl(c.amount)}` }),
         el('td', { className: 'r', textContent: c.maxUses ? `${c.uses} / ${c.maxUses}` : String(c.uses) }),
         el('td', { className: 'num', textContent: dd(c.expires) }), el('td', { className: 'ell mute', textContent: c.note || '—' }), el('td', {}, codeInvoice(c)), el('td', { className: 'r' }, del));

@@ -103,3 +103,7 @@ Przykładowe dane do obejrzenia panelu lokalnie: `DATA_DIR=/tmp/cvpo-demo node s
 ## Reklamy i zgoda na cookies
 `GADS_ID` (AW-…), `GADS_PURCHASE_LABEL` i `META_PIXEL_ID` włączają śledzenie reklam (`public/consent.js`). Bez nich nic się nie zmienia. Z nimi pojawia się baner zgody („Akceptuję” / „Tylko niezbędne”, link „Ustawienia cookies” w stopce). Skrypty Google i Meta ładują się dopiero po zgodzie. Zakup (konwersja Google Ads i `Purchase` w Pixelu, wartość w PLN, numer zamówienia jako identyfikator) jest zgłaszany raz na zamówienie, tylko w ciągu doby od płatności i tylko za zgodą. Zmiana opisana w polityce prywatności (pkt 8).
 
+`GOOGLE_REVIEW_URL` (link „Poproś o opinie” z Profilu Firmy w Google) dodaje przycisk „Oceń nas w Google” przy ocenie na stronie dokumentów i w e-mailu z prośbą o ocenę. Przycisk widzi każdy klient, niezależnie od liczby gwiazdek (Google zabrania zapraszania do opinii tylko zadowolonych klientów).
+
+Kody z prowizją (panel → Kody rabatowe → „Prowizja partnera”) to program partnerski: partner dostaje link `/?ref=KOD`, jego odbiorcy rabat, a on procent od każdej zapłaconej kwoty. Panel liczy sprzedaże i prowizję do wypłaty; przycisk „Wypłacono” zapisuje rozliczenie. Kod z niewypłaconą prowizją nie jest kasowany po wygaśnięciu.
+
