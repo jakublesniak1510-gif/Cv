@@ -31,6 +31,12 @@ services:
         sync: false
       - key: CONTACT_EMAIL
         sync: false
+      - key: GADS_ID
+        sync: false
+      - key: GADS_PURCHASE_LABEL
+        sync: false
+      - key: META_PIXEL_ID
+        sync: false
       - key: BASE_URL
         sync: false
       - key: ADMIN_PASSWORD

@@ -159,8 +159,11 @@ const cleanCv = (c = {}) => ({
   certificates: arr(c.certificates, 15).map((x) => str(x, 160)).filter(Boolean), interests: str(c.interests, 400), clause: str(c.clause, 600),
 });
 
+// Reklamy: identyfikatory Google Ads i Meta Pixel (skrypty ładują się w przeglądarce dopiero po zgodzie na cookie).
+const env = (k, re) => (re.test(process.env[k] || '') ? process.env[k] : '');
+const ADS = { gads: env('GADS_ID', /^AW-\d{6,15}$/), label: env('GADS_PURCHASE_LABEL', /^[\w-]{4,64}$/), pixel: env('META_PIXEL_ID', /^\d{6,20}$/) };
 app.get('/api/config', (req, res) => res.json({
-  demo: DEMO, salesClosed: salesClosedFor(req), ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
+  ads: ADS, demo: DEMO, salesClosed: salesClosedFor(req), ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
   promo: salesClosedFor(req) ? null : activePromo(),
   prices: { ...Object.fromEntries(Object.entries(PRICES).map(([k, v]) => [k, v / 100])), bundleOff: BUNDLE_OFF / 100 },
 }));
@@ -366,7 +369,7 @@ app.post('/api/orders/:id/followup', async (req, res) => {
 const view = (o, extra = {}) => ({
   ...extra, id: o.id, pkg: o.pkg, addons: o.addons || {}, extraLangs: o.extraLangs || [], total: o.total, status: o.status, results: o.results, error: o.error, mail: o.mail,
   design: cleanDesign(o.design), photo: o.profile.photo || '', email: o.profile.email, parentId: o.parentId || null,
-  createAccount: !!o.createAccount, canPay: o.status === 'pending' && !DEMO, revisionsLeft: MAX_REVISIONS - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
+  paidAt: o.paidAt || null, createAccount: !!o.createAccount, canPay: o.status === 'pending' && !DEMO, revisionsLeft: MAX_REVISIONS - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
 });
 
 // Stan zamówienia; po powrocie z Przelewy24 sprawdza płatność u źródła (gdyby powiadomienie się spóźniło).

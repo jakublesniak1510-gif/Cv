@@ -211,7 +211,7 @@ function hl(text, kws) {
 }
 
 fetch('/api/config').then((r) => r.json()).then((c) => {
-  cfg = c; track('pv'); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; drawPromo(c.promo); if (c.salesClosed) $('#demoBar').textContent = 'Strona w przygotowaniu – zamówienia ruszą za kilka dni.'; $('#soonNote').hidden = !c.salesClosed; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
+  cfg = c; window.CONSENT?.init(c.ads); track('pv'); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; drawPromo(c.promo); if (c.salesClosed) $('#demoBar').textContent = 'Strona w przygotowaniu – zamówienia ruszą za kilka dni.'; $('#soonNote').hidden = !c.salesClosed; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
 }).catch(() => drawLists().catch(() => {})); // bez internetu (aplikacja na telefonie): treści z pamięci
 
 /* ---------- Przykład dopasowania ---------- */
@@ -1010,6 +1010,8 @@ async function poll() {
   if (!r || !r.ok) { $('#genTitle').textContent = 'Nie znaleziono zamówienia'; $('#genMsg').textContent = 'Sprawdź link lub wróć na stronę główną.'; return; }
   data = await r.json();
   data.design = data.design || { ...design };
+  // Zakup do statystyk reklam (tylko za zgodą na cookie, raz na zamówienie, tuż po płatności).
+  if (data.status !== 'pending' && data.total > 0 && data.paidAt && Date.now() - data.paidAt < 864e5) window.CONSENT?.purchase(data.id, data.total / 100);
   if (data.status === 'done') { $('#gen').hidden = true; return showResult(); }
   if (data.status === 'paid') { $('#genTitle').textContent = 'Dokumenty są w przygotowaniu'; $('#genMsg').textContent = 'Mamy chwilowe opóźnienie. Płatność jest zachowana, a gotowe dokumenty wyślemy na Twój e-mail, zwykle w ciągu kilku godzin. Możesz zamknąć tę stronę albo spróbować ponownie.'; $('#retry').hidden = false; timer = setTimeout(poll, 60000); return; }
   if (data.status === 'pending' && data.canPay && ++pendingPolls >= 4) { $('#genTitle').textContent = 'Płatność nie jest jeszcze potwierdzona'; $('#genMsg').textContent = 'Jeśli przerwałeś płatność albo zamknąłeś okno banku, możesz ją dokończyć. Jeśli zapłaciłeś, poczekaj chwilę: potwierdzenie może przyjść z opóźnieniem.'; $('#payAgain').hidden = false; timer = setTimeout(poll, 5000); return; }
