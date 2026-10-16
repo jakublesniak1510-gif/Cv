@@ -91,12 +91,13 @@
           <label class="f" id="cPkgBox" hidden>Pakiet bez opłaty<select id="cPkg"><option value="cv">CV (39 zł)</option><option value="cv_letter" selected>CV + list (49 zł)</option><option value="pack3">Pakiet 3 (79 zł)</option></select></label>
           <label class="f">Ważny (dni)<input id="cDays" type="number" min="1" max="365" value="30" required></label>
           <label class="f">Limit użyć<input id="cMax" type="number" min="0" placeholder="bez limitu"></label>
+          <label class="f" id="cComBox">Prowizja partnera (%) <input id="cCom" type="number" min="0" max="50" placeholder="bez prowizji"></label>
           <label class="f">Notatka<input id="cNote" maxlength="100" placeholder="np. post na FB"></label>
           <div class="wide"><button class="btn" type="submit">Utwórz kod</button> <span class="msg" id="cMsg"></span></div>
         </form>
-        <p class="help">Każda osoba (adres e-mail) może użyć danego kodu raz. Kody klientów (KOD-…) powstają automatycznie po zakupie i dają −10 zł. Kod „pakiet (instytucja)” daje wybrany pakiet bez opłaty – dla urzędu pracy, szkoły czy firmy; w „Limit użyć” wpisz liczbę osób, a w notatce nazwę instytucji. To też program poleceń: za każdego znajomego, który zapłaci z kodem klienta, właściciel kodu dostaje 10 zł salda na kolejne zamówienia (do 50 zł).</p>
+        <p class="help">Każda osoba (adres e-mail) może użyć danego kodu raz. Kody klientów (KOD-…) powstają automatycznie po zakupie i dają −10 zł. Kod „pakiet (instytucja)” daje wybrany pakiet bez opłaty – dla urzędu pracy, szkoły czy firmy; w „Limit użyć” wpisz liczbę osób, a w notatce nazwę instytucji. To też program poleceń: za każdego znajomego, który zapłaci z kodem klienta, właściciel kodu dostaje 10 zł salda na kolejne zamówienia (do 50 zł). Kod z prowizją to program partnerski dla twórców i doradców kariery: odbiorcy dostają rabat, a partner procent od każdej zapłaconej kwoty. Partner udostępnia link <span class="mono">/?ref=KOD</span>, który sam wpisuje kod w zamówieniu. Prowizję przelewasz partnerowi zgodnie z umową z nim (przy firmie: na podstawie jego faktury), a potem klikasz „Wypłacono”. Przy zwrocie pieniędzy klientowi odejmij prowizję ręcznie przy wypłacie.</p>
       </div>
-      <div class="filters"><div class="seg" id="codeKind"><button type="button" data-k="" aria-pressed="true">Wszystkie</button><button type="button" data-k="akcja" aria-pressed="false">Akcje</button><button type="button" data-k="instytucja" aria-pressed="false">Instytucje</button><button type="button" data-k="klient" aria-pressed="false">Kody klientów</button></div></div>
+      <div class="filters"><div class="seg" id="codeKind"><button type="button" data-k="" aria-pressed="true">Wszystkie</button><button type="button" data-k="akcja" aria-pressed="false">Akcje</button><button type="button" data-k="instytucja" aria-pressed="false">Instytucje</button><button type="button" data-k="partner" aria-pressed="false">Partnerzy</button><button type="button" data-k="klient" aria-pressed="false">Kody klientów</button></div></div>
       <div class="tbl-wrap" id="codeTable"></div>
     </section>
 

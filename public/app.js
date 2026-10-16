@@ -1300,9 +1300,11 @@ async function drawAcctOffer() {
 }
 
 // Ocena po zamówieniu: gwiazdki obowiązkowe, komentarz i zgoda na publikację opcjonalne.
+// Link do opinii w Google widzi każdy klient, niezależnie od oceny (Google zabrania zapraszania tylko zadowolonych).
+const googleReview = () => (cfg.googleReview ? el('p', { className: 'hint' }, 'Możesz też wystawić opinię w Google: ', el('a', { href: cfg.googleReview, target: '_blank', rel: 'noopener', textContent: 'oceń nas w Google' }), '.') : null);
 function drawRate() {
   const box = $('#rate');
-  if (data.review) { box.replaceChildren(el('h3', { textContent: 'Dziękujemy za opinię' }), el('p', { className: 'hint', textContent: `Twoja ocena: ${'★'.repeat(data.review.rating)}${'☆'.repeat(5 - data.review.rating)}. Pomaga innym wybrać, a nam poprawiać dokumenty.` })); box.hidden = false; return; }
+  if (data.review) { box.replaceChildren(el('h3', { textContent: 'Dziękujemy za opinię' }), el('p', { className: 'hint', textContent: `Twoja ocena: ${'★'.repeat(data.review.rating)}${'☆'.repeat(5 - data.review.rating)}. Pomaga innym wybrać, a nam poprawiać dokumenty.` }), googleReview() || ''); box.hidden = false; return; }
   let rating = 0;
   const pick = el('div', { className: 'starpick', role: 'radiogroup', ariaLabel: 'Ocena' }, ...[1, 2, 3, 4, 5].map((n) => el('button', { type: 'button', role: 'radio', ariaLabel: `${n} na 5`, ariaChecked: 'false', textContent: '★', onclick: () => { rating = n; $$('button', pick).forEach((b, i) => { b.classList.toggle('on', i < n); b.setAttribute('aria-checked', String(i === n - 1)); }); } })));
   const text = el('textarea', { maxLength: 500, placeholder: 'Co Ci się podobało, a co możemy poprawić? (opcjonalnie)', ariaLabel: 'Komentarz' });
@@ -1319,7 +1321,7 @@ function drawRate() {
     } catch (x) { msg.textContent = x.message; send.disabled = false; }
   } });
   box.replaceChildren(el('h3', { textContent: 'Jak oceniasz swoje dokumenty?' }), pick, text, name,
-    el('label', { className: 'check' }, pub, el('span', { textContent: 'Zgadzam się na publikację opinii z podpisem na stronie (bez nazwiska i e-maila).' })), msg, el('div', {}, send));
+    el('label', { className: 'check' }, pub, el('span', { textContent: 'Zgadzam się na publikację opinii z podpisem na stronie (bez nazwiska i e-maila).' })), msg, el('div', {}, send), googleReview() || '');
   box.hidden = false;
 }
 
