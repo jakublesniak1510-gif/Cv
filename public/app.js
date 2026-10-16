@@ -1221,6 +1221,10 @@ function drawPaper() {
   $('#paper').replaceChildren(node());
 }
 
+// Kolejne zamówienie: 3 pakiety + „Pewna rozmowa” (CV z listem, przygotowanie do rozmowy i symulator, taniej o PRICE.bundleOff).
+const FU_NAME = (k) => (k === 'bundle' ? 'Pewna rozmowa' : PKG_NAME[k]);
+const FU_PRICE = (k) => (k === 'bundle' ? PRICE.cv_letter + PRICE.interview + PRICE.sim - PRICE.bundleOff : PRICE[k]);
+const FU_ADS = (k) => (k === 'bundle' ? 1 : PKG_ADS[k]);
 function drawFollowup() {
   const box = $('#followup');
   box.hidden = false;
@@ -1229,24 +1233,25 @@ function drawFollowup() {
   let fpkg = 'cv_letter';
   const pick = el('div', { className: 'fupick seg', role: 'tablist' });
   const drawPick = () => {
-    pick.replaceChildren(...['cv', 'cv_letter', 'pack3'].map((k) => el('button', { type: 'button', role: 'tab', ariaSelected: String(k === fpkg), onclick: () => { fpkg = k; drawPick(); } }, el('span', { textContent: PKG_NAME[k] }), ' · ', el('span', { textContent: `${PRICE[k]} zł` }))));
+    pick.replaceChildren(...['cv', 'cv_letter', 'pack3', 'bundle'].map((k) => el('button', { type: 'button', role: 'tab', ariaSelected: String(k === fpkg), onclick: () => { fpkg = k; drawPick(); } }, el('span', { textContent: FU_NAME(k) }), ' · ', el('span', { textContent: `${FU_PRICE(k)} zł` }))));
     const n = $('#fuAds')?.children.length || 0;
-    if ($('#fuAdd')) { $('#fuAdd').hidden = PKG_ADS[fpkg] === 1; $('#fuAdd').disabled = n >= PKG_ADS[fpkg]; }
-    if ($('#fuPay')) $('#fuPay').textContent = `Zamów za ${PRICE[fpkg]} zł`;
+    if ($('#fuAdd')) { $('#fuAdd').hidden = FU_ADS(fpkg) === 1; $('#fuAdd').disabled = n >= FU_ADS(fpkg); }
+    if ($('#fuPay')) $('#fuPay').textContent = `Zamów za ${FU_PRICE(fpkg)} zł`;
+    if ($('#fuInfo')) $('#fuInfo').textContent = fpkg === 'bundle' ? 'CV i list motywacyjny, przygotowanie do rozmowy (12 pytań z odpowiedziami) i symulator rozmowy.' : '';
   };
   box.replaceChildren(el('h3', { textContent: 'Masz kolejne ogłoszenia?' }),
     el('p', { className: 'hint' }, el('span', { textContent: 'Twoje dane już mamy, więc nie wpisujesz ich ponownie. Dokumenty powstaną w tym samym wyglądzie.' }), data.myCode && !data.myCode.usedByMe ? el('span', { textContent: ` Twój kod ${data.myCode.code} obniży cenę o ${data.myCode.mine} zł.` }) : ''),
-    pick, el('div', { id: 'fuAds' }),
+    pick, el('p', { className: 'hint', id: 'fuInfo' }), el('div', { id: 'fuAds' }),
     el('button', { type: 'button', className: 'btn ghost sm', id: 'fuAdd', textContent: '+ Dodaj ogłoszenie (w pakiecie do 3)', onclick: () => { addRow('fuAds'); drawPick(); } }),
     el('label', { className: 'f fucode' }, 'Kod rabatowy ', el('input', { type: 'text', id: 'fuCode', placeholder: 'opcjonalnie', autocomplete: 'off', value: data.myCode && !data.myCode.usedByMe ? data.myCode.code : '' })),
     el('p', {}, el('button', { type: 'button', className: 'btn', id: 'fuPay', textContent: '', onclick: async (e) => {
       const ads = rows('fuAds'), err = $('#fuErr'), code = $('#fuCode').value.trim();
-      if (ads.length > PKG_ADS[fpkg]) { err.textContent = 'Ten pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe albo wybierz Pakiet 3.'; return; }
+      if (ads.length > FU_ADS(fpkg)) { err.textContent = 'Ten pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe albo wybierz Pakiet 3.'; return; }
       const bad = ads.find((a) => !a.title || a.text.length < 80);
       if (bad) { err.textContent = 'Podaj nazwę stanowiska i pełną treść ogłoszenia (min. 80 znaków).'; return; }
       e.target.disabled = true; err.textContent = '';
       try {
-        const r = await fetch(`/api/orders/${orderId}/followup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pkg: fpkg, ads, code }) });
+        const r = await fetch(`/api/orders/${orderId}/followup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pkg: fpkg === 'bundle' ? 'cv_letter' : fpkg, addons: fpkg === 'bundle' ? { interview: true, sim: true } : {}, ads, code }) });
         const j = await r.json(); if (!r.ok) throw new Error(j.error);
         if (j.free) { delete box.dataset.ready; startResult(j.id); } else if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); delete box.dataset.ready; startResult(j.id); } else location.href = j.url;
       } catch (x) { err.textContent = x.message; e.target.disabled = false; }
