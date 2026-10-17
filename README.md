@@ -107,4 +107,4 @@ Przykładowe dane do obejrzenia panelu lokalnie: `DATA_DIR=/tmp/cvpo-demo node s
 
 Kody z prowizją (panel → Kody rabatowe → „Prowizja partnera”) to program partnerski: partner dostaje link `/?ref=KOD`, jego odbiorcy rabat, a on procent od każdej zapłaconej kwoty. Panel liczy sprzedaże i prowizję do wypłaty; przycisk „Wypłacono” zapisuje rozliczenie. Kod z niewypłaconą prowizją nie jest kasowany po wygaśnięciu.
 
-`ALIAS_HOSTS` (domyślnie `cvpodogloszenie.pl,www.cvpodogloszenie.pl`): dodatkowe domeny podpięte w Render, które przekierowują (301) na `BASE_URL`, z zachowaniem ścieżki.
+`ALIAS_HOSTS` (domyślnie obie domeny serwisu, z „ł” i bez, z www i bez): domeny, które przekierowują (301, tylko GET/HEAD) na `BASE_URL` z zachowaniem ścieżki. Host z `BASE_URL` jest zawsze pomijany, więc zmiana głównej domeny to tylko zmiana `BASE_URL`. Webhooki (POST) pod starym adresem działają dalej.
