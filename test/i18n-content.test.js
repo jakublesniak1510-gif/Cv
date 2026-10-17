@@ -35,3 +35,14 @@ test('Przycisk zgody na cookies ma własny klucz tłumaczenia, niezależny od zd
   }
   assert.match(read('i18n.js'), /dataset\.i18nKey/);
 });
+
+test('Podstrona „Jak to działa”: tytuł do 60 znaków (też w tłumaczeniach), opis bez „prawdziwego” przykładu', () => {
+  const html = read('index.html'), m = /<template id="pg-jak-to-dziala" data-title="([^"]+)" data-desc="([^"]+)">([\s\S]*?)<\/template>/.exec(html);
+  assert.ok(m, 'szablon podstrony');
+  const [, title, desc, body] = m;
+  assert.ok(title.length <= 60, `tytuł: ${title.length} znaków`);
+  assert.ok(desc.length <= 160, `opis: ${desc.length} znaków`);
+  assert.doesNotMatch(desc + body, /prawdziw/i);
+  assert.match(body, /Przykład: Anna/);
+  for (const l of LANGS) { const t = dict(l)[title]; assert.ok(t && t.length <= 60, `tytuł ${l}: ${t}`); }
+});
