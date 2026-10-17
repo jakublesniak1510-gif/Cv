@@ -312,7 +312,7 @@ textarea{min-height:88px;resize:vertical}
  .exv-body{padding:16px;gap:16px}
 }
 /* dokumenty prawne */
-.legal{padding-block:40px 80px}.legal[hidden]{display:none}
+.legal{padding-block:40px 80px}.legal[hidden]{display:none}.page .legal{padding-block:0}.page .legal h1{margin-top:14px}
 .legal h1{font-size:clamp(28px,4vw,38px);font-weight:800;margin:16px 0 8px}
 .legal h2{font-size:19px;margin:28px 0 8px}.legal p,.legal li{color:var(--ink);font-size:15.5px}.legal li{margin-bottom:6px}
 .legal a{color:var(--brand)}.legal .back{text-decoration:none;font-weight:600;font-size:14px}

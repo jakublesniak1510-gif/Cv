@@ -297,7 +297,7 @@
       <label class="f">Temat<select name="topic"><option>Pytanie o usługę</option><option>Moje zamówienie</option><option>Współpraca</option><option>Inne</option></select></label>
       <label class="f">Wiadomość<textarea name="message" rows="4" maxlength="4000" required></textarea></label>
       <label class="hp" aria-hidden="true">Strona www<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
-      <label class="check"><input type="checkbox" name="consent" required><span>Zgadzam się na przetwarzanie moich danych w celu odpowiedzi na tę wiadomość. Szczegóły w <a href="#prywatnosc">polityce prywatności</a>.</span></label>
+      <label class="check"><input type="checkbox" name="consent" required><span>Zgadzam się na przetwarzanie moich danych w celu odpowiedzi na tę wiadomość. Szczegóły w <a href="/polityka-prywatnosci">polityce prywatności</a>.</span></label>
       <button class="btn" type="submit">Wyślij wiadomość</button>
       <p class="fstatus" role="status"></p>
     </form>
@@ -367,7 +367,7 @@
   <label class="f">Ile osób (w przybliżeniu) <span class="h">opcjonalnie</span><input type="number" name="count" min="1" max="100000" inputmode="numeric"></label></div>
   <label class="f">Czego potrzebujecie? <span class="h">opcjonalnie</span><textarea name="message" rows="4" maxlength="4000" placeholder="np. kod dla absolwentów kierunku…, projekt dla 60 uczestników od marca"></textarea></label>
   <label class="hp" aria-hidden="true">Strona www<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
-  <label class="check"><input type="checkbox" name="consent" required><span>Zgadzam się na kontakt w sprawie tego zapytania. Dane usuwamy po 12 miesiącach. Szczegóły w <a href="/#prywatnosc">polityce prywatności</a>.</span></label>
+  <label class="check"><input type="checkbox" name="consent" required><span>Zgadzam się na kontakt w sprawie tego zapytania. Dane usuwamy po 12 miesiącach. Szczegóły w <a href="/polityka-prywatnosci">polityce prywatności</a>.</span></label>
   <button class="btn" type="submit">Wyślij zapytanie</button>
   <p class="fstatus" role="status"></p>
 </form>
@@ -462,20 +462,15 @@
 <details><summary>Jak długo ważny jest kod i saldo?</summary><p>90 dni od ostatniego polecenia. Każdy znajomy, który zapłaci z Twoim kodem, przedłuża ważność o kolejne 90 dni.</p></details>
 <details><summary>Czy mogę wypłacić saldo?</summary><p>Nie, saldo obniża tylko cenę Twoich kolejnych zamówień. Cena pakietu po rabacie wynosi co najmniej 2 zł.</p></details>
 <details><summary>Czy znajomy musi coś robić?</summary><p>Wystarczy, że otworzy Twój link albo wpisze kod w podsumowaniu zamówienia. Każda osoba może użyć kodu raz.</p></details>
-<p class="hint">Pełne zasady: <a href="/#regulamin">regulamin, §5b</a>.</p>
+<p class="hint">Pełne zasady: <a href="/regulamin">regulamin, §5b</a>.</p>
 </div></template>
 <div class="mcta" id="mcta" hidden><div><b>CV pod ogłoszenie</b><span>od 39 zł · bez abonamentu</span></div><button class="btn sm" data-open>Zacznij</button></div>
 
 
 
-<!-- Dokumenty prawne (widok przez #regulamin / #prywatnosc) -->
-<section class="legal" id="legal-regulamin" role="main" hidden></section>
-
-<section class="legal" id="legal-prywatnosc" role="main" hidden></section>
-
 <footer class="foot" id="foot"><div class="inner">
   <div class="foot-brand"><a class="logo" href="/" data-page=""><svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--brand)"/><path d="M10 6.5h8.5l5.5 5.5v13.5a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-17a2 2 0 0 1 2-2z" fill="#fff"/><rect x="10.5" y="14.5" width="11" height="3.2" rx="1" fill="#FFE45C"/><rect x="10.5" y="20" width="8" height="1.8" rx=".9" fill="#2548E8" opacity=".55"/><rect x="10.5" y="10" width="5" height="1.8" rx=".9" fill="#2548E8" opacity=".55"/></svg><span class="wm">CV<span>Pod</span>Ogłoszenie</span></a><p>CV i listy motywacyjne pisane pod konkretne ogłoszenie. Darmowa poprawka, dane usuwane po 30 dniach.</p></div>
-  <div class="foot-cols"><div><b>Usługa</b><a href="/konto" data-acct>Moje konto</a><a href="#cennik">Cennik</a><a href="/jak-to-dziala" data-page="jak-to-dziala">Jak to działa</a><a href="/dla-firm" data-page="dla-firm">Dla firm</a><a href="#szablony">Szablony</a><a href="#faq">FAQ</a><a href="#" id="installApp" hidden>Zainstaluj aplikację</a></div><div><b>Zawody</b><span id="footProf"><a href="/cv/kasjer">Kasjer</a><a href="/cv/magazynier">Magazynier</a><a href="/cv/sprzedawca">Sprzedawca</a><a href="/cv/kierowca">Kierowca</a><a href="/cv/pielegniarka">Pielęgniarka</a><a href="/cv/ksiegowa">Księgowa</a><a href="/cv/programista">Programista</a><a href="/cv/opiekun-osob-starszych">Opiekun osób starszych</a></span></div><div><b>Poradnik</b><a href="/poradnik/wzor-cv-2026">Wzór CV 2026</a><a href="/poradnik/jak-napisac-list-motywacyjny">List motywacyjny</a><a href="/poradnik/cv-po-angielsku">CV po angielsku</a><a href="/poradnik/cv-dla-studenta">CV dla studenta</a><a href="/poradnik/cv-do-pracy-w-niemczech">CV do pracy w Niemczech</a><a href="/narzedzia/jaki-zawod-dla-mnie">Darmowe narzędzia</a></div><div><b>Informacje</b><a href="/program-polecen" data-page="program-polecen">Program poleceń</a><a href="/#kontakt">Kontakt</a><a href="/#newsletter">Newsletter</a><a href="#regulamin">Regulamin</a><a href="#prywatnosc">Polityka prywatności</a><a href="#" data-consent hidden>Ustawienia cookies</a><span>Jakub Leśniak · NIP 9731085406</span><span>Tel. +48 577 151 435</span></div></div>
+  <div class="foot-cols"><div><b>Usługa</b><a href="/konto" data-acct>Moje konto</a><a href="#cennik">Cennik</a><a href="/jak-to-dziala" data-page="jak-to-dziala">Jak to działa</a><a href="/dla-firm" data-page="dla-firm">Dla firm</a><a href="#szablony">Szablony</a><a href="#faq">FAQ</a><a href="#" id="installApp" hidden>Zainstaluj aplikację</a></div><div><b>Zawody</b><span id="footProf"><a href="/cv/kasjer">Kasjer</a><a href="/cv/magazynier">Magazynier</a><a href="/cv/sprzedawca">Sprzedawca</a><a href="/cv/kierowca">Kierowca</a><a href="/cv/pielegniarka">Pielęgniarka</a><a href="/cv/ksiegowa">Księgowa</a><a href="/cv/programista">Programista</a><a href="/cv/opiekun-osob-starszych">Opiekun osób starszych</a></span></div><div><b>Poradnik</b><a href="/poradnik/wzor-cv-2026">Wzór CV 2026</a><a href="/poradnik/jak-napisac-list-motywacyjny">List motywacyjny</a><a href="/poradnik/cv-po-angielsku">CV po angielsku</a><a href="/poradnik/cv-dla-studenta">CV dla studenta</a><a href="/poradnik/cv-do-pracy-w-niemczech">CV do pracy w Niemczech</a><a href="/narzedzia/jaki-zawod-dla-mnie">Darmowe narzędzia</a></div><div><b>Informacje</b><a href="/program-polecen" data-page="program-polecen">Program poleceń</a><a href="/#kontakt">Kontakt</a><a href="/#newsletter">Newsletter</a><a href="/regulamin">Regulamin</a><a href="/polityka-prywatnosci">Polityka prywatności</a><a href="#" data-consent hidden>Ustawienia cookies</a><span>Jakub Leśniak · NIP 9731085406</span><span>Tel. +48 577 151 435</span></div></div>
 </div></footer>
 
 <!-- Kreator -->
@@ -568,7 +563,7 @@
       <label class="check"><input type="checkbox" id="followUp"> <span>Zapytajcie mnie raz po miesiącu, jak poszła rekrutacja (jeden e-mail z kodem rabatowym na kolejne CV, opcjonalnie).</span></label>
       <p class="perk small">Po opłaceniu dostaniesz <b>swój kod −10 zł</b> (ważny 90 dni): na kolejne zamówienie dla Ciebie i dla Twoich znajomych.</p>
       <p class="hint trust-mini">W cenie: raport dopasowania, darmowa poprawka i edycja tekstu. Dane usuwamy automatycznie po 30 dniach.</p>
-      <label class="check"><input type="checkbox" id="consent"> <span>Akceptuję <a href="#regulamin" target="_blank" rel="noopener">Regulamin</a> i zapoznałem/am się z <a href="#prywatnosc" target="_blank" rel="noopener">Polityką prywatności</a>. Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów.</span></label>
+      <label class="check"><input type="checkbox" id="consent"> <span>Akceptuję <a href="/regulamin" target="_blank" rel="noopener">Regulamin</a> i zapoznałem/am się z <a href="/polityka-prywatnosci" target="_blank" rel="noopener">Polityką prywatności</a>. Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów.</span></label>
       <label class="check"><input type="checkbox" id="waiver"> <span>Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.</span></label>
     </section>
     <section data-step="7" hidden>
