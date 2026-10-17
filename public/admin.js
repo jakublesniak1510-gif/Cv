@@ -70,7 +70,7 @@ loaders.dash = async () => {
     ['Konta klientów', String(s.accounts)],
     ['Ocena klientów', s.reviews.count ? `${String(s.reviews.avg).replace('.', ',')} / 5 (${s.reviews.count})` : 'brak ocen'], [`Koszt AI (${s.ai.month})`, `$${s.ai.usd.toFixed(2)} · ${s.ai.calls} wywołań`],
   ].map(([k, v]) => el('div', {}, el('dt', { textContent: k }), el('dd', { textContent: v }))));
-  drawChart(s.byDay);
+  loadSales().catch((x) => toast(x.message));
   setBadge(s.problems); setRvBadge(s.reviews.waiting); setMsgBadge(s.newMessages); $('#invBadge').hidden = !s.invoicesTodo; $('#invBadge').textContent = s.invoicesTodo;
   $('#dashUpd').textContent = 'Stan na ' + new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
   const r = await api('/orders?page=0');
@@ -105,25 +105,62 @@ function barChart(box, days, o) {
     const hit = sv('rect', { class: 'hit', x: L + i * step, y: T, width: step, height: ih });
     hit.addEventListener('pointerenter', () => {
       bar?.classList.add('on');
-      tip.replaceChildren(el('div', { textContent: longDay(d.day) }), el('b', { textContent: o.fmt(vals[i]) }), document.createTextNode(` · ${o.sub(d)}`));
+      tip.replaceChildren(el('div', { textContent: (o.long || longDay)(d.day, d) }), el('b', { textContent: o.fmt(vals[i]) }), document.createTextNode(` · ${o.sub(d)}`));
       tip.hidden = false;
       const px = ((x + bw / 2) / W) * box.clientWidth, py = (Math.min(y, T + ih - 2) / H) * 240;
       tip.style.left = `${Math.min(Math.max(px, 80), box.clientWidth - 80)}px`; tip.style.top = `${py}px`;
     });
     hit.addEventListener('pointerleave', () => { bar?.classList.remove('on'); tip.hidden = true; });
     svg.append(hit);
-    const every = days.length > 45 ? 15 : 5;
-    if (i % every === every - 1 || i === 0) { const t = sv('text', { class: 'ax', x: x + bw / 2, y: H - 6, 'text-anchor': 'middle' }); t.textContent = shortDay(d.day); svg.append(t); }
+    const every = o.every || (days.length > 45 ? 15 : 5);
+    if (i % every === every - 1 || i === 0) { const t = sv('text', { class: 'ax', x: x + bw / 2, y: H - 6, 'text-anchor': 'middle' }); t.textContent = (o.short || shortDay)(d.day, d); svg.append(t); }
   });
   box.replaceChildren(svg, tip);
 }
-function drawChart(days) {
-  barChart($('#chart'), days, { val: (d) => d.revenue, fmt: zl, axis: (v) => `${Math.round(v)} zł`, sub: (d) => ords(d.orders), label: 'Przychód dziennie z ostatnich 30 dni' });
+// Sprzedaż z rejestru (zostaje po skasowaniu zamówień): dziennie (30 dni), tygodniowo (90 dni), miesięcznie (12 miesięcy).
+const MONTHS = ['sty', 'lut', 'mar', 'kwi', 'maj', 'cze', 'lip', 'sie', 'wrz', 'paź', 'lis', 'gru'];
+const monthLong = (k) => new Date(k + '-15T12:00').toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' });
+const weekLong = (_k, d) => `${new Date(d.from + 'T12:00').toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' })} – ${new Date(d.to + 'T12:00').toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' })}`;
+let salesRange = '30';
+function drawChart(rep) {
+  const days = rep.series.map((x) => ({ ...x, day: x.key })), unit = rep.unit;
+  const label = { day: 'Przychód dziennie, ostatnie 30 dni', week: 'Przychód tygodniowo, ostatnie 90 dni', month: 'Przychód miesięcznie, ostatnie 12 miesięcy' }[unit];
+  $('#chartTitle').textContent = label;
+  barChart($('#chart'), days, {
+    val: (d) => d.revenue, fmt: zl, axis: (v) => `${Math.round(v)} zł`, sub: (d) => ords(d.orders), label,
+    short: unit === 'month' ? (k) => MONTHS[+k.slice(5, 7) - 1] : unit === 'week' ? (_k, d) => shortDay(d.from) : shortDay,
+    long: unit === 'month' ? monthLong : unit === 'week' ? weekLong : longDay, every: unit === 'day' ? 5 : unit === 'week' ? 2 : 1,
+  });
+  const name = unit === 'month' ? 'Miesiąc' : unit === 'week' ? 'Tydzień' : 'Dzień', lab = unit === 'month' ? monthLong : unit === 'week' ? weekLong : longDay;
   $('#chartTable').replaceChildren(el('table', {},
-    el('thead', {}, el('tr', {}, el('th', { textContent: 'Dzień' }), el('th', { className: 'r', textContent: 'Zamówienia' }), el('th', { className: 'r', textContent: 'Przychód' }))),
-    el('tbody', {}, [...days].reverse().map((d) => el('tr', {}, el('td', { textContent: longDay(d.day) }), el('td', { className: 'r', textContent: d.orders }), el('td', { className: 'r', textContent: zl(d.revenue) }))))));
-  lastDays = days;
+    el('thead', {}, el('tr', {}, el('th', { textContent: name }), el('th', { className: 'r', textContent: 'Zamówienia' }), el('th', { className: 'r', textContent: 'Przychód' }))),
+    el('tbody', {}, [...days].reverse().map((d) => el('tr', {}, el('td', { textContent: lab(d.day, d) }), el('td', { className: 'r', textContent: d.orders }), el('td', { className: 'r', textContent: zl(d.revenue) }))))));
+  const t = rep.total;
+  $('#salesSum').textContent = `Razem: ${zl(t.revenue)} · ${ords(t.orders)} · średnio ${zl(t.avg)}${t.refunded ? ` · zwroty ${zl(t.refunded)}` : ''}. Kwoty po rabatach i zwrotach.${rep.since ? ` Dane od ${dd(rep.since)}.` : ''}`;
+  drawMix(rep);
+  lastDays = rep;
 }
+// Co się sprzedaje: pakiety, dodatki, języki strony i kody (udział w liczbie zamówień z okresu).
+function drawMix(rep) {
+  const n = rep.total.orders || 1, LN = { pl: 'polski', en: 'angielski', uk: 'ukraiński', de: 'niemiecki' };
+  const list = (title, rows, nameOf, empty) => el('div', {}, el('h3', { textContent: title }), rows.length ? el('ul', {}, rows.map((r) => {
+    const pct = Math.round((100 * r.n) / n);
+    return el('li', {}, el('span', { textContent: nameOf(r) }), el('span', { className: 'n', textContent: `${r.n} · ${pct}% · ${zl(r.revenue)}` }),
+      el('div', { className: 'bar-row', role: 'presentation' }, el('i', { style: `width:${Math.max(2, pct)}%` })));
+  })) : el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: empty }));
+  $('#mixRange').textContent = { day: 'ostatnie 30 dni', week: 'ostatnie 90 dni', month: 'ostatnie 12 miesięcy' }[rep.unit] + (rep.followupShare ? ` · ${rep.followupShare}% to kolejne zamówienia` : '');
+  $('#salesMix').replaceChildren(
+    list('Pakiety', rep.pkgs, (r) => r.name, 'Brak sprzedaży w tym okresie.'),
+    list('Dodatki', rep.addons, (r) => r.name, 'Nikt jeszcze nie dokupił dodatku.'),
+    list('Język strony przy zakupie', rep.langs, (r) => LN[r.key] || r.key, '—'),
+    list('Kody rabatowe', rep.codes, (r) => r.key, 'Bez kodów.'),
+  );
+}
+async function loadSales() { drawChart(await api('/sales?range=' + salesRange)); }
+$('#salesRange').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return; salesRange = b.dataset.k;
+  $$('#salesRange button').forEach((x) => x.setAttribute('aria-pressed', x === b)); loadSales().catch((x) => toast(x.message));
+});
 let lastDays = null;
 $('#chartToggle').addEventListener('click', (e) => {
   const on = e.target.getAttribute('aria-pressed') !== 'true';
@@ -205,7 +242,7 @@ async function openOrder(id) {
       el('a', { className: 'btn ghost sm', href: o.link, target: '_blank', rel: 'noopener', textContent: 'Strona klienta ↗' })), act),
     el('div', {}, el('h3', { textContent: 'Zamówienie' }), kv([
       ['Numer', el('span', { className: 'mono', textContent: o.id })], ['Złożone', dt(o.created)], ['Opłacone', dt(o.paidAt)],
-      ['Pakiet', o.pkgName], ['Dodatki', addons.join(', ') || '—'], ['Kwota', zl(o.total)],
+      ['Pakiet', o.pkgName], ['Dodatki', addons.join(', ') || '—'], ['Kwota', o.refunded ? `${zl(o.total)} · zwrócono ${zl(o.refunded)}` : zl(o.total)],
       o.code && ['Kod', `${o.code} (−${zl(o.discount)})`],
       ['Poprawki', `${o.revisions} z 10`], ['Kod klienta', o.myCode || '—'], ['Dane znikną', dd(o.expires)],
     ])),
@@ -215,10 +252,31 @@ async function openOrder(id) {
       const r = o.results[i];
       return el('li', {}, `${a.title || 'Bez tytułu'} · ${LANG[r?.lang || a.lang] || a.lang}`, r?.score != null ? ` · dopasowanie ${r.score}%` : '', r?.variants.length ? ` · +${r.variants.map((v) => LANG[v] || v).join(', ')}` : '');
     }))),
+    refundBox(o, reload),
     invoiceBox(o, reload),
     o.mailInfo ? el('div', {}, el('h3', { textContent: 'E-mail' }), kv([['Do', o.mailInfo.to], ['Status', MAIL[o.mailInfo.status] || o.mailInfo.status], ['Kiedy', dt(o.mailInfo.at)]])) : null,
   ].filter(Boolean));
   x.focus();
+}
+// Zwrot przez Stripe: całość albo podana kwota, z potwierdzeniem. Pieniądze wracają na kartę/BLIK klienta w kilka dni.
+function refundBox(o, reload) {
+  if (!['stripe', 'przelewy24'].includes(o.provider) && !o.refunds.length) return null;
+  const hist = o.refunds.length ? el('ul', { className: 'list' }, o.refunds.map((r) => el('li', { textContent: `${zl(r.amount)} · ${dt(r.at)} · ${r.source === 'stripe' ? 'w panelu Stripe' : 'z tego panelu'}` }))) : null;
+  if (o.provider === 'przelewy24') return el('div', {}, el('h3', { textContent: 'Zwrot' }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: 'Płatność przez Przelewy24: zwrot zrób w panelu Przelewy24.' }), hist);
+  if (!o.refundable) return el('div', {}, el('h3', { textContent: 'Zwrot' }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: o.refunded ? 'Zamówienie zwrócone w całości.' : 'Zwrot niedostępny (brak klucza Stripe).' }), hist);
+  const amt = el('input', { type: 'text', inputMode: 'decimal', value: String(o.refundable).replace('.', ','), ariaLabel: 'Kwota zwrotu w zł' });
+  const box = el('div', { className: 'confirm', hidden: true });
+  const b = el('button', { className: 'btn danger sm', textContent: 'Zwróć pieniądze' });
+  b.onclick = () => {
+    const v = amt.value.trim();
+    const ok = el('button', { className: 'btn danger solid sm', textContent: `Tak, zwróć ${v} zł` }), no = el('button', { className: 'btn ghost sm', textContent: 'Anuluj' });
+    no.onclick = () => { box.hidden = true; };
+    ok.onclick = async () => { ok.disabled = no.disabled = true; try { const r = await post(`/orders/${o.id}/refund`, { amount: v }); toast(`Zwrot ${zl(r.amount)} zlecony w Stripe.`); reload(); } catch (x) { toast(x.message); ok.disabled = no.disabled = false; } };
+    box.replaceChildren(el('strong', { textContent: `Zwrócić klientowi ${v} zł?` }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: 'Stripe odda pieniądze tą samą metodą, którą klient zapłacił (zwykle 5–10 dni). Opłaty Stripe za transakcję nie wracają. Tego nie da się cofnąć.' }), el('div', { className: 'actions' }, ok, no));
+    box.hidden = false; ok.focus();
+  };
+  return el('div', {}, el('h3', { textContent: 'Zwrot' }), el('div', { className: 'refund' }, el('label', { className: 'mute', style: 'font-size:14px' }, 'Kwota (zł) ', amt), b), box, hist,
+    el('p', { className: 'help', textContent: `Do zwrotu zostało ${zl(o.refundable)}. Dokumenty klienta zostają; jeśli trzeba, usuń dane przyciskiem „Usuń dane”.` }));
 }
 // Faktura bez VAT na życzenie: dane nabywcy do przepisania w programie do faktur i odhaczenie z numerem.
 function invoiceBox(o, reload) {
@@ -432,3 +490,36 @@ loaders.leads = async () => {
         el('td', { className: 'r', textContent: l.count || '—' }), el('td', { className: 'mute', textContent: l.msg || '—' }), el('td', { className: 'r' }, del));
     }))));
 };
+
+// --- ustawienia i kopia zapasowa ---
+loaders.settings = async () => {
+  const st = await api('/settings'), f = $('#setForm');
+  for (const k of ['orderMail', 'dailyMail', 'backupMail']) f.elements[k].checked = !!st[k];
+  $('#setTo').textContent = st.mail ? (st.to ? `Wysyłamy na: ${st.to} (zmienna BACKUP_EMAIL albo CONTACT_EMAIL).` : 'Ustaw CONTACT_EMAIL w Render, żeby dostawać te e-maile.') : 'Poczta wyłączona: ustaw SMTP_USER i SMTP_PASS w Render.';
+};
+$('#setForm').addEventListener('change', async (e) => {
+  const m = $('#setMsg'); m.className = 'msg';
+  try { await post('/settings', { [e.target.name]: e.target.checked }); m.className = 'msg good'; m.textContent = 'Zapisano.'; } catch (x) { m.className = 'msg bad'; m.textContent = x.message; e.target.checked = !e.target.checked; }
+});
+$('#setTest').addEventListener('click', async (e) => {
+  const b = e.target, m = $('#setMsg'); b.disabled = true; m.className = 'msg'; m.textContent = 'Wysyłam…';
+  try { const r = await post('/settings/test-daily'); m.className = 'msg good'; m.textContent = r.backup ? 'Wysłane, z kopią w załączniku. Sprawdź skrzynkę.' : 'Wysłane (kopia za duża na e-mail: pobierz ją przyciskiem obok).'; }
+  catch (x) { m.className = 'msg bad'; m.textContent = x.message; } finally { b.disabled = false; }
+});
+$('#rsFile').addEventListener('change', () => { $('#rsBtn').disabled = !$('#rsFile').files.length; $('#rsConfirm').hidden = true; });
+$('#rsBtn').addEventListener('click', () => {
+  const file = $('#rsFile').files[0]; if (!file) return;
+  const box = $('#rsConfirm'), m = $('#rsMsg');
+  const ok = el('button', { className: 'btn danger solid sm', textContent: 'Tak, przywróć' }), no = el('button', { className: 'btn ghost sm', textContent: 'Anuluj' });
+  no.onclick = () => { box.hidden = true; };
+  ok.onclick = async () => {
+    ok.disabled = no.disabled = true; m.className = 'msg'; m.textContent = 'Przywracam…';
+    try {
+      const r = await fetch('/api/admin/restore', { method: 'POST', headers: { 'Content-Type': 'application/gzip', 'X-Admin': '1' }, credentials: 'same-origin', body: file });
+      const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || `Błąd ${r.status}`);
+      m.className = 'msg good'; m.textContent = `Przywrócono kopię z ${dt(j.created)} (${j.restored.length} plików). Poprzedni stan zapisany na serwerze jako ${j.savedBefore}.`; box.hidden = true;
+    } catch (x) { m.className = 'msg bad'; m.textContent = x.message; ok.disabled = no.disabled = false; }
+  };
+  box.replaceChildren(el('strong', { textContent: `Przywrócić dane z pliku ${file.name}?` }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: 'Obecne zamówienia, kody, opinie i inne dane zostaną zastąpione zawartością kopii. Zamówienia złożone po jej utworzeniu znikną z panelu (zostaną w zapisanym stanie sprzed przywrócenia).' }), el('div', { className: 'actions' }, ok, no));
+  box.hidden = false; ok.focus();
+});

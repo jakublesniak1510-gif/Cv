@@ -42,10 +42,10 @@ main{padding:24px 28px 48px;min-width:0}
 .head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.head h1{font-size:24px;margin-right:auto}
 .demo{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:8px 12px;font-size:14px;margin-bottom:16px}
 @media(max-width:860px){
- .app{grid-template-columns:1fr}
+ .app{grid-template-columns:minmax(0,1fr)}
  .side{position:sticky;z-index:5;height:auto;flex-direction:row;align-items:center;padding:8px 12px;border-right:0;border-bottom:1px solid var(--line);gap:10px}
  .side .brand .wm{display:none}
- .side nav{display:flex;overflow-x:auto;gap:2px;scrollbar-width:none}.side nav button{padding:7px 9px;font-size:14px;white-space:nowrap}.side nav button svg{display:none}
+ .side nav{display:flex;overflow-x:auto;gap:2px;scrollbar-width:none;min-width:0;flex:1}.side nav button{padding:7px 9px;font-size:14px;white-space:nowrap}.side nav button svg{display:none}
  .side .foot{margin:0 0 0 auto}.side .foot .who{display:none}
  main{padding:18px 16px 40px}
 }
@@ -130,3 +130,17 @@ tbody tr.click{cursor:pointer}tbody tr.click:hover{background:var(--alt)}
 .fn-row b{text-align:right}
 @media(max-width:600px){.fn-row{grid-template-columns:110px 1fr 50px}.fn-row small{display:none}}
 @media(max-width:1000px){[data-view=traffic] .grid2{grid-template-columns:1fr!important}}
+
+/* Co się sprzedaje: poziome paski udziału (jedna seria, kolor marki). */
+.mix{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.mix h3{margin:0 0 8px;font-size:14px}
+.mix ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.mix li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:14px}
+.mix .bar-row{grid-column:1/-1;height:8px;border-radius:4px;background:var(--grid);overflow:hidden}
+.mix .bar-row i{display:block;height:100%;background:var(--bar);border-radius:4px}
+.mix .n{font-variant-numeric:tabular-nums;color:var(--ink2)}
+.setlist{display:grid;gap:12px}.setlist .check{display:flex;min-width:0;gap:10px;align-items:flex-start;font-size:14px}.setlist input{margin-top:3px;width:18px;height:18px}
+.refund{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.refund input{max-width:120px}
+.app>main{min-width:0}
+.setlist input{flex:none}
+.grid-set{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}@media(max-width:1000px){.grid-set{grid-template-columns:minmax(0,1fr)}}

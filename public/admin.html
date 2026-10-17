@@ -32,6 +32,7 @@
       <button data-v="newsletter"><svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg>Newsletter</button>
       <button data-v="leads"><svg viewBox="0 0 24 24"><path d="M3 21V7l9-4 9 4v14"/><path d="M9 21v-6h6v6M8 10h.01M12 10h.01M16 10h.01"/></svg>Firmy</button>
       <button data-v="problems"><svg viewBox="0 0 24 24"><path d="M12 3 2 21h20z"/><path d="M12 10v5M12 18v.01"/></svg>Problemy<span class="badge" id="probBadge" hidden></span></button>
+      <button data-v="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Ustawienia</button>
       <button data-v="export"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>Eksport</button>
     </nav>
     <div class="foot"><span class="who mute">Zalogowano jako administrator</span><button class="btn ghost sm" id="logout">Wyloguj</button></div>
@@ -46,12 +47,15 @@
       <div class="tiles" id="tiles"></div>
       <div class="grid2">
         <div class="card">
-          <h2>Przychód dziennie, ostatnie 30 dni <button class="link r" id="chartToggle" aria-pressed="false">Pokaż tabelę</button></h2>
+          <h2><span id="chartTitle">Przychód dziennie, ostatnie 30 dni</span> <button class="link r" id="chartToggle" aria-pressed="false">Pokaż tabelę</button></h2>
+          <div class="seg" id="salesRange" style="margin-bottom:10px"><button type="button" data-k="30" aria-pressed="true">30 dni</button><button type="button" data-k="90" aria-pressed="false">90 dni</button><button type="button" data-k="365" aria-pressed="false">12 miesięcy</button></div>
           <div class="chart" id="chart"></div>
           <div class="tbl-wrap" id="chartTable" hidden></div>
+          <p class="help" id="salesSum"></p>
         </div>
         <div class="card"><h2>Ostatnie 30 dni</h2><dl class="facts" id="facts"></dl></div>
       </div>
+      <div class="card" style="margin-bottom:12px"><h2>Co się sprzedaje <span class="mute" id="mixRange" style="font:400 13px var(--f-b)"></span></h2><div class="mix" id="salesMix"></div></div>
       <div class="card"><h2>Ostatnie zamówienia <button class="link r" data-go="orders">Wszystkie</button></h2><div class="tbl-wrap" id="recent"></div></div>
     </section>
 
@@ -142,6 +146,33 @@
       <div class="head"><h1>Problemy</h1></div>
       <div class="card" style="margin-bottom:14px"><h2>Zamówienia wymagające uwagi</h2><p class="help" style="margin:-6px 0 12px">Opłacone, ale dokumenty się nie wygenerowały, albo e-mail nie doszedł. Otwórz zamówienie i użyj „Generuj ponownie” lub „Wyślij e-mail ponownie”.</p><div class="tbl-wrap" id="probOrders"></div></div>
       <div class="card"><h2>Dziennik błędów <span class="mute" style="font:400 13px var(--f-b)">ostatnie 30 dni, bez danych osobowych</span></h2><div class="tbl-wrap" id="probEvents"></div></div>
+    </section>
+
+    <!-- Ustawienia -->
+    <section data-view="settings" hidden>
+      <div class="head"><h1>Ustawienia i kopia zapasowa</h1></div>
+      <div class="grid-set">
+        <div class="card">
+          <h2>E-maile do Ciebie</h2>
+          <p class="help" id="setTo" style="margin:-6px 0 12px"></p>
+          <form id="setForm" class="setlist">
+            <label class="check"><input type="checkbox" name="orderMail"> <span><b>Nowe zamówienie</b><br><span class="mute">Krótki e-mail po każdej płatności: pakiet, kwota, kod, faktura.</span></span></label>
+            <label class="check"><input type="checkbox" name="dailyMail"> <span><b>Poranne podsumowanie</b><br><span class="mute">Codziennie po 7:00: wczorajsza sprzedaż, miesiąc, problemy i faktury do wystawienia.</span></span></label>
+            <label class="check"><input type="checkbox" name="backupMail"> <span><b>Kopia zapasowa w e-mailu</b><br><span class="mute">Codziennie po 7:00 plik z danymi strony (bez zdjęć klientów) w załączniku.</span></span></label>
+          </form>
+          <div class="actions" style="margin-top:12px"><button class="btn ghost sm" id="setTest">Wyślij podsumowanie z kopią teraz</button> <span class="msg" id="setMsg" role="status"></span></div>
+        </div>
+        <div class="card">
+          <h2>Kopia zapasowa</h2>
+          <p class="help" style="margin:-6px 0 12px">Wszystkie dane strony w jednym pliku: zamówienia (ze zdjęciami), kody, opinie, konta, newsletter, wiadomości, rejestr sprzedaży. Zachowaj plik w bezpiecznym miejscu: są w nim dane osobowe klientów.</p>
+          <div class="actions"><a class="btn sm" href="/api/admin/backup" download>Pobierz kopię teraz</a></div>
+          <h3 style="margin-top:18px">Przywróć z kopii</h3>
+          <p class="help" style="margin:0 0 8px">Tylko po awarii, gdy dane zniknęły. Pliki z kopii zastąpią obecne dane; obecny stan zapisujemy najpierw osobno na serwerze.</p>
+          <div class="actions"><input type="file" id="rsFile" accept=".gz,application/gzip" aria-label="Plik kopii zapasowej"><button class="btn danger sm" id="rsBtn" disabled>Przywróć</button></div>
+          <div class="confirm" id="rsConfirm" hidden></div>
+          <p class="msg" id="rsMsg" role="status"></p>
+        </div>
+      </div>
     </section>
 
     <!-- Eksport -->

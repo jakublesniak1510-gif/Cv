@@ -19,6 +19,7 @@ import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes, sendNotFound } from './lib/seo.js';
 import { p24Enabled, p24Register, p24NotificationOk, p24Verify, p24BySession } from './lib/p24.js';
 import { stripeEnabled, stripeCheckout, stripeSession, stripeEvent } from './lib/stripe.js';
+import { recordSale, notifyNewOrder, setRefunded, commissionBack, ownerDaily } from './lib/ops.js';
 import { renderDocx } from './lib/docx.js';
 import { adminRoutes, isAdmin } from './lib/admin.js';
 import { accountRoutes, accountHourly } from './lib/account.js';
@@ -74,6 +75,13 @@ app.post('/api/stripe/webhook', express.raw({ type: '*/*', limit: '1mb' }), asyn
   const ev = stripeEvent(req.body?.toString('utf8') || '', req.get('stripe-signature'));
   if (!ev) return res.sendStatus(400);
   res.sendStatus(200);
+  // Zwrot zrobiony w panelu Stripe (albo z naszego panelu): zapis w zamówieniu i w rejestrze sprzedaży.
+  if (ev.type === 'charge.refunded') {
+    const ch = ev.data?.object;
+    if (ch?.payment_intent) setRefunded({ orderId: ch.metadata?.orderId, paymentIntent: ch.payment_intent, total: ch.amount_refunded || 0, source: 'stripe' })
+      .then((r) => r?.changed && r.code && commissionBack(r.code, r.delta)).catch((e) => logEvent('płatność', `Zwrot: ${e.message}`));
+    return;
+  }
   if (!['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(ev.type)) return;
   const sess = ev.data?.object, o = sess && (await getOrder(sess.client_reference_id));
   if (o) confirmStripe(o, sess).catch((e) => logEvent('płatność', e.message, { orderId: o.id }));
@@ -473,7 +481,8 @@ async function markPaidAndGenerate(id) {
   if (!o || o.status !== 'pending' || inFlight.has(id)) return;
   inFlight.add(id);
   try {
-    await updateOrder(id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
+    const paidO = await updateOrder(id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
+    if (!o.paidAt) { recordSale(paidO).catch((e) => console.error('Rejestr sprzedaży', e.message)); notifyNewOrder(paidO, BASE_URL).catch((e) => logEvent('e-mail', `Powiadomienie o zamówieniu: ${e.message}`)); }
     const withLetter = hasLetter(o.pkg);
     const results = await Promise.all(o.ads.map(async (ad) => {
       const r = await generateForAd({ profile: o.profile, ad, withLetter, addons: o.addons });
@@ -627,6 +636,7 @@ async function hourly() {
     await ensurePromoCode().catch((e) => console.error('Promocja', e.message));
     await alertsHourly(BASE_URL).catch((e) => console.error('Powiadomienia o ofertach', e.message));
     await accountHourly(BASE_URL).catch((e) => console.error('Konta', e.message));
+    await ownerDaily(BASE_URL).catch((e) => logEvent('e-mail', `Podsumowanie dnia / kopia: ${e.message}`));
     if (!mailEnabled()) return;
     for (const o of Object.values(await allOrders())) {
       if (o.status !== 'done' || !o.reminder?.consent || o.reminder.sent || Date.now() - o.created < REMINDER_AFTER) continue;
