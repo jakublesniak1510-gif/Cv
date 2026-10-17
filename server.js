@@ -1,4 +1,6 @@
 import 'dotenv/config';
+import path from 'node:path';
+import fsp from 'node:fs/promises';
 import express from 'express';
 import crypto from 'node:crypto';
 import { activePromo, ensurePromoCode } from './lib/promos.js';
@@ -19,7 +21,7 @@ import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes, sendNotFound } from './lib/seo.js';
 import { p24Enabled, p24Register, p24NotificationOk, p24Verify, p24BySession } from './lib/p24.js';
 import { stripeEnabled, stripeCheckout, stripeSession, stripeEvent } from './lib/stripe.js';
-import { recordSale, notifyNewOrder, setRefunded, commissionBack, ownerDaily, getSettings } from './lib/ops.js';
+import { recordSale, notifyNewOrder, setRefunded, commissionBack, ownerDaily, getSettings, DATA_DIR } from './lib/ops.js';
 import { invoices, issueInvoice, renderInvoice, invoiceFile, cleanupInvoices } from './lib/invoice.js';
 import { renderDocx } from './lib/docx.js';
 import { adminRoutes, isAdmin } from './lib/admin.js';
@@ -48,12 +50,27 @@ const RETENTION_MS = 30 * 24 * 3600 * 1000;
 const MAX_REVISIONS = 10;
 
 const app = express();
+const AD_HOSTS = 'https://*.google.com https://*.google.pl https://*.googleadservices.com https://*.doubleclick.net https://*.googletagmanager.com https://*.google-analytics.com https://*.facebook.com https://*.facebook.net';
+const csp = (scripts) => [
+  "default-src 'self'", `script-src ${scripts} 'self' https://www.googletagmanager.com https://connect.facebook.net`, "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' https://fonts.gstatic.com", `img-src 'self' data: blob: ${AD_HOSTS}`, `connect-src 'self' ${AD_HOSTS}`, `frame-src ${AD_HOSTS}`,
+  "worker-src 'self'", "manifest-src 'self'", "object-src 'none'", "base-uri 'self'", "form-action 'self'", "frame-ancestors 'none'",
+].join('; ');
 app.disable('x-powered-by');
 // Podstawowe nagłówki bezpieczeństwa: bez osadzania strony w cudzych ramkach (np. podszywanie się pod panel),
 // bez zgadywania typu plików, ograniczony Referer, a na https wymuszenie bezpiecznego połączenia.
 app.use((req, res, next) => {
   res.set({ 'X-Frame-Options': 'DENY', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin', 'Permissions-Policy': 'camera=(), microphone=(), geolocation=()' });
   if (BASE_URL.startsWith('https')) res.set('Strict-Transport-Security', 'max-age=15552000');
+  // CSP: skrypty tylko z jednorazowym kluczem (nonce) dopisywanym do każdego <script> w HTML z serwera; skrypty, które one
+  // dołączą (Google Ads i Meta po zgodzie na cookies), dziedziczą zaufanie ('strict-dynamic'). Panel ma tylko własny plik admin.js.
+  const nonce = crypto.randomBytes(16).toString('base64');
+  res.set('Content-Security-Policy', csp(req.path === '/admin' ? "'self'" : `'nonce-${nonce}' 'strict-dynamic'`));
+  const send = res.send.bind(res);
+  res.send = (body) => {
+    if (typeof body === 'string' && (/text\/html/.test(res.get('Content-Type') || '') || (!res.get('Content-Type') && body.trimStart().startsWith('<')))) body = body.replace(/<script(?=[\s>])/g, `<script nonce="${nonce}"`);
+    return send(body);
+  };
   next();
 });
 app.set('trust proxy', 1);
@@ -179,6 +196,19 @@ const env = (k, re) => (re.test(process.env[k] || '') ? process.env[k] : '');
 const ADS = { gads: env('GADS_ID', /^AW-\d{6,15}$/), label: env('GADS_PURCHASE_LABEL', /^[\w-]{4,64}$/), pixel: env('META_PIXEL_ID', /^\d{6,20}$/) };
 // Link do opinii w Profilu Firmy w Google (pokazywany każdemu klientowi, bez względu na ocenę).
 const GOOGLE_REVIEW = env('GOOGLE_REVIEW_URL', /^https:\/\/(g\.page|search\.google\.com|www\.google\.com|maps\.app\.goo\.gl|g\.co)\/[^\s"'<>]{1,300}$/);
+// Stan strony dla monitoringu (np. UptimeRobot co 5 minut): 200 = sprzedaż działa, 503 = coś blokuje zamówienia.
+// Bez szczegółów konfiguracji: tylko nazwy sprawdzeń i ok / błąd.
+app.get('/health', async (_req, res) => {
+  const checks = {};
+  try { const f = path.join(DATA_DIR, '.health'); await fsp.writeFile(f, String(Date.now())); await fsp.readFile(f); checks.dane = 'ok'; } catch { checks.dane = 'błąd'; }
+  checks.platnosci = SALES_CLOSED ? 'błąd' : DEMO ? 'demo' : 'ok';
+  checks.ai = aiEnabled() ? 'ok' : 'błąd';
+  checks.poczta = mailEnabled() ? 'ok' : 'brak';
+  const stuck = Object.values(await allOrders().catch(() => ({}))).filter((o) => o.status === 'paid' || (o.status === 'generating' && Date.now() - (o.paidAt || 0) > 30 * 60_000)).length;
+  checks.zamowienia = stuck ? `${stuck} czeka na dokumenty` : 'ok';
+  const ok = checks.dane === 'ok' && checks.platnosci !== 'błąd' && checks.ai === 'ok' && (DEMO || checks.poczta === 'ok');
+  res.status(ok ? 200 : 503).set('Cache-Control', 'no-store').json({ ok, checks, at: new Date().toISOString() });
+});
 app.get('/api/config', (req, res) => res.json({
   ads: ADS, googleReview: GOOGLE_REVIEW, demo: DEMO, salesClosed: salesClosedFor(req), ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
   promo: salesClosedFor(req) ? null : activePromo(),
