@@ -1,4 +1,9 @@
 {
+"Forma": "Form",
+"obie formy (przekonany/a)": "beide Formen (przekonany/a)",
+"żeńska (przekonana)": "weiblich (przekonana)",
+"męska (przekonany)": "männlich (przekonany)",
+"Wyślij wiadomość w ciągu doby od rozmowy. Wybierz formę (żeńską albo męską), żeby w tekście nie było ukośników. Nie dopisuj nowych argumentów, tylko krótko podziękuj.": "Senden Sie die Nachricht innerhalb eines Tages nach dem Gespräch. Wählen Sie eine Form (weiblich oder männlich), damit der Text keine Schrägstriche enthält. Fügen Sie keine neuen Argumente hinzu, bedanken Sie sich nur kurz.",
 "Najniższa cena z 30 dni przed obniżką:": "Niedrigster Preis der letzten 30 Tage vor der Ermäßigung:",
 "−{0}% z kodem {1}": "−{0}% mit Code {1}",
 "Zobacz wszystkie {0} szablonów": "Alle {0} Vorlagen ansehen",

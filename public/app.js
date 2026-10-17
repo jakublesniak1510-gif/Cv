@@ -1778,6 +1778,25 @@ function toolAlerts(box, out, field) {
     el('p', { className: 'perk small', textContent: 'Po potwierdzeniu zapisu dostaniesz kod −10 zł na CV.' }),
     el('p', { className: 'hint', textContent: 'Nie pobieramy ofert z portali: w e-mailu są linki do aktualnych wyników wyszukiwania na Pracuj.pl, OLX i Indeed, ustawione na Twój zawód i miasto. Możesz mieć do 3 takich powiadomień.' }));
 }
+// --- thankYouText: treść podziękowania po rozmowie (czysta funkcja; test/thanks.test.js wczytuje ten fragment) ---
+// Kropka na końcu zdania tylko wtedy, gdy wpisany tekst sam się nią nie kończy (np. „Sp. z o.o.”).
+const endDot = (s) => (/[.!?…]$/.test(s) ? s : s + '.');
+function thankYouText(v) {
+  const t = (x) => String(x || '').trim();
+  const p = t(v.pos) || '[stanowisko]', f = t(v.firm) || '[firma]', n = t(v.name) || '[imię i nazwisko]', who = t(v.who), topic = t(v.topic);
+  const g = v.gender === 'f' ? ['przekonana', 'chciałabym'] : v.gender === 'm' ? ['przekonany', 'chciałbym'] : ['przekonany/a', 'chciałbym/chciałabym'];
+  return `Temat: Podziękowanie za rozmowę – ${p}
+
+${who ? 'Szanowna ' + who.replace(/^szanown[ya]\s+/i, '') + ',' : 'Dzień dobry,'}
+
+${endDot(`dziękuję za dzisiejszą rozmowę i czas poświęcony na przedstawienie stanowiska ${p} w ${f}`)}${topic ? ' ' + endDot(`Szczególnie zainteresowała mnie rozmowa o ${topic}`) : ''} Po spotkaniu jestem jeszcze bardziej ${g[0]}, że ${g[1]} dołączyć do Państwa zespołu.
+
+Jeśli potrzebują Państwo dodatkowych informacji lub dokumentów, chętnie je prześlę.
+
+Z poważaniem,
+${n}`;
+}
+// --- koniec thankYouText ---
 function toolPage(slug, C) {
   const t = C.TOOLS[slug], box = el('div', { className: 'tool-box' });
   const out = el('div', { className: 'msgbox tool-out' });
@@ -1810,22 +1829,11 @@ function toolPage(slug, C) {
   else if (slug === 'oferty-pracy-na-maila') toolAlerts(box, out, field);
   else {
     const name = el('input', { type: 'text', placeholder: 'Anna Kowalska' }), pos = el('input', { type: 'text', placeholder: 'Specjalista ds. obsługi klienta' }), firm = el('input', { type: 'text', placeholder: 'ABC Sp. z o.o.' }), who = el('input', { type: 'text', placeholder: 'np. Pani Magdaleno (opcjonalnie)' }), topic = el('input', { type: 'text', placeholder: 'np. wdrożeniu nowego systemu CRM (opcjonalnie)' });
-    const draw = () => {
-      const p = pos.value.trim() || '[stanowisko]', f = firm.value.trim() || '[firma]', n = name.value.trim() || '[imię i nazwisko]';
-      out.textContent = `Temat: Podziękowanie za rozmowę – ${p}
-
-${who.value.trim() ? 'Szanowna ' + who.value.trim().replace(/^szanown[ya]\s+/i, '') + ',' : 'Dzień dobry,'}
-
-dziękuję za dzisiejszą rozmowę i czas poświęcony na przedstawienie stanowiska ${p} w ${f}.${topic.value.trim() ? ` Szczególnie zainteresowała mnie rozmowa o ${topic.value.trim()}.` : ''} Po spotkaniu jestem jeszcze bardziej przekonany/a, że chciałbym/chciałabym dołączyć do Państwa zespołu.
-
-Jeśli potrzebują Państwo dodatkowych informacji lub dokumentów, chętnie je prześlę.
-
-Z poważaniem,
-${n}`;
-    };
-    [name, pos, firm, who, topic].forEach((i) => i.addEventListener('input', draw)); draw();
-    box.append(el('div', { className: 'tool-form' }, field('Twoje imię i nazwisko', name), field('Stanowisko', pos), field('Firma', firm), field('Zwrot do rekrutera', who), field('Temat z rozmowy, który zapamiętałeś', topic)), out, copyBtn2(out),
-      el('p', { className: 'hint', textContent: 'Wyślij wiadomość w ciągu doby od rozmowy. Usuń formę, która Cię nie dotyczy (przekonany/a). Nie dopisuj nowych argumentów, tylko krótko podziękuj.' }));
+    const gender = el('select', {}, el('option', { value: '', textContent: 'obie formy (przekonany/a)' }), el('option', { value: 'f', textContent: 'żeńska (przekonana)' }), el('option', { value: 'm', textContent: 'męska (przekonany)' }));
+    const draw = () => { out.textContent = thankYouText({ name: name.value, pos: pos.value, firm: firm.value, who: who.value, topic: topic.value, gender: gender.value }); };
+    [name, pos, firm, who, topic, gender].forEach((i) => i.addEventListener('input', draw)); gender.addEventListener('change', draw); draw();
+    box.append(el('div', { className: 'tool-form' }, field('Twoje imię i nazwisko', name), field('Forma', gender), field('Stanowisko', pos), field('Firma', firm), field('Zwrot do rekrutera', who), field('Temat z rozmowy, który zapamiętałeś', topic)), out, copyBtn2(out),
+      el('p', { className: 'hint', textContent: 'Wyślij wiadomość w ciągu doby od rozmowy. Wybierz formę (żeńską albo męską), żeby w tekście nie było ukośników. Nie dopisuj nowych argumentów, tylko krótko podziękuj.' }));
   }
   return el('div', { className: 'inner narrow' },
     el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', el('a', { href: '#poradnik', textContent: 'Darmowe narzędzia' }), '›', el('span', { textContent: t.title })),
