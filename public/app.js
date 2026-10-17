@@ -36,7 +36,8 @@ const COLOR_NAMES = { niebieski: 'niebieski', granat: 'granatowy', morski: 'mors
 let design = { tpl: 'nowoczesny', color: 'niebieski' };
 const tplName = (t) => (TPLS.find((x) => x[0] === t) || TPLS[0])[1];
 const ro = new ResizeObserver((es) => es.forEach((e) => e.target.style.setProperty('--s', e.contentRect.width / 794)));
-const thumb = (r, d, on = false, photo = '') => { const t = el('div', { className: 'thumb' }, cvNode(r, on, d, photo)); ro.observe(t); return t; };
+// Miniatura to podgląd wizualny (obok jest nazwa szablonu i opis), więc czytniki ekranu ją pomijają.
+const thumb = (r, d, on = false, photo = '') => { const t = el('div', { className: 'thumb' }, cvNode(r, on, d, photo)); t.setAttribute('aria-hidden', 'true'); ro.observe(t); return t; };
 function initials(n) { return String(n || '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join(''); }
 function paperEl(cls, d) { const p = el('div', { className: `paper t-${d.tpl} ${cls}` }); p.style.setProperty('--acc', COLORS[d.color] || COLORS.niebieski); return p; }
 // Wspólne klocki dokumentu; każdy szablon składa je po swojemu (węzeł DOM można wstawić tylko raz).
@@ -142,7 +143,7 @@ function parts(c, kw, lang = 'pl', photo = '') {
   };
 }
 const CV_LAYOUT = {
-  nowoczesny: (k) => [el('aside', { className: 'side' }, k.mono(), k.contactSec(), k.skills(), k.langs(), k.certs(), k.intr()),
+  nowoczesny: (k) => [el('div', { className: 'side' }, k.mono(), k.contactSec(), k.skills(), k.langs(), k.certs(), k.intr()),
     el('div', { className: 'mainc' }, el('header', { className: 'top' }, k.name(), k.head()), k.summary(), k.exp(), k.edu(), k.clause())],
   os: (k) => [el('header', { className: 'top' }, k.pic(), el('div', { className: 'who' }, k.name(), k.head()), k.clist()), k.summary(), k.exp(), k.edu(),
     el('div', { className: 'grid3' }, k.skills(), k.langs(), k.certs()), k.intr(), k.clause()],
@@ -150,14 +151,14 @@ const CV_LAYOUT = {
     k.summary(), k.exp(), k.edu(), k.skills(), k.langs(), k.certs(), k.intr(), k.clause()],
   geometria: (k) => [el('header', { className: 'band' }, el('div', {}, k.name(), k.head()), k.mono()),
     el('div', { className: 'body' }, el('div', { className: 'mainc' }, k.summary(), k.exp(), k.edu(), k.clause()),
-      el('aside', { className: 'panel' }, k.contactSec(), k.skills(), k.langs(), k.certs(), k.intr()))],
+      el('div', { className: 'panel' }, k.contactSec(), k.skills(), k.langs(), k.certs(), k.intr()))],
   elegancki: (k) => [el('header', { className: 'top' }, k.mono(), k.name(), k.head(), k.ct(), k.rule()), k.summary(), k.exp(), k.edu(), k.skills(), k.langs(), k.certs(), k.intr(), k.clause()],
   klasyczny: (k) => [el('header', { className: 'top' }, el('div', { className: 'who' }, k.name(), k.head(), k.ct()), k.pic()), k.summary(), k.exp(), k.edu(), k.skills(), k.langs(), k.certs(), k.intr(), k.clause()],
   monogram: (k) => [el('header', { className: 'top' }, k.mono(), k.name(), k.head(), k.ct()), k.summary(), k.exp(), k.edu(), k.skills(), k.langs(), k.certs(), k.intr(), k.clause()],
   kreatywny: (k) => [el('header', { className: 'band' }, el('div', { className: 'who' }, k.name(), k.head(), k.ct()), k.pic()),
-    el('div', { className: 'body' }, el('div', { className: 'mainc' }, k.summary(), k.exp(), k.edu(), k.clause()), el('aside', { className: 'panel' }, k.skills(), k.langs(), k.certs(), k.intr()))],
+    el('div', { className: 'body' }, el('div', { className: 'mainc' }, k.summary(), k.exp(), k.edu(), k.clause()), el('div', { className: 'panel' }, k.skills(), k.langs(), k.certs(), k.intr()))],
   kompetencje: (k) => [el('div', { className: 'mainc' }, el('header', { className: 'top' }, k.name(), k.head()), k.summary(), k.exp(), k.edu(), k.clause()),
-    el('aside', { className: 'side' }, k.pic(), k.contactSec(), k.skills(), k.langsLv(), k.certs(), k.intr())],
+    el('div', { className: 'side' }, k.pic(), k.contactSec(), k.skills(), k.langsLv(), k.certs(), k.intr())],
   wstega: (k) => [el('div', { className: 'band' }, k.mono()), el('header', { className: 'top' }, k.name(), k.head(), k.ct()), k.summary(), k.exp(), k.edu(), k.skills(), k.langs(), k.certs(), k.intr(), k.clause()],
   lebenslauf: (k) => [el('header', { className: 'top' }, el('div', { className: 'who' }, k.kicker(), k.name(), k.head()), k.pic()), k.persData(), k.summary(), k.tExp(), k.tEdu(), k.tMore(), k.clause(), k.sign()],
   europass: (k) => [el('header', { className: 'top' }, k.pic(), el('div', { className: 'who' }, k.name(), k.head(), k.persLine())), k.summary(), k.eExp(), k.eEdu(), k.eLangs(), k.skills(), k.certs(), k.intr(), k.clause()],
@@ -492,7 +493,7 @@ function drawEx(i) {
   $$('#exTabs button').forEach((b, j) => b.setAttribute('aria-selected', j === i));
   $('#exAd').replaceChildren(
     el('div', { className: 'ad-top' }, el('span', { className: 'ad-logo', textContent: e.company.split(/\s+/).map((w) => w[0]).join('').slice(0, 2) }), el('div', {}, el('small', { textContent: EX_UI[EX_LANG][0] }), el('b', { textContent: e.company }))),
-    el('h4', { textContent: e.title }), el('p', { className: 'ad-txt' }, hl(e.ad, e.kws)),
+    el('h4', { textContent: e.title, ariaLevel: '3' }), el('p', { className: 'ad-txt' }, hl(e.ad, e.kws)),
     el('div', { className: 'ad-kws' }, el('small', { textContent: EX_UI[EX_LANG][1] }), el('div', {}, ...[...new Map(e.kws.map((k) => [k.toLowerCase().split(/\s+/).map((w) => w.slice(0, Math.max(3, Math.min(5, w.length - 1)))).join(' '), k])).values()].map((k) => el('span', { textContent: k })))));
   $('#exCv').replaceChildren(
     el('div', { className: 'mcv-head' }, el('span', { className: 'mcv-ini', textContent: 'AN' }), el('div', {}, el('b', { textContent: 'Anna Nowak' }), el('span', { textContent: e.title }))),
@@ -2020,6 +2021,12 @@ function settleScroll(t, n = 0) {
   if (n < 6) setTimeout(() => { if (Math.abs(t.getBoundingClientRect().top - (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0)) > 4) settleScroll(t, n + 1); }, 250);
 }
 window.addEventListener('hashchange', route); route();
+// „Przejdź do treści”: fokus na widocznej treści głównej (strona główna, podstrona, konto albo dokument prawny).
+$('.skip').addEventListener('click', (e) => {
+  e.preventDefault();
+  const m = [...document.querySelectorAll('main, [role=main]')].find((x) => !x.hidden); if (!m) return;
+  m.tabIndex = -1; m.focus({ preventScroll: true }); m.scrollIntoView();
+});
 
 addRow('exp'); addRow('edu'); addRow('ads');
 if (restoreDraft()) $('#draftNote').hidden = false;
