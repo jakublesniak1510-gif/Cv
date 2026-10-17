@@ -107,3 +107,4 @@ Przykładowe dane do obejrzenia panelu lokalnie: `DATA_DIR=/tmp/cvpo-demo node s
 
 Kody z prowizją (panel → Kody rabatowe → „Prowizja partnera”) to program partnerski: partner dostaje link `/?ref=KOD`, jego odbiorcy rabat, a on procent od każdej zapłaconej kwoty. Panel liczy sprzedaże i prowizję do wypłaty; przycisk „Wypłacono” zapisuje rozliczenie. Kod z niewypłaconą prowizją nie jest kasowany po wygaśnięciu.
 
+`ALIAS_HOSTS` (domyślnie `cvpodogloszenie.pl,www.cvpodogloszenie.pl`): dodatkowe domeny podpięte w Render, które przekierowują (301) na `BASE_URL`, z zachowaniem ścieżki.
