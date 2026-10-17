@@ -212,7 +212,7 @@ async function openOrder(id) {
   lastFocus = document.activeElement;
   const p = $('#panel'); p.replaceChildren(el('p', { className: 'mute', textContent: 'Wczytuję…' })); $('#drawer').hidden = false;
   let o; try { o = await api('/orders/' + id); } catch (x) { p.replaceChildren(el('p', { className: 'msg bad', textContent: x.message })); return; }
-  const addons = [o.addons.interview && 'przygotowanie do rozmowy', o.addons.messages && 'wiadomości do rekrutera', o.addons.linkedin && 'profil LinkedIn', o.addons.docx && 'wersja Word', ...o.extraLangs.map((l) => `wersja: ${l}`)].filter(Boolean);
+  const addons = [o.addons.interview && 'przygotowanie do rozmowy', o.addons.messages && 'wiadomości do rekrutera', o.addons.linkedin && 'profil LinkedIn', o.addons.sim && 'symulator rozmowy', o.addons.docx && 'wersja Word', ...o.extraLangs.map((l) => `wersja: ${l}`)].filter(Boolean);
   const act = el('div', { className: 'confirm', hidden: true });
   const reload = () => { openOrder(id); loaders[current()]?.(); };
   const run = async (b, fn, ok) => { b.disabled = true; try { await fn(); toast(ok); reload(); } catch (x) { toast(x.message); b.disabled = false; } };
@@ -281,6 +281,13 @@ function refundBox(o, reload) {
 // Faktura bez VAT na życzenie: dane nabywcy do przepisania w programie do faktur i odhaczenie z numerem.
 function invoiceBox(o, reload) {
   const f = o.invoiceData; if (!f) return null;
+  // Faktura PDF wystawiona przez stronę: pobranie; gdy jeszcze nie ma, „Wystaw teraz” (numer i e-mail do klienta).
+  if (f.pdf) return el('div', {}, el('h3', { textContent: 'Faktura (bez VAT, zw. art. 113)' }), kv([
+    ['Numer', `${f.number} (${dt(f.issuedAt)})`], ['Nabywca', f.name], ['Adres', f.address], ['NIP', f.nip || '— (osoba prywatna)'], ['Kwota', zl(o.total)],
+  ]), el('div', { className: 'actions' }, el('a', { className: 'btn ghost sm', href: `/api/admin/invoices/${o.id}.pdf`, target: '_blank', rel: 'noopener', textContent: 'Pobierz PDF' })),
+  o.refunded ? el('p', { className: 'help', textContent: 'Zamówienie ma zwrot: wystaw fakturę korygującą w swoim programie do faktur.' }) : null);
+  const auto = el('button', { className: 'btn sm', textContent: 'Wystaw fakturę PDF teraz', disabled: !['generating', 'paid', 'done'].includes(o.status) });
+  auto.onclick = async () => { auto.disabled = true; try { const r = await post(`/orders/${o.id}/invoice/issue`); toast(`Wystawiono ${r.number} i wysłano klientowi.`); reload(); } catch (x) { toast(x.message); auto.disabled = false; } };
   const copy = el('button', { className: 'btn ghost sm', textContent: 'Kopiuj dane' });
   copy.onclick = async () => { try { await navigator.clipboard.writeText([f.name, f.address, f.nip && 'NIP ' + f.nip].filter(Boolean).join('\n')); toast('Skopiowano.'); } catch { toast('Nie udało się skopiować.'); } };
   const num = el('input', { placeholder: 'Numer faktury, np. FV 1/10/2026', maxLength: 60, value: f.number || '', style: 'max-width:240px' });
@@ -289,7 +296,7 @@ function invoiceBox(o, reload) {
   return el('div', {}, el('h3', { textContent: 'Faktura (bez VAT, zw. art. 113)' }), kv([
     ['Status', f.issued ? `wystawiona${f.number ? ' · ' + f.number : ''} (${dt(f.issuedAt)})` : o.status === 'pending' ? 'czeka na płatność' : 'do wystawienia'],
     ['Nabywca', f.name], ['Adres', f.address], ['NIP', f.nip || '— (osoba prywatna)'], ['Kwota', zl(o.total)],
-  ]), el('div', { className: 'actions' }, f.issued ? null : num, b, copy));
+  ]), el('div', { className: 'actions' }, f.issued ? null : auto, f.issued ? null : num, b, copy));
 }
 const current = () => $('#nav [aria-current]')?.dataset.v || 'dash';
 
@@ -462,7 +469,7 @@ function setRange(which) {
   const n = new Date(), y = n.getFullYear(), m = n.getMonth() - (which === 'prev' ? 1 : 0);
   $('#eFrom').value = iso(new Date(y, m, 1)); $('#eTo').value = iso(which === 'prev' ? new Date(y, m + 1, 0) : n);
 }
-$$('[data-range]').forEach((b) => b.addEventListener('click', () => setRange(b.dataset.range)));
+$$('[data-range]').forEach((b) => b.addEventListener('click', () => { setRange(b.dataset.range); loadInvoices().catch(() => {}); }));
 $('#expForm').addEventListener('submit', (e) => { e.preventDefault(); if (window.PREVIEW) return toast('W podglądzie pobieranie pliku jest wyłączone.'); location.href = `/api/admin/export.csv?from=${$('#eFrom').value}&to=${$('#eTo').value}`; });
 loaders.export = () => { if (!$('#eFrom').value) setRange('this'); };
 
@@ -494,7 +501,7 @@ loaders.leads = async () => {
 // --- ustawienia i kopia zapasowa ---
 loaders.settings = async () => {
   const st = await api('/settings'), f = $('#setForm');
-  for (const k of ['orderMail', 'dailyMail', 'backupMail']) f.elements[k].checked = !!st[k];
+  for (const k of ['orderMail', 'dailyMail', 'backupMail', 'autoInvoice']) f.elements[k].checked = !!st[k];
   $('#setTo').textContent = st.mail ? (st.to ? `Wysyłamy na: ${st.to} (zmienna BACKUP_EMAIL albo CONTACT_EMAIL).` : 'Ustaw CONTACT_EMAIL w Render, żeby dostawać te e-maile.') : 'Poczta wyłączona: ustaw SMTP_USER i SMTP_PASS w Render.';
 };
 $('#setForm').addEventListener('change', async (e) => {
@@ -523,3 +530,18 @@ $('#rsBtn').addEventListener('click', () => {
   box.replaceChildren(el('strong', { textContent: `Przywrócić dane z pliku ${file.name}?` }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: 'Obecne zamówienia, kody, opinie i inne dane zostaną zastąpione zawartością kopii. Zamówienia złożone po jej utworzeniu znikną z panelu (zostaną w zapisanym stanie sprzed przywrócenia).' }), el('div', { className: 'actions' }, ok, no));
   box.hidden = false; ok.focus();
 });
+
+// --- faktury (zakładka Eksport) ---
+async function loadInvoices() {
+  const q = new URLSearchParams({ from: $('#eFrom').value || '', to: $('#eTo').value || '' });
+  $('#invCsv').href = '/api/admin/invoices.csv?' + q;
+  const list = await api('/invoices?' + q);
+  $('#invTable').replaceChildren(list.length ? el('table', {},
+    el('thead', {}, el('tr', {}, el('th', { textContent: 'Numer' }), el('th', { textContent: 'Data' }), el('th', { textContent: 'Nabywca' }), el('th', { textContent: 'NIP' }), el('th', { className: 'r', textContent: 'Kwota' }), el('th', { textContent: 'PDF' }))),
+    el('tbody', {}, list.reverse().map((i) => el('tr', {}, el('td', { className: 'mono', textContent: i.number }), el('td', { textContent: dd(i.issued) }), el('td', { className: 'ell', textContent: i.buyer, title: i.buyer }), el('td', { className: 'mono', textContent: i.nip || '—' }), el('td', { className: 'r', textContent: zl(i.total) }),
+      el('td', {}, el('a', { href: `/api/admin/invoices/${i.id}.pdf`, target: '_blank', rel: 'noopener', textContent: 'Otwórz' })))))) : el('div', { className: 'empty', textContent: 'Brak faktur w tym okresie.' }));
+}
+const prevExport = loaders.export;
+loaders.export = async () => { await prevExport?.(); await loadInvoices().catch((x) => toast(x.message)); };
+$('#eFrom').addEventListener('change', () => loadInvoices().catch(() => {}));
+$('#eTo').addEventListener('change', () => loadInvoices().catch(() => {}));

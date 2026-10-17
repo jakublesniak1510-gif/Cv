@@ -1022,7 +1022,15 @@ async function poll() {
 $('#payAgain').onclick = async () => { $('#payAgain').disabled = true; try { const r = await fetch(`/api/orders/${orderId}/pay`, { method: 'POST' }); const j = await r.json(); if (!r.ok) throw new Error(j.error); location.href = j.url; } catch (x) { $('#genMsg').textContent = x.message || 'Nie udało się otworzyć płatności.'; $('#payAgain').disabled = false; } };
 $('#retry').onclick = async () => { await fetch(`/api/orders/${orderId}/retry`, { method: 'POST' }); startResult(orderId); };
 
+function drawInvoice() {
+  let b = $('#invNote');
+  if (!data.invoice) { if (b) b.hidden = true; return; }
+  if (!b) { b = el('p', { id: 'invNote', className: 'mailnote noprint good' }); $('#mailNote').after(b); }
+  b.hidden = false;
+  b.replaceChildren(el('span', { textContent: 'Faktura' }), ' ', el('b', { textContent: data.invoice.number }), ' · ', el('a', { href: `/api/orders/${orderId}/invoice.pdf`, target: '_blank', rel: 'noopener', textContent: 'Pobierz fakturę (PDF)' }));
+}
 function drawMail() {
+  drawInvoice();
   const m = data.mail, n = $('#mailNote');
   n.hidden = !m || m.status === 'skipped';
   if (n.hidden) return;

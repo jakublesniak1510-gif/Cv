@@ -71,7 +71,7 @@ test('Kopia zapasowa: wersja do e-maila bez zdjęć, przywrócenie zapisuje najp
 });
 
 test('Ustawienia e-maili: domyślnie włączone, zapis tylko znanych pól', async () => {
-  assert.deepEqual(await ops.getSettings(), { orderMail: true, dailyMail: true, backupMail: true });
+  assert.deepEqual(await ops.getSettings(), { orderMail: true, dailyMail: true, backupMail: true, autoInvoice: true });
   const s = await ops.saveSettings({ orderMail: false, hack: true });
   assert.equal(s.orderMail, false); assert.equal(s.hack, undefined);
 });

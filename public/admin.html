@@ -158,6 +158,7 @@
           <form id="setForm" class="setlist">
             <label class="check"><input type="checkbox" name="orderMail"> <span><b>Nowe zamówienie</b><br><span class="mute">Krótki e-mail po każdej płatności: pakiet, kwota, kod, faktura.</span></span></label>
             <label class="check"><input type="checkbox" name="dailyMail"> <span><b>Poranne podsumowanie</b><br><span class="mute">Codziennie po 7:00: wczorajsza sprzedaż, miesiąc, problemy i faktury do wystawienia.</span></span></label>
+            <label class="check"><input type="checkbox" name="autoInvoice"> <span><b>Faktury automatycznie</b><br><span class="mute">Gdy klient zaznaczy fakturę: numer FV n/MM/RRRR, PDF w e-mailu do klienta i na stronie jego dokumentów. Wyłączone: wystawiasz sam (przycisk w zamówieniu).</span></span></label>
             <label class="check"><input type="checkbox" name="backupMail"> <span><b>Kopia zapasowa w e-mailu</b><br><span class="mute">Codziennie po 7:00 plik z danymi strony (bez zdjęć klientów) w załączniku.</span></span></label>
           </form>
           <div class="actions" style="margin-top:12px"><button class="btn ghost sm" id="setTest">Wyślij podsumowanie z kopią teraz</button> <span class="msg" id="setMsg" role="status"></span></div>
@@ -178,6 +179,11 @@
     <!-- Eksport -->
     <section data-view="export" hidden>
       <div class="head"><h1>Eksport sprzedaży</h1></div>
+      <div class="card" style="max-width:860px;margin-bottom:14px">
+        <h2>Faktury wystawione przez stronę <a class="link r" id="invCsv" href="/api/admin/invoices.csv" download>Pobierz CSV</a></h2>
+        <p class="help" style="margin:-6px 0 12px">Z okresu wybranego niżej (domyślnie wszystkie). Przechowywane 6 lat, także po usunięciu zamówienia.</p>
+        <div class="tbl-wrap" id="invTable"></div>
+      </div>
       <div class="card" style="max-width:560px">
         <h2>Plik CSV dla księgowej</h2>
         <form id="expForm" class="filters" style="align-items:end">

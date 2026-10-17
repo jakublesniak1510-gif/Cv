@@ -13,13 +13,14 @@ import { adFromImage, AdImageError } from './lib/adImage.js';
 import { simTurn, SimError } from './lib/sim.js';
 import { samplePdf } from './lib/sample.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
-import { mailEnabled, sendOrderMail, sendReminder, sendFollowUp, sendReviewAsk, sendPayReminder, sendAdminAlert } from './lib/mail.js';
+import { mailEnabled, sendOrderMail, sendReminder, sendFollowUp, sendReviewAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail } from './lib/mail.js';
 import { cleanDesign } from './lib/designs.js';
 import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes, sendNotFound } from './lib/seo.js';
 import { p24Enabled, p24Register, p24NotificationOk, p24Verify, p24BySession } from './lib/p24.js';
 import { stripeEnabled, stripeCheckout, stripeSession, stripeEvent } from './lib/stripe.js';
-import { recordSale, notifyNewOrder, setRefunded, commissionBack, ownerDaily } from './lib/ops.js';
+import { recordSale, notifyNewOrder, setRefunded, commissionBack, ownerDaily, getSettings } from './lib/ops.js';
+import { invoices, issueInvoice, renderInvoice, invoiceFile, cleanupInvoices } from './lib/invoice.js';
 import { renderDocx } from './lib/docx.js';
 import { adminRoutes, isAdmin } from './lib/admin.js';
 import { accountRoutes, accountHourly } from './lib/account.js';
@@ -386,6 +387,14 @@ const view = (o, extra = {}) => ({
   ...extra, id: o.id, pkg: o.pkg, addons: o.addons || {}, extraLangs: o.extraLangs || [], total: o.total, status: o.status, results: o.results, error: o.error, mail: o.mail,
   design: cleanDesign(o.design), photo: o.profile.photo || '', email: o.profile.email, parentId: o.parentId || null,
   paidAt: o.paidAt || null, createAccount: !!o.createAccount, canPay: o.status === 'pending' && !DEMO, revisionsLeft: MAX_REVISIONS - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
+  invoice: o.invoice?.pdf ? { number: o.invoice.number } : null,
+});
+
+// Faktura PDF dla klienta (link na stronie dokumentów; adres zamówienia jest nie do zgadnięcia, jak przy dokumentach).
+app.get('/api/orders/:id/invoice.pdf', async (req, res) => {
+  const inv = await invoices.get(req.params.id);
+  if (!inv) return res.sendStatus(404);
+  res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `inline; filename="${invoiceFile(inv)}"`, 'Cache-Control': 'private, no-store' }).send(await renderInvoice(inv));
 });
 
 // Stan zamówienia; po powrocie z Przelewy24 sprawdza płatność u źródła (gdyby powiadomienie się spóźniło).
@@ -483,6 +492,7 @@ async function markPaidAndGenerate(id) {
   try {
     const paidO = await updateOrder(id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
     if (!o.paidAt) { recordSale(paidO).catch((e) => console.error('Rejestr sprzedaży', e.message)); notifyNewOrder(paidO, BASE_URL).catch((e) => logEvent('e-mail', `Powiadomienie o zamówieniu: ${e.message}`)); }
+    if (!o.paidAt && paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: id }));
     const withLetter = hasLetter(o.pkg);
     const results = await Promise.all(o.ads.map(async (ad) => {
       const r = await generateForAd({ profile: o.profile, ad, withLetter, addons: o.addons });
@@ -502,6 +512,16 @@ async function markPaidAndGenerate(id) {
     await updateOrder(id, (x) => ({ ...x, status: 'paid', attempts: (x.attempts || 0) + 1, error: 'Generowanie nie powiodło się.' }));
     alertOwner(`Zamówienie ${id} jest opłacone, ale nie udało się wygenerować dokumentów.\n\nBłąd: ${e.message}\n\nStrona ponawia generowanie co 15 minut przez 3 dni, a klient dostanie dokumenty e-mailem. Jeśli błąd mówi o środkach (credit balance / billing), doładuj konto na console.anthropic.com. Szczegóły: panel → Problemy.`);
   } finally { inFlight.delete(id); }
+}
+
+// Faktura bez VAT na życzenie klienta: numer, PDF w e-mailu i na stronie dokumentów (wyłączane w panelu → Ustawienia).
+async function autoInvoice(o, { force = false } = {}) {
+  if (!force && !(await getSettings()).autoInvoice) return null;
+  const inv = await issueInvoice(o);
+  if (!inv) return null;
+  await updateOrder(o.id, (x) => ({ ...x, invoice: { ...x.invoice, issued: true, pdf: true, number: inv.number, issuedAt: inv.issued } }));
+  if (mailEnabled()) await sendInvoiceMail(o, inv, await renderInvoice(inv), BASE_URL).catch((e) => logEvent('e-mail', `Faktura ${inv.number}: ${e.message}`, { orderId: o.id }));
+  return inv;
 }
 
 // Mail do właściciela najwyżej raz na godzinę, żeby przy awarii nie zasypać skrzynki.
@@ -614,7 +634,7 @@ accountRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 leadRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 alertRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 analyticsRoutes(app, BASE_URL);
-adminRoutes(app, { DEMO, BASE_URL, markPaidAndGenerate, trySend, retentionMs: RETENTION_MS });
+adminRoutes(app, { DEMO, BASE_URL, markPaidAndGenerate, trySend, retentionMs: RETENTION_MS, autoInvoice });
 
 // Dane zamówień (w tym zdjęcia) kasujemy po 30 dniach.
 // Co godzinę: kasowanie starych zamówień i kodów oraz jednorazowe przypomnienie po 7 dniach (tylko za zgodą klienta).
@@ -631,6 +651,7 @@ async function hourly() {
     }
     await cleanupEvents(RETENTION_MS);
     await cleanupLeads().catch(() => {});
+    await cleanupInvoices().catch(() => {});
     await leads.deleteWhere((l) => Date.now() - l.created > 365 * 864e5);
     await cleanupAnalytics().catch(() => {});
     await ensurePromoCode().catch((e) => console.error('Promocja', e.message));
