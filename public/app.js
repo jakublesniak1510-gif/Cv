@@ -930,40 +930,54 @@ async function importData(b64) {
   } catch (x) { st.textContent = x.message || 'Nie udało się odczytać pliku.'; st.classList.add('bad'); }
 }
 
-/* darmowy skaner CV */
+/* darmowy skaner CV (na stronie głównej i na podstronie /narzedzia/skaner-cv) */
 let scanData = null;
-$('#scanFile').onchange = (e) => ($('#scanFileName').textContent = e.target.files[0]?.name || 'nie wybrano pliku');
-$('#scanForm').onsubmit = async (e) => {
-  e.preventDefault();
-  const msg = $('#scanMsg'), file = $('#scanFile').files[0];
-  let ad = $('#scanAd').value.trim(), title = '';
-  msg.className = 'fstatus';
-  const fail = (t) => { msg.className = 'fstatus bad'; msg.textContent = t; };
-  if (!file) return fail('Wybierz plik ze swoim CV.');
-  if (file.size > 5 * 1024 * 1024) return fail('Plik musi mieć do 5 MB.');
-  if (!ad) return fail('Wklej link do ogłoszenia albo jego treść.');
-  $('#scanBtn').disabled = true;
-  try {
-    if (/^https?:\/\/\S+$/i.test(ad)) {
-      msg.textContent = 'Pobieram ogłoszenie…';
-      const r = await fetch('/api/fetch-ad', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: ad }) });
-      const j = await r.json(); if (!r.ok) throw new Error(`${j.error} Wklej treść ogłoszenia zamiast linku.`);
-      ad = j.text; title = j.title;
-    }
-    if (ad.length < 80) throw new Error('Wklej pełną treść ogłoszenia (min. 80 znaków).');
-    msg.textContent = 'Porównujemy Twoje CV z ogłoszeniem…';
-    const b64 = await fileB64(file);
-    const r = await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: b64, adText: ad }) });
-    const j = await r.json(); if (!r.ok) throw new Error(j.error);
-    // Nazwa stanowiska: z linku, z oceny AI albo z pierwszego zdania ogłoszenia.
-    const guess = ad.split(/[.\n]/)[0].replace(/^(poszukujemy|szukamy|zatrudnimy|zatrudni[mę]?)\s+/i, '').trim().slice(0, 60);
-    scanData = { b64, adText: ad, title: title || j.position || guess.charAt(0).toUpperCase() + guess.slice(1) };
-    msg.textContent = ''; renderScan(j);
-  } catch (x) { fail(x.message); }
-  $('#scanBtn').disabled = false;
-};
-function renderScan(j) {
-  const box = $('#scanResult'), total = j.found.length + j.missing.length, pct = j.score ?? 0;
+function bindScan(ui) {
+  ui.file.onchange = () => (ui.fileName.textContent = ui.file.files[0]?.name || 'nie wybrano pliku');
+  ui.form.onsubmit = async (e) => {
+    e.preventDefault();
+    const msg = ui.msg, file = ui.file.files[0];
+    let ad = ui.ad.value.trim(), title = '';
+    msg.className = 'fstatus';
+    const fail = (t) => { msg.className = 'fstatus bad'; msg.textContent = t; };
+    if (!file) return fail('Wybierz plik ze swoim CV.');
+    if (file.size > 5 * 1024 * 1024) return fail('Plik musi mieć do 5 MB.');
+    if (!ad) return fail('Wklej link do ogłoszenia albo jego treść.');
+    ui.btn.disabled = true;
+    try {
+      if (/^https?:\/\/\S+$/i.test(ad)) {
+        msg.textContent = 'Pobieram ogłoszenie…';
+        const r = await fetch('/api/fetch-ad', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: ad }) });
+        const j = await r.json(); if (!r.ok) throw new Error(`${j.error} Wklej treść ogłoszenia zamiast linku.`);
+        ad = j.text; title = j.title;
+      }
+      if (ad.length < 80) throw new Error('Wklej pełną treść ogłoszenia (min. 80 znaków).');
+      msg.textContent = 'Porównujemy Twoje CV z ogłoszeniem…';
+      const b64 = await fileB64(file);
+      const r = await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: b64, adText: ad }) });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      // Nazwa stanowiska: z linku, z oceny AI albo z pierwszego zdania ogłoszenia.
+      const guess = ad.split(/[.\n]/)[0].replace(/^(poszukujemy|szukamy|zatrudnimy|zatrudni[mę]?)\s+/i, '').trim().slice(0, 60);
+      scanData = { b64, adText: ad, title: title || j.position || guess.charAt(0).toUpperCase() + guess.slice(1) };
+      msg.textContent = ''; renderScan(j, ui.result);
+    } catch (x) { fail(x.message); }
+    ui.btn.disabled = false;
+  };
+}
+bindScan({ form: $('#scanForm'), file: $('#scanFile'), fileName: $('#scanFileName'), ad: $('#scanAd'), btn: $('#scanBtn'), msg: $('#scanMsg'), result: $('#scanResult') });
+// Formularz skanera na podstronie narzędzia: te same pola co na stronie głównej, wynik pod formularzem.
+function toolScan(box) {
+  const file = el('input', { type: 'file', accept: '.pdf,.docx,.txt', hidden: true }), fileName = el('span', { className: 'hint', textContent: 'nie wybrano pliku' });
+  const ad = el('textarea', { rows: 4, placeholder: 'Wklej link (https://…) albo całą treść ogłoszenia' }), btn = el('button', { className: 'btn', type: 'submit', textContent: 'Sprawdź za darmo' });
+  const msg = el('p', { className: 'fstatus', role: 'status' }), result = el('div', { className: 'scan-result', hidden: true });
+  const form = el('form', { className: 'scan-card', noValidate: true },
+    el('div', { className: 'f' }, '1. Twoje CV ', el('span', { className: 'h', textContent: 'PDF, Word lub TXT, do 5 MB' }), el('div', { className: 'filerow' }, el('label', { className: 'btn ghost sm filebtn' }, 'Wybierz plik', file), fileName)),
+    el('label', { className: 'f' }, '2. Link do ogłoszenia albo jego treść', ad), btn, msg, el('p', { className: 'hint small', textContent: 'Nie zapisujemy ani pliku, ani wyniku.' }));
+  bindScan({ form, file, fileName, ad, btn, msg, result });
+  box.classList.remove('tool-box'); box.append(form, result);
+}
+function renderScan(j, box = $('#scanResult')) {
+  const total = j.found.length + j.missing.length, pct = j.score ?? 0;
   box.replaceChildren(
     el('div', { className: 'ring', style: `--p:${pct}` }, el('b', { textContent: `${pct}%` })),
     el('div', { className: 'mcol ok' }, el('h3', { textContent: `Spełniasz ${j.found.length} z ${total} wymagań${j.position ? ': ' + j.position : ''}` }), el('ul', {}, ...j.found.map((x) => el('li', { textContent: x })))),
@@ -1757,6 +1771,7 @@ function toolPage(slug, C) {
       el('label', { className: 'check' }, commute, el('span', { textContent: 'Dojeżdżam z innej miejscowości (koszty 300 zł zamiast 250 zł)' })), out,
       el('p', { className: 'hint', textContent: 'Wynik szacunkowy dla umowy o pracę, według zasad podatkowych obowiązujących od 2022 r. (skala 12% i 32%, kwota wolna 30 000 zł). Nie uwzględnia PPK, limitu składek ZUS przy bardzo wysokich zarobkach ani innych ulg. Przed decyzją sprawdź aktualne przepisy lub zapytaj pracodawcę.' }));
   } else if (slug === 'wypowiedzenie-umowy-o-prace') toolNotice(box, out, field);
+  else if (slug === 'skaner-cv') toolScan(box);
   else if (slug === 'zdjecie-do-cv') toolPhoto(box, out);
   else if (slug === 'odpowiedzi-na-pytania-rekrutera') toolAnswer(box, out, field, t.questions || []);
   else if (slug === 'jaki-zawod-dla-mnie') toolQuiz(box, out, C);
@@ -1786,7 +1801,7 @@ ${n}`;
     ...(t.about || []).map((x) => el('p', { textContent: x })),
     ...(t.faq?.length ? [el('h2', { textContent: 'Pytania' }), ...t.faq.map((f) => el('details', {}, el('summary', { textContent: f.q }), el('p', { textContent: f.a })))] : []),
     el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Masz już ogłoszenie?' }), el('p', { className: 'hint', textContent: 'Przygotujemy CV i list pisane pod nie, z raportem dopasowania. Od 39 zł, bez abonamentu.' })), openBtn('Zamów CV')),
-    el('h2', { textContent: 'Inne darmowe narzędzia' }), el('div', { className: 'more' }, ...Object.entries(C.TOOLS).filter(([k]) => k !== slug).map(([k, x]) => pageLink(`narzedzia/${k}`, { textContent: x.title })), el('a', { href: '#skaner', textContent: 'Skaner CV' })));
+    el('h2', { textContent: 'Inne darmowe narzędzia' }), el('div', { className: 'more' }, ...Object.entries(C.TOOLS).filter(([k]) => k !== slug).map(([k, x]) => pageLink(`narzedzia/${k}`, { textContent: x.title })), pageLink('narzedzia/skaner-cv', { textContent: 'Skaner CV' })));
 }
 const copyBtn2 = (node) => el('button', { type: 'button', className: 'btn sm', textContent: 'Kopiuj', onclick: async (e) => { try { await navigator.clipboard.writeText(node.textContent); e.target.textContent = 'Skopiowano'; } catch { e.target.textContent = 'Zaznacz tekst i skopiuj'; } } });
 
