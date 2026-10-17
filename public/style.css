@@ -845,3 +845,4 @@ main[tabindex="-1"]:focus,[role=main][tabindex="-1"]:focus{outline:none}
 .more-link{margin-top:18px}.more-link a{font-weight:600;color:var(--brand)}
 .hw .tbl-wrap{overflow-x:auto;margin:12px 0 8px}
 .hero-rating{display:inline-flex;align-items:center;gap:4px;margin-top:14px;font-size:15px;color:var(--ink);text-decoration:none}.hero-rating .stars{color:#E8A400;letter-spacing:1px}.hero-rating:hover b{text-decoration:underline}
+.hw .lead .hw-tag{display:inline-block;vertical-align:middle;margin:0 8px 2px 0}

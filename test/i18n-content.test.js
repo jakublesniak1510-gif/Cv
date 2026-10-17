@@ -43,6 +43,6 @@ test('Podstrona „Jak to działa”: tytuł do 60 znaków (też w tłumaczeniac
   assert.ok(title.length <= 60, `tytuł: ${title.length} znaków`);
   assert.ok(desc.length <= 160, `opis: ${desc.length} znaków`);
   assert.doesNotMatch(desc + body, /prawdziw/i);
-  assert.match(body, /Przykład: Anna/);
+  assert.match(body, /<span class="hw-tag">Przykład<\/span>Pokazujemy cały proces na przykładzie Anny/);
   for (const l of LANGS) { const t = dict(l)[title]; assert.ok(t && t.length <= 60, `tytuł ${l}: ${t}`); }
 });
