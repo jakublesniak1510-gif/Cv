@@ -1492,7 +1492,12 @@ loadReviews();
 addEventListener('scroll', () => { const show = scrollY > 500 && $('#result').hidden && ($('#account')?.hidden ?? true) && $('#wiz').hidden && document.body.style.overflow !== 'hidden'; $('#mcta').hidden = !show; document.body.classList.toggle('mcta-on', show); }, { passive: true });
 
 async function loadContent() {
-  if (!CONTENT) { try { CONTENT = await (await fetch('/content.json')).json(); } catch { CONTENT = { INDEX: [], POPULAR: [], ARTICLES: [], CITIES: [] }; } }
+  if (!CONTENT) {
+    try { CONTENT = await (await fetch('/content.json')).json(); } catch { CONTENT = { INDEX: [], POPULAR: [], ARTICLES: [], CITIES: [] }; }
+    // Kafelki narzędzi i linki w stopce: adresy w języku strony (serwer robi to samo dla wersji /en, /uk, /de).
+    const l = window.I18N?.lang;
+    if (TOOL_SEG[l]) $$('a[data-page^="narzedzia/"]').forEach((a) => { const k = a.dataset.page.slice(10), ts = CONTENT.TOOLS?.[k]?.slugs?.[l]; if (ts) a.setAttribute('href', `/${l}/${TOOL_SEG[l]}/${ts}`); });
+  }
   // Poradnik w języku strony (EN / UA / DE): tłumaczenia artykułów ładujemy tylko dla tego języka.
   const l = window.I18N?.lang;
   if (ART_SEG[l] && !CONTENT.artLang) {
@@ -1510,6 +1515,14 @@ async function loadContent() {
   return CONTENT;
 }
 // Pełna treść artykułu (w języku strony, jeśli jest tłumaczenie); lista w content.json ma tylko tytuły i opisy.
+// Treść strony narzędzia w języku strony (tytuł, wstęp, „o narzędziu”, FAQ); same narzędzia działają tak samo.
+let TOOLS_TR = null;
+async function loadTool(slug, C) {
+  const l = window.I18N?.lang, t = C.TOOLS[slug];
+  if (!TOOL_SEG[l] || !t.slugs?.[l]) return t;
+  if (!TOOLS_TR) { try { TOOLS_TR = await (await fetch(`/content/tools-${l}.json`)).json(); } catch { TOOLS_TR = {}; } }
+  return TOOLS_TR[slug] ? { ...t, seoTitle: undefined, ...TOOLS_TR[slug] } : t;
+}
 async function loadArticle(meta) {
   try { const r = await fetch(`/content/art/${meta.slug}.json${meta.slugLang && CONTENT.artLang ? '?lang=' + CONTENT.artLang : ''}`); if (r.ok) return { ...meta, ...(await r.json()) }; } catch {}
   return { ...meta, sections: [] };
@@ -1529,13 +1542,15 @@ const profResult = (p) => ({ position: p.sample.headline, lang: p.lang || 'pl', 
 const STATIC_PAGES = ['jak-to-dziala', 'dla-firm', 'program-polecen'];
 const HOME_TITLE = 'CV pod ogłoszenie i list motywacyjny od 39 zł';
 // Publiczny adres podstrony: na wersjach EN / UA / DE strona główna to /<język>, a przetłumaczone artykuły mają własne adresy.
-const ART_SEG = { de: 'ratgeber', en: 'guides', uk: 'porady' }, PROF_SEG = { de: 'lebenslauf', en: 'cv', uk: 'rezyume' };
+const ART_SEG = { de: 'ratgeber', en: 'guides', uk: 'porady' }, PROF_SEG = { de: 'lebenslauf', en: 'cv', uk: 'rezyume' }, TOOL_SEG = { de: 'tools', en: 'tools', uk: 'instrumenty' };
 const pubPath = (r) => {
   const l = window.I18N?.lang;
   if (!ART_SEG[l]) return r;
   if (!r) return l;
   const m = /^poradnik\/([\w-]+)$/.exec(r), a = m && CONTENT?.ARTICLES.find((x) => x.slug === m[1]);
   if (a?.slugLang) return `${l}/${ART_SEG[l]}/${a.slugLang}`;
+  const tm = /^narzedzia\/([\w-]+)$/.exec(r), ts = tm && CONTENT?.TOOLS?.[tm[1]]?.slugs?.[l];
+  if (ts) return `${l}/${TOOL_SEG[l]}/${ts}`;
   const pm = /^cv\/([\w-]+)(?:\/([\w-]+))?$/.exec(r), P = CONTENT?.prof, ps = pm && P?.index[pm[1]]?.slugLang, cs = pm?.[2] && P?.cities[pm[2]]?.slugLang;
   return ps && (!pm[2] || cs) ? `${l}/${P.seg}/${ps}${cs ? '/' + cs : ''}` : r;
 };
@@ -1797,9 +1812,13 @@ Z poważaniem,
 ${n}`;
 }
 // --- koniec thankYouText ---
-function toolPage(slug, C) {
-  const t = C.TOOLS[slug], box = el('div', { className: 'tool-box' });
+function toolPage(slug, C, item) {
+  const t = item || C.TOOLS[slug], box = el('div', { className: 'tool-box' });
+  // Generowane dokumenty są po polsku (do polskiego pracodawcy): w wersjach obcych mówimy to nad wynikiem.
+  const plNote = () => ((window.I18N?.lang || 'pl') !== 'pl' && ['podziekowanie-po-rozmowie', 'wypowiedzenie-umowy-o-prace'].includes(slug) ? el('p', { className: 'pl-note' }, el('span', { textContent: 'To dokument po polsku, do polskiego pracodawcy. Skopiuj go i wyślij bez tłumaczenia.' })) : null);
   const out = el('div', { className: 'msgbox tool-out' });
+  // Wynik to interfejs (liczby, etykiety, odpowiedź AI w języku strony), więc tłumaczy się; dokumenty po polsku zostają po polsku.
+  if (!['klauzula-rodo', 'podziekowanie-po-rozmowie', 'wypowiedzenie-umowy-o-prace'].includes(slug)) out.setAttribute('data-i18n', '');
   const field = (label, input) => el('label', { className: 'f' }, label, input);
   if (slug === 'klauzula-rodo') {
     const firm = el('input', { type: 'text', placeholder: 'np. ABC Sp. z o.o. (opcjonalnie)' }), lang = el('select', {}, ...[['pl', 'polski'], ['en', 'angielski'], ['de', 'niemiecki']].map(([v, n]) => el('option', { value: v, textContent: n })));
@@ -1835,13 +1854,16 @@ function toolPage(slug, C) {
     box.append(el('div', { className: 'tool-form' }, field('Twoje imię i nazwisko', name), field('Forma', gender), field('Stanowisko', pos), field('Firma', firm), field('Zwrot do rekrutera', who), field('Temat z rozmowy, który zapamiętałeś', topic)), out, copyBtn2(out),
       el('p', { className: 'hint', textContent: 'Wyślij wiadomość w ciągu doby od rozmowy. Wybierz formę (żeńską albo męską), żeby w tekście nie było ukośników. Nie dopisuj nowych argumentów, tylko krótko podziękuj.' }));
   }
-  return el('div', { className: 'inner narrow' },
+  // data-i18n: interfejs narzędzia tłumaczy się słownikiem (wynik w .tool-out zostaje po polsku).
+  const root = el('div', { className: 'inner narrow' },
     el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', el('a', { href: '#poradnik', textContent: 'Darmowe narzędzia' }), '›', el('span', { textContent: t.title })),
-    el('h1', { textContent: t.title }), el('p', { className: 'lead', textContent: t.lead }), box,
+    el('h1', { textContent: t.title }), el('p', { className: 'lead', textContent: t.lead }), plNote(), box,
     ...(t.about || []).map((x) => el('p', { textContent: x })),
     ...(t.faq?.length ? [el('h2', { textContent: 'Pytania' }), ...t.faq.map((f) => el('details', {}, el('summary', { textContent: f.q }), el('p', { textContent: f.a })))] : []),
     el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Masz już ogłoszenie?' }), el('p', { className: 'hint', textContent: 'Przygotujemy CV i list pisane pod nie, z raportem dopasowania. Od 39 zł, bez abonamentu.' })), openBtn('Zamów CV')),
-    el('h2', { textContent: 'Inne darmowe narzędzia' }), el('div', { className: 'more' }, ...Object.entries(C.TOOLS).filter(([k]) => k !== slug).map(([k, x]) => pageLink(`narzedzia/${k}`, { textContent: x.title })), pageLink('narzedzia/skaner-cv', { textContent: 'Skaner CV' })));
+    el('h2', { textContent: 'Inne darmowe narzędzia' }), el('div', { className: 'more' }, ...Object.entries(C.TOOLS).filter(([k]) => k !== slug).map(([k, x]) => pageLink(`narzedzia/${k}`, { textContent: TOOLS_TR?.[k]?.title || x.title })), pageLink('narzedzia/skaner-cv', { textContent: 'Skaner CV' })));
+  root.setAttribute('data-i18n', '');
+  return root;
 }
 const copyBtn2 = (node) => el('button', { type: 'button', className: 'btn sm', textContent: 'Kopiuj', onclick: async (e) => { try { await navigator.clipboard.writeText(node.textContent); e.target.textContent = 'Skopiowano'; } catch { e.target.textContent = 'Zaznacz tekst i skopiuj'; } } });
 
@@ -1895,6 +1917,7 @@ async function showPage(r, push = true) {
     const C0 = await loadContent(), [, ps, cs] = r.split('/'), pl = Object.keys(C0.prof?.index || {}).find((k) => C0.prof.index[k].slugLang === ps), city = cs && C0.CITIES.find((c) => c.slugLang === cs);
     r = pl && (!cs || city) ? `cv/${pl}${city ? '/' + city.slug : ''}` : '';
   }
+  if (r.startsWith('tool/')) { const C0 = await loadContent(), l = window.I18N?.lang, k = Object.keys(C0.TOOLS || {}).find((x) => C0.TOOLS[x].slugs?.[l] === r.slice(5)); r = k ? 'narzedzia/' + k : ''; }
   const C = await loadContent(), [kind, slug, sub] = r.split('/');
   let item = null, node = null;
   if (kind === 'cv') {
@@ -1902,11 +1925,13 @@ async function showPage(r, push = true) {
     if (p && sub && city && C.POPULAR.some((x) => x.slug === p.slug)) { item = p.lang && C.prof ? { title: fillT(C.prof.tpl.title, p, city), seoTitle: C.prof.tpl.seo && fillT(C.prof.tpl.seo, p, city), metaDescription: fillT(C.prof.tpl.desc, p, city) } : cityMeta(p, city); node = () => cityPage(p, city, C); }
     else if (p && !sub) { item = p; node = () => profPage(p, C); }
   } else if (kind === 'poradnik') { item = C.ARTICLES.find((a) => a.slug === slug); if (item) { item = await loadArticle(item); node = () => articlePage(item, C); } }
-  else if (kind === 'narzedzia' && C.TOOLS?.[slug]) { item = C.TOOLS[slug]; node = () => toolPage(slug, C); }
+  else if (kind === 'narzedzia' && C.TOOLS?.[slug]) { item = await loadTool(slug, C); node = () => toolPage(slug, C, item); }
   else if (!slug && STATIC_PAGES.includes(kind)) { const t = $('#pg-' + kind); item = { title: t.dataset.title, metaDescription: t.dataset.desc }; node = () => { const d = el('div', {}, t.content.cloneNode(true)); d.setAttribute('data-i18n', ''); return d; }; }
   if (!item) return showHome(push);
   $('#landing').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#account').hidden = true;
-  $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl' || (kind === 'poradnik' && !!item.slugLang) || (kind === 'cv' && !!C.prof) || STATIC_PAGES.includes(kind);
+  $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl' || (kind === 'poradnik' && !!item.slugLang) || (kind === 'cv' && !!C.prof) || (kind === 'narzedzia' && !!item.slugLang) || STATIC_PAGES.includes(kind);
+  // Przełącznik języka prowadzi do tej samej strony w innym języku (narzędzia mają adresy w każdym języku).
+  $$('.langsw a').forEach((a) => { const L = a.dataset.lang; a.setAttribute('href', kind === 'narzedzia' && TOOL_SEG[L] && item.slugs?.[L] ? `/${L}/${TOOL_SEG[L]}/${item.slugs[L]}` : L === 'pl' && kind === 'narzedzia' ? `/narzedzia/${slug}` : L === 'pl' ? '/' : '/' + L); });
   $('#page').replaceChildren(node());
   // Ten sam tytuł co z serwera: nazwę serwisu dopisujemy tylko, gdy całość mieści się w ok. 60 znakach (Google ucina dłuższe).
   try { const t = STATIC_PAGES.includes(kind) ? window.I18N.t(item.title) : item.seoTitle || item.title; document.title = t.length <= 40 ? `${t} | CV Pod Ogłoszenie` : t; } catch {}
@@ -1915,7 +1940,9 @@ async function showPage(r, push = true) {
   const target = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
   if (target && $('#page').contains(target)) target.scrollIntoView(); else window.scrollTo(0, 0);
 }
+const resetLangSw = () => $$('.langsw a').forEach((a) => a.setAttribute('href', a.dataset.lang === 'pl' ? '/' : '/' + a.dataset.lang));
 function showHome(push) {
+  resetLangSw();
   $('#page').hidden = $('#pageNote').hidden = true; $('#account').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#landing').hidden = false;
   try { document.title = HOME_TITLE; } catch {}
   if (push) navTo('');
@@ -2075,8 +2102,9 @@ function route() {
   if (dm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) {
     if (ART_SEG[dm[1]] === dm[2] && !dm[4]) return showPage('art/' + dm[3], false);
     if (PROF_SEG[dm[1]] === dm[2]) return showPage('prof/' + dm[3] + (dm[4] ? '/' + dm[4] : ''), false);
+    if (TOOL_SEG[dm[1]] === dm[2] && !dm[4]) return showPage('tool/' + dm[3], false);
   }
-  $('#page').hidden = $('#pageNote').hidden = true;
+  $('#page').hidden = $('#pageNote').hidden = true; resetLangSw();
   const id = LEGAL[h];
   $('#landing').hidden = !!id;
   Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = l !== id));
