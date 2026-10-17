@@ -1433,6 +1433,10 @@ async function loadReviews() {
     $('#rvAvg').replaceChildren(el('b', { textContent: String(r.avg).replace('.', ',') }), el('span', { className: 'stars', textContent: '★'.repeat(Math.round(r.avg)) + '☆'.repeat(5 - Math.round(r.avg)) }), ` średnia z ${r.count} ${r.count === 1 ? 'oceny' : 'ocen'}`);
     $('#rvGrid').replaceChildren(...r.list.map((x) => el('figure', { className: 'rv' }, el('span', { className: 'stars', textContent: '★'.repeat(x.rating) + '☆'.repeat(5 - x.rating), ariaLabel: `${x.rating} na 5` }), el('blockquote', { style: 'margin:0' }, el('p', { textContent: x.text })), el('figcaption', {}, el('small', { textContent: `${x.name} · ${x.pkg} · ${new Date(x.date).toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })}` })))));
     $('#opinie').hidden = false;
+    // Skrót oceny pod przyciskami w nagłówku strony (link do sekcji opinii).
+    const st = '★'.repeat(Math.round(r.avg)) + '☆'.repeat(5 - Math.round(r.avg));
+    $('#heroRating').replaceChildren(el('span', { className: 'stars', textContent: st, ariaHidden: 'true' }), ' ', el('b', { textContent: String(r.avg).replace('.', ',') }), ' / 5 · ', el('span', { textContent: `${r.count} ${r.count === 1 ? 'opinia' : r.count % 10 >= 2 && r.count % 10 <= 4 && (r.count % 100 < 10 || r.count % 100 >= 20) ? 'opinie' : 'opinii'} klientów` }));
+    $('#heroRating').hidden = false;
   } catch {}
 }
 loadReviews();

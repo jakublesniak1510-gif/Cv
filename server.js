@@ -468,6 +468,8 @@ app.get('/api/reviews', async (_req, res) => {
   const all = Object.values(await reviews.all()).filter((r) => r.status !== 'spam');
   const shown = all.filter((r) => r.status === 'approved' && r.publish && r.text).sort((a, b) => b.created - a.created).slice(0, 9);
   res.set('Cache-Control', 'public, max-age=300');
+  // Sekcja opinii pokazuje się od REVIEWS_MIN opublikowanych opinii (domyślnie 3), żeby nie świeciła jedną recenzją.
+  if (shown.length < (Number(process.env.REVIEWS_MIN) || 3)) return res.json({ count: 0, avg: null, list: [] });
   res.json({
     count: all.length, avg: all.length ? Math.round((10 * all.reduce((s, r) => s + r.rating, 0)) / all.length) / 10 : null,
     list: shown.map((r) => ({ name: r.name, rating: r.rating, text: r.text, pkg: PACKAGES[r.pkg]?.name || '', date: r.created })),
