@@ -1463,7 +1463,7 @@ const profResult = (p) => ({ position: p.sample.headline, lang: p.lang || 'pl', 
   experience: p.sample.jobs.map((j) => ({ title: j.title, company: j.company, period: j.period, bullets: j.bullets })),
   education: [p.sample.education], skills: p.sample.skills, languages: p.sample.languages || [], certificates: [], interests: '', clause: CLAUSE } });
 // Podstrony bez danych z content.json: treść w <template id="pg-…"> w index.html (serwer renderuje ją też dla wyszukiwarek).
-const STATIC_PAGES = ['dla-firm', 'program-polecen'];
+const STATIC_PAGES = ['jak-to-dziala', 'dla-firm', 'program-polecen'];
 const HOME_TITLE = 'CV pod ogłoszenie i list motywacyjny od 39 zł';
 // Publiczny adres podstrony: na wersjach EN / UA / DE strona główna to /<język>, a przetłumaczone artykuły mają własne adresy.
 const ART_SEG = { de: 'ratgeber', en: 'guides', uk: 'porady' }, PROF_SEG = { de: 'lebenslauf', en: 'cv', uk: 'rezyume' };
@@ -1994,7 +1994,7 @@ function route() {
   if (!$('#result').hidden || !$('#gen').hidden) return;
   if (location.pathname === '/konto' || location.hash === '#konto') return showAccount();
   $('#account').hidden = true;
-  const h = location.hash, hm = /^#\/((?:cv|poradnik|narzedzia)\/[\w-]+(?:\/[\w-]+)?|dla-firm|program-polecen)$/.exec(h), pm = /^\/((?:cv|poradnik|narzedzia)\/[\w-]+(?:\/[\w-]+)?|dla-firm|program-polecen)\/?$/.exec(location.pathname);
+  const h = location.hash, hm = /^#\/((?:cv|poradnik|narzedzia)\/[\w-]+(?:\/[\w-]+)?|jak-to-dziala|dla-firm|program-polecen)$/.exec(h), pm = /^\/((?:cv|poradnik|narzedzia)\/[\w-]+(?:\/[\w-]+)?|jak-to-dziala|dla-firm|program-polecen)\/?$/.exec(location.pathname);
   if (hm) return showPage(hm[1], false);
   const anchor = h.length > 1 && document.getElementById(h.slice(1));
   if (pm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage(pm[1], false);
