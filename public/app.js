@@ -1289,8 +1289,13 @@ function drawMyCode() {
     el('div', { className: 'refshare' },
       navigator.share ? el('button', { type: 'button', className: 'btn ghost sm', textContent: 'Udostępnij', onclick: () => navigator.share({ title: 'CV Pod Ogłoszenie', text: share, url: link }).catch(() => {}) }) : null,
       el('a', { className: 'btn ghost sm', href: `https://wa.me/?text=${encodeURIComponent(share)}`, target: '_blank', rel: 'noopener', textContent: 'WhatsApp' }),
+      // Messenger tylko na telefonie (link otwiera aplikację); SMS z gotową treścią (iOS i Android rozumieją ?&body=).
+      matchMedia('(pointer: coarse)').matches ? el('a', { className: 'btn ghost sm', href: `fb-messenger://share/?link=${encodeURIComponent(link)}`, textContent: 'Messenger' }) : null,
+      el('a', { className: 'btn ghost sm', href: `sms:?&body=${encodeURIComponent(share)}`, textContent: 'SMS' }),
+      el('a', { className: 'btn ghost sm', href: `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(share.replace(link, '').trim())}`, target: '_blank', rel: 'noopener', textContent: 'Telegram' }),
       el('a', { className: 'btn ghost sm', href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`, target: '_blank', rel: 'noopener', textContent: 'Facebook' }),
       el('a', { className: 'btn ghost sm', href: `mailto:?subject=${encodeURIComponent('CV pod ogłoszenie taniej o ' + k.discount + ' zł')}&body=${encodeURIComponent(share)}`, textContent: 'E-mail' }),
+      el('button', { type: 'button', className: 'btn ghost sm', textContent: 'Kopiuj wiadomość', onclick: async (e) => { try { await navigator.clipboard.writeText(share); e.target.textContent = 'Skopiowano'; } catch { e.target.textContent = share; } } }),
       pageLink('program-polecen', { className: 'link', textContent: 'Zasady programu' })));
 }
 
