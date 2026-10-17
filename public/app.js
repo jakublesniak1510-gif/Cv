@@ -777,7 +777,7 @@ $('#toPack').onclick = () => { $('input[name=pkg][value=pack3]').checked = true;
   const ref = new URLSearchParams(location.search).get('ref');
   try { if (ref) localStorage.setItem(REF_KEY, ref); } catch {}
   let saved = ref; try { saved = saved || localStorage.getItem(REF_KEY); } catch {}
-  if (saved) { $('#codeInput').value = saved; $('#refBanner').hidden = false; }
+  if (saved) { $('#codeInput').value = saved; $('#refBanner').hidden = false; if (/^WITAJ-/i.test(saved)) $('#refBanner').textContent = 'Masz kod powitalny −10 zł. Wpiszemy go automatycznie w podsumowaniu zamówienia.'; }
 }
 $('#wizForm').addEventListener('input', saveDraft);
 $('#addExp').onclick = () => addRow('exp');
@@ -1720,6 +1720,7 @@ function toolAlerts(box, out, field) {
   box.append(el('div', { className: 'tool-form' }, field('Zawód lub stanowisko', job), field('Miasto', city), field('E-mail', email)), trap,
     el('label', { className: 'check' }, consent, el('span', { textContent: 'Chcę dostawać raz w tygodniu e-mail z linkami do ofert pracy dla wybranego zawodu i miasta oraz wskazówkami o CV, przez 12 tygodni. Zgodę mogę wycofać w każdej chwili linkiem w każdej wiadomości.' })),
     el('div', {}, go), status,
+    el('p', { className: 'perk small', textContent: 'Po potwierdzeniu zapisu dostaniesz kod −10 zł na CV.' }),
     el('p', { className: 'hint', textContent: 'Nie pobieramy ofert z portali: w e-mailu są linki do aktualnych wyników wyszukiwania na Pracuj.pl, OLX i Indeed, ustawione na Twój zawód i miasto. Możesz mieć do 3 takich powiadomień.' }));
 }
 function toolPage(slug, C) {
