@@ -1496,6 +1496,7 @@ async function loadContent() {
     try { CONTENT = await (await fetch('/content.json')).json(); } catch { CONTENT = { INDEX: [], POPULAR: [], ARTICLES: [], CITIES: [] }; }
     // Kafelki narzędzi i linki w stopce: adresy w języku strony (serwer robi to samo dla wersji /en, /uk, /de).
     const l = window.I18N?.lang;
+    if (l && l !== 'pl') $$('a[href="/regulamin"]:not([data-lang]),a[href="/polityka-prywatnosci"]:not([data-lang])').forEach((a) => a.setAttribute('href', legalUrl(a.getAttribute('href') === '/regulamin' ? 'regulamin' : 'prywatnosc', l)));
     if (TOOL_SEG[l]) $$('a[data-page^="narzedzia/"]').forEach((a) => { const k = a.dataset.page.slice(10), ts = CONTENT.TOOLS?.[k]?.slugs?.[l]; if (ts) a.setAttribute('href', `/${l}/${TOOL_SEG[l]}/${ts}`); });
   }
   // Poradnik w języku strony (EN / UA / DE): tłumaczenia artykułów ładujemy tylko dla tego języka.
@@ -1543,6 +1544,10 @@ const STATIC_PAGES = ['jak-to-dziala', 'dla-firm', 'program-polecen'];
 const HOME_TITLE = 'CV pod ogłoszenie i list motywacyjny od 39 zł';
 // Publiczny adres podstrony: na wersjach EN / UA / DE strona główna to /<język>, a przetłumaczone artykuły mają własne adresy.
 const ART_SEG = { de: 'ratgeber', en: 'guides', uk: 'porady' }, PROF_SEG = { de: 'lebenslauf', en: 'cv', uk: 'rezyume' }, TOOL_SEG = { de: 'tools', en: 'tools', uk: 'instrumenty' };
+// Regulamin i polityka prywatności: pełne strony w języku (SSR); stare kotwice #regulamin / #prywatnosc przekierowują.
+const LEGAL_URLS = { regulamin: { pl: '/regulamin', en: '/en/terms', uk: '/uk/pravyla', de: '/de/agb' }, prywatnosc: { pl: '/polityka-prywatnosci', en: '/en/privacy-policy', uk: '/uk/polityka-konfidentsiinosti', de: '/de/datenschutz' } };
+const legalUrl = (name, l) => LEGAL_URLS[name][l] || LEGAL_URLS[name].pl;
+const isLegalPath = (p) => Object.values(LEGAL_URLS).some((m) => Object.values(m).includes(p.replace(/\/$/, '') || '/'));
 const pubPath = (r) => {
   const l = window.I18N?.lang;
   if (!ART_SEG[l]) return r;
@@ -2086,8 +2091,13 @@ $$('.langsw a').forEach((a) => {
   a.onclick = (e) => { e.preventDefault(); window.I18N?.set(a.dataset.lang); if (cfg.preview) location.reload(); else location.href = a.getAttribute('href'); };
 });
 
-const LEGAL = { '#regulamin': 'legal-regulamin', '#prywatnosc': 'legal-prywatnosc' };
+const LEGAL = { '#regulamin': 'regulamin', '#prywatnosc': 'prywatnosc' };
 function route() {
+  // Stare adresy /#regulamin i /#prywatnosc → pełne strony w języku użytkownika.
+  if (LEGAL[location.hash]) return location.replace(legalUrl(LEGAL[location.hash], window.I18N?.lang));
+  // Strona prawna z serwera zostaje, dopóki ktoś nie kliknie linku do sekcji strony głównej.
+  const la = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
+  if (isLegalPath(location.pathname) && !(la && la.closest('#landing'))) return;
   // Strona 404 z serwera zostaje, dopóki ktoś nie kliknie linku do sekcji strony głównej.
   if (window.__NOTFOUND && !location.hash) return;
   window.__NOTFOUND = 0;
@@ -2097,23 +2107,16 @@ function route() {
   const h = location.hash, hm = /^#\/((?:cv|poradnik|narzedzia)\/[\w-]+(?:\/[\w-]+)?|jak-to-dziala|dla-firm|program-polecen)$/.exec(h), pm = /^\/((?:cv|poradnik|narzedzia)\/[\w-]+(?:\/[\w-]+)?|jak-to-dziala|dla-firm|program-polecen)\/?$/.exec(location.pathname);
   if (hm) return showPage(hm[1], false);
   const anchor = h.length > 1 && document.getElementById(h.slice(1));
-  if (pm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) return showPage(pm[1], false);
+  if (pm && !(anchor && anchor.closest('#landing'))) return showPage(pm[1], false);
   const dm = /^\/(de|en|uk)\/(\w+)\/([\w-]+)(?:\/([\w-]+))?\/?$/.exec(location.pathname);
-  if (dm && !LEGAL[h] && !(anchor && anchor.closest('#landing'))) {
+  if (dm && !(anchor && anchor.closest('#landing'))) {
     if (ART_SEG[dm[1]] === dm[2] && !dm[4]) return showPage('art/' + dm[3], false);
     if (PROF_SEG[dm[1]] === dm[2]) return showPage('prof/' + dm[3] + (dm[4] ? '/' + dm[4] : ''), false);
     if (TOOL_SEG[dm[1]] === dm[2] && !dm[4]) return showPage('tool/' + dm[3], false);
   }
   $('#page').hidden = $('#pageNote').hidden = true; resetLangSw();
-  const id = LEGAL[h];
-  $('#landing').hidden = !!id;
-  Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = l !== id));
-  if (id && !$('#' + id).children.length) {
-    $('#' + id).replaceChildren(el('div', { className: 'inner narrow', textContent: '…' }));
-    fetch(`/legal/${id.slice(6)}.html`).then((r) => r.text()).then((h) => { $('#' + id).innerHTML = h; }).catch(() => { $('#' + id).replaceChildren(el('div', { className: 'inner narrow' }, el('p', { textContent: 'Nie udało się wczytać dokumentu. Odśwież stronę.' }))); });
-  }
-  if (id) { window.scrollTo(0, 0); try { document.title = location.hash === '#regulamin' ? 'Regulamin – CV Pod Ogłoszenie' : 'Polityka prywatności – CV Pod Ogłoszenie'; } catch {} }
-  else { try { document.title = HOME_TITLE; } catch {} const t = location.hash.length > 1 && document.getElementById(location.hash.slice(1)); if (t) settleScroll(t); }
+  $('#landing').hidden = false;
+  try { document.title = HOME_TITLE; } catch {} const t = location.hash.length > 1 && document.getElementById(location.hash.slice(1)); if (t) settleScroll(t);
 }
 // Skok do sekcji (np. /#cennik z innej podstrony): sekcje wyżej dorysowują się dopiero przy przewijaniu (whenNear)
 // i zmieniają wysokość strony, więc poprawiamy pozycję, aż sekcja zostanie na swoim miejscu.
@@ -2134,7 +2137,8 @@ if (restoreDraft()) $('#draftNote').hidden = false;
 refresh(); go(1);
 $('#clearDraft').onclick = () => { clearDraft(); resetWizard(); $('#draftNote').hidden = true; };
 const q = new URLSearchParams(location.search);
-if (window.__ROUTE) showPage(window.__ROUTE, false);
+if (window.__ROUTE?.startsWith('legal/')) $$('.langsw a').forEach((a) => a.setAttribute('href', legalUrl(window.__ROUTE.slice(6), a.dataset.lang)));
+else if (window.__ROUTE) showPage(window.__ROUTE, false);
 if (q.get('id')) startResult(q.get('id'));
 else if (q.has('canceled')) { try { history.replaceState(null, '', location.pathname); } catch {} openWiz(); go(6); $('#werr').textContent = 'Płatność została anulowana. Twoje dane są zachowane, możesz spróbować ponownie.'; }
 /* aplikacja na telefon (PWA) */
