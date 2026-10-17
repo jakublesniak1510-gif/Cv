@@ -513,7 +513,9 @@ EX.forEach((e, i) => $('#exTabs').append(el('button', { type: 'button', role: 't
 whenNear('#przyklad', () => drawEx(0));
 
 /* galeria szablonów i hero */
-const gal = { tpl: 'nowoczesny', color: 'niebieski' };
+const gal = { tpl: 'nowoczesny', color: 'niebieski', all: false };
+// Na stronie głównej pokazujemy 3 najbardziej różne szablony; pozostałe po kliknięciu „Zobacz wszystkie”.
+const GAL_FEATURED = ['nowoczesny', 'szwajcarski', 'klasyczny'];
 // Przykładowe CV w PDF ze znakiem wodnym (fikcyjna osoba) w danym szablonie i kolorze.
 const sampleLink = (d, text, cls = 'btn ghost sm') => el('a', { className: cls, href: `/api/sample.pdf?tpl=${d.tpl}&color=${d.color}&lang=${window.I18N?.lang || 'pl'}`, download: '', textContent: text,
   onclick: (e) => { if (cfg.preview) { e.preventDefault(); flash('W podglądzie pobieranie PDF jest wyłączone. Na działającej stronie pobierzesz przykładowe CV ze znakiem wodnym „PRZYKŁAD”.'); } else track('sample', { tpl: d.tpl }); } });
@@ -531,12 +533,23 @@ $('#b2bForm')?.addEventListener('submit', async (e) => {
 function drawGallery() {
   const sample = exResult(1);
   $('#galColors').replaceChildren(el('span', { className: 'dp-lbl', textContent: 'Kolor:' }), ...Object.entries(COLORS).map(([id, hex]) => el('button', { type: 'button', className: 'sw', title: COLOR_NAMES[id], ariaLabel: `Kolor ${COLOR_NAMES[id]}`, ariaPressed: String(gal.color === id), style: `--c:${hex}`, onclick: () => { gal.color = id; drawGallery(); } })));
-  $('#galGrid').replaceChildren(...TPLS.map(([id, name, desc]) => el('div', { className: 'gal-card' },
+  const list = gal.all ? [...GAL_FEATURED.map((f) => TPLS.find((t) => t[0] === f)), ...TPLS.filter((t) => !GAL_FEATURED.includes(t[0]))] : GAL_FEATURED.map((f) => TPLS.find((t) => t[0] === f));
+  $('#galGrid').replaceChildren(...list.map(([id, name, desc]) => el('div', { className: 'gal-card' },
     el('button', { type: 'button', className: 'gal-thumb', ariaLabel: `Podgląd szablonu ${name}`, onclick: () => openEx(1, { tpl: id, color: gal.color }) }, thumb(sample, { tpl: id, color: gal.color })),
     el('div', { className: 'gal-meta' }, el('b', { textContent: name }), el('span', { textContent: desc })),
     el('button', { type: 'button', className: 'btn ghost sm', textContent: 'Wybierz ten szablon', onclick: () => { design = { tpl: id, color: gal.color }; drawWizDesign(); saveDraft(); openWiz(); } }))));
+  const more = $('#galMore');
+  more.textContent = gal.all ? 'Pokaż mniej szablonów' : `Zobacz wszystkie ${TPLS.length} szablonów`;
+  more.className = gal.all ? 'btn ghost lg' : 'btn lg';
+  more.setAttribute('aria-expanded', String(gal.all));
   $('#galSample').replaceChildren(sampleLink(gal, 'Pobierz przykładowe CV w PDF'), el('span', { className: 'hint', textContent: ' Fikcyjna osoba, ze znakiem wodnym. Twoje CV będzie z Twoimi danymi i pod Twoje ogłoszenie.' }));
 }
+$('#galMore').addEventListener('click', () => {
+  gal.all = !gal.all; drawGallery();
+  // Po rozwinięciu fokus na pierwszym nowym szablonie; po zwinięciu wracamy do nagłówka sekcji, żeby strona nie „uciekła”.
+  if (gal.all) $$('#galGrid .gal-thumb')[GAL_FEATURED.length]?.focus({ preventScroll: true });
+  else $('#szablony h2').scrollIntoView({ block: 'start' });
+});
 const drawWizDesign = () => designPicker($('#wizDesign'), design, (d) => { design = d; saveDraft(); });
 /* animowane demo w nagłówku: słowa z ogłoszenia zapalają się w ogłoszeniu i w CV */
 EX[0].groups = [['obsługi klienta', 'obsługa klienta'], ['kasy fiskalnej', 'kasa fiskalna'], ['komunikatywności', 'komunikatywność'], ['pracy zmianowej', 'praca zmianowa']];

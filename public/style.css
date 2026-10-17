@@ -846,3 +846,5 @@ main[tabindex="-1"]:focus,[role=main][tabindex="-1"]:focus{outline:none}
 .hw .tbl-wrap{overflow-x:auto;margin:12px 0 8px}
 .hero-rating{display:inline-flex;align-items:center;gap:4px;margin-top:14px;font-size:15px;color:var(--ink);text-decoration:none}.hero-rating .stars{color:#E8A400;letter-spacing:1px}.hero-rating:hover b{text-decoration:underline}
 .hw .lead .hw-tag{display:inline-block;vertical-align:middle;margin:0 8px 2px 0}
+.gal-more{display:flex;justify-content:center;margin-top:22px}.gal-more .btn{min-width:260px}
+.gal-sample{text-align:center;margin-top:14px}
