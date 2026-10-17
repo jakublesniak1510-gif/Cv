@@ -769,9 +769,11 @@ const REF_KEY = 'cvpo-ref';
 { const r = $('#baRange'); if (r) r.addEventListener('input', () => $('#ba').style.setProperty('--p', r.value + '%')); }
 // Pasek promocji z kalendarza (lib/promos.js): kod wpisuje się sam w kreatorze.
 // Omnibus: przy obniżce pokazujemy najniższą cenę z 30 dni przed nią (dla każdego pakietu). Dane z /api/config i /api/code.
+// Kwoty w złotych z przecinkiem (np. 29,25), bez zbędnych zer (39).
+const zlFmt = (v) => Number(v).toLocaleString('pl-PL', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 function lowestNote(lowest, cls = 'lowest', only) {
   if (!lowest) return null;
-  const items = Object.entries(lowest).filter(([k]) => !only || k === only).flatMap(([k, v], i) => [i ? ', ' : ' ', el('span', { textContent: PKG_NAME[k] }), ' ', el('span', { textContent: `${v} zł` })]);
+  const items = Object.entries(lowest).filter(([k]) => !only || k === only).flatMap(([k, v], i) => [i ? ', ' : ' ', el('span', { textContent: PKG_NAME[k] }), ' ', el('span', { textContent: `${zlFmt(v)} zł` })]);
   return el('span', { className: cls }, el('span', { textContent: 'Najniższa cena z 30 dni przed obniżką:' }), ...items, '.');
 }
 // W cenniku pod kwotą każdego pakietu, tylko w czasie promocji z kalendarza.
@@ -780,7 +782,7 @@ function drawPriceLowest(p) {
   if (!p?.lowest) return;
   for (const [k, v] of Object.entries(p.lowest)) {
     const card = $(`#cennik .price-card [data-pkg="${k}"]`)?.closest('.price-card'); if (!card) continue;
-    card.querySelector('.amt').after(el('div', { className: 'lowest' }, el('span', { textContent: `−${p.percent}% z kodem ${p.code}` }), el('br'), el('span', { textContent: 'Najniższa cena z 30 dni przed obniżką:' }), ' ', el('span', { textContent: `${v} zł` })));
+    card.querySelector('.amt').after(el('div', { className: 'lowest' }, el('span', { textContent: `−${p.percent}% z kodem ${p.code}` }), el('br'), el('span', { textContent: 'Najniższa cena z 30 dni przed obniżką:' }), ' ', el('span', { textContent: `${zlFmt(v)} zł` })));
   }
 }
 function drawPromo(p) {
