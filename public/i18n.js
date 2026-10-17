@@ -1,5 +1,13 @@
 // Wersje językowe interfejsu (EN, UK, DE). Strona jest pisana po polsku; ten skrypt podmienia teksty interfejsu
 // według słownika (klucz = polski tekst). Dokumenty klienta, przykłady CV, poradnik i dokumenty prawne zostają po polsku.
+// Sekcje strony głównej liczą układ dopiero przy przewijaniu (style.css: content-visibility). Przy skoku do kotwicy
+// wyłączamy to od razu, żeby przeglądarka przewinęła w dokładne miejsce.
+(() => {
+  const off = () => document.documentElement.classList.add('cv-off');
+  if (location.hash.length > 1) off();
+  addEventListener('hashchange', off);
+  document.addEventListener('click', (e) => { if (e.target.closest?.('a[href*="#"]')) off(); }, true);
+})();
 (() => {
   const LANGS = ['pl', 'en', 'uk', 'de'];
   const pick = () => {

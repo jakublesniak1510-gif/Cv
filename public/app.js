@@ -2011,7 +2011,13 @@ function route() {
     fetch(`/legal/${id.slice(6)}.html`).then((r) => r.text()).then((h) => { $('#' + id).innerHTML = h; }).catch(() => { $('#' + id).replaceChildren(el('div', { className: 'inner narrow' }, el('p', { textContent: 'Nie udało się wczytać dokumentu. Odśwież stronę.' }))); });
   }
   if (id) { window.scrollTo(0, 0); try { document.title = location.hash === '#regulamin' ? 'Regulamin – CV Pod Ogłoszenie' : 'Polityka prywatności – CV Pod Ogłoszenie'; } catch {} }
-  else { try { document.title = HOME_TITLE; } catch {} const t = location.hash.length > 1 && document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+  else { try { document.title = HOME_TITLE; } catch {} const t = location.hash.length > 1 && document.getElementById(location.hash.slice(1)); if (t) settleScroll(t); }
+}
+// Skok do sekcji (np. /#cennik z innej podstrony): sekcje wyżej dorysowują się dopiero przy przewijaniu (whenNear)
+// i zmieniają wysokość strony, więc poprawiamy pozycję, aż sekcja zostanie na swoim miejscu.
+function settleScroll(t, n = 0) {
+  t.scrollIntoView({ behavior: n ? 'instant' : 'auto' });
+  if (n < 6) setTimeout(() => { if (Math.abs(t.getBoundingClientRect().top - (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0)) > 4) settleScroll(t, n + 1); }, 250);
 }
 window.addEventListener('hashchange', route); route();
 

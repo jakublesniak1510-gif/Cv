@@ -823,3 +823,7 @@ html[lang="en"] .legal-pl,html[lang="uk"] .legal-pl,html[lang="de"] .legal-pl{di
 .consent{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:70;max-width:720px;margin:0 auto;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:14px 16px;display:flex;gap:12px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
 .consent p{margin:0;flex:1 1 320px}.consent a{color:var(--brand)}
 .consent-btns{display:flex;gap:8px;flex:none}
+/* Sekcje poza ekranem: przeglądarka liczy ich układ dopiero przy przewijaniu (krótsze blokowanie przy wczytaniu na telefonie). */
+.sec{content-visibility:auto;contain-intrinsic-size:auto 900px}
+/* Przy przejściu do kotwicy (#cennik itp.) liczymy pełny układ, żeby przewinięcie trafiło dokładnie. */
+.cv-off .sec{content-visibility:visible}
