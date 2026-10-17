@@ -55,9 +55,12 @@ app.use((req, res, next) => {
   next();
 });
 app.set('trust proxy', 1);
-// Dodatkowe domeny (np. cvpodogloszenie.pl bez „ł”) przekierowują na główny adres, żeby Google widział jedną stronę.
-const ALIAS_HOSTS = new Set((process.env.ALIAS_HOSTS || 'cvpodogloszenie.pl,www.cvpodogloszenie.pl').split(',').map((h) => h.trim().toLowerCase()).filter(Boolean));
-app.use((req, res, next) => (ALIAS_HOSTS.has(req.hostname) && BASE_URL.startsWith('http') ? res.redirect(301, BASE_URL + req.originalUrl) : next()));
+// Pozostałe domeny serwisu (z „ł” i bez, z www i bez) przekierowują na główny adres z BASE_URL, żeby Google widział jedną stronę.
+// Zmiana głównej domeny to tylko zmiana BASE_URL: jej host nigdy nie przekierowuje sam na siebie.
+const BASE_HOST = (() => { try { return new URL(BASE_URL).hostname; } catch { return ''; } })();
+const ALIAS_HOSTS = new Set((process.env.ALIAS_HOSTS || 'cvpodogloszenie.pl,www.cvpodogloszenie.pl,xn--cvpodogoszenie-mnc.pl,www.xn--cvpodogoszenie-mnc.pl').split(',').map((h) => h.trim().toLowerCase()).filter((h) => h && h !== BASE_HOST));
+// Tylko GET/HEAD: webhooki płatności (POST) zapisane w panelach Stripe/P24 pod starym adresem dalej trafiają do serwera.
+app.use((req, res, next) => (ALIAS_HOSTS.has(req.hostname) && BASE_URL.startsWith('http') && (req.method === 'GET' || req.method === 'HEAD') ? res.redirect(301, BASE_URL + req.originalUrl) : next()));
 
 
 // Prosty limit zapytań na adres IP.
