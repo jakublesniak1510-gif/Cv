@@ -38,13 +38,15 @@
   const skip = (n) => { const e = n.nodeType === 1 ? n : n.parentElement; return !e || (!!e.closest(SKIP) && !e.closest('[data-i18n]')); };
   const ATTRS = ['placeholder', 'aria-label', 'title', 'alt'];
   const doText = (n) => {
-    if (skip(n)) return;
+    if (skip(n) || n.parentElement?.dataset.i18nKey) return;
     const v = tr(n.nodeValue); if (v == null) return;
     const lead = /^\s*/.exec(n.nodeValue)[0], tail = /\s*$/.exec(n.nodeValue)[0];
     const out = lead + v + tail; if (n.nodeValue !== out) n.nodeValue = out;
   };
   const doEl = (e) => {
     if (skip(e)) return;
+    // Własny klucz, gdy ten sam polski tekst ma inne tłumaczenie w innym miejscu (np. „Akceptuję” na przycisku i w zdaniu).
+    const k = e.dataset.i18nKey; if (k && dict.has(k) && e.textContent !== dict.get(k)) e.textContent = dict.get(k);
     for (const a of ATTRS) if (e.hasAttribute(a)) { const v = tr(e.getAttribute(a)); if (v != null && v !== e.getAttribute(a)) e.setAttribute(a, v); }
     if ((e.tagName === 'INPUT' && (e.type === 'button' || e.type === 'submit'))) { const v = tr(e.value); if (v != null) e.value = v; }
   };
