@@ -1,4 +1,9 @@
 {
+"Forma": "Form",
+"obie formy (przekonany/a)": "both forms (przekonany/a)",
+"żeńska (przekonana)": "feminine (przekonana)",
+"męska (przekonany)": "masculine (przekonany)",
+"Wyślij wiadomość w ciągu doby od rozmowy. Wybierz formę (żeńską albo męską), żeby w tekście nie było ukośników. Nie dopisuj nowych argumentów, tylko krótko podziękuj.": "Send the message within a day of the interview. Choose a form (feminine or masculine) so the text has no slashes. Do not add new arguments, just thank them briefly.",
 "Najniższa cena z 30 dni przed obniżką:": "Lowest price in the 30 days before the discount:",
 "−{0}% z kodem {1}": "−{0}% with code {1}",
 "Zobacz wszystkie {0} szablonów": "See all {0} templates",
