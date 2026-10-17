@@ -43,7 +43,8 @@
     return null;
   };
   I.t = (s) => tr(s) ?? s;
-  const skip = (n) => { const e = n.nodeType === 1 ? n : n.parentElement; return !e || (!!e.closest(SKIP) && !e.closest('[data-i18n]')); };
+  // Pomijamy fragment z listy SKIP, chyba że bliżej (albo na nim samym) jest data-i18n; data-noi18n wewnątrz data-i18n znów pomija.
+  const skip = (n) => { const e = n.nodeType === 1 ? n : n.parentElement; if (!e) return true; const sk = e.closest(SKIP), ok = e.closest('[data-i18n]'); return !!sk && (!ok || (ok !== sk && ok.contains(sk))); };
   const ATTRS = ['placeholder', 'aria-label', 'title', 'alt'];
   const doText = (n) => {
     if (skip(n) || n.parentElement?.dataset.i18nKey) return;
@@ -62,7 +63,7 @@
     if (root.nodeType === 3) return doText(root);
     if (root.nodeType !== 1) return;
     doEl(root);
-    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, { acceptNode: (n) => (n.nodeType === 1 && n.matches(SKIP) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, { acceptNode: (n) => (n.nodeType === 1 && n.matches(SKIP) && !n.hasAttribute('data-i18n') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
     let n; while ((n = w.nextNode())) (n.nodeType === 3 ? doText(n) : doEl(n));
   };
   const obs = new MutationObserver((ms) => { for (const m of ms) { if (m.type === 'characterData') doText(m.target); else if (m.type === 'attributes') doEl(m.target); else m.addedNodes.forEach(walk); } });
