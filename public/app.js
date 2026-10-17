@@ -768,10 +768,26 @@ const REF_KEY = 'cvpo-ref';
 // Przed i po: suwak (range) przesuwa granicę między zwykłym CV a CV pod ogłoszenie.
 { const r = $('#baRange'); if (r) r.addEventListener('input', () => $('#ba').style.setProperty('--p', r.value + '%')); }
 // Pasek promocji z kalendarza (lib/promos.js): kod wpisuje się sam w kreatorze.
+// Omnibus: przy obniżce pokazujemy najniższą cenę z 30 dni przed nią (dla każdego pakietu). Dane z /api/config i /api/code.
+function lowestNote(lowest, cls = 'lowest', only) {
+  if (!lowest) return null;
+  const items = Object.entries(lowest).filter(([k]) => !only || k === only).flatMap(([k, v], i) => [i ? ', ' : ' ', el('span', { textContent: PKG_NAME[k] }), ' ', el('span', { textContent: `${v} zł` })]);
+  return el('span', { className: cls }, el('span', { textContent: 'Najniższa cena z 30 dni przed obniżką:' }), ...items, '.');
+}
+// W cenniku pod kwotą każdego pakietu, tylko w czasie promocji z kalendarza.
+function drawPriceLowest(p) {
+  $$('#cennik .price-card .lowest').forEach((e) => e.remove());
+  if (!p?.lowest) return;
+  for (const [k, v] of Object.entries(p.lowest)) {
+    const card = $(`#cennik .price-card [data-pkg="${k}"]`)?.closest('.price-card'); if (!card) continue;
+    card.querySelector('.amt').after(el('div', { className: 'lowest' }, el('span', { textContent: `−${p.percent}% z kodem ${p.code}` }), el('br'), el('span', { textContent: 'Najniższa cena z 30 dni przed obniżką:' }), ' ', el('span', { textContent: `${v} zł` })));
+  }
+}
 function drawPromo(p) {
   const bar = $('#promoBar'); bar.hidden = !p; if (!p) return;
   const until = new Date(p.until - 3600_000).toLocaleDateString('pl-PL', { day: 'numeric', month: 'numeric' });
-  bar.replaceChildren(el('span', { textContent: `${p.label}: −${p.percent}% z kodem ${p.code} do ${until}.` }), el('button', { type: 'button', className: 'btn sm', textContent: 'Zamów z rabatem', onclick: () => { $('#codeInput').value = p.code; openWiz(); } }));
+  bar.replaceChildren(el('span', { textContent: `${p.label}: −${p.percent}% z kodem ${p.code} do ${until}.` }), lowestNote(p.lowest, 'promo-low'), el('button', { type: 'button', className: 'btn sm', textContent: 'Zamów z rabatem', onclick: () => { $('#codeInput').value = p.code; openWiz(); } }));
+  drawPriceLowest(p);
   if (!$('#codeInput').value) $('#codeInput').value = p.code;
 }
 async function applyCode(raw, quiet) {
@@ -822,6 +838,7 @@ function drawSummary() {
     ...extraLangs().map((l) => el('div', { className: 'sumrow' }, el('span', { textContent: `Tłumaczenie: ${LANGS[l]}` }), el('span', { textContent: '+' + PRICE.extraLang + ' zł' }))),
     ...(bundleOn() ? [el('div', { className: 'sumrow' }, el('span', { textContent: 'Pakiet „Pewna rozmowa”' }), el('span', { textContent: '−' + PRICE.bundleOff + ' zł' }))] : []),
     ...(discount() ? [el('div', { className: 'sumrow' }, el('span', {}, el('span', { textContent: promo.label }), ' ' + promo.code), el('span', { textContent: '−' + discount() + ' zł' }))] : []),
+    ...(discount() && promo.calendar && promo.lowest ? [el('div', { className: 'sumrow lowest' }, lowestNote(promo.lowest, 'lowest', pkg()))] : []),
     el('div', { className: 'sumrow' }, el('span', { textContent: 'Razem' }), el('span', { textContent: total() + ' zł' })));
 }
 const nipOk = (n) => /^\d{10}$/.test(n) && [6, 5, 7, 2, 3, 4, 5, 6, 7].reduce((s, w, i) => s + w * +n[i], 0) % 11 === +n[9];
