@@ -218,7 +218,9 @@ app.get('/api/config', (req, res) => res.json({
 app.get('/api/code/:code', async (req, res) => {
   const r = await checkCode(req.params.code, req.query.email);
   if (r.error) return res.status(404).json({ error: r.error });
-  res.json({ code: r.code, discount: r.discount / 100, percent: r.percent || 0, voucher: r.voucher, label: r.voucher ? 'Kod od instytucji' : r.owner ? 'Twój kod z saldem poleceń' : 'Kod rabatowy' });
+  // Kod promocji z kalendarza: do podsumowania zamówienia dołączamy najniższą cenę z 30 dni przed obniżką (Omnibus).
+  const promo = activePromo();
+  res.json({ code: r.code, discount: r.discount / 100, percent: r.percent || 0, voucher: r.voucher, label: r.voucher ? 'Kod od instytucji' : r.owner ? 'Twój kod z saldem poleceń' : 'Kod rabatowy', ...(promo && promo.code === r.code ? { calendar: true, lowest: promo.lowest } : {}) });
 });
 
 // Darmowe narzędzia z AI (lib/freeTools.js): ocena zdjęcia do CV (zdjęcia nie zapisujemy) i odpowiedź na pytanie rekrutera.
