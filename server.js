@@ -55,6 +55,9 @@ app.use((req, res, next) => {
   next();
 });
 app.set('trust proxy', 1);
+// Dodatkowe domeny (np. cvpodogloszenie.pl bez „ł”) przekierowują na główny adres, żeby Google widział jedną stronę.
+const ALIAS_HOSTS = new Set((process.env.ALIAS_HOSTS || 'cvpodogloszenie.pl,www.cvpodogloszenie.pl').split(',').map((h) => h.trim().toLowerCase()).filter(Boolean));
+app.use((req, res, next) => (ALIAS_HOSTS.has(req.hostname) && BASE_URL.startsWith('http') ? res.redirect(301, BASE_URL + req.originalUrl) : next()));
 
 
 // Prosty limit zapytań na adres IP.
