@@ -1991,9 +1991,9 @@ document.addEventListener('click', (e) => {
   e.preventDefault(); try { history.pushState(null, '', cfg.preview ? '#konto' : '/konto'); } catch {} if ($('#result').hidden) showAccount(); else location.href = cfg.preview ? '#konto' : '/konto';
 });
 const accApi = async (path = '', opts = {}) => {
-  const r = await fetch('/api/account' + path, { ...opts, headers: { 'Content-Type': 'application/json', 'X-Acc': '1' }, credentials: 'same-origin' });
+  const r = await fetch('/api/account' + path, { ...opts, headers: { 'Content-Type': 'application/json', 'X-Acc': '1' }, credentials: 'same-origin' }).catch(() => ({ ok: false, status: 0, json: async () => ({}) }));
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) { const e = new Error(j.error || 'Błąd'); e.status = r.status; throw e; }
+  if (!r.ok) { const e = new Error(j.error || 'Nie udało się połączyć z serwerem. Spróbuj ponownie za chwilę.'); e.status = r.status; throw e; }
   return j;
 };
 const STATUS_CLS = { 'wysłane': 'st-sent', rozmowa: 'st-int', oferta: 'st-ok', odmowa: 'st-no', 'brak odpowiedzi': 'st-none' };
@@ -2102,7 +2102,10 @@ function route() {
   if (window.__NOTFOUND && !location.hash) return;
   window.__NOTFOUND = 0;
   if (!$('#result').hidden || !$('#gen').hidden) return;
-  if (location.pathname === '/konto' || location.hash === '#konto') return showAccount();
+  // Z konta link do sekcji strony głównej (#szablony, #cennik…): wracamy na stronę główną zamiast odświeżać konto.
+  const ha = location.hash.length > 1 && location.hash !== '#konto' && document.getElementById(location.hash.slice(1));
+  if (location.pathname === '/konto' && ha && ha.closest('#landing')) { try { history.replaceState(null, '', '/' + location.hash); } catch {} }
+  else if (location.pathname === '/konto' || location.hash === '#konto') return showAccount();
   $('#account').hidden = true;
   const h = location.hash, hm = /^#\/((?:cv|poradnik|narzedzia)\/[\w-]+(?:\/[\w-]+)?|jak-to-dziala|dla-firm|program-polecen)$/.exec(h), pm = /^\/((?:cv|poradnik|narzedzia)\/[\w-]+(?:\/[\w-]+)?|jak-to-dziala|dla-firm|program-polecen)\/?$/.exec(location.pathname);
   if (hm) return showPage(hm[1], false);
