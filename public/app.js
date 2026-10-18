@@ -1933,7 +1933,7 @@ async function showPage(r, push = true) {
   else if (kind === 'narzedzia' && C.TOOLS?.[slug]) { item = await loadTool(slug, C); node = () => toolPage(slug, C, item); }
   else if (!slug && STATIC_PAGES.includes(kind)) { const t = $('#pg-' + kind); item = { title: t.dataset.title, metaDescription: t.dataset.desc }; node = () => { const d = el('div', {}, t.content.cloneNode(true)); d.setAttribute('data-i18n', ''); return d; }; }
   if (!item) return showHome(push);
-  $('#landing').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#account').hidden = true;
+  $('#landing').hidden = true; $('#account').hidden = true;
   $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl' || (kind === 'poradnik' && !!item.slugLang) || (kind === 'cv' && !!C.prof) || (kind === 'narzedzia' && !!item.slugLang) || STATIC_PAGES.includes(kind);
   // Przełącznik języka prowadzi do tej samej strony w innym języku (narzędzia mają adresy w każdym języku).
   $$('.langsw a').forEach((a) => { const L = a.dataset.lang; a.setAttribute('href', kind === 'narzedzia' && TOOL_SEG[L] && item.slugs?.[L] ? `/${L}/${TOOL_SEG[L]}/${item.slugs[L]}` : L === 'pl' && kind === 'narzedzia' ? `/narzedzia/${slug}` : L === 'pl' ? '/' : '/' + L); });
@@ -1948,7 +1948,7 @@ async function showPage(r, push = true) {
 const resetLangSw = () => $$('.langsw a').forEach((a) => a.setAttribute('href', a.dataset.lang === 'pl' ? '/' : '/' + a.dataset.lang));
 function showHome(push) {
   resetLangSw();
-  $('#page').hidden = $('#pageNote').hidden = true; $('#account').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true)); $('#landing').hidden = false;
+  $('#page').hidden = $('#pageNote').hidden = true; $('#account').hidden = true; $('#landing').hidden = false;
   try { document.title = HOME_TITLE; } catch {}
   if (push) navTo('');
   window.scrollTo(0, 0);
@@ -1999,7 +1999,7 @@ const accApi = async (path = '', opts = {}) => {
 const STATUS_CLS = { 'wysłane': 'st-sent', rozmowa: 'st-int', oferta: 'st-ok', odmowa: 'st-no', 'brak odpowiedzi': 'st-none' };
 const dtLocal = (t) => (t ? new Date(t - new Date(t).getTimezoneOffset() * 60e3).toISOString().slice(0, 16) : '');
 async function showAccount() {
-  $('#landing').hidden = true; $('#page').hidden = $('#pageNote').hidden = true; Object.values(LEGAL).forEach((l) => ($('#' + l).hidden = true));
+  $('#landing').hidden = true; $('#page').hidden = $('#pageNote').hidden = true;
   const box = $('#account'); box.hidden = false; window.scrollTo(0, 0);
   try { document.title = 'Moje konto – CV Pod Ogłoszenie'; } catch {}
   const t = new URLSearchParams(location.search).get('t');
