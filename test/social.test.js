@@ -65,3 +65,15 @@ test('Bot Meta: parsowanie zdarzeń i podpis', () => {
   assert.equal(ev.length, 1); assert.equal(ev[0].attachments, true); assert.equal(ev[0].text, '');
   assert.ok(validSignature('abc', sign('abc'))); assert.ok(!validSignature('abd', sign('abc'))); assert.ok(!validSignature('abc', undefined));
 });
+
+test('Bot Meta: diagnostyka do /health bez sekretów', async () => {
+  const { botStatus } = await import('../lib/social.js');
+  const resp = (ok, j) => ({ ok, json: async () => j });
+  const good = async (u) => (u.includes('subscribed_apps') ? resp(true, { data: [{ subscribed_fields: ['messages', 'messaging_postbacks'] }] }) : resp(true, { id: '1', name: 'CV Pod Ogłoszenie', instagram_business_account: { id: '2' } }));
+  assert.deepEqual(await botStatus({ fetchFn: good, now: 1 }), { bot: 'ok', strona: 'CV Pod Ogłoszenie', instagram: 'połączony' });
+  const noSubs = async (u) => (u.includes('subscribed_apps') ? resp(true, { data: [] }) : resp(true, { id: '1', name: 'X' }));
+  assert.match((await botStatus({ fetchFn: noSubs, now: 1e9 })).bot, /brak subskrypcji/);
+  const bad = async () => resp(false, { error: { message: 'Error validating access token: Session has expired' } });
+  const r = await botStatus({ fetchFn: bad, now: 2e9 });
+  assert.match(r.bot, /token/); assert.ok(!JSON.stringify(r).includes('page-token'));
+});

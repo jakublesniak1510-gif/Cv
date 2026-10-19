@@ -95,6 +95,10 @@ test('Podsumowania miesiąca: tylko 1. dnia, raz w miesiącu; partner, instytucj
   assert.equal(r.ym, '2026-11'); assert.ok(r.partners >= 2, 'partner i doradca'); assert.equal(r.institutions >= 1, true); assert.ok(r.payouts >= 1);
   assert.deepEqual((await codes.get(code)).monthSnap, { uses: 3, sales: 3, revenue: 30000, accrued: 6000 });
   assert.equal(await b2bMonthly(BASE, new Date('2026-11-01T15:00:00Z')), null, 'drugi raz w tym samym miesiącu nic nie wysyła');
+  // restart w trakcie: brak znacznika miesiąca, ale lista wysłanych chroni przed duplikatami
+  const { makeStore } = await import('../lib/store.js'); await makeStore('b2b-runs.json').remove('monthly');
+  const again = await b2bMonthly(BASE, new Date('2026-11-01T16:00:00Z'));
+  assert.equal(again.partners, 0); assert.equal(again.institutions, 0);
 });
 
 test('Strony: dla doradców, oferta PDF, wypis, API zgłoszenia doradcy', async () => {
@@ -106,7 +110,16 @@ test('Strony: dla doradców, oferta PDF, wypis, API zgłoszenia doradcy', async 
     assert.match(t, /Scenariusz zajęć \(45 min\): „CV pod konkretne ogłoszenie”/); assert.match(t, /<a href="\/narzedzia\/klauzula-rodo">/); assert.match(t, /href="\/dla-doradcow\/scenariusz\.pdf"/);
     const sc = await fetch(U + '/dla-doradcow/scenariusz.pdf'); assert.equal(sc.status, 200); assert.match(sc.headers.get('content-type'), /pdf/);
     const pdf = await fetch(U + '/oferta-dla-instytucji.pdf'); assert.equal(pdf.status, 200); assert.match(pdf.headers.get('content-type'), /pdf/);
-    const w = await fetch(U + '/b2b/wypisz?t=00'); assert.equal(w.status, 200); assert.match(await w.text(), /Wypisano/);
+    assert.match(await (await fetch(U + '/b2b/wypisz?t=00')).text(), /Link nieaktualny/);
+    // GET tylko pokazuje przycisk (skanery linków nie wypisują), POST wypisuje; One-Click z nagłówka List-Unsubscribe-Post
+    await crm.importContacts('email;organizacja\nwypis1@x.example;A\nwypis2@x.example;B');
+    const all = Object.values(await crm.contacts.all()), c1 = all.find((c) => c.email === 'wypis1@x.example'), c2 = all.find((c) => c.email === 'wypis2@x.example');
+    const g = await (await fetch(`${U}/b2b/wypisz?t=${c1.token}`)).text();
+    assert.match(g, /<form method="post" action="\/b2b\/wypisz\?t=[0-9a-f]{32}">/); assert.ok(await crm.contacts.get(c1.id), 'GET nie wypisuje');
+    const p1 = await fetch(`${U}/b2b/wypisz?t=${c1.token}`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: '' });
+    assert.match(await p1.text(), /Wypisano/); assert.equal(await crm.contacts.get(c1.id), null); assert.ok(await crm.isBlocked('wypis1@x.example'));
+    const p2 = await fetch(`${U}/b2b/wypisz?t=${c2.token}`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'List-Unsubscribe=One-Click' });
+    assert.equal(p2.status, 200); assert.ok(await crm.isBlocked('wypis2@x.example'));
     const post = (b) => fetch(U + '/api/b2b/advisor', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) });
     assert.equal((await post({ name: 'Ala', email: 'x', org: 'S', terms: true })).status, 400);
     assert.equal((await post({ name: 'Ala Nowak', email: 'ala@szkola.example', org: 'Technikum 2', terms: true })).status, 200);
