@@ -2174,11 +2174,11 @@ else if (window.__ROUTE) showPage(window.__ROUTE, false);
 async function loadDraft(id) {
   try { history.replaceState(null, '', location.pathname + location.hash); } catch {}
   let d; try { const r = await fetch(`/api/ad-draft/${encodeURIComponent(id)}`); d = await r.json(); if (!r.ok) throw new Error(d.error); } catch (x) { alert(x.message || 'Nie udało się wczytać ogłoszenia.'); return; }
-  const text = d.url ? `${d.text}` : d.text;
+  const text = d.text;
   if (/^\/(?:[a-z]{2}\/)?(?:narzedzia|tools|instrumenty)\/(?:skaner|cv-scanner|lebenslauf|skaner-rezyume)/.test(location.pathname)) {
     // Formularz skanera na stronie narzędzia powstaje po wczytaniu treści strony: oddajemy mu szkic przy tworzeniu.
     // Strona narzędzia może się przy starcie narysować ponownie, więc szkic zostaje do wzięcia przez kilka sekund.
-    pendingDraft = text; setTimeout(() => (pendingDraft = ''), 8000);
+    pendingDraft = text; setTimeout(() => (pendingDraft = ''), 20000);
     const t = $('#page form.scan-card textarea'); if (t) t.value = text;
     return;
   }

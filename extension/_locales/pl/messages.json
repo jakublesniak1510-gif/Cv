@@ -30,6 +30,21 @@
     "message": "Nie udało się połączyć z serwisem. Spróbuj za chwilę."
   },
   "privacyNote": {
-    "message": "Treść strony czytamy tylko po kliknięciu i wysyłamy wyłącznie tekst ogłoszenia. Bez historii przeglądania i śledzenia."
+    "message": "Treść strony czytamy tylko po kliknięciu, a wysyłamy dopiero po Twoim potwierdzeniu: tekst ogłoszenia, tytuł i adres strony. Bez historii przeglądania i śledzenia."
+  },
+  "previewFrom": {
+    "message": "Odczytano z:"
+  },
+  "unknownSiteName": {
+    "message": "nierozpoznana strona"
+  },
+  "unknownSite": {
+    "message": "Upewnij się, że to strona z ogłoszeniem o pracę: wyślemy tekst widoczny w podglądzie i dalszą część strony."
+  },
+  "btnSend": {
+    "message": "Wyślij"
+  },
+  "btnCancel": {
+    "message": "Anuluj"
   }
 }

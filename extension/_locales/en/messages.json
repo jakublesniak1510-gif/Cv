@@ -30,6 +30,21 @@
     "message": "Could not connect to the service. Please try again in a moment."
   },
   "privacyNote": {
-    "message": "We read the page only after you click and send only the job ad text. No browsing history, no tracking."
+    "message": "We read the page only after you click and send it only after you confirm: the job ad text, the title and the page address. No browsing history, no tracking."
+  },
+  "previewFrom": {
+    "message": "Read from:"
+  },
+  "unknownSiteName": {
+    "message": "unrecognised page"
+  },
+  "unknownSite": {
+    "message": "Make sure this is a job ad page: we will send the text shown in the preview and the rest of the page."
+  },
+  "btnSend": {
+    "message": "Send"
+  },
+  "btnCancel": {
+    "message": "Cancel"
   }
 }

@@ -30,6 +30,21 @@
     "message": "Keine Verbindung zum Dienst. Bitte gleich noch einmal versuchen."
   },
   "privacyNote": {
-    "message": "Wir lesen die Seite nur nach Ihrem Klick und senden nur den Anzeigentext. Kein Browserverlauf, kein Tracking."
+    "message": "Wir lesen die Seite nur nach Ihrem Klick und senden erst nach Ihrer Bestätigung: Anzeigentext, Titel und Seitenadresse. Kein Browserverlauf, kein Tracking."
+  },
+  "previewFrom": {
+    "message": "Gelesen von:"
+  },
+  "unknownSiteName": {
+    "message": "nicht erkannte Seite"
+  },
+  "unknownSite": {
+    "message": "Prüfen Sie, ob dies eine Stellenanzeige ist: Wir senden den Text aus der Vorschau und den Rest der Seite."
+  },
+  "btnSend": {
+    "message": "Senden"
+  },
+  "btnCancel": {
+    "message": "Abbrechen"
   }
 }
