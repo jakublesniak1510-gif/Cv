@@ -1937,7 +1937,7 @@ async function showPage(r, push = true) {
   $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl' || (kind === 'poradnik' && !!item.slugLang) || (kind === 'cv' && !!C.prof) || (kind === 'narzedzia' && !!item.slugLang) || STATIC_PAGES.includes(kind);
   // Przełącznik języka prowadzi do tej samej strony w innym języku (narzędzia mają adresy w każdym języku).
   $$('.langsw a').forEach((a) => { const L = a.dataset.lang; a.setAttribute('href', kind === 'narzedzia' && TOOL_SEG[L] && item.slugs?.[L] ? `/${L}/${TOOL_SEG[L]}/${item.slugs[L]}` : L === 'pl' && kind === 'narzedzia' ? `/narzedzia/${slug}` : L === 'pl' ? '/' : '/' + L); });
-  $('#page').replaceChildren(node());
+  $('#page').replaceChildren(node()); $('#page').dataset.ssr = '';
   // Ten sam tytuł co z serwera: nazwę serwisu dopisujemy tylko, gdy całość mieści się w ok. 60 znakach (Google ucina dłuższe).
   try { const t = STATIC_PAGES.includes(kind) ? window.I18N.t(item.title) : item.seoTitle || item.title; document.title = t.length <= 40 ? `${t} | CV Pod Ogłoszenie` : t; } catch {}
   setMeta(item.metaDescription);
@@ -2097,6 +2097,8 @@ function route() {
   if (LEGAL[location.hash]) return location.replace(legalUrl(LEGAL[location.hash], window.I18N?.lang));
   // Strona prawna z serwera zostaje, dopóki ktoś nie kliknie linku do sekcji strony głównej.
   const la = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
+  // Strony tylko z serwera (zamówienie paczki kodów, program partnerski, raporty): po powrocie przyciskiem wstecz wczytujemy je od nowa.
+  if (window.__SSRPATH && location.pathname === window.__SSRPATH && !(la && la.closest('#landing'))) { if ($('#page').dataset.ssr !== '1') location.reload(); return; }
   if (isLegalPath(location.pathname) && !(la && la.closest('#landing'))) return;
   // Strona 404 z serwera zostaje, dopóki ktoś nie kliknie linku do sekcji strony głównej.
   if (window.__NOTFOUND && !location.hash) return;

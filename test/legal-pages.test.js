@@ -44,7 +44,7 @@ test('SSR: strony prawne zwracają 200 z tytułem, lang, canonical, hreflang na 
       for (const l of LEGAL_LANGS) assert.ok(text.includes(`hreflang="${l}" href="${base}/${LEGAL_PAGES[name][l].path}"`), `${path}: hreflang ${l}`);
       assert.ok(text.includes(`hreflang="x-default" href="${base}/${LEGAL_PAGES[name].pl.path}"`), `${path}: x-default`);
       assert.ok(text.includes(`<h1>${H1[name][lang]}</h1>`), `${path}: H1`);
-      const sec = /<section class="page" id="page" role="main">([\s\S]*?)<\/section>/.exec(text)?.[1] || '';
+      const sec = /<section class="page" id="page" role="main"[^>]*>([\s\S]*?)<\/section>/.exec(text)?.[1] || '';
       assert.equal((sec.match(/<h1>/g) || []).length, 1, `${path}: jeden H1 w treści`);
       assert.ok(!sec.includes('[E-MAIL]'), `${path}: bez znacznika e-maila`);
       assert.ok(text.includes(`window.__ROUTE="legal/${name}"`), `${path}: trasa dla skryptu`);

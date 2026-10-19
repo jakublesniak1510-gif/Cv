@@ -322,7 +322,7 @@ $('#codeForm').addEventListener('submit', async (e) => {
 });
 // Kod partnera: ile prowizji czeka na przelew; po przelewie „Wypłacono” zeruje kwotę do wypłaty.
 function codePayout(c) {
-  const info = el('div', { className: 'mute', style: 'font-size:12px', textContent: `wypłacono ${zl(c.paidOut)}` });
+  const info = el('div', { className: 'mute', style: 'font-size:12px', textContent: `wypłacono ${zl(c.paidOut)}${c.bank ? ` · konto: ${c.bank}` : ' · brak numeru konta'}` });
   if (!c.due) return el('span', {}, el('span', { className: 'tag', textContent: 'do wypłaty 0 zł' }), info);
   const b = el('button', { className: 'btn sm', textContent: `Wypłacono ${zl(c.due)}` });
   b.onclick = async () => {
@@ -335,10 +335,23 @@ function codePayout(c) {
 function codeInvoice(c) {
   if (c.kind === 'partner') return codePayout(c);
   if (c.kind !== 'instytucja') return el('span', { className: 'mute', textContent: '—' });
+  if (c.b2b) return el('span', { className: 'tag', textContent: 'faktura automatyczna (Firmy)' });
   const set = async (issued, number) => { try { await post(`/codes/${encodeURIComponent(c.code)}/invoice`, { issued, number }); toast(issued ? 'Faktura oznaczona jako wystawiona.' : 'Cofnięto oznaczenie faktury.'); loaders.codes(); } catch (x) { toast(x.message); } };
   if (c.invoice) { const b = el('button', { className: 'btn ghost sm', textContent: 'Cofnij' }); b.onclick = () => set(false); return el('span', {}, el('span', { className: 'tag', textContent: `✓ ${c.invoice.number || 'wystawiona'}` }), ' ', b); }
   const b = el('button', { className: 'btn sm', textContent: 'Wystawiona' });
   b.onclick = () => { const n = prompt('Numer faktury dla organizacji (opcjonalnie):', ''); if (n !== null) set(true, n); };
+  return b;
+}
+// Link do prywatnej strony statystyk kodu (bez danych osobowych): kopiowany do schowka, tworzony przy pierwszym kliknięciu.
+function codeReport(c) {
+  if (c.kind === 'klient') return '';
+  const b = el('button', { className: 'btn ghost sm', textContent: 'Link do raportu', title: c.report || 'Utworzy prywatny link do statystyk kodu' });
+  b.onclick = async () => {
+    try {
+      const url = c.report || (await post(`/codes/${encodeURIComponent(c.code)}/report`)).url; c.report = url;
+      await navigator.clipboard.writeText(url).then(() => toast('Skopiowano link do raportu.'), () => prompt('Link do raportu:', url));
+    } catch (x) { toast(x.message); }
+  };
   return b;
 }
 loaders.codes = async () => {
@@ -356,7 +369,7 @@ loaders.codes = async () => {
           c.kind === 'partner' ? el('div', { className: 'mute', style: 'font-size:12px', textContent: `${c.commission}% · ${c.sales} sprzed. · ${zl(c.revenue)}` }) : null),
         el('td', { className: 'r', textContent: c.voucher ? `${{ cv: 'CV', cv_letter: 'CV + list', pack3: 'Pakiet 3' }[c.voucher]} gratis` : c.percent ? `−${c.percent}%` : `−${zl(c.amount)}` }),
         el('td', { className: 'r', textContent: c.maxUses ? `${c.uses} / ${c.maxUses}` : String(c.uses) }),
-        el('td', { className: 'num', textContent: dd(c.expires) }), el('td', { className: 'ell mute', textContent: c.note || '—' }), el('td', {}, codeInvoice(c)), el('td', { className: 'r' }, del));
+        el('td', { className: 'num', textContent: dd(c.expires) }), el('td', { className: 'ell mute', textContent: c.note || '—' }), el('td', {}, codeInvoice(c)), el('td', { className: 'r' }, codeReport(c), ' ', del));
     }))));
 };
 
@@ -484,7 +497,59 @@ async function start() {
 start();
 
 // --- zapytania od firm ---
+// Zamówienia paczek kodów (instytucje): płatność, wykorzystanie, faktura, raport.
+const B2BST = { paid: 'opłacona', unpaid: 'czeka na przelew', refunded: 'zwrot', new: 'nieopłacona (płatność online)', approval: 'czeka na zatwierdzenie', rejected: 'odrzucone' };
+async function loadB2b() {
+  const list = await api('/b2b'), late = list.filter((b) => (b.overdue && !b.deactivated) || b.status === 'approval').length;
+  $('#b2bBadge').hidden = !late; $('#b2bBadge').textContent = late;
+  if (!list.length) return $('#b2bTable').replaceChildren(el('div', { className: 'empty', textContent: 'Brak zamówień paczek kodów.' }));
+  $('#b2bTable').replaceChildren(el('div', { className: 'tbl-wrap' }, el('table', {},
+    el('thead', {}, el('tr', {}, ['Data', 'Organizacja', 'Pakiet', 'Kwota', 'Płatność', 'Kod', ''].map((t, i) => el('th', { className: i === 3 ? 'r' : '', textContent: t })))),
+    el('tbody', {}, list.map((b) => {
+      const acts = el('td', { className: 'r' });
+      if (b.status === 'unpaid') { const x = el('button', { className: 'btn sm', textContent: 'Opłacona' }); x.onclick = async () => { if (!confirm(`Czy przelew ${zl(b.total / 100)} od ${b.org} dotarł?`)) return; try { await post(`/b2b/${b.id}/paid`); toast('Oznaczono jako opłaconą.'); loadB2b(); } catch (e) { toast(e.message); } }; acts.append(x, ' '); }
+      if (b.status === 'approval') {
+        const ok = el('button', { className: 'btn sm', textContent: 'Zatwierdź' }), no = el('button', { className: 'btn ghost sm', textContent: 'Odrzuć' });
+        ok.onclick = async () => { if (!confirm(`Zatwierdzić ${b.qty} kodów dla ${b.org} z fakturą na 14 dni? Kod zacznie działać od razu.`)) return; ok.disabled = true; try { const r = await post(`/b2b/${b.id}/approve`); toast(`Zatwierdzono. Kod ${r.code} i faktura wysłane.`); loadB2b(); } catch (e) { toast(e.message); ok.disabled = false; } };
+        no.onclick = async () => { if (!confirm(`Odrzucić zamówienie ${b.org}? Zamawiający dostanie uprzejmy e-mail.`)) return; try { await post(`/b2b/${b.id}/reject`); toast('Odrzucono.'); loadB2b(); } catch (e) { toast(e.message); } };
+        acts.append(ok, ' ', no);
+      }
+      if (b.deactivated && b.status === 'unpaid' && b.invoiceNumber && !b.corrected) { const x = el('button', { className: 'btn ghost sm', textContent: 'Korekta wystawiona', title: `Faktura korygująca do ${b.invoiceNumber}` }); x.onclick = async () => { try { await post(`/b2b/${b.id}/corrected`); toast('Zapisano.'); loadB2b(); } catch (e) { toast(e.message); } }; acts.append(x, ' '); }
+      if (b.code && !b.deactivated && b.status !== 'refunded') { const x = el('button', { className: 'btn ghost sm', textContent: 'Wyłącz kod' }); x.onclick = async () => { if (!confirm(`Wyłączyć kod ${b.code}? Zostaną tylko już wykorzystane użycia.`)) return; try { await post(`/b2b/${b.id}/deactivate`); toast('Kod wyłączony.'); loadB2b(); } catch (e) { toast(e.message); } }; acts.append(x); }
+      const pay = el('span', { className: `st ${b.status === 'paid' ? 'done' : b.overdue ? 'paid' : 'pending'}`, textContent: b.overdue ? `po terminie (${dd(b.due)})` : B2BST[b.status] || b.status, title: b.approvalReason || '' });
+      return el('tr', {}, el('td', { className: 'num', textContent: dd(b.created) }),
+        el('td', {}, b.org, el('div', { className: 'mute', style: 'font-size:12px' }, el('a', { href: 'mailto:' + b.email, textContent: b.email }), b.nip ? ` · NIP ${b.nip}` : '')),
+        el('td', { textContent: `${b.pkgName} × ${b.qty}` }), el('td', { className: 'r', textContent: zl(b.total / 100) }),
+        el('td', {}, pay, b.invoiceNumber ? el('div', { style: 'font-size:12px' }, el('a', { href: `/api/admin/b2b/${b.id}/invoice.pdf`, target: '_blank', textContent: b.invoiceNumber })) : null),
+        el('td', {}, b.code ? el('span', { className: 'mono', textContent: b.code }) : '—', b.code ? el('div', { className: 'mute', style: 'font-size:12px' }, `${b.used} / ${b.qty} użyć${b.deactivated ? ' · wyłączony' : ''} · `, b.report ? el('a', { href: b.report, target: '_blank', textContent: 'raport' }) : '') : null),
+        acts);
+    })))));
+}
+// Zgłoszenia do programu partnerskiego.
+loaders.partners = async () => {
+  const list = await api('/partners'), waiting = list.filter((a) => a.status === 'new').length;
+  $('#partBadge').hidden = !waiting; $('#partBadge').textContent = waiting;
+  if (!list.length) return $('#partTable').replaceChildren(el('div', { className: 'empty', textContent: 'Brak zgłoszeń.' }));
+  const ST2 = { new: 'nowe', approved: 'zatwierdzone', rejected: 'odrzucone' };
+  $('#partTable').replaceChildren(el('div', { className: 'tbl-wrap' }, el('table', {},
+    el('thead', {}, el('tr', {}, ['Data', 'Partner', 'Kanał', 'Obserwujący', 'Odbiorcy', 'Stan', ''].map((t, i) => el('th', { className: i === 3 ? 'r' : '', textContent: t })))),
+    el('tbody', {}, list.map((a) => {
+      const acts = el('td', { className: 'r' });
+      if (a.status === 'new') {
+        const ok = el('button', { className: 'btn sm', textContent: 'Zatwierdź' }), no = el('button', { className: 'btn ghost sm', textContent: 'Odrzuć' });
+        ok.onclick = async () => { ok.disabled = true; try { const r = await post(`/partners/${a.id}/approve`); toast(`Zatwierdzono. Kod ${r.code} wysłany do partnera.`); loaders.partners(); } catch (e) { toast(e.message); ok.disabled = false; } };
+        no.onclick = async () => { if (!confirm(`Odrzucić zgłoszenie: ${a.name}? Partner dostanie krótki e-mail.`)) return; try { await post(`/partners/${a.id}/reject`); toast('Odrzucono.'); loaders.partners(); } catch (e) { toast(e.message); } };
+        acts.append(ok, ' ', no);
+      }
+      return el('tr', {}, el('td', { className: 'num', textContent: dd(a.created) }),
+        el('td', {}, a.name, el('div', { className: 'mute', style: 'font-size:12px' }, el('a', { href: 'mailto:' + a.email, textContent: a.email }))),
+        el('td', {}, el('a', { href: a.channel, target: '_blank', rel: 'noopener noreferrer', textContent: a.platform || 'link' })),
+        el('td', { className: 'r', textContent: a.followers ? a.followers.toLocaleString('pl-PL') : '—' }), el('td', { className: 'mute', textContent: a.audience || '—' }),
+        el('td', {}, el('span', { className: 'tag', textContent: ST2[a.status] || a.status }), a.code ? el('div', { className: 'mono', style: 'font-size:12px', textContent: a.code }) : null), acts);
+    })))));
+};
 loaders.leads = async () => {
+  loadB2b().catch((e) => toast(e.message));
   const list = await api('/leads');
   if (!list.length) return $('#leadTable').replaceChildren(el('div', { className: 'empty', textContent: 'Brak zapytań.' }));
   $('#leadTable').replaceChildren(el('table', {},
