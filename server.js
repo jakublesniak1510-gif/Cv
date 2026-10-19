@@ -16,7 +16,7 @@ import { simTurn, SimError } from './lib/sim.js';
 import { samplePdf } from './lib/sample.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
 import { mailEnabled, sendOrderMail, sendReminder, sendFollowUp, sendReviewAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail, sendOwnerMail } from './lib/mail.js';
-import { socialRoutes, cleanupChats } from './lib/social.js';
+import { socialRoutes, cleanupChats, botStatus } from './lib/social.js';
 import { b2bRoutes, b2bOrders, fulfillB2b, b2bRefunded, cleanupPartnerApps } from './lib/b2b.js';
 import { b2bMonthly } from './lib/b2b-monthly.js';
 import { crmHourly } from './lib/crm.js';
@@ -145,6 +145,8 @@ app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
   } catch (e) { console.error('Skaner', e.message); logEvent('skaner', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się ocenić CV. Spróbuj ponownie.' }); }
 });
 
+// Import kontaktów CSV w panelu może przekraczać ogólny limit 700 KB (parser przed globalnym).
+app.use('/api/admin/contacts/import', express.json({ limit: '3mb' }));
 app.use(express.json({ limit: '700kb' }));
 growthRoutes(app, { BASE_URL });
 // Instytucje i partnerzy: zamówienie paczki kodów, zgłoszenie do programu partnerskiego, raporty kodów (przed stronami SEO).
@@ -233,7 +235,9 @@ app.get('/health', async (_req, res) => {
   const stuck = Object.values(await allOrders().catch(() => ({}))).filter((o) => o.status === 'paid' || (o.status === 'generating' && Date.now() - (o.paidAt || 0) > 30 * 60_000)).length;
   checks.zamowienia = stuck ? `${stuck} czeka na dokumenty` : 'ok';
   const ok = checks.dane === 'ok' && checks.platnosci !== 'błąd' && checks.ai === 'ok' && (DEMO || checks.poczta === 'ok');
-  res.status(ok ? 200 : 503).set('Cache-Control', 'no-store').json({ ok, checks, at: new Date().toISOString() });
+  // Bot na Messengerze/Instagramie: tylko informacyjnie, nie wpływa na „ok” (strona działa bez niego).
+  const meta = await botStatus().catch(() => ({ bot: 'błąd' }));
+  res.status(ok ? 200 : 503).set('Cache-Control', 'no-store').json({ ok, checks, meta, at: new Date().toISOString() });
 });
 app.get('/api/config', (req, res) => res.json({
   ads: ADS, googleReview: GOOGLE_REVIEW, demo: DEMO, salesClosed: salesClosedFor(req), ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
