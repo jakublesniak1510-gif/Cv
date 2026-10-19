@@ -525,7 +525,7 @@ loaders.partners = async () => {
   if (!list.length) return $('#partTable').replaceChildren(el('div', { className: 'empty', textContent: 'Brak zgłoszeń.' }));
   const ST2 = { new: 'nowe', approved: 'zatwierdzone', rejected: 'odrzucone' };
   $('#partTable').replaceChildren(el('div', { className: 'tbl-wrap' }, el('table', {},
-    el('thead', {}, el('tr', {}, ['Data', 'Partner', 'Kanał', 'Obserwujący', 'Odbiorcy', 'Stan', ''].map((t, i) => el('th', { className: i === 3 ? 'r' : '', textContent: t })))),
+    el('thead', {}, el('tr', {}, ['Data', 'Partner', 'Kanał / instytucja', 'Obserwujący / osób', 'Odbiorcy', 'Stan', ''].map((t, i) => el('th', { className: i === 3 ? 'r' : '', textContent: t })))),
     el('tbody', {}, list.map((a) => {
       const acts = el('td', { className: 'r' });
       if (a.status === 'new') {
@@ -534,13 +534,53 @@ loaders.partners = async () => {
         no.onclick = async () => { if (!confirm(`Odrzucić zgłoszenie: ${a.name}? Partner dostanie krótki e-mail.`)) return; try { await post(`/partners/${a.id}/reject`); toast('Odrzucono.'); loaders.partners(); } catch (e) { toast(e.message); } };
         acts.append(ok, ' ', no);
       }
+      const adv = a.kind === 'advisor';
       return el('tr', {}, el('td', { className: 'num', textContent: dd(a.created) }),
-        el('td', {}, a.name, el('div', { className: 'mute', style: 'font-size:12px' }, el('a', { href: 'mailto:' + a.email, textContent: a.email }))),
-        el('td', {}, el('a', { href: a.channel, target: '_blank', rel: 'noopener noreferrer', textContent: a.platform || 'link' })),
-        el('td', { className: 'r', textContent: a.followers ? a.followers.toLocaleString('pl-PL') : '—' }), el('td', { className: 'mute', textContent: a.audience || '—' }),
+        el('td', {}, a.name, adv ? el('span', { className: 'tag', style: 'margin-left:6px', textContent: 'doradca, kod 0 zł' }) : null, el('div', { className: 'mute', style: 'font-size:12px' }, el('a', { href: 'mailto:' + a.email, textContent: a.email }))),
+        el('td', {}, adv ? `${a.org}${a.role ? ` (${a.role})` : ''}` : el('a', { href: a.channel, target: '_blank', rel: 'noopener noreferrer', textContent: a.platform || 'link' })),
+        el('td', { className: 'r', textContent: (adv ? a.group : a.followers) ? (adv ? a.group : a.followers).toLocaleString('pl-PL') : '—' }), el('td', { className: 'mute', textContent: adv ? 'grupa uczniów / studentów' : a.audience || '—' }),
         el('td', {}, el('span', { className: 'tag', textContent: ST2[a.status] || a.status }), a.code ? el('div', { className: 'mono', style: 'font-size:12px', textContent: a.code }) : null), acts);
     })))));
 };
+// Mini-CRM kontaktów B2B.
+let ctData = null;
+$('#ctImport').addEventListener('submit', async (e) => {
+  e.preventDefault(); const f = $('#ctFile').files[0]; if (!f) return toast('Wybierz plik CSV.');
+  try { const r = await post('/contacts/import', { csv: await f.text() }); $('#ctMsg').textContent = `Dodano ${r.added} z ${r.rows}. Duplikaty: ${r.dupes}, na liście blokad: ${r.blocked}, bez poprawnego e-maila: ${r.invalid}.`; $('#ctFile').value = ''; loaders.contacts(); }
+  catch (x) { toast(x.message); }
+});
+['#ctStatus', '#ctQ'].forEach((s) => $(s).addEventListener('input', () => drawContacts()));
+loaders.contacts = async () => {
+  ctData = await api('/contacts');
+  if ($('#ctStatus').options.length === 1) ctData.statuses.forEach((x) => $('#ctStatus').append(el('option', { value: x, textContent: x })));
+  drawContacts();
+};
+function drawContacts() {
+  const st = $('#ctStatus').value, q = $('#ctQ').value.trim().toLowerCase();
+  const list = ctData.list.filter((c) => (!st || c.status === st) && (!q || `${c.org} ${c.city} ${c.email}`.toLowerCase().includes(q)));
+  $('#ctSum').textContent = `${list.length} z ${ctData.list.length} · na liście blokad: ${ctData.blocked}`;
+  if (!list.length) return $('#ctTable').replaceChildren(el('div', { className: 'empty', textContent: ctData.list.length ? 'Brak kontaktów dla tego filtra.' : 'Brak kontaktów. Zaimportuj plik CSV.' }));
+  const save = async (c, patch, ok) => { try { const r = await post(`/contacts/${c.id}`, patch); if (ok) toast(ok); if (!r.contact) return loaders.contacts(); Object.assign(c, r.contact); drawContacts(); } catch (x) { toast(x.message); drawContacts(); } };
+  $('#ctTable').replaceChildren(el('table', {},
+    el('thead', {}, el('tr', {}, ['Organizacja', 'Kontakt', 'Segment', 'Status', 'Zgoda (jak i kiedy)', 'Notatka', ''].map((t) => el('th', { textContent: t })))),
+    el('tbody', {}, list.slice(0, 300).map((c) => {
+      const sel = el('select', { ariaLabel: 'Status' }, ctData.statuses.map((x) => el('option', { value: x, textContent: x, selected: x === c.status })));
+      sel.onchange = () => { if (sel.value === 'odmowa' && !confirm('Odmowa usuwa kontakt i zostawia sam e-mail na liście blokad. Kontynuować?')) { sel.value = c.status; return; } save(c, { status: sel.value, consent: cons.value }, sel.value === 'odmowa' ? 'Kontakt usunięty, e-mail na liście blokad.' : 'Zapisano.'); };
+      const seg = el('select', { ariaLabel: 'Segment' }, Object.entries(ctData.segments).map(([k, v]) => el('option', { value: k, textContent: v, selected: k === c.segment })));
+      seg.onchange = () => save(c, { segment: seg.value }, 'Zapisano.');
+      const cons = el('input', { value: c.consent?.text || '', placeholder: 'np. telefon 21.10, p. Kowalska', maxLength: 500 });
+      cons.onchange = () => save(c, { consent: cons.value }, 'Zapisano zgodę.');
+      const note = el('input', { value: c.note || '', maxLength: 1000 }); note.onchange = () => save(c, { note: note.value }, 'Zapisano notatkę.');
+      const send = el('button', { className: 'btn sm', textContent: 'Wyślij ofertę', disabled: c.status !== 'zgoda na ofertę' || !c.consent?.text, title: c.status !== 'zgoda na ofertę' ? 'Najpierw ustaw status „zgoda na ofertę” i opisz zgodę' : '' });
+      send.onclick = async () => { if (!confirm(`Wysłać ofertę (${ctData.segments[c.segment]}) na ${c.email}?`)) return; send.disabled = true; try { await post(`/contacts/${c.id}/offer`); toast('Oferta wysłana.'); loaders.contacts(); } catch (x) { toast(x.message); send.disabled = false; } };
+      const del = el('button', { className: 'btn danger sm', textContent: 'Usuń' });
+      del.onclick = async () => { if (del.dataset.sure !== '1') { del.dataset.sure = '1'; del.textContent = 'Na pewno?'; return; } try { await api('/contacts/' + c.id, { method: 'DELETE' }); loaders.contacts(); } catch (x) { toast(x.message); } };
+      return el('tr', {}, el('td', {}, c.org || '—', el('div', { className: 'mute', style: 'font-size:12px', textContent: [c.city, c.dept].filter(Boolean).join(' · ') })),
+        el('td', {}, el('a', { href: 'mailto:' + c.email, textContent: c.email }), c.phone ? el('div', { className: 'mute', style: 'font-size:12px', textContent: c.phone }) : null),
+        el('td', {}, seg), el('td', {}, sel, c.offer ? el('div', { className: 'mute', style: 'font-size:12px', textContent: `oferta ${dd(c.offer.at)}${c.reminder ? `, przyp. ${dd(c.reminder.at)}` : ''}` }) : null),
+        el('td', {}, cons), el('td', {}, note), el('td', { className: 'r' }, send, ' ', del));
+    }))));
+}
 loaders.leads = async () => {
   loadB2b().catch((e) => toast(e.message));
   const list = await api('/leads');

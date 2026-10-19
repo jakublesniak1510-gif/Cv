@@ -18,6 +18,8 @@ import { importCv, extractText, ImportError } from './lib/importCv.js';
 import { mailEnabled, sendOrderMail, sendReminder, sendFollowUp, sendReviewAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail, sendOwnerMail } from './lib/mail.js';
 import { socialRoutes, cleanupChats } from './lib/social.js';
 import { b2bRoutes, b2bOrders, fulfillB2b, b2bRefunded, cleanupPartnerApps } from './lib/b2b.js';
+import { b2bMonthly } from './lib/b2b-monthly.js';
+import { crmHourly } from './lib/crm.js';
 import { cleanDesign } from './lib/designs.js';
 import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes, sendNotFound } from './lib/seo.js';
@@ -714,6 +716,8 @@ async function hourly() {
     await cleanupEvents(RETENTION_MS);
     await cleanupChats().catch(() => {});
     await cleanupPartnerApps().catch(() => {});
+    await crmHourly(BASE_URL).catch((e) => logEvent('kontakty', e.message));
+    await b2bMonthly(BASE_URL).catch((e) => logEvent('e-mail', `Podsumowania miesiąca: ${e.message}`));
     await cleanupLeads().catch(() => {});
     await cleanupInvoices().catch(() => {});
     await leads.deleteWhere((l) => Date.now() - l.created > 365 * 864e5);
