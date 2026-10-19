@@ -15,7 +15,8 @@ import { adFromImage, AdImageError } from './lib/adImage.js';
 import { simTurn, SimError } from './lib/sim.js';
 import { samplePdf } from './lib/sample.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
-import { mailEnabled, sendOrderMail, sendReminder, sendFollowUp, sendReviewAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail } from './lib/mail.js';
+import { mailEnabled, sendOrderMail, sendReminder, sendFollowUp, sendReviewAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail, sendOwnerMail } from './lib/mail.js';
+import { socialRoutes, cleanupChats } from './lib/social.js';
 import { cleanDesign } from './lib/designs.js';
 import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes, sendNotFound } from './lib/seo.js';
@@ -87,6 +88,11 @@ const limiter = (max, windowMs) => { const hits = new Map(); return (req) => { c
 const photoLimit = limiter(5, 3600_000), answerLimit = limiter(8, 3600_000), importLimit = limiter(10, 600_000), fetchLimit = limiter(20, 600_000), scanLimit = limiter(6, 3600_000), chatLimit = limiter(30, 3600_000);
 const FOLLOWUP_AFTER = 29 * 24 * 3600 * 1000, REMINDER_AFTER = 7 * 24 * 3600 * 1000, REVIEW_AFTER = 4 * 24 * 3600 * 1000;
 
+// Bot AI na Messengerze i Instagramie (podpis Meta wymaga surowej treści, więc przed globalnym parserem JSON).
+socialRoutes(app, {
+  answer: assistant,
+  notifyOwner: (subject, text) => (mailEnabled() ? sendOwnerMail(subject, text).catch((e) => logEvent('e-mail', `Bot: ${e.message}`)) : null),
+});
 // --- Import starego CV (większy limit body, więc przed globalnym parserem) ---
 // Powiadomienie ze Stripe o płatności (surowa treść potrzebna do sprawdzenia podpisu, więc przed globalnym parserem JSON).
 app.post('/api/stripe/webhook', express.raw({ type: '*/*', limit: '1mb' }), async (req, res) => {
@@ -684,6 +690,7 @@ async function hourly() {
       if (o?.profile?.email) await codes.update(c.id, (x) => ({ ...x, ownerHash: emailHash(o.profile.email) }));
     }
     await cleanupEvents(RETENTION_MS);
+    await cleanupChats().catch(() => {});
     await cleanupLeads().catch(() => {});
     await cleanupInvoices().catch(() => {});
     await leads.deleteWhere((l) => Date.now() - l.created > 365 * 864e5);
