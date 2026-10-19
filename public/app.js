@@ -9,6 +9,7 @@ const PKG_NAME = { cv: 'CV', cv_letter: 'CV + list motywacyjny', pack3: 'Pakiet 
 let promo = null; // zastosowany kod rabatowy: { code, discount, label }
 let data; // bieżące zamówienie na stronie wyniku
 const STEPS = ['Pakiet i wygląd CV', 'Twoje dane', 'Doświadczenie', 'Wykształcenie i umiejętności', 'Ogłoszenia', 'Podsumowanie'];
+let pendingDraft = ''; // ogłoszenie z rozszerzenia Chrome czekające na formularz skanera
 let cfg = { demo: false, maxAds: 5, noPrint: false, maxRevisions: 10, loading: true };
 // Statystyki bez cookies: zbiorcze odsłony i kroki kreatora (serwer nie zapisuje IP ani identyfikatorów).
 function track(e, x = {}) {
@@ -212,7 +213,7 @@ function hl(text, kws) {
 }
 
 fetch('/api/config').then((r) => r.json()).then((c) => {
-  cfg = c; window.CONSENT?.init(c.ads); track('pv'); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; drawPromo(c.promo); if (c.salesClosed) $('#demoBar').textContent = 'Strona w przygotowaniu – zamówienia ruszą za kilka dni.'; $('#soonNote').hidden = !c.salesClosed; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
+  cfg = c; if (c.chromeExt) { $('#chromeExt').href = c.chromeExt; $('#chromeExtBox').hidden = false; } window.CONSENT?.init(c.ads); track('pv'); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; drawPromo(c.promo); if (c.salesClosed) $('#demoBar').textContent = 'Strona w przygotowaniu – zamówienia ruszą za kilka dni.'; $('#soonNote').hidden = !c.salesClosed; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
 }).catch(() => drawLists().catch(() => {})); // bez internetu (aplikacja na telefonie): treści z pamięci
 
 /* ---------- Przykład dopasowania ---------- */
@@ -1007,8 +1008,10 @@ function toolScan(box) {
   const form = el('form', { className: 'scan-card', noValidate: true },
     el('div', { className: 'f' }, '1. Twoje CV ', el('span', { className: 'h', textContent: 'PDF, Word lub TXT, do 5 MB' }), el('div', { className: 'filerow' }, el('label', { className: 'btn ghost sm filebtn' }, 'Wybierz plik', file), fileName)),
     el('label', { className: 'f' }, '2. Link do ogłoszenia albo jego treść', ad), btn, msg, el('p', { className: 'hint small', textContent: 'Nie zapisujemy ani pliku, ani wyniku.' }));
+  if (pendingDraft) ad.value = pendingDraft;
   bindScan({ form, file, fileName, ad, btn, msg, result });
   box.classList.remove('tool-box'); box.append(form, result);
+  if (cfg.chromeExt) box.append(el('p', { className: 'chrome-ext' }, el('a', { className: 'btn ghost sm', href: cfg.chromeExt, target: '_blank', rel: 'noopener', textContent: 'Dodaj do Chrome' }), ' ', el('span', { className: 'hint', textContent: 'Skaner jednym kliknięciem na stronie ogłoszenia.' })));
 }
 function renderScan(j, box = $('#scanResult')) {
   const total = j.found.length + j.missing.length, pct = j.score ?? 0;
@@ -2167,6 +2170,24 @@ $('#clearDraft').onclick = () => { clearDraft(); resetWizard(); $('#draftNote').
 const q = new URLSearchParams(location.search);
 if (window.__ROUTE?.startsWith('legal/')) $$('.langsw a').forEach((a) => a.setAttribute('href', legalUrl(window.__ROUTE.slice(6), a.dataset.lang)));
 else if (window.__ROUTE) showPage(window.__ROUTE, false);
+// ?draft=<id>: ogłoszenie przysłane przez rozszerzenie Chrome → do skanera (strona narzędzia) albo do kreatora.
+async function loadDraft(id) {
+  try { history.replaceState(null, '', location.pathname + location.hash); } catch {}
+  let d; try { const r = await fetch(`/api/ad-draft/${encodeURIComponent(id)}`); d = await r.json(); if (!r.ok) throw new Error(d.error); } catch (x) { alert(x.message || 'Nie udało się wczytać ogłoszenia.'); return; }
+  const text = d.url ? `${d.text}` : d.text;
+  if (/^\/(?:[a-z]{2}\/)?(?:narzedzia|tools|instrumenty)\/(?:skaner|cv-scanner|lebenslauf|skaner-rezyume)/.test(location.pathname)) {
+    // Formularz skanera na stronie narzędzia powstaje po wczytaniu treści strony: oddajemy mu szkic przy tworzeniu.
+    // Strona narzędzia może się przy starcie narysować ponownie, więc szkic zostaje do wzięcia przez kilka sekund.
+    pendingDraft = text; setTimeout(() => (pendingDraft = ''), 8000);
+    const t = $('#page form.scan-card textarea'); if (t) t.value = text;
+    return;
+  }
+  const first = $('#ads .entry');
+  if (first) { $('[data-k=title]', first).value = d.title || ''; $('[data-k=text]', first).value = text; first.dataset.fetched = '1'; setMode(first, 'paste'); }
+  if ($('#scanAd')) $('#scanAd').value = text;
+  openWiz();
+}
+if (q.get('draft')) loadDraft(q.get('draft'));
 if (q.get('id')) startResult(q.get('id'));
 else if (q.has('canceled')) { try { history.replaceState(null, '', location.pathname); } catch {} openWiz(); go(6); $('#werr').textContent = 'Płatność została anulowana. Twoje dane są zachowane, możesz spróbować ponownie.'; }
 /* aplikacja na telefon (PWA) */

@@ -1,0 +1,35 @@
+{
+  "extName": {
+    "message": "CV Pod Ogłoszenie – dopasuj CV do tej oferty"
+  },
+  "extDesc": {
+    "message": "Jedno kliknięcie na stronie ogłoszenia o pracę: zrób CV pod tę ofertę albo sprawdź swoje CV darmowym skanerem."
+  },
+  "actionTitle": {
+    "message": "Dopasuj CV do tej oferty"
+  },
+  "popupLead": {
+    "message": "Jesteś na stronie ogłoszenia? Przeniesiemy jego treść do CV Pod Ogłoszenie."
+  },
+  "btnCv": {
+    "message": "Zrób CV pod to ogłoszenie"
+  },
+  "btnScan": {
+    "message": "Sprawdź moje CV (skaner)"
+  },
+  "working": {
+    "message": "Odczytuję ogłoszenie…"
+  },
+  "errPage": {
+    "message": "Otwórz stronę z ogłoszeniem o pracę i spróbuj ponownie."
+  },
+  "errShort": {
+    "message": "Na tej stronie nie ma treści ogłoszenia. Otwórz samo ogłoszenie."
+  },
+  "errServer": {
+    "message": "Nie udało się połączyć z serwisem. Spróbuj za chwilę."
+  },
+  "privacyNote": {
+    "message": "Treść strony czytamy tylko po kliknięciu i wysyłamy wyłącznie tekst ogłoszenia. Bez historii przeglądania i śledzenia."
+  }
+}

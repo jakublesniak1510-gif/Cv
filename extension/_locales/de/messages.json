@@ -1,0 +1,35 @@
+{
+  "extName": {
+    "message": "CV Pod Ogłoszenie – Lebenslauf für diese Stelle"
+  },
+  "extDesc": {
+    "message": "Ein Klick auf einer Stellenanzeige: Lebenslauf für dieses Angebot erstellen oder mit dem Gratis-Scanner prüfen."
+  },
+  "actionTitle": {
+    "message": "Lebenslauf für diese Stelle"
+  },
+  "popupLead": {
+    "message": "Sie sind auf der Seite einer Stellenanzeige? Wir übernehmen den Text zu CV Pod Ogłoszenie."
+  },
+  "btnCv": {
+    "message": "Lebenslauf für diese Anzeige"
+  },
+  "btnScan": {
+    "message": "Meinen Lebenslauf prüfen (Scanner)"
+  },
+  "working": {
+    "message": "Anzeige wird gelesen…"
+  },
+  "errPage": {
+    "message": "Öffnen Sie die Seite einer Stellenanzeige und versuchen Sie es erneut."
+  },
+  "errShort": {
+    "message": "Auf dieser Seite gibt es keinen Anzeigentext. Öffnen Sie die Anzeige selbst."
+  },
+  "errServer": {
+    "message": "Keine Verbindung zum Dienst. Bitte gleich noch einmal versuchen."
+  },
+  "privacyNote": {
+    "message": "Wir lesen die Seite nur nach Ihrem Klick und senden nur den Anzeigentext. Kein Browserverlauf, kein Tracking."
+  }
+}

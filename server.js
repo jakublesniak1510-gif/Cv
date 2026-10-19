@@ -22,6 +22,7 @@ import { b2bMonthly } from './lib/b2b-monthly.js';
 import { crmHourly } from './lib/crm.js';
 import { growthRoutes, welcomeSeries, telegramHourly, rememberScan } from './lib/growth.js';
 import { sendPurchase, adContext } from './lib/capi.js';
+import { draftRoutes } from './lib/drafts.js';
 import { cleanDesign } from './lib/designs.js';
 import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes, sendNotFound } from './lib/seo.js';
@@ -145,6 +146,8 @@ app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
   } catch (e) { console.error('Skaner', e.message); logEvent('skaner', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się ocenić CV. Spróbuj ponownie.' }); }
 });
 
+// Szkic ogłoszenia z rozszerzenia Chrome (własny limit 20 KB i CORS, więc przed globalnym parserem).
+draftRoutes(app);
 app.use(express.json({ limit: '700kb' }));
 growthRoutes(app, { BASE_URL });
 // Instytucje i partnerzy: zamówienie paczki kodów, zgłoszenie do programu partnerskiego, raporty kodów (przed stronami SEO).
@@ -221,6 +224,8 @@ const cleanCv = (c = {}) => ({
 const env = (k, re) => (re.test(process.env[k] || '') ? process.env[k] : '');
 const ADS = { gads: env('GADS_ID', /^AW-\d{6,15}$/), label: env('GADS_PURCHASE_LABEL', /^[\w-]{4,64}$/), pixel: env('META_PIXEL_ID', /^\d{6,20}$/) };
 // Link do opinii w Profilu Firmy w Google (pokazywany każdemu klientowi, bez względu na ocenę).
+// Link do rozszerzenia w Chrome Web Store: bez niego przycisk „Dodaj do Chrome” jest ukryty.
+const CHROME_EXT = env('CHROME_EXT_URL', /^https:\/\/(chromewebstore\.google\.com|chrome\.google\.com\/webstore)\/[^\s"'<>]{1,300}$/);
 const GOOGLE_REVIEW = env('GOOGLE_REVIEW_URL', /^https:\/\/(g\.page|search\.google\.com|www\.google\.com|maps\.app\.goo\.gl|g\.co)\/[^\s"'<>]{1,300}$/);
 // Stan strony dla monitoringu (np. UptimeRobot co 5 minut): 200 = sprzedaż działa, 503 = coś blokuje zamówienia.
 // Bez szczegółów konfiguracji: tylko nazwy sprawdzeń i ok / błąd.
@@ -236,7 +241,7 @@ app.get('/health', async (_req, res) => {
   res.status(ok ? 200 : 503).set('Cache-Control', 'no-store').json({ ok, checks, at: new Date().toISOString() });
 });
 app.get('/api/config', (req, res) => res.json({
-  ads: ADS, googleReview: GOOGLE_REVIEW, demo: DEMO, salesClosed: salesClosedFor(req), ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
+  ads: ADS, googleReview: GOOGLE_REVIEW, chromeExt: CHROME_EXT, demo: DEMO, salesClosed: salesClosedFor(req), ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
   promo: salesClosedFor(req) ? null : activePromo(),
   prices: { ...Object.fromEntries(Object.entries(PRICES).map(([k, v]) => [k, v / 100])), bundleOff: BUNDLE_OFF / 100 },
 }));
