@@ -141,6 +141,8 @@ app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
   } catch (e) { console.error('Skaner', e.message); logEvent('skaner', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się ocenić CV. Spróbuj ponownie.' }); }
 });
 
+// Import kontaktów CSV w panelu może przekraczać ogólny limit 700 KB (parser przed globalnym).
+app.use('/api/admin/contacts/import', express.json({ limit: '3mb' }));
 app.use(express.json({ limit: '700kb' }));
 // Instytucje i partnerzy: zamówienie paczki kodów, zgłoszenie do programu partnerskiego, raporty kodów (przed stronami SEO).
 b2bRoutes(app, {
