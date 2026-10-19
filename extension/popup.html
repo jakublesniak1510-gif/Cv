@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+<header><img src="icons/32.png" alt="" width="20" height="20"><b data-msg="extName"></b></header>
+<p class="lead" data-msg="popupLead"></p>
+<button id="cv" class="btn" type="button" data-msg="btnCv"></button>
+<button id="scan" class="btn ghost" type="button" data-msg="btnScan"></button>
+<div id="preview" hidden>
+  <p class="src"><span data-msg="previewFrom"></span> <b id="site"></b></p>
+  <p id="warn" class="warn" data-msg="unknownSite" hidden></p>
+  <pre id="snippet"></pre>
+  <button id="send" class="btn" type="button" data-msg="btnSend"></button>
+  <button id="cancel" class="btn ghost" type="button" data-msg="btnCancel"></button>
+</div>
+<p id="status" role="status"></p>
+<p class="note" data-msg="privacyNote"></p>
+<script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{
+  "extName": {
+    "message": "CV Pod Ogłoszenie – tailor your CV to this job"
+  },
+  "extDesc": {
+    "message": "One click on a job ad page: get a CV tailored to this offer or check your CV with the free scanner."
+  },
+  "actionTitle": {
+    "message": "Tailor your CV to this job"
+  },
+  "popupLead": {
+    "message": "On a job ad page? We will bring its text to CV Pod Ogłoszenie."
+  },
+  "btnCv": {
+    "message": "Make a CV for this job ad"
+  },
+  "btnScan": {
+    "message": "Check my CV (scanner)"
+  },
+  "working": {
+    "message": "Reading the job ad…"
+  },
+  "errPage": {
+    "message": "Open a job ad page and try again."
+  },
+  "errShort": {
+    "message": "There is no job ad text on this page. Open the ad itself."
+  },
+  "errServer": {
+    "message": "Could not connect to the service. Please try again in a moment."
+  },
+  "privacyNote": {
+    "message": "We read the page only after you click and send it only after you confirm: the job ad text, the title and the page address. No browsing history, no tracking."
+  },
+  "previewFrom": {
+    "message": "Read from:"
+  },
+  "unknownSiteName": {
+    "message": "unrecognised page"
+  },
+  "unknownSite": {
+    "message": "Make sure this is a job ad page: we will send the text shown in the preview and the rest of the page."
+  },
+  "btnSend": {
+    "message": "Send"
+  },
+  "btnCancel": {
+    "message": "Cancel"
+  }
+}
