@@ -899,6 +899,8 @@ $('#wizForm').onsubmit = async (e) => {
     design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
+  // Zgoda na cookies reklamowe (baner): tylko wtedy serwer zgłosi zakup do Meta (Conversions API) z identyfikatorami piksela.
+  try { if (localStorage.getItem('cvpo-consent') === 'granted') { const ck = (n) => (document.cookie.match(new RegExp('(?:^|; )' + n + '=([^;]*)')) || [])[1]; Object.assign(body, { adConsent: true, fbp: ck('_fbp'), fbc: ck('_fbc') }); } } catch {}
   $('#next').disabled = true;
   try {
     const r = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -1016,8 +1018,29 @@ function renderScan(j, box = $('#scanResult')) {
     el('div', { className: 'mcol miss' }, el('h3', { textContent: j.missing.length ? 'Czego nie widać w Twoim CV' : 'Niczego nie brakuje' }), el('ul', {}, ...j.missing.map((m) => el('li', {}, el('b', { textContent: m.keyword }), el('small', { textContent: m.hint }))))),
     j.tips?.length ? el('div', { className: 'tips' }, el('h3', { textContent: 'Co poprawić' }), el('ol', {}, ...j.tips.map((t) => el('li', { textContent: t })))) : null,
     el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Zrób CV pisane pod to ogłoszenie' }), el('p', { className: 'hint', textContent: 'Uzupełnimy formularz danymi z Twojego pliku, ułożymy CV pod te wymagania, a brakujące rzeczy, które masz, dopiszesz jednym kliknięciem. Od 39 zł, z darmową poprawką.' })),
-      el('button', { type: 'button', className: 'btn', textContent: 'Zrób CV pod to ogłoszenie', onclick: fromScan })));
+      el('button', { type: 'button', className: 'btn', textContent: 'Zrób CV pod to ogłoszenie', onclick: fromScan })),
+    j.scanId ? scanMailForm(j.scanId) : null);
   box.hidden = false; box.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+}
+// Wynik skanera na e-mail (usługa na prośbę, bez zgody marketingowej); newsletter tylko po osobnym, niezaznaczonym polu.
+function scanMailForm(scanId) {
+  const email = el('input', { type: 'email', required: true, autocomplete: 'email', placeholder: 'twoj@email.pl', maxLength: 160 });
+  const nl = el('input', { type: 'checkbox' }), msg = el('p', { className: 'fstatus', role: 'status' });
+  const btn = el('button', { type: 'submit', className: 'btn ghost', textContent: 'Wyślij' });
+  const form = el('form', { className: 'scan-mail', noValidate: true },
+    el('label', { className: 'f' }, 'Wyślij mi wynik i listę braków na e-mail', el('div', { className: 'filerow' }, email, btn)),
+    el('label', { className: 'check' }, nl, el('span', { textContent: 'Chcę też newsletter z poradami (potwierdzisz zapis w e-mailu, wypis w każdej chwili)' })), msg,
+    el('p', { className: 'hint small', textContent: 'Wynik wyślemy jednorazowo. Nie zapisujemy treści CV ani adresu, chyba że zaznaczysz newsletter.' }));
+  form.onsubmit = async (e) => {
+    e.preventDefault(); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) { msg.className = 'fstatus err'; msg.textContent = 'Podaj poprawny adres e-mail.'; return; }
+    btn.disabled = true; msg.className = 'fstatus'; msg.textContent = '';
+    try {
+      const r = await fetch('/api/scan/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scanId, email: email.value.trim(), newsletter: nl.checked, lang: window.I18N?.lang === 'uk' ? 'uk' : 'pl' }) });
+      const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || 'Nie udało się wysłać.');
+      msg.className = 'fstatus ok'; msg.textContent = j.newsletter ? 'Wysłane. Sprawdź też e-mail z linkiem potwierdzającym zapis do newslettera.' : 'Wysłane. Sprawdź skrzynkę (także Spam).';
+    } catch (x) { msg.className = 'fstatus err'; msg.textContent = x.message; btn.disabled = false; }
+  };
+  return form;
 }
 function fromScan() {
   if (!scanData) return;

@@ -20,6 +20,8 @@ import { socialRoutes, cleanupChats } from './lib/social.js';
 import { b2bRoutes, b2bOrders, fulfillB2b, b2bRefunded, cleanupPartnerApps } from './lib/b2b.js';
 import { b2bMonthly } from './lib/b2b-monthly.js';
 import { crmHourly } from './lib/crm.js';
+import { growthRoutes, welcomeSeries, telegramHourly, rememberScan } from './lib/growth.js';
+import { sendPurchase, adContext } from './lib/capi.js';
 import { cleanDesign } from './lib/designs.js';
 import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes, sendNotFound } from './lib/seo.js';
@@ -64,12 +66,13 @@ app.disable('x-powered-by');
 // Podstawowe nagłówki bezpieczeństwa: bez osadzania strony w cudzych ramkach (np. podszywanie się pod panel),
 // bez zgadywania typu plików, ograniczony Referer, a na https wymuszenie bezpiecznego połączenia.
 app.use((req, res, next) => {
-  res.set({ 'X-Frame-Options': 'DENY', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin', 'Permissions-Policy': 'camera=(), microphone=(), geolocation=()' });
+  const embed = req.path.startsWith('/embed/'); // widżet skanera można osadzić na stronach partnerów (iframe)
+  res.set({ ...(embed ? {} : { 'X-Frame-Options': 'DENY' }), 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin', 'Permissions-Policy': 'camera=(), microphone=(), geolocation=()' });
   if (BASE_URL.startsWith('https')) res.set('Strict-Transport-Security', 'max-age=15552000');
   // CSP: skrypty tylko z jednorazowym kluczem (nonce) dopisywanym do każdego <script> w HTML z serwera; skrypty, które one
   // dołączą (Google Ads i Meta po zgodzie na cookies), dziedziczą zaufanie ('strict-dynamic'). Panel ma tylko własny plik admin.js.
   const nonce = crypto.randomBytes(16).toString('base64');
-  res.set('Content-Security-Policy', csp(req.path === '/admin' ? "'self'" : `'nonce-${nonce}' 'strict-dynamic'`));
+  res.set('Content-Security-Policy', csp(req.path === '/admin' ? "'self'" : `'nonce-${nonce}' 'strict-dynamic'`).replace("frame-ancestors 'none'", embed ? 'frame-ancestors *' : "frame-ancestors 'none'"));
   const send = res.send.bind(res);
   res.send = (body) => {
     if (typeof body === 'string' && (/text\/html/.test(res.get('Content-Type') || '') || (!res.get('Content-Type') && body.trimStart().startsWith('<')))) body = body.replace(/<script(?=[\s>])/g, `<script nonce="${nonce}"`);
@@ -137,11 +140,13 @@ app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
       cvText = await extractText(buf);
     }
     if (cvText.length < 60) return res.status(400).json({ error: 'CV jest za krótkie, żeby je ocenić.' });
-    res.json(await scanCv({ cvText, adText }));
+    const result = await scanCv({ cvText, adText });
+    res.json({ ...result, scanId: rememberScan(result) });
   } catch (e) { console.error('Skaner', e.message); logEvent('skaner', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się ocenić CV. Spróbuj ponownie.' }); }
 });
 
 app.use(express.json({ limit: '700kb' }));
+growthRoutes(app, { BASE_URL });
 // Instytucje i partnerzy: zamówienie paczki kodów, zgłoszenie do programu partnerskiego, raporty kodów (przed stronami SEO).
 b2bRoutes(app, {
   BASE_URL, demo: DEMO && !SALES_CLOSED, closedFor: (req) => salesClosedFor(req),
@@ -407,7 +412,7 @@ function cleanInvoice(v) {
 app.post('/api/orders', async (req, res) => {
   if (salesClosedFor(req)) return res.status(503).json({ error: CLOSED_MSG });
   try {
-    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, followUp, jobAlerts, reviewAsk, payReminder, uiLang, createAccount, invoice } = req.body || {};
+    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, followUp, jobAlerts, reviewAsk, payReminder, uiLang, createAccount, invoice, adConsent } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
     const a = cleanAds(ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
@@ -420,7 +425,7 @@ app.post('/api/orders', async (req, res) => {
     const inv = cleanInvoice(invoice);
     if (inv?.error) return res.status(400).json({ error: inv.error });
     const disc = discountFor(c, pkg, a.length, ad, false, langs), total = calcTotal(pkg, a.length, ad, false, langs, disc);
-    const order = { invoice: total > 0 ? inv : null, id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const order = { invoice: total > 0 ? inv : null, id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -557,6 +562,7 @@ async function markPaidAndGenerate(id) {
     const paidO = await updateOrder(id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
     if (!o.paidAt) { recordSale(paidO).catch((e) => console.error('Rejestr sprzedaży', e.message)); notifyNewOrder(paidO, BASE_URL).catch((e) => logEvent('e-mail', `Powiadomienie o zamówieniu: ${e.message}`)); }
     if (!o.paidAt && paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: id }));
+    if (!o.paidAt && paidO.adConsent) sendPurchase(paidO, BASE_URL).then((r) => r && updateOrder(id, { capi: r })).catch((e) => logEvent('reklamy', `Meta CAPI: ${e.message}`, { orderId: id }));
     const withLetter = hasLetter(o.pkg);
     const results = await Promise.all(o.ads.map(async (ad) => {
       const r = await generateForAd({ profile: o.profile, ad, withLetter, addons: o.addons });
@@ -718,6 +724,8 @@ async function hourly() {
     await cleanupPartnerApps().catch(() => {});
     await crmHourly(BASE_URL).catch((e) => logEvent('kontakty', e.message));
     await b2bMonthly(BASE_URL).catch((e) => logEvent('e-mail', `Podsumowania miesiąca: ${e.message}`));
+    await welcomeSeries(BASE_URL).catch((e) => logEvent('e-mail', `Seria powitalna: ${e.message}`));
+    await telegramHourly(BASE_URL).catch((e) => logEvent('telegram', e.message));
     await cleanupLeads().catch(() => {});
     await cleanupInvoices().catch(() => {});
     await leads.deleteWhere((l) => Date.now() - l.created > 365 * 864e5);
