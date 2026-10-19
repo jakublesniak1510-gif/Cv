@@ -43,3 +43,5 @@
   const bank = document.getElementById('bankForm');
   wire(bank, bank ? `/api/b2b/report/${bank.dataset.token}/bank` : '', (_j, st) => { st.className = 'fstatus ok'; st.textContent = 'Zapisano.'; bank.querySelector('button[type=submit]').disabled = false; });
 })();
+// Kod widżetu: zaznaczenie całości po kliknięciu (łatwe kopiowanie).
+document.querySelectorAll('.embed-code').forEach((t) => t.addEventListener('focus', () => t.select()));

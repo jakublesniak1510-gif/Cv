@@ -863,3 +863,6 @@ table.rep th[scope=row]{font-weight:600;color:var(--mute);width:55%}
 .pay-choice{border:0;padding:0;margin:0 0 12px}.pay-choice legend{font-weight:600;margin-bottom:6px;padding:0}
 .b2b-sum{font-size:17px;margin:4px 0 14px}
 .page h1 small{font-size:.5em;color:var(--mute);font-weight:600}
+
+.scan-mail{grid-column:1/-1;margin-top:14px;border-top:1px solid var(--line);padding-top:14px}.scan-mail .filerow{display:flex;gap:8px;flex-wrap:wrap}.scan-mail input[type=email]{flex:1 1 220px;min-width:0}
+.embed-code{width:100%;box-sizing:border-box;font:13px/1.4 ui-monospace,monospace;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--surface)}
