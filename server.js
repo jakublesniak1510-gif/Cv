@@ -17,6 +17,7 @@ import { samplePdf } from './lib/sample.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
 import { mailEnabled, sendOrderMail, sendReminder, sendFollowUp, sendReviewAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail, sendOwnerMail } from './lib/mail.js';
 import { socialRoutes, cleanupChats } from './lib/social.js';
+import { b2bRoutes, b2bOrders, fulfillB2b, b2bRefunded, cleanupPartnerApps } from './lib/b2b.js';
 import { cleanDesign } from './lib/designs.js';
 import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes, sendNotFound } from './lib/seo.js';
@@ -102,11 +103,13 @@ app.post('/api/stripe/webhook', express.raw({ type: '*/*', limit: '1mb' }), asyn
   // Zwrot zrobiony w panelu Stripe (albo z naszego panelu): zapis w zamówieniu i w rejestrze sprzedaży.
   if (ev.type === 'charge.refunded') {
     const ch = ev.data?.object;
+    if (String(ch?.metadata?.orderId || '').startsWith('B2B-')) { b2bRefunded(ch.metadata.orderId, ch.amount_refunded || 0).catch((e) => logEvent('płatność', `Zwrot B2B: ${e.message}`)); return; }
     if (ch?.payment_intent) setRefunded({ orderId: ch.metadata?.orderId, paymentIntent: ch.payment_intent, total: ch.amount_refunded || 0, source: 'stripe' })
       .then((r) => r?.changed && r.code && commissionBack(r.code, r.delta)).catch((e) => logEvent('płatność', `Zwrot: ${e.message}`));
     return;
   }
   if (!['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(ev.type)) return;
+  if (String(ev.data?.object?.client_reference_id || '').startsWith('B2B-')) { confirmB2b(null, ev.data.object).catch((e) => logEvent('płatność', `B2B: ${e.message}`)); return; }
   const sess = ev.data?.object, o = sess && (await getOrder(sess.client_reference_id));
   if (o) confirmStripe(o, sess).catch((e) => logEvent('płatność', e.message, { orderId: o.id }));
 });
@@ -137,6 +140,16 @@ app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
 });
 
 app.use(express.json({ limit: '700kb' }));
+// Instytucje i partnerzy: zamówienie paczki kodów, zgłoszenie do programu partnerskiego, raporty kodów (przed stronami SEO).
+b2bRoutes(app, {
+  BASE_URL, demo: DEMO && !SALES_CLOSED, closedFor: (req) => salesClosedFor(req),
+  confirm: (b) => confirmB2b(b),
+  checkout: PROVIDER === 'stripe' ? async (b, returnUrl) => {
+    const sess = await stripeCheckout({ orderId: b.id, amount: b.total, email: b.email, lang: 'pl', name: `CV Pod Ogłoszenie: paczka ${b.qty} kodów (${PACKAGES[b.pkg]?.name})`, description: `${b.org}: ${b.qty} × ${b.unit / 100} zł`.slice(0, 300), returnUrl });
+    await b2bOrders.update(b.id, { stripe: { sessionId: sess.id } });
+    return sess.url;
+  } : null,
+});
 seoRoutes(app, BASE_URL);
 // Pliki z wersją w adresie (?v=…, wstawiana przez lib/seo.js) i czcionki można trzymać w pamięci przeglądarki na stałe.
 app.use(express.static('public', { setHeaders: (res, path) => { if (res.req.query.v || /\/fonts\//.test(path)) res.set('Cache-Control', 'public, max-age=31536000, immutable'); } }));
@@ -174,7 +187,7 @@ async function checkCode(raw, email) {
   if (!code) return { discount: 0 };
   if (code === activePromo()?.code) await ensurePromoCode();
   const c = await codes.get(code);
-  if (!c || Date.now() > c.expires) return { error: 'Ten kod nie istnieje albo wygasł.' };
+  if (!c || c.disabled || Date.now() > c.expires) return { error: 'Ten kod nie istnieje albo wygasł.' };
   const d = codeDiscount(c, email);
   if (d.error) return d;
   return { code, discount: d.base + d.credit, base: d.base, credit: d.credit, owner: isOwner(c, email), percent: c.percent || 0, voucher: c.voucher || null };
@@ -340,6 +353,15 @@ async function checkout(order, lang) {
   return { id: order.id, url };
 }
 // Stripe: płatność potwierdzona tylko, gdy sesja jest opłacona, dotyczy tego zamówienia i kwota się zgadza.
+// Paczka kodów dla instytucji: płatność potwierdzona przez webhook albo po powrocie na stronę zamówienia.
+async function confirmB2b(b, sess) {
+  b ||= await b2bOrders.get(sess?.client_reference_id);
+  if (!b || b.code && b.status === 'paid') return b;
+  sess ||= b.stripe?.sessionId ? await stripeSession(b.stripe.sessionId).catch(() => null) : null;
+  if (!sess || sess.payment_status !== 'paid' || sess.client_reference_id !== b.id) return null;
+  if (sess.amount_total !== b.total || sess.currency !== 'pln') { logEvent('płatność', `Stripe: kwota ${sess.amount_total} ${sess.currency} nie zgadza się z paczką kodów`, { orderId: b.id }); return null; }
+  return fulfillB2b(b.id, { paid: true, provider: 'stripe', paymentIntent: sess.payment_intent, sessionId: sess.id, base: BASE_URL });
+}
 async function confirmStripe(o, sess) {
   if (o.status !== 'pending' || sess.payment_status !== 'paid' || sess.client_reference_id !== o.id) return false;
   if (sess.amount_total !== o.total || sess.currency !== 'pln') { logEvent('płatność', `Stripe: kwota ${sess.amount_total} ${sess.currency} nie zgadza się z zamówieniem`, { orderId: o.id }); return false; }
@@ -691,6 +713,7 @@ async function hourly() {
     }
     await cleanupEvents(RETENTION_MS);
     await cleanupChats().catch(() => {});
+    await cleanupPartnerApps().catch(() => {});
     await cleanupLeads().catch(() => {});
     await cleanupInvoices().catch(() => {});
     await leads.deleteWhere((l) => Date.now() - l.created > 365 * 864e5);

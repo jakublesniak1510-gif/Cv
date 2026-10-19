@@ -852,3 +852,14 @@ main[tabindex="-1"]:focus,[role=main][tabindex="-1"]:focus{outline:none}
 .price-card .lowest{font-size:13px;color:var(--mute);margin:-6px 0 10px;line-height:1.35}.price-card .lowest span:first-child{color:var(--ok);font-weight:600}
 .sumrow.lowest{font-size:13px;color:var(--mute);justify-content:flex-start}
 .pl-note{background:var(--soft-b);border-radius:10px;padding:10px 14px;font-size:14px;margin:0 0 14px}
+/* Strony B2B: zamówienie paczki kodów, program partnerski, raporty kodów */
+.fstatus.ok{color:#137A3E;font-weight:600}.fstatus.err{color:#B42318;font-weight:600}
+.msgbox.ok{border-color:#9AD3AE;background:#EEF9F1;white-space:normal}
+.table-wrap{overflow-x:auto;margin:0 0 8px}
+table.rep{width:100%;border-collapse:collapse;margin:8px 0 16px;font-size:15px}
+table.rep th,table.rep td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+table.rep th[scope=row]{font-weight:600;color:var(--mute);width:55%}
+.b2b-prices th,.b2b-prices td{white-space:nowrap}
+.pay-choice{border:0;padding:0;margin:0 0 12px}.pay-choice legend{font-weight:600;margin-bottom:6px;padding:0}
+.b2b-sum{font-size:17px;margin:4px 0 14px}
+.page h1 small{font-size:.5em;color:var(--mute);font-weight:600}

@@ -30,7 +30,8 @@
       <button data-v="reviews"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Opinie<span class="badge info" id="rvBadge" hidden></span></button>
       <button data-v="messages"><svg viewBox="0 0 24 24"><path d="M3 5h18v12H8l-5 4z"/></svg>Wiadomości<span class="badge info" id="msgBadge" hidden></span></button>
       <button data-v="newsletter"><svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg>Newsletter</button>
-      <button data-v="leads"><svg viewBox="0 0 24 24"><path d="M3 21V7l9-4 9 4v14"/><path d="M9 21v-6h6v6M8 10h.01M12 10h.01M16 10h.01"/></svg>Firmy</button>
+      <button data-v="leads"><svg viewBox="0 0 24 24"><path d="M3 21V7l9-4 9 4v14"/><path d="M9 21v-6h6v6M8 10h.01M12 10h.01M16 10h.01"/></svg>Firmy<span class="badge" id="b2bBadge" hidden title="Faktury instytucji po terminie"></span></button>
+      <button data-v="partners"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 20c0-3 3-5 6-5s6 2 6 5M14 15c3 0 8 1 8 5"/></svg>Partnerzy<span class="badge info" id="partBadge" hidden></span></button>
       <button data-v="problems"><svg viewBox="0 0 24 24"><path d="M12 3 2 21h20z"/><path d="M12 10v5M12 18v.01"/></svg>Problemy<span class="badge" id="probBadge" hidden></span></button>
       <button data-v="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Ustawienia</button>
       <button data-v="export"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>Eksport</button>
@@ -139,8 +140,14 @@
 
     <!-- Problemy -->
     <section data-view="leads" hidden>
+      <div class="card"><h2>Zamówienia paczek kodów</h2><p class="help">Instytucje zamawiają same na stronie <a href="/dla-instytucji/zamow" target="_blank" rel="noopener">/dla-instytucji/zamow</a>. Kod, faktura i plakat wychodzą automatycznie. Przy fakturze z terminem kod działa od razu: gdy przelew dotrze, kliknij „Opłacona”. Gdy faktura nie zostanie opłacona, „Wyłącz kod” zostawia tylko już wykorzystane użycia.</p></div>
+      <div id="b2bTable" style="margin-bottom:18px"></div>
       <div class="card"><h2>Zapytania od firm i instytucji</h2><p class="help">Z formularza „Dla firm i instytucji” na stronie. Odpowiedz e-mailem, ustal liczbę osób i cenę, a potem w zakładce „Kody rabatowe” utwórz kod „pakiet (instytucja)” z limitem użyć. Zapytania usuwamy automatycznie po 12 miesiącach.</p></div>
       <div id="leadTable"></div>
+    </section>
+    <section data-view="partners" hidden>
+      <div class="card"><h2>Partnerzy: zgłoszenia</h2><p class="help">Ze strony <a href="/program-partnerski" target="_blank" rel="noopener">/program-partnerski</a>. „Zatwierdź” tworzy kod partnera (rabat 10% dla klienta, prowizja z ustawienia PARTNER_COMMISSION, domyślnie 20%, ważny rok) i wysyła partnerowi e-mail z kodem, linkiem, zasadami oznaczania i linkiem do statystyk. „Odrzuć” wysyła krótką, uprzejmą odmowę. Odrzucone zgłoszenia usuwamy po 90 dniach.</p></div>
+      <div id="partTable"></div>
     </section>
     <section data-view="problems" hidden>
       <div class="head"><h1>Problemy</h1></div>
