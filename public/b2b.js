@@ -35,6 +35,11 @@
     st.className = 'fstatus ok'; st.textContent = 'Dziękujemy! Zgłoszenie dotarło. Odpowiemy e-mailem, zwykle w ciągu 2 dni roboczych.';
     f.querySelector('button[type=submit]').disabled = false;
   });
+  wire(document.getElementById('advisorForm'), '/api/b2b/advisor', (_j, st) => {
+    const f = document.getElementById('advisorForm'); f.reset();
+    st.className = 'fstatus ok'; st.textContent = 'Dziękujemy! Kod, plakat i link do raportu wyślemy e-mailem po zatwierdzeniu, zwykle w ciągu 1 dnia roboczego.';
+    f.querySelector('button[type=submit]').disabled = false;
+  });
   const bank = document.getElementById('bankForm');
   wire(bank, bank ? `/api/b2b/report/${bank.dataset.token}/bank` : '', (_j, st) => { st.className = 'fstatus ok'; st.textContent = 'Zapisano.'; bank.querySelector('button[type=submit]').disabled = false; });
 })();

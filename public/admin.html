@@ -32,6 +32,7 @@
       <button data-v="newsletter"><svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg>Newsletter</button>
       <button data-v="leads"><svg viewBox="0 0 24 24"><path d="M3 21V7l9-4 9 4v14"/><path d="M9 21v-6h6v6M8 10h.01M12 10h.01M16 10h.01"/></svg>Firmy<span class="badge" id="b2bBadge" hidden title="Faktury instytucji po terminie"></span></button>
       <button data-v="partners"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 20c0-3 3-5 6-5s6 2 6 5M14 15c3 0 8 1 8 5"/></svg>Partnerzy<span class="badge info" id="partBadge" hidden></span></button>
+      <button data-v="contacts"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><circle cx="12" cy="10" r="3"/><path d="M7 18c1-2.5 3-3.5 5-3.5s4 1 5 3.5"/></svg>Kontakty</button>
       <button data-v="problems"><svg viewBox="0 0 24 24"><path d="M12 3 2 21h20z"/><path d="M12 10v5M12 18v.01"/></svg>Problemy<span class="badge" id="probBadge" hidden></span></button>
       <button data-v="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Ustawienia</button>
       <button data-v="export"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>Eksport</button>
@@ -148,6 +149,13 @@
     <section data-view="partners" hidden>
       <div class="card"><h2>Partnerzy: zgłoszenia</h2><p class="help">Ze strony <a href="/program-partnerski" target="_blank" rel="noopener">/program-partnerski</a>. „Zatwierdź” tworzy kod partnera (rabat 10% dla klienta, prowizja z ustawienia PARTNER_COMMISSION, domyślnie 20%, ważny rok) i wysyła partnerowi e-mail z kodem, linkiem, zasadami oznaczania i linkiem do statystyk. „Odrzuć” wysyła krótką, uprzejmą odmowę. Odrzucone zgłoszenia usuwamy po 90 dniach.</p></div>
       <div id="partTable"></div>
+    </section>
+    <section data-view="contacts" hidden>
+      <div class="card"><h2>Kontakty B2B</h2><p class="help">Lista instytucji i firm do kontaktu. Ofertę e-mailem można wysłać <b>tylko</b> przy statusie „zgoda na ofertę” i z opisem, jak i kiedy uzyskano zgodę (np. „odpisali na list 28.10 mailem”). Bez zgody nie wolno wysyłać informacji handlowej e-mailem ani dzwonić z ofertą (art. 398 Prawa komunikacji elektronicznej, także do firm i instytucji), więc pierwszy kontakt to list papierowy: zaznacz kontakty i kliknij „Listy PDF”. Po 7 dniach bez zmiany statusu idzie jedno przypomnienie. Status „odmowa” albo kliknięcie wypisu w e-mailu usuwa kontakt i zostawia sam adres na liście blokad. Kontakty bez aktywności przez 12 miesięcy usuwamy automatycznie.</p>
+        <form id="ctImport" style="display:grid;gap:10px;max-width:640px"><label class="f">Import CSV (kolumny: segment, organizacja, miasto, dzial, email, typ_maila, telefon, strona, zrodlo, uwagi, opcjonalnie adres; separator ; albo ,)<input type="file" id="ctFile" accept=".csv,text/csv"></label><div><button class="btn" type="submit">Importuj</button> <span class="msg" id="ctMsg"></span> <a class="btn ghost sm" href="/oferta-dla-instytucji.pdf" target="_blank">Podgląd oferty PDF</a></div></form>
+      </div>
+      <div class="filters"><select id="ctStatus" aria-label="Status"><option value="">Wszystkie statusy</option></select> <input id="ctQ" placeholder="Szukaj: organizacja, miasto, e-mail" aria-label="Szukaj"> <span class="mute" id="ctSum"></span> <button class="btn sm" type="button" id="ctLetters">Listy PDF</button></div>
+      <div class="tbl-wrap" id="ctTable"></div>
     </section>
     <section data-view="problems" hidden>
       <div class="head"><h1>Problemy</h1></div>
