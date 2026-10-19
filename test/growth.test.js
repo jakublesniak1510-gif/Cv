@@ -35,21 +35,30 @@ test('Seria powitalna: dzień 2, 5 i 9 (tylko z nieużytym kodem), pomija kupuj�
   for (const s of g.SERIES) for (const l of ['pl', 'uk']) assert.doesNotMatch(s[l](BASE, { code: 'WITAJ-1', amount: 10, expires: now + 2 * D, days: 2 }).text, /gwarant|zatrudnienie gwar|\d+% skutecz/i);
 });
 
-test('Wynik skanera na e-mail: tylko po id wyniku, limit 3/h, newsletter tylko po zaznaczeniu', async () => {
+test('Wynik skanera na e-mail: jednorazowy id, 1 wynik na adres na dobę, bez linków z ogłoszenia, newsletter tylko po zaznaczeniu, limit 3/h', async () => {
   const app = express(); g.growthRoutes(app, { BASE_URL: BASE });
   const srv = app.listen(0), U = `http://127.0.0.1:${srv.address().port}`;
   const post = (b) => fetch(U + '/api/scan/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) });
+  const R = { score: 64, position: 'Magazynier – aplikuj na http://spam.example albo pisz na x@spam.example ' + 'y'.repeat(200), found: ['wózek widłowe www.spam.example'], missing: [{ keyword: 'WMS https://spam.example/a', hint: 'dopisz system' }], tips: ['Dodaj liczby'] };
   try {
-    const id = g.rememberScan({ score: 64, position: 'Magazynier', found: ['wózek widłowy'], missing: [{ keyword: 'WMS', hint: 'dopisz system' }], tips: ['Dodaj liczby'] });
-    assert.equal((await post({ scanId: 'zly', email: 'a@x.test' })).status, 410);
+    const id = g.rememberScan(R);
     const r1 = await post({ scanId: id, email: 'wynik@x.test' }); assert.equal(r1.status, 200); assert.equal((await r1.json()).newsletter, false);
+    assert.equal((await post({ scanId: id, email: 'inny@x.test' })).status, 410, 'ten sam wynik nie pójdzie na kolejny adres');
     assert.ok(!Object.values(await subscribers.all()).some((s) => s.email === 'wynik@x.test'), 'bez zaznaczenia nie zapisujemy adresu');
-    const r2 = await post({ scanId: id, email: 'nl@x.test', newsletter: true, lang: 'uk' }); assert.equal((await r2.json()).newsletter, true);
+    const r2 = await post({ scanId: g.rememberScan(R), email: 'nl@x.test', newsletter: true, lang: 'uk' }); assert.equal((await r2.json()).newsletter, true);
     const s = Object.values(await subscribers.all()).find((x) => x.email === 'nl@x.test'); assert.equal(s.status, 'pending', 'podwójna zgoda'); assert.equal(s.source, 'skaner'); assert.equal(s.lang, 'uk');
-    assert.equal((await post({ scanId: id, email: 'x3@x.test' })).status, 429, 'czwarta próba w godzinie');
-    const text = g.scanMailText({ score: 64, position: 'Magazynier', found: ['a'], missing: [{ keyword: 'WMS', hint: 'h' }], tips: ['t'] }, 'pl', BASE);
-    assert.match(text, /64%/); assert.match(text, /WMS: h/); assert.equal((text.match(/https?:\/\//g) || []).length, 1, 'jeden neutralny link');
+    assert.equal((await post({ scanId: g.rememberScan(R), email: 'x3@x.test' })).status, 429, 'czwarta próba w godzinie z tego IP');
   } finally { srv.close(); }
+  // limit na adres i dzienny (funkcje, bez limitu IP)
+  assert.equal(g.scanMailAllowed('limit@x.test', 1e12), null); g.scanMailSent('limit@x.test', 1e12);
+  assert.match(g.scanMailAllowed('limit@x.test', 1e12 + 3600e3), /już dziś/); assert.equal(g.scanMailAllowed('limit@x.test', 1e12 + 864e5 + 1), null);
+  process.env.SCAN_MAIL_DAILY = '1'; const day = Date.parse('2030-01-02T10:00:00Z');
+  assert.equal(g.scanMailAllowed('a1@x.test', day), null); g.scanMailSent('a1@x.test', day); assert.match(g.scanMailAllowed('a2@x.test', day), /chwilowo/); delete process.env.SCAN_MAIL_DAILY;
+  // treść: bez adresów z ogłoszenia, przycięte pola, jeden link (do naszej strony)
+  const id2 = g.rememberScan(R), text = g.scanMailText(g.takeScan(id2).result, 'pl', BASE);
+  assert.doesNotMatch(text, /spam\.example|x@/); assert.match(text, /64%/); assert.match(text, /WMS: dopisz system/);
+  assert.equal((text.match(/https?:\/\//g) || []).length, 1, 'jeden neutralny link');
+  assert.ok(text.split('\n').find((x) => x.startsWith('Stanowisko:')).length <= 'Stanowisko: '.length + 80);
 });
 
 test('Meta CAPI: tylko za zgodą i ze zmiennymi, event_id = id zamówienia, e-mail jako SHA-256', async () => {
