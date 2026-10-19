@@ -550,7 +550,19 @@ loaders.partners = async () => {
     })))));
 };
 // Mini-CRM kontaktów B2B.
-let ctData = null;
+let ctData = null; const ctSel = new Set();
+$('#ctLetters').addEventListener('click', async () => {
+  if (!ctSel.size) return toast('Zaznacz kontakty (pole wyboru w pierwszej kolumnie).');
+  const b = $('#ctLetters'); b.disabled = true;
+  try {
+    const r = await fetch('/api/admin/contacts/letters', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin': '1' }, credentials: 'same-origin', body: JSON.stringify({ ids: [...ctSel] }) });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `Błąd ${r.status}`);
+    const url = URL.createObjectURL(await r.blob()), a = el('a', { href: url, download: `listy-${new Date().toISOString().slice(0, 10)}.pdf` }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
+    const n = r.headers.get('X-Letters'), na = +r.headers.get('X-No-Address');
+    toast(`Listy: ${n}. Status „list wysłany” ustawiony przy nowych kontaktach.${na ? ` Bez adresu: ${na} (sprawdź przed drukiem).` : ''}`);
+    ctSel.clear(); loaders.contacts();
+  } catch (x) { toast(x.message); } finally { b.disabled = false; }
+});
 $('#ctImport').addEventListener('submit', async (e) => {
   e.preventDefault(); const f = $('#ctFile').files[0]; if (!f) return toast('Wybierz plik CSV.');
   try { const r = await post('/contacts/import', { csv: await f.text() }); $('#ctMsg').textContent = `Dodano ${r.added} z ${r.rows}. Duplikaty: ${r.dupes}, na liście blokad: ${r.blocked}, bez poprawnego e-maila: ${r.invalid}.`; $('#ctFile').value = ''; loaders.contacts(); }
@@ -569,20 +581,21 @@ function drawContacts() {
   if (!list.length) return $('#ctTable').replaceChildren(el('div', { className: 'empty', textContent: ctData.list.length ? 'Brak kontaktów dla tego filtra.' : 'Brak kontaktów. Zaimportuj plik CSV.' }));
   const save = async (c, patch, ok) => { try { const r = await post(`/contacts/${c.id}`, patch); if (ok) toast(ok); if (!r.contact) return loaders.contacts(); Object.assign(c, r.contact); drawContacts(); } catch (x) { toast(x.message); drawContacts(); } };
   $('#ctTable').replaceChildren(el('table', {},
-    el('thead', {}, el('tr', {}, ['Organizacja', 'Kontakt', 'Segment', 'Status', 'Zgoda (jak i kiedy)', 'Notatka', ''].map((t) => el('th', { textContent: t })))),
+    el('thead', {}, el('tr', {}, (() => { const all = el('input', { type: 'checkbox', ariaLabel: 'Zaznacz widoczne', checked: list.length && list.slice(0, 300).every((c) => ctSel.has(c.id)) }); all.onchange = () => { list.slice(0, 300).forEach((c) => (all.checked ? ctSel.add(c.id) : ctSel.delete(c.id))); drawContacts(); }; return el('th', {}, all); })(), ['Organizacja', 'Kontakt', 'Segment', 'Status', 'Zgoda (jak i kiedy)', 'Notatka', ''].map((t) => el('th', { textContent: t })))),
     el('tbody', {}, list.slice(0, 300).map((c) => {
       const sel = el('select', { ariaLabel: 'Status' }, ctData.statuses.map((x) => el('option', { value: x, textContent: x, selected: x === c.status })));
       sel.onchange = () => { if (sel.value === 'odmowa' && !confirm('Odmowa usuwa kontakt i zostawia sam e-mail na liście blokad. Kontynuować?')) { sel.value = c.status; return; } save(c, { status: sel.value, consent: cons.value }, sel.value === 'odmowa' ? 'Kontakt usunięty, e-mail na liście blokad.' : 'Zapisano.'); };
       const seg = el('select', { ariaLabel: 'Segment' }, Object.entries(ctData.segments).map(([k, v]) => el('option', { value: k, textContent: v, selected: k === c.segment })));
       seg.onchange = () => save(c, { segment: seg.value }, 'Zapisano.');
-      const cons = el('input', { value: c.consent?.text || '', placeholder: 'np. telefon 21.10, p. Kowalska', maxLength: 500 });
+      const cons = el('input', { value: c.consent?.text || '', placeholder: 'np. odpisali na list 28.10 mailem', maxLength: 500 });
       cons.onchange = () => save(c, { consent: cons.value }, 'Zapisano zgodę.');
       const note = el('input', { value: c.note || '', maxLength: 1000 }); note.onchange = () => save(c, { note: note.value }, 'Zapisano notatkę.');
       const send = el('button', { className: 'btn sm', textContent: 'Wyślij ofertę', disabled: c.status !== 'zgoda na ofertę' || !c.consent?.text, title: c.status !== 'zgoda na ofertę' ? 'Najpierw ustaw status „zgoda na ofertę” i opisz zgodę' : '' });
       send.onclick = async () => { if (!confirm(`Wysłać ofertę (${ctData.segments[c.segment]}) na ${c.email}?`)) return; send.disabled = true; try { await post(`/contacts/${c.id}/offer`); toast('Oferta wysłana.'); loaders.contacts(); } catch (x) { toast(x.message); send.disabled = false; } };
       const del = el('button', { className: 'btn danger sm', textContent: 'Usuń' });
       del.onclick = async () => { if (del.dataset.sure !== '1') { del.dataset.sure = '1'; del.textContent = 'Na pewno?'; return; } try { await api('/contacts/' + c.id, { method: 'DELETE' }); loaders.contacts(); } catch (x) { toast(x.message); } };
-      return el('tr', {}, el('td', {}, c.org || '—', el('div', { className: 'mute', style: 'font-size:12px', textContent: [c.city, c.dept].filter(Boolean).join(' · ') })),
+      const pick = el('input', { type: 'checkbox', ariaLabel: `Zaznacz ${c.org || c.email}`, checked: ctSel.has(c.id) }); pick.onchange = () => (pick.checked ? ctSel.add(c.id) : ctSel.delete(c.id));
+      return el('tr', {}, el('td', {}, pick), el('td', {}, c.org || '—', el('div', { className: 'mute', style: 'font-size:12px', textContent: [c.city, c.dept].filter(Boolean).join(' · ') + (c.address ? '' : ' · brak adresu') }), c.letter ? el('div', { className: 'mute', style: 'font-size:12px', textContent: `list ${dd(c.letter.at)}` }) : null),
         el('td', {}, el('a', { href: 'mailto:' + c.email, textContent: c.email }), c.phone ? el('div', { className: 'mute', style: 'font-size:12px', textContent: c.phone }) : null),
         el('td', {}, seg), el('td', {}, sel, c.offer ? el('div', { className: 'mute', style: 'font-size:12px', textContent: `oferta ${dd(c.offer.at)}${c.reminder ? `, przyp. ${dd(c.reminder.at)}` : ''}` }) : null),
         el('td', {}, cons), el('td', {}, note), el('td', { className: 'r' }, send, ' ', del));

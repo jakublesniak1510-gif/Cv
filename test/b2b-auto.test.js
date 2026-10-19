@@ -48,8 +48,8 @@ test('Kontakty: import, zgoda wymagana do oferty, wysyłka, jedno przypomnienie 
   assert.equal(pt.segment, 'uczelnia'); assert.equal(pt.status, 'nowy'); assert.equal(pt.token.length, 32);
   await assert.rejects(() => crm.sendOffer(pt.id, BASE), /zgoda na ofertę/);
   await assert.rejects(() => crm.updateContact(pt.id, { status: 'zgoda na ofertę' }), /jak i kiedy/);
-  const ok = await crm.updateContact(pt.id, { status: 'zgoda na ofertę', consent: 'telefon 21.10, p. Kowalska' });
-  assert.equal(ok.consent.text, 'telefon 21.10, p. Kowalska'); assert.ok(ok.consent.at);
+  const ok = await crm.updateContact(pt.id, { status: 'zgoda na ofertę', consent: 'odpisali na list 28.10 mailem' });
+  assert.equal(ok.consent.text, 'odpisali na list 28.10 mailem'); assert.ok(ok.consent.at);
   const sent = await crm.sendOffer(pt.id, BASE);
   assert.equal(sent.status, 'oferta wysłana'); assert.ok(sent.offer.at); assert.match(sent.offer.subject, /dla studentów Politechnika "Testowa"/);
   assert.equal((await crm.crmHourly(BASE, Date.now() + 3 * 864e5)).reminded, 0, 'przed upływem 7 dni bez przypomnienia');
@@ -112,4 +112,20 @@ test('Strony: dla doradców, oferta PDF, wypis, API zgłoszenia doradcy', async 
     assert.equal((await post({ name: 'Ala Nowak', email: 'ala@szkola.example', org: 'Technikum 2', terms: true })).status, 200);
     assert.ok(Object.values(await b2b.partnerApps.all()).some((a) => a.kind === 'advisor' && a.org === 'Technikum 2'));
   } finally { srv.close(); }
+});
+
+test('Listy papierowe: PDF z listem na osobnej stronie, adres w okienku, status „list wysłany”', async () => {
+  const { renderLetters, letterText, addressLines } = await import('../lib/letters.js');
+  assert.match(letterText({ segment: 'uczelnia' }), /Dla studentów Państwa instytucji/);
+  assert.match(letterText({ segment: 'szkola' }), /Dla uczniów/); assert.match(letterText({ segment: 'urzad_ngo' }), /Dla podopiecznych/);
+  assert.deepEqual(addressLines({ org: 'Uniwersytet X', dept: 'Biuro Karier', address: 'ul. Długa 1, 60-001 Poznań' }), ['Uniwersytet X', 'Biuro Karier', 'ul. Długa 1', '60-001 Poznań']);
+  const pdf = (await renderLetters([{ org: 'A', segment: 'uczelnia' }, { org: 'B', segment: 'firma' }])).toString('latin1');
+  assert.equal((pdf.match(/\/Type \/Page\b/g) || []).length, 2, 'każdy list na osobnej stronie');
+  await crm.importContacts('email;organizacja;adres;segment\nlist1@u.example;Uczelnia L;ul. Krótka 2, 00-001 Warszawa;Uczelnia\nlist2@u.example;Szkoła L;;Liceum');
+  const ids = Object.values(await crm.contacts.all()).filter((c) => /^list\d@/.test(c.email)).map((c) => c.id);
+  const r = await crm.lettersFor(ids, 'https://example.test');
+  assert.equal(r.count, 2); assert.equal(r.noAddress, 1); assert.ok(r.pdf.length > 1000);
+  for (const id of ids) { const c = await crm.contacts.get(id); assert.equal(c.status, 'list wysłany'); assert.ok(c.letter.at); }
+  assert.ok(crm.STATUSES.includes('list wysłany') && !crm.STATUSES.includes('zadzwoniono'));
+  await assert.rejects(() => crm.lettersFor([], 'https://example.test'), /Zaznacz/);
 });
