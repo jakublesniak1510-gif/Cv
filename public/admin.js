@@ -498,9 +498,9 @@ start();
 
 // --- zapytania od firm ---
 // Zamówienia paczek kodów (instytucje): płatność, wykorzystanie, faktura, raport.
-const B2BST = { paid: 'opłacona', unpaid: 'czeka na przelew', refunded: 'zwrot', new: 'nieopłacona (płatność online)' };
+const B2BST = { paid: 'opłacona', unpaid: 'czeka na przelew', refunded: 'zwrot', new: 'nieopłacona (płatność online)', approval: 'czeka na zatwierdzenie', rejected: 'odrzucone' };
 async function loadB2b() {
-  const list = await api('/b2b'), late = list.filter((b) => b.overdue && !b.deactivated).length;
+  const list = await api('/b2b'), late = list.filter((b) => (b.overdue && !b.deactivated) || b.status === 'approval').length;
   $('#b2bBadge').hidden = !late; $('#b2bBadge').textContent = late;
   if (!list.length) return $('#b2bTable').replaceChildren(el('div', { className: 'empty', textContent: 'Brak zamówień paczek kodów.' }));
   $('#b2bTable').replaceChildren(el('div', { className: 'tbl-wrap' }, el('table', {},
@@ -508,8 +508,15 @@ async function loadB2b() {
     el('tbody', {}, list.map((b) => {
       const acts = el('td', { className: 'r' });
       if (b.status === 'unpaid') { const x = el('button', { className: 'btn sm', textContent: 'Opłacona' }); x.onclick = async () => { if (!confirm(`Czy przelew ${zl(b.total / 100)} od ${b.org} dotarł?`)) return; try { await post(`/b2b/${b.id}/paid`); toast('Oznaczono jako opłaconą.'); loadB2b(); } catch (e) { toast(e.message); } }; acts.append(x, ' '); }
+      if (b.status === 'approval') {
+        const ok = el('button', { className: 'btn sm', textContent: 'Zatwierdź' }), no = el('button', { className: 'btn ghost sm', textContent: 'Odrzuć' });
+        ok.onclick = async () => { if (!confirm(`Zatwierdzić ${b.qty} kodów dla ${b.org} z fakturą na 14 dni? Kod zacznie działać od razu.`)) return; ok.disabled = true; try { const r = await post(`/b2b/${b.id}/approve`); toast(`Zatwierdzono. Kod ${r.code} i faktura wysłane.`); loadB2b(); } catch (e) { toast(e.message); ok.disabled = false; } };
+        no.onclick = async () => { if (!confirm(`Odrzucić zamówienie ${b.org}? Zamawiający dostanie uprzejmy e-mail.`)) return; try { await post(`/b2b/${b.id}/reject`); toast('Odrzucono.'); loadB2b(); } catch (e) { toast(e.message); } };
+        acts.append(ok, ' ', no);
+      }
+      if (b.deactivated && b.status === 'unpaid' && b.invoiceNumber && !b.corrected) { const x = el('button', { className: 'btn ghost sm', textContent: 'Korekta wystawiona', title: `Faktura korygująca do ${b.invoiceNumber}` }); x.onclick = async () => { try { await post(`/b2b/${b.id}/corrected`); toast('Zapisano.'); loadB2b(); } catch (e) { toast(e.message); } }; acts.append(x, ' '); }
       if (b.code && !b.deactivated && b.status !== 'refunded') { const x = el('button', { className: 'btn ghost sm', textContent: 'Wyłącz kod' }); x.onclick = async () => { if (!confirm(`Wyłączyć kod ${b.code}? Zostaną tylko już wykorzystane użycia.`)) return; try { await post(`/b2b/${b.id}/deactivate`); toast('Kod wyłączony.'); loadB2b(); } catch (e) { toast(e.message); } }; acts.append(x); }
-      const pay = el('span', { className: `st ${b.status === 'paid' ? 'done' : b.overdue ? 'paid' : 'pending'}`, textContent: b.overdue ? `po terminie (${dd(b.due)})` : B2BST[b.status] || b.status });
+      const pay = el('span', { className: `st ${b.status === 'paid' ? 'done' : b.overdue ? 'paid' : 'pending'}`, textContent: b.overdue ? `po terminie (${dd(b.due)})` : B2BST[b.status] || b.status, title: b.approvalReason || '' });
       return el('tr', {}, el('td', { className: 'num', textContent: dd(b.created) }),
         el('td', {}, b.org, el('div', { className: 'mute', style: 'font-size:12px' }, el('a', { href: 'mailto:' + b.email, textContent: b.email }), b.nip ? ` · NIP ${b.nip}` : '')),
         el('td', { textContent: `${b.pkgName} × ${b.qty}` }), el('td', { className: 'r', textContent: zl(b.total / 100) }),

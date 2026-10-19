@@ -135,3 +135,66 @@ test('Poranny e-mail: faktury instytucji po terminie', async () => {
   const r = await ops.ownerDaily(BASE, new Date(), { force: true });
   assert.ok(r !== null);
 });
+
+test('Przegląd #15: równoległa realizacja daje jeden kod, jedną fakturę i jedną sprzedaż', async () => {
+  const o = await b2b.createB2bOrder(body({ pay: 'now', qty: 20, pkg: 'cv', org: 'Wyścig Sp. z o.o.', email: 'race@example.test' }));
+  const before = Object.keys(await codes.all()).length;
+  const [a, b] = await Promise.all([
+    b2b.fulfillB2b(o.id, { paid: true, provider: 'stripe', paymentIntent: 'pi_r', base: BASE }),
+    b2b.fulfillB2b(o.id, { paid: true, provider: 'stripe', paymentIntent: 'pi_r', base: BASE }),
+  ]);
+  assert.equal(a.code, b.code);
+  assert.equal(Object.keys(await codes.all()).length, before + 1, 'dokładnie jeden nowy kod');
+  assert.equal(Object.values(await invoices.all()).filter((i) => i.id === o.id).length, 1);
+  assert.equal((await b2b.b2bOrders.get(o.id)).fulfilling, null);
+});
+
+test('Przegląd #15: faktura z terminem tylko z poprawnym NIP, do 200 kodów, jedna nieopłacona na NIP/e-mail; reszta czeka na zatwierdzenie', async () => {
+  assert.ok(b2b.nipValid('123-456-32-18')); assert.ok(!b2b.nipValid('1234563217')); assert.ok(!b2b.nipValid('123'));
+  await assert.rejects(() => b2b.createB2bOrder(body({ nip: '', pay: 'invoice' })), /wymaga NIP/);
+  await assert.rejects(() => b2b.createB2bOrder(body({ nip: '1234563217' })), /sumą kontrolną/);
+  // bez NIP można zapłacić od razu
+  assert.equal((await b2b.createB2bOrder(body({ nip: '', pay: 'now', email: 'bezNip@example.test' }))).status, 'new');
+  const big = await b2b.createB2bOrder(body({ nip: '5260250274', email: 'duzo@example.test', qty: 201 }));
+  assert.equal(big.status, 'approval'); assert.match(big.approvalReason, /200/);
+  const nBefore = Object.keys(await codes.all()).length, iBefore = Object.keys(await invoices.all()).length;
+  const first = await b2b.createB2bOrder(body({ nip: '7740001454', email: 'pierwsza@example.test', qty: 20 }));
+  assert.equal(first.status, 'new'); await b2b.fulfillB2b(first.id, { base: BASE });
+  const sameNip = await b2b.createB2bOrder(body({ nip: '7740001454', email: 'inna@example.test', qty: 20 }));
+  const sameMail = await b2b.createB2bOrder(body({ nip: '5213017228', email: 'pierwsza@example.test', qty: 20 }));
+  assert.equal(sameNip.status, 'approval'); assert.match(sameNip.approvalReason, /NIP/);
+  assert.equal(sameMail.status, 'approval'); assert.match(sameMail.approvalReason, /e-mail/);
+  assert.equal(Object.keys(await codes.all()).length, nBefore + 1, 'czekające zamówienia nie mają kodu');
+  assert.equal(Object.keys(await invoices.all()).length, iBefore + 1, 'ani faktury');
+  const ok = await b2b.approveB2b(big.id, { base: BASE });
+  assert.equal(ok.status, 'unpaid'); assert.ok(ok.code); assert.ok(await invoices.get(big.id));
+  assert.equal((await b2b.rejectB2b(sameNip.id)).status, 'rejected');
+  await assert.rejects(() => b2b.approveB2b(sameNip.id), /nie czeka/);
+  assert.equal((await b2b.fulfillB2b(sameNip.id, { base: BASE })).code, undefined, 'odrzucone nie dostaje kodu');
+});
+
+test('Przegląd #15: wyłączony kod nie przechodzi, korekta faktury w porannym e-mailu', async () => {
+  const { codeDiscount } = await import('../lib/referral.js');
+  const o = await b2b.createB2bOrder(body({ nip: '9542751368', email: 'korekta@example.test', qty: 10, pkg: 'cv' }));
+  const b = await b2b.fulfillB2b(o.id, { base: BASE });
+  assert.equal(codeDiscount(await codes.get(b.code), 'x@example.test').error, undefined);
+  await b2b.deactivateB2b(o.id);
+  const c = await codes.get(b.code);
+  assert.equal(c.maxUses, 0); assert.match(codeDiscount(c, 'x@example.test').error, /nie jest już aktywny/);
+});
+
+test('Przegląd #15: jeden <h1> na stronach z serwera, pułapka na boty w zamówieniu', async () => {
+  const app = express(); b2b.b2bRoutes(app, { BASE_URL: BASE, demo: true }); app.use((_q, res) => res.sendStatus(404));
+  const srv = app.listen(0), U = `http://127.0.0.1:${srv.address().port}`;
+  try {
+    const c = Object.values(await codes.all()).find((x) => x.report && x.voucher);
+    for (const p of [`/raport/${c.report}`, '/dla-instytucji/zamow', '/program-partnerski']) {
+      const html = (await (await fetch(U + p)).text()).replace(/<template[\s\S]*?<\/template>/g, '');
+      assert.equal((html.match(/<h1[\s>]/g) || []).length, 1, `${p}: jeden <h1>`);
+      assert.match(html, /<p class="h1">/, `${p}: nagłówek strony głównej jako akapit`);
+    }
+    const r = await fetch(U + '/api/b2b/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body({ email: 'bot@example.test' }), website: 'http://spam' }) });
+    assert.equal(r.status, 400);
+    assert.ok(!Object.values(await b2b.b2bOrders.all()).some((b) => b.email === 'bot@example.test'));
+  } finally { srv.close(); }
+});
