@@ -84,6 +84,7 @@ test('Panel → Dane: API, okresy, CSV tylko n ≥ 30, BOM i escapowanie', async
     assert.equal(kas.n, 30); assert.equal(kas.ok, true); assert.equal(kas.name, 'Kasjer / Kasjerka');
     assert.deepEqual(kas.keywords.find((k) => k.kw === 'obsługa kasy'), { kw: 'obsługa kasy', seen: 30, inCv: 15, pct: 50 });
     assert.equal(sp.ok, false);
+    assert.ok(!sp.keywords.some((k) => k.kw === 'spawanie mig'), 'wymaganie z mniej niż 3 ogłoszeń nie jest pokazywane');
     const d3 = await (await fetch(`${base}/stats-agg?month=last3`)).json();
     assert.equal(d3.month, 'last3');
     // okres „ostatnie 3 miesiące” liczony od dziś: dane z 2026-09/10 mieszczą się, gdy test działa w tych miesiącach
