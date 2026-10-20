@@ -1,0 +1,1199 @@
+[
+  {
+    "firma": "Lidl Polska",
+    "slug": "lidl",
+    "kariera_url": "https://kariera.lidl.pl/",
+    "stanowiska": [
+      "Pracownik/Pracowniczka Wsparcia Sprzedaży (wykładanie towaru)",
+      "Pracownik/Pracowniczka Sklepu (kasa + sala)",
+      "Pracownik Magazynu – Kompletacja towaru (także zmiana wieczorna/nocna)",
+      "Pracownik Magazynu – Operator Wózka",
+      "Pracownik Magazynu – Kontroler",
+      "Praca zlecenie w sklepie"
+    ],
+    "proces": "Aplikacja online w systemie rekrutacyjnym Lidla (formularz aplikacyjny) lub przez chatbota LARA (zbiera dokumenty). Poradnik zaleca przygotowanie CV (PDF/Word/JPG), list motywacyjny opcjonalny. Etapy: weryfikacja aplikacji -> rozmowa telefoniczna (~10 min) -> spotkanie rekrutacyjne (~30 min) w sklepie/magazynie, częściowo zdalnie (telefon/wideokonferencja) -> informacja zwrotna w ok. 14 dni -> podpisanie umowy. Można aplikować na kilka ofert i ponownie po odmowie. Infolinia rekrutacyjna 800 500 518.",
+    "wymagania": [
+      "Badania sanitarno-epidemiologiczne (sanepid) – warunek konieczny przy kontakcie z żywnością; przed startem także orzeczenie lekarskie (FAQ)",
+      "Pracownik Wsparcia Sprzedaży: brak wymogu doświadczenia (motywacja, zaangażowanie)",
+      "Pracownik Sklepu: doświadczenie w handlu",
+      "Magazyn: odpowiedzialność, dokładność, organizacja pracy, praca w zespole; aktualne badania sanepid mile widziane",
+      "Wymiary etatu: pełny, 3/4, 1/2 oraz dodatkowo 40%, 30%, 20%; także praca zlecenie"
+    ],
+    "benefity": [
+      "Umowa o pracę bez okresu próbnego, gwarantowany na umowie wzrost wynagrodzenia (staż)",
+      "Prywatna opieka medyczna (3 warianty, możliwość objęcia rodziny)",
+      "Karta Multisport Plus / Medicover Sport",
+      "Aplikacja do nauki języków (także dla rodziny)",
+      "Program Wsparcia Pracowników (porady prawne, finansowe, psychologiczne)",
+      "Grupowe ubezpieczenie na życie",
+      "Kupony rabatowe na święta, paczki dla dzieci, wyprawki",
+      "Magazyn: bezpłatne obiady, kawa/herbata, fizjoterapeuta",
+      "Te same benefity dla pracowników na część etatu"
+    ],
+    "obcokrajowcy": "Brak informacji dla obcokrajowców/UA na polskiej stronie kariery (strona tylko po polsku; jest odnośnik do International Careers i Globalnej Puli Kandydatów).",
+    "wynagrodzenie_oficjalne": [
+      {
+        "stanowisko": "Pracownik Sklepu (start)",
+        "kwota": "5 600 – 6 300 zł brutto/mies.",
+        "zrodlo": "https://kariera.lidl.pl/poznaj-nas/nasza-polityka-wynagrodzen",
+        "stan_na": "2026-10-20",
+        "uwaga": "strona nie podaje daty obowiązywania"
+      },
+      {
+        "stanowisko": "Pracownik Magazynu (start)",
+        "kwota": "6 000 – 7 000 zł brutto/mies.",
+        "zrodlo": "https://kariera.lidl.pl/poznaj-nas/nasza-polityka-wynagrodzen",
+        "stan_na": "2026-10-20",
+        "uwaga": "strona nie podaje daty obowiązywania"
+      }
+    ],
+    "zrodla": [
+      "https://kariera.lidl.pl/",
+      "https://kariera.lidl.pl/praca-w-sklepie",
+      "https://kariera.lidl.pl/praca-w-magazynie/pracownik-magazynu-kompletacja-towaru",
+      "https://kariera.lidl.pl/poznaj-nas/wszystko-o-rekrutacji",
+      "https://kariera.lidl.pl/poznaj-nas/faq-najczesciej-zadawane-pytania",
+      "https://kariera.lidl.pl/poznaj-nas/nasza-polityka-wynagrodzen"
+    ],
+    "uwagi": "Niespójność na stronie: FAQ podaje dla Pracownika Sklepu 4550–5550 zł brutto na start (po roku 4800–5750, po 2 latach 5000–6000), a strona 'Nasza polityka wynagrodzeń' 5600–6300 zł. FAQ wygląda na nieaktualne – na stronę SEO brać tylko kwotę z polityki wynagrodzeń z adnotacją. Nie potwierdzono, czy CV jest obowiązkowe (chatbot LARA vs formularz).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Biedronka (Jeronimo Martins Polska S.A.)",
+    "slug": "biedronka",
+    "kariera_url": "https://pracawbiedronce.pl/",
+    "stanowiska": [
+      "Sprzedawca-Kasjer / Sprzedawczyni-Kasjerka",
+      "Starszy Sprzedawca-Kasjer",
+      "Pracownik Sklepu",
+      "Kasjer",
+      "Sprzedawca – lada tradycyjna",
+      "Magazynier (Centrum Dystrybucyjne)"
+    ],
+    "proces": "Aplikacja online w systemie careers.jeronimomartins.com (z aktualnym adresem e-mail) -> na e-mail gra rekrutacyjna (5–7 min) -> krótka rozmowa telefoniczna z wybranymi -> spotkanie rekrutacyjne z Kierownikiem Sklepu -> informacja zwrotna. Status aplikacji w koncie kandydata. Gdy brak oferty: e-mail na jmp.rekrutacja@jeronimo-martins.com. Strona nie mówi wprost, czy wymagane jest CV.",
+    "wymagania": [
+      "Gotowość do pracy fizycznej, na 3 zmiany (5:30–14:30, 14:00–22:30, 22:00–6:00) i w weekendy",
+      "Nastawienie na kontakt z ludźmi i pracę w zespole",
+      "Doświadczenie mile widziane, nie wymagane (szkolenie na stanowisku)",
+      "Możliwe niepełne etaty: 1/4, 1/2, 3/4, 7/8; grafik dopasowywany do zajęć studentów",
+      "Sanepid: nie wspomniano na przejrzanych stronach (nie potwierdzono na oficjalnej stronie kariery)"
+    ],
+    "benefity": [
+      "Umowa o pracę, najczęściej bez okresu próbnego",
+      "Godziny nocne płatne wyżej niż ustawowo; płatne nadgodziny",
+      "Zasilenia e-kodów na zakupy w Biedronce i Hebe, vouchery rabatowe",
+      "Ponad 20 benefitów: prywatna opieka medyczna i karta sportowa na preferencyjnych warunkach, coroczne badania krwi, ubezpieczenie na życie",
+      "Nieoprocentowana pożyczka mieszkaniowa, bezzwrotne wsparcie w sytuacjach losowych",
+      "Paczka świąteczna dla pracowników i dzieci",
+      "Premia miesięczna, nagroda za obecność, nagroda roczna"
+    ],
+    "obcokrajowcy": "Strona dostępna także po ukraińsku, białorusku, angielsku i słowacku; filmy instruktażowe (aplikowanie z telefonu, dane do zatrudnienia) także po ukraińsku. Brak innych wymogów opisanych publicznie.",
+    "wynagrodzenie_oficjalne": [
+      {
+        "stanowisko": "Sprzedawca-Kasjer / Sprzedawca Lady Tradycyjnej (od stycznia 2026)",
+        "kwota": "5300 – 5650 zł brutto/mies.; staż >3 lata: 5450 – 5900 zł",
+        "zrodlo": "https://pracawbiedronce.pl/wynagrodzenia/",
+        "stan_na": "2026-10-20"
+      },
+      {
+        "stanowisko": "Magazynier (CD), od stycznia 2026",
+        "kwota": "od 5500 zł brutto/mies.",
+        "zrodlo": "https://pracawbiedronce.pl/wynagrodzenia/",
+        "stan_na": "2026-10-20"
+      },
+      {
+        "stanowisko": "Zastępca Kierownika Sklepu (od stycznia 2026)",
+        "kwota": "od 5950 zł brutto/mies.",
+        "zrodlo": "https://pracawbiedronce.pl/wynagrodzenia/",
+        "stan_na": "2026-10-20"
+      },
+      {
+        "stanowisko": "Sprzedawca-Kasjer, oferta Alwernia (ID 230990)",
+        "kwota": "0,75 etatu: 3978–4353 zł brutto; 0,5 etatu: 2655–2905 zł brutto",
+        "zrodlo": "https://careers.jeronimomartins.com/Biedronka/job/Alwernia-Sprzedawca-Kasjer-Biedronka-%28mk%29-Biedronka-Alwernia-Ma%C5%82o/1365055455/",
+        "stan_na": "2026-10-20"
+      }
+    ],
+    "zrodla": [
+      "https://pracawbiedronce.pl/",
+      "https://pracawbiedronce.pl/sklep/",
+      "https://pracawbiedronce.pl/wynagrodzenia/",
+      "https://careers.jeronimomartins.com/Biedronka/search/?locale=pl_PL",
+      "https://careers.jeronimomartins.com/Biedronka/job/Alwernia-Sprzedawca-Kasjer-Biedronka-%28mk%29-Biedronka-Alwernia-Ma%C5%82o/1365055455/"
+    ],
+    "uwagi": "Ogłoszenia linkują wyciąg z Regulaminu Wynagradzania: https://pracawbiedronce.pl/wyciag-z-regulaminu-wynagradzania-jeronimo-martins-polska/. Wymagania magazynowe nie zostały sprawdzone na konkretnym ogłoszeniu.",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Żabka (Żabka Polska / Grupa Żabka)",
+    "slug": "zabka",
+    "kariera_url": "https://praca.zabka.pl/",
+    "stanowiska": [
+      "Sprzedawca (sklep Żabka)",
+      "Dokładanie towaru",
+      "Prace porządkowe w sklepie",
+      "Operator wózka widłowego (Centrum Logistyczne)",
+      "Pracownik Centrum Logistycznego"
+    ],
+    "proces": "Sklepy: wyszukiwarka ofert na praca.zabka.pl (przycisk 'Aplikuj'), a gdy potrzebna pomoc – formularz kontaktowy. Centra logistyczne: wyślij CV lub zostaw dane w formularzu (imię, telefon, lokalizacja, stanowisko) -> telefon -> rozmowa z przyszłym przełożonym -> umowa. Ogólny portal (kariera.zabkagroup.com, SAP SuccessFactors) przyjmuje też CV 'do bazy'.",
+    "wymagania": [
+      "Centra logistyczne: 'Nie musisz mieć doświadczenia czy uprawnień' – firma pomaga je zdobyć (np. na wózek)",
+      "Sklepy: elastyczny grafik, pełny etat lub część etatu",
+      "Szczegółowe wymagania dla sklepów: nie potwierdzono na oficjalnej stronie kariery"
+    ],
+    "benefity": [
+      "Sklepy (praca.zabka.pl): grupowe ubezpieczenie PZU Życie, ubezpieczenie NNW dziecka PZU, ubezpieczenie szpitalne LUX MED, karta Multisport, zniżki Holiday Park & Resort",
+      "Centra logistyczne: LuxMed, MultiSport, częściowy zwrot kosztów dojazdu, program emerytalny, dopłata do okularów do 1000 zł, prezenty dla dzieci i bony świąteczne, EAP, stołówki"
+    ],
+    "obcokrajowcy": "Serwis praca.zabka.pl ma wersję ukraińską i angielską. Brak opisanych wymogów dla obcokrajowców.",
+    "wynagrodzenie_oficjalne": [],
+    "zrodla": [
+      "https://praca.zabka.pl/",
+      "https://kariera.zabkagroup.com/",
+      "https://zabkagroup.com/pl/kariera/",
+      "https://zabkagroup.com/pl/tywcentrumlogistycznym/"
+    ],
+    "uwagi": "Na przejrzanych stronach nie wskazano, kto jest pracodawcą w sklepach (sieć franczyzowa). Stopka praca.zabka.pl: '© Żabka Polska sp. z o.o.' oraz 'Numer wpisu do KRAZ: 27563' (rejestr agencji zatrudnienia). Szczegółów pojedynczego ogłoszenia nie udało się otworzyć (serwis za Cloudflare). Wynagrodzeń brak. Wynagrodzenie nie jest publikowane na oficjalnej stronie kariery (w przejrzanych materiałach).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Kaufland Polska",
+    "slug": "kaufland",
+    "kariera_url": "https://kariera.kaufland.pl/",
+    "stanowiska": [
+      "Sprzedawca/Kasjer – Dział Artykułów Świeżych",
+      "Sprzedawca/Kasjer – Dział Artykułów Spożywczych",
+      "Sprzedawca/Kasjer – Dział Kas",
+      "Pracownik/Pracowniczka Porządkowa",
+      "Magazynier Wydania Towaru (logistyka)",
+      "Kontroler Przyjęcia Towaru (logistyka)"
+    ],
+    "proces": "Aplikacja online przez wyszukiwarkę ofert (SAP SuccessFactors). Bez logowania wystarczą pola obowiązkowe formularza; po zalogowaniu można dołączyć CV, list motywacyjny, certyfikaty. Odpowiedź w ciągu 5 dni roboczych (telefon/e-mail) -> spotkanie rekrutacyjne w markecie z Kierownikiem Marketu i Menedżerem Zespołu -> informacja zwrotna.",
+    "wymagania": [
+      "Na stronach działów podano tylko obowiązki, bez formalnych wymagań – nie potwierdzono na oficjalnej stronie kariery",
+      "Umowy na 1/4, 1/2, 3/4 i pełny etat"
+    ],
+    "benefity": [
+      "Wynagrodzenie zasadnicze + dodatki",
+      "Prywatna opieka medyczna, karta sportowa",
+      "Bony i paczki świąteczne",
+      "Grupowe ubezpieczenie na życie, wyprawka dla dziecka, nagrody jubileuszowe (logistyka)",
+      "Zniżki na kursy językowe online, wellbeing",
+      "Logistyka: fizjoterapeuta i darmowe obiady",
+      "Program poleceń: bon 1500 zł brutto"
+    ],
+    "obcokrajowcy": "Brak informacji na stronie kariery.",
+    "wynagrodzenie_oficjalne": [],
+    "zrodla": [
+      "https://kariera.kaufland.pl/",
+      "https://kariera.kaufland.pl/praca-w-markecie",
+      "https://kariera.kaufland.pl/praca-w-logistyce",
+      "https://kariera.kaufland.pl/o-firmie/proces-rekrutacyjny"
+    ],
+    "uwagi": "Lista ofert (oferty-pracy) ładuje się dynamicznie i nie udało się otworzyć pojedynczego ogłoszenia, więc typowe wymagania (sanepid, zmianowość) nie są potwierdzone. Wynagrodzenie nie jest publikowane na oficjalnej stronie kariery (w przejrzanych materiałach).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Auchan Polska",
+    "slug": "auchan",
+    "kariera_url": "https://www.auchan.pl/pl/dla-klienta/auchan-kariera",
+    "stanowiska": [
+      "Sprzedawca",
+      "Kasjer",
+      "Sprzedawca-Kasjer",
+      "Pracownik produkcji (cukiernia/piekarnia)",
+      "Piekarz",
+      "Elastyczna praca na zlecenie"
+    ],
+    "proces": "Lista ofert na auchan.pl/pl/job-offers, aplikacja online przez eRecruiter (formularz/ankieta). Wg strony dla kandydatów z Ukrainy: tworzysz ankietę online -> e-mail i SMS od rekrutera z terminem rozmowy lub odmową -> rozmowa z Menedżerem Handlowym w wybranym sklepie -> oferta -> badania lekarskie i sanitarno-epidemiologiczne -> dokumenty -> start.",
+    "wymagania": [
+      "Dyspozycyjność do pracy zmianowej, także w weekendy",
+      "Gotowość do pracy fizycznej i różnorodnych zadań",
+      "Praca w zespole, nastawienie na klienta",
+      "Mile widziane: aktualne badania sanitarno-epidemiologiczne; osoby z orzeczeniem o niepełnosprawności",
+      "Przed zatrudnieniem: badania lekarskie i sanepid"
+    ],
+    "benefity": [
+      "Umowa o pracę, premia zależna od wyników i obecności",
+      "7% rabatu na zakupy, 10% na markę własną (karta Skarbonka)",
+      "Posiłek w pracy maks. 8 zł",
+      "Prywatna opieka medyczna od 1 gr/mies.",
+      "Grupowe ubezpieczenie na życie (3 warianty)",
+      "Wczasy, dofinansowanie urlopu i Multisport, świąteczne doładowanie karty, wyprawka dla niemowlaka",
+      "Program poleceń, akcjonariat pracowniczy"
+    ],
+    "obcokrajowcy": "Tak – strona po ukraińsku (ua_rekrutacja): firma jest otwarta na zatrudnienie osób nieznających języka polskiego, pełny i niepełny etat. Wymagane: ważny paszport + dokument legalizujący pobyt i pracę (np. wiza krajowa, karta pobytu czasowego/stałego, ochrona międzynarodowa, stempel o złożeniu wniosku, status studenta, Karta Polaka, wiza humanitarna).",
+    "wynagrodzenie_oficjalne": [
+      {
+        "stanowisko": "Sprzedawca-Kasjer, hipermarket Lublin ul. Witosa 32a",
+        "kwota": "4856 – 5156 zł brutto/mies. (wynagrodzenie zasadnicze, stawka premii, ekwiwalenty), pełny etat",
+        "zrodlo": "https://skk.erecruiter.pl/Offer.aspx?oid=4941748&cfg=B21101D855194D90A4E5DBB7B8A297B8&ejoId=796734&ejorId=544864&comId=18800911",
+        "stan_na": "2026-10-20",
+        "uwaga": "data przy ofercie na liście: 19.08.2026"
+      }
+    ],
+    "zrodla": [
+      "https://www.auchan.pl/pl/dla-klienta/auchan-kariera",
+      "https://www.auchan.pl/pl/job-offers",
+      "https://www.auchan.pl/pl/dla-klienta/ua_rekrutacja",
+      "https://skk.erecruiter.pl/Offer.aspx?oid=4941748&cfg=B21101D855194D90A4E5DBB7B8A297B8&ejoId=796734&ejorId=544864&comId=18800911"
+    ],
+    "uwagi": "Strona kariery to podstrona auchan.pl renderowana JavaScriptem; ogłoszenia hostowane na eRecruiter. Nie potwierdzono, czy CV jest obowiązkowe.",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Dino Polska",
+    "slug": "dino",
+    "kariera_url": "https://www.marketdino.pl/kariera",
+    "stanowiska": [
+      "Kasjer-Sprzedawca / Mobilny Kasjer-Sprzedawca",
+      "Kierownik Marketu",
+      "Pracownik Centrum Dystrybucyjnego (magazyn)",
+      "Brygadzista hali / Kierownik zmiany (magazyn)"
+    ],
+    "proces": "Formularz online 'Aplikuj na stanowisko' przy ogłoszeniu; czat 'Asystent rekrutacji' na stronie. Osoby bez adresu e-mail mogą złożyć CV osobiście w Centrali, w marketach lub Centrach Dystrybucyjnych albo wysłać pocztą na adres siedziby w Krotoszynie. W ogłoszeniach podany telefon rekrutacyjny ('Odpowiemy na każde zgłoszenie').",
+    "wymagania": [
+      "Ogłoszenie Mobilny Kasjer-Sprzedawca nie wymienia wymagań",
+      "Dino deklaruje zatrudnianie osób bez doświadczenia (system szkoleń wewnętrznych, m.in. w CD)",
+      "Sanepid, prawo jazdy itp.: nie potwierdzono na oficjalnej stronie kariery"
+    ],
+    "benefity": [
+      "Możliwość dopasowania wymiaru czasu pracy",
+      "Umowa o pracę, stabilne zatrudnienie",
+      "Awanse wewnętrzne, szkolenia",
+      "Programy na preferencyjnych warunkach: ubezpieczenie, prywatna opieka medyczna, możliwość pożyczki"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [],
+    "zrodla": [
+      "https://www.marketdino.pl/kariera",
+      "https://www.marketdino.pl/kariera/wyniki?category=market&page=1&page_size=48",
+      "https://www.marketdino.pl/kariera/mobilny-kasjer-sprzedawca-kmx-praca-w-marketach-na-terenie-caego-wojewodztwa-opole-321853"
+    ],
+    "uwagi": "W dniu sprawdzenia kategoria Market miała 46 ofert (głównie Kierownik Marketu i Mobilny Kasjer-Sprzedawca), Magazyn – 3 oferty kierownicze. Strona to aplikacja JS. Wynagrodzenie nie jest publikowane na oficjalnej stronie kariery (w przejrzanych materiałach).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Netto Polska",
+    "slug": "netto",
+    "kariera_url": "https://kariera.netto.pl/",
+    "stanowiska": [
+      "Sprzedawca",
+      "Pracownik wykładający towar (umowa zlecenie)",
+      "Koordynator zmiany",
+      "Zastępca Kierownika Sklepu",
+      "Magazynier"
+    ],
+    "proces": "Aplikacja online (netto.pl/oferty-pracy) lub 'Aplikuj w sklepie': pobierasz dwujęzyczny (PL/UA) formularz, wypełniasz i zanosisz do wybranego sklepu razem z podpisaną klauzulą RODO. Pytania: REKRUTACJA@NETTO.PL. Strona nie wspomina o CV przy aplikacji w sklepie.",
+    "wymagania": [
+      "Orzeczenie do celów sanitarno-epidemiologicznych lub gotowość do jego wyrobienia (Sprzedawca); orzeczenie sanepid (Pracownik wykładający towar)",
+      "Gotowość do pracy w systemie zmianowym",
+      "Znajomość zasad obsługi klienta, praca w zespole",
+      "Zlecenie: sam wskazujesz dni i godziny dyspozycyjności"
+    ],
+    "benefity": [
+      "Umowa o pracę (Sprzedawca), wynagrodzenie rosnące ze stażem + premia miesięczna do 400 zł brutto",
+      "Prywatna opieka medyczna, ubezpieczenie grupowe, dopłata do Multisport",
+      "Zniżka 5% na zakupy (także dla bliskiej osoby)",
+      "Program poleceń: 800 zł brutto",
+      "ZFŚS: doładowania Pluxee na święta, wczasy pod gruszą, zapomogi",
+      "Nagrody jubileuszowe"
+    ],
+    "obcokrajowcy": "Tak – osobna strona dla obywateli Ukrainy (PL/UA), stanowisko pracownika wykładającego towar, formularz dwujęzyczny, przetłumaczone materiały wdrożeniowe i szkoleniowe.",
+    "wynagrodzenie_oficjalne": [
+      {
+        "stanowisko": "Sprzedawca, Szczecin ul. Zaleskiego 2D (ID 211766)",
+        "kwota": "Wynagrodzenie zasadnicze 4806 zł brutto/mies./pełen etat + premia do 400 zł brutto",
+        "zrodlo": "https://netto.pl/pracy/5e4dd945-cf56-4c80-8629-24246ed32259/",
+        "stan_na": "2026-10-20",
+        "uwaga": "data rozpoczęcia w ogłoszeniu 2026-10-20"
+      }
+    ],
+    "zrodla": [
+      "https://kariera.netto.pl/",
+      "https://kariera.netto.pl/aplikuj-w-sklepie/",
+      "https://kariera.netto.pl/zatrudnianie-obywateli-z-ukrainy/",
+      "https://kariera.netto.pl/benefity/",
+      "https://netto.pl/oferty-pracy/",
+      "https://netto.pl/pracy/5e4dd945-cf56-4c80-8629-24246ed32259/",
+      "https://netto.pl/pracy/50f3bc2b-5b09-42dc-a39f-b24bdbd76f25/"
+    ],
+    "uwagi": "273 oferty w dniu sprawdzenia (głównie sklep). Pracownik wykładający towar – umowa zlecenie, kwota nie podana.",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "ALDI Polska",
+    "slug": "aldi",
+    "kariera_url": "https://www.aldi.pl/praca.html",
+    "stanowiska": [
+      "Sprzedawca",
+      "Starszy sprzedawca",
+      "Wsparcie sklepu na umowę zlecenie",
+      "Zastępca kierownika sklepu",
+      "Pracownik magazynu"
+    ],
+    "proces": "Kliknij 'Aplikuj' w ogłoszeniu i wypełnij formularz -> telefon do wybranych kandydatów -> spotkanie rekrutacyjne -> decyzja przekazana po spotkaniu.",
+    "wymagania": [
+      "Gotowość do pracy na dwie zmiany i w weekendy",
+      "Praca w zespole, przyjazne podejście do klienta, dokładność, chęć nauki",
+      "Atut: doświadczenie na podobnym stanowisku i aktualne badania sanitarno-epidemiologiczne",
+      "Otwartość na osoby z orzeczeniem o niepełnosprawności"
+    ],
+    "benefity": [
+      "Umowa o pracę od pierwszego dnia, na czas nieokreślony po roku",
+      "Gwarantowane podwyżki stażowe (pierwsza po roku)",
+      "Karta przedpłacona z comiesięcznym zasileniem na zakupy w ALDI",
+      "Prywatna opieka medyczna od 1 zł, darmowy pakiet sportowy, ubezpieczenie na życie",
+      "Bonus za polecenie pracownika"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [
+      {
+        "stanowisko": "Sprzedawca, Kowale ul. Glazurowa 29, pełny etat (PL_SL02569)",
+        "kwota": "Wynagrodzenie podstawowe z kartą przedpłaconą: 6050,00 zł brutto",
+        "zrodlo": "https://www.aldi.pl/praca/detail/sprzedawca-m-k-x-kowale-ul-glazurowa-29-pe-ny-etat-praca-rowniez-dla-osob-z-orzeczeniem-o-niepe-nosprawnosci-301989.html",
+        "stan_na": "2026-10-20"
+      }
+    ],
+    "zrodla": [
+      "https://www.aldi.pl/praca.html",
+      "https://www.aldi.pl/praca/praca-w-sklepie.html",
+      "https://www.aldi.pl/praca/oferty-pracy.html",
+      "https://www.aldi.pl/praca/detail/sprzedawca-m-k-x-kowale-ul-glazurowa-29-pe-ny-etat-praca-rowniez-dla-osob-z-orzeczeniem-o-niepe-nosprawnosci-301989.html"
+    ],
+    "uwagi": "289 ofert w dniu sprawdzenia. ALDI nie było na liście przykładów, dodane jako duży pracodawca masowy.",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Stokrotka",
+    "slug": "stokrotka",
+    "kariera_url": "https://kariera.stokrotka.pl/",
+    "stanowiska": [
+      "Kasjer-Sprzedawca",
+      "Sprzedawca na Stoisku Mięsnym",
+      "Pracownik Sklepu (także dla osób z orzeczeniem)",
+      "Magazynier-Sprzedawca",
+      "Zastępca Kierownika Sklepu"
+    ],
+    "proces": "Wybierz ofertę i kliknij 'Aplikuj' -> rozmowa z wybranymi kandydatami -> rozmowa z potencjalnym przełożonym -> adaptacja i szkolenia wdrożeniowe.",
+    "wymagania": [
+      "Brak wymogu doświadczenia ('wszystkiego Cię nauczymy')",
+      "Cały lub część etatu do wyboru",
+      "Szczegółowe wymagania z ogłoszeń: nie potwierdzono na oficjalnej stronie kariery"
+    ],
+    "benefity": [
+      "Umowa o pracę od pierwszego dnia",
+      "Karta świąteczna (także dla dzieci)",
+      "Dofinansowanie kart sportowych",
+      "Ubezpieczenie na życie na preferencyjnych warunkach",
+      "Bonus urlopowy",
+      "Szkolenia, awanse wewnętrzne"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [],
+    "zrodla": [
+      "https://kariera.stokrotka.pl/",
+      "https://kariera.stokrotka.pl/sklep/",
+      "https://kariera.stokrotka.pl/dobremiejsce/",
+      "https://kariera.stokrotka.pl/oferty-pracy/"
+    ],
+    "uwagi": "Pojedynczych ogłoszeń nie udało się otworzyć automatycznie – wymagania typu sanepid niepotwierdzone. Dodana zamiast firm niedostępnych. Wynagrodzenie nie jest publikowane na oficjalnej stronie kariery (w przejrzanych materiałach).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Rossmann",
+    "slug": "rossmann",
+    "kariera_url": "https://kariera.rossmann.pl/",
+    "stanowiska": [
+      "Asystent Klienta Drogerii",
+      "Magazynier (magazyn e-commerce / regionalny)",
+      "Zastępca Kierownika Drogerii",
+      "Oferty dla nastolatka ('Moje kieszonkowe')"
+    ],
+    "proces": "Wyszukiwarka ofert z filtrem lokalizacji, przycisk 'APLIKUJ' przy ogłoszeniu. Etapy i to, czy wymagane jest CV: nie potwierdzono na oficjalnej stronie kariery.",
+    "wymagania": [
+      "Praca od poniedziałku do soboty, także w niedziele handlowe",
+      "Praca z towarem, czasem w porze nocnej (dostawy)",
+      "Prowadzenie zmiany, obsługa kasy i sali",
+      "Ogłoszenia na 1/4, 1/2, 3/4 etatu (elastyczny grafik)"
+    ],
+    "benefity": [
+      "Umowa o pracę bez okresu próbnego",
+      "Platforma językowa e-tutor dla pracownika i bliskich",
+      "Program pasji 'Pozytywnie Zakręceni'",
+      "Strefa PeopleCare (psychoterapia, porady prawne/finansowe)",
+      "Wsparcie finansowe w okresie jesienno-zimowym",
+      "Pakiet Kultura (m.in. Netflix, Spotify, Empik GO)",
+      "Klub Zwierzaka, kolonie, wyprawka, becikowe, dofinansowanie wypoczynku, program poleceń"
+    ],
+    "obcokrajowcy": "Strona kariery ma wersję ukraińską (/ua/). Brak opisanych wymogów.",
+    "wynagrodzenie_oficjalne": [],
+    "zrodla": [
+      "https://kariera.rossmann.pl/",
+      "https://kariera.rossmann.pl/pracuj-w-drogerii",
+      "https://kariera.rossmann.pl/pracuj-w-drogerii/asystent-klienta-drogerii/22127,asystent-klienta-drogerii-m-k",
+      "https://kariera.rossmann.pl/benefity",
+      "https://kariera.rossmann.pl/pracuj-w-magazynie",
+      "https://kariera.rossmann.pl/ua/"
+    ],
+    "uwagi": "Sanepid i inne formalne wymagania nie są wymienione w przejrzanym ogłoszeniu. Wynagrodzenie nie jest publikowane na oficjalnej stronie kariery (w przejrzanych materiałach).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Hebe (Jeronimo Martins Drogerie i Farmacja)",
+    "slug": "hebe",
+    "kariera_url": "https://kariera.hebe.pl/",
+    "stanowiska": [
+      "Konsultant-Sprzedawca",
+      "Magazynier-Sprzedawca",
+      "Zastępca Kierownika Sklepu",
+      "Pracownik Centrum Dystrybucyjnego (Pruszków, Sosnowiec)"
+    ],
+    "proces": "Konsultant-Sprzedawca: aplikacja BEZ CV (5 min) -> gra wideo o pracy w drogerii (15 min) -> natychmiastowa informacja zwrotna (5 min) -> decyzja o spotkaniu z przełożonym maks. w 3 dni robocze. Stanowiska liderskie: kwestionariusz + 2 gry kompetencyjne.",
+    "wymagania": [
+      "Lubisz pracę z ludźmi i doradzanie klientom",
+      "Zaangażowanie, zainteresowanie kosmetykami",
+      "Magazynier-Sprzedawca: praca w ruchu, wysiłek fizyczny, wiedza kosmetyczna niewymagana",
+      "Praca zmianowa (grafik na cały miesiąc)"
+    ],
+    "benefity": [
+      "Umowa o pracę bez okresu próbnego (6 mies., 12 mies., nieokreślony po 18 mies.)",
+      "Premia zespołowa 360–1400 zł brutto zależnie od lokalizacji i stanowiska",
+      "Nagroda roczna (w 2024: 3150 zł brutto)",
+      "Doładowania świąteczne kafeterii, vouchery na zakupy w Hebe",
+      "Kafeteria benefitów, Multisport Plus, ubezpieczenie na życie, opieka medyczna",
+      "Bezzwrotne zapomogi, pożyczka 0%",
+      "Odzież pracownicza"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [
+      {
+        "stanowisko": "Konsultant-Sprzedawca (strona kariery)",
+        "kwota": "4670 – 4820 zł brutto (+150 zł po 18 mies.)",
+        "zrodlo": "https://kariera.hebe.pl/poznaj-prace-w-sklepy-hebe/",
+        "stan_na": "2026-10-20"
+      },
+      {
+        "stanowisko": "Zastępca Kierownika (strona kariery)",
+        "kwota": "5530 – 6170 zł brutto",
+        "zrodlo": "https://kariera.hebe.pl/poznaj-prace-w-sklepy-hebe/",
+        "stan_na": "2026-10-20"
+      },
+      {
+        "stanowisko": "Konsultant-Sprzedawca, oferta Łomża",
+        "kwota": "4810 – 4960 zł brutto/mies., pełny etat",
+        "zrodlo": "https://careers.jeronimomartins.com/Hebe/job/%C5%81om%C5%BCa-Konsultant-Sprzedawca-%28KM%29-PD-18-400/1370426755/",
+        "stan_na": "2026-10-20"
+      }
+    ],
+    "zrodla": [
+      "https://kariera.hebe.pl/",
+      "https://kariera.hebe.pl/poznaj-prace-w-sklepy-hebe/",
+      "https://careers.jeronimomartins.com/Hebe/search/?locale=pl_PL",
+      "https://careers.jeronimomartins.com/Hebe/job/%C5%81om%C5%BCa-Konsultant-Sprzedawca-%28KM%29-PD-18-400/1370426755/"
+    ],
+    "uwagi": "Kwoty na stronie 'Poznaj pracę' niższe niż w aktualnych ogłoszeniach – prawdopodobnie nieaktualne; brać kwotę z konkretnej oferty. Dodana zamiast firm niedostępnych.",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Pepco Poland",
+    "slug": "pepco",
+    "kariera_url": "https://careers.pepco.eu/Poland/?locale=pl_PL",
+    "stanowiska": [
+      "Kasjer – sprzedawca",
+      "Umowa Zlecenie – Sklep PEPCO",
+      "Lider zmiany",
+      "Kierownik sklepu"
+    ],
+    "proces": "Aplikacja online ('Aplikuj teraz') w portalu careers.pepco.eu (SAP SuccessFactors). Opis etapów ('Jak rekrutujemy do sklepów?') ładuje się dynamicznie – nie potwierdzono na oficjalnej stronie kariery.",
+    "wymagania": [
+      "Wykształcenie min. zawodowe (handlowe mile widziane)",
+      "Lubisz pracować z ludźmi",
+      "Obowiązki: obsługa kasy, otwarcie sklepu, rozładunek dostaw, ekspozycja towaru"
+    ],
+    "benefity": [
+      "Umowa o pracę (Kasjer-sprzedawca)",
+      "Premia za sprzedaż",
+      "Rabat pracowniczy do 25%",
+      "Godziny pracy wg ustalonego grafiku",
+      "Employee Assistance Program (EAP)",
+      "Program Pepcoversary (staż)"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [],
+    "zrodla": [
+      "https://careers.pepco.eu/Poland/?locale=pl_PL",
+      "https://careers.pepco.eu/Poland/go/Sklep/3832801/",
+      "https://careers.pepco.eu/job/Gliwice-Kasjer-sprzedawca-44-100/1449366233/"
+    ],
+    "uwagi": "Adres pepco.pl/kariera zwraca 404 – oficjalna polska sekcja jest na careers.pepco.eu. Wynagrodzenie nie jest publikowane na oficjalnej stronie kariery (w przejrzanych materiałach).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Action",
+    "slug": "action",
+    "kariera_url": "https://pl.action.jobs/",
+    "stanowiska": [
+      "Pracownik/Pracownica Sklepu (10–40 h tygodniowo)",
+      "Asystent/Asystentka Kierownika Sklepu",
+      "Kierownik Sklepu",
+      "Praca w centrum dystrybucji"
+    ],
+    "proces": "Aplikacja online ('Wyślij zgłoszenie teraz'); w FAQ: CV można przesłać w formacie txt, doc, docx lub pdf.",
+    "wymagania": [
+      "Wykształcenie co najmniej średnie",
+      "Elastyczny grafik min. 10 h tygodniowo, także wieczorami i w weekendy",
+      "Energia, praca w zespole"
+    ],
+    "benefity": [
+      "Umowa od 10 do 40 h tygodniowo, płatna każda minuta",
+      "Rabat 15% na wszystkie produkty",
+      "Bezpłatna opieka medyczna",
+      "Możliwość ubezpieczenia grupowego",
+      "Fundusz stypendialny dla dzieci pracowników",
+      "Szkolenia (Akademia Action), awanse wewnętrzne"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [
+      {
+        "stanowisko": "Pracownik/Pracownica Sklepu (oferta 240096, Jaworzno)",
+        "kwota": "od 5500 zł brutto/mies. przy pełnym etacie, zależnie od regionu",
+        "zrodlo": "https://pl.action.jobs/oferty-pracy/pracownikpracownica-sklepu-e125702",
+        "stan_na": "2026-10-20"
+      }
+    ],
+    "zrodla": [
+      "https://pl.action.jobs/",
+      "https://pl.action.jobs/dzialy-pracy/obszar-pracy-sklep",
+      "https://pl.action.jobs/oferty-pracy/praca-w-sklepie",
+      "https://pl.action.jobs/oferty-pracy/pracownikpracownica-sklepu-e125702",
+      "https://pl.action.jobs/o-firmie-action/czesto-zadawane-pytania"
+    ],
+    "uwagi": "208 ofert sklepowych w dniu sprawdzenia (129 Pracownik Sklepu, 74 Asystent Kierownika).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "IKEA Retail (Polska)",
+    "slug": "ikea",
+    "kariera_url": "https://www.ikea.com/pl/pl/this-is-ikea/work-with-us/",
+    "stanowiska": [
+      "Sprzedaż (doradca klienta)",
+      "Dział Kas",
+      "Dział Przepływu Towaru (logistyka sklepu)",
+      "IKEA Food (restauracja)",
+      "Dział Obsługi Klienta"
+    ],
+    "proces": "Oferty na jobs.ikea.com/pl: profil kandydata + ankieta dot. stanowiska; można dołączyć dowolny plik, który pozwoli Cię poznać (na niektóre stanowiska wymagane CV) -> telefon lub wideo-odpowiedzi w HireVue -> spotkanie zdalne lub osobiste z przełożonym -> oferta i onboarding. Pytania: studio.pracy.pl@ingka.ikea.com (Studio Pracy IKEA w Warszawie).",
+    "wymagania": [
+      "Otwarci na osoby bez doświadczenia i z doświadczeniem",
+      "Szczegółowe wymagania z ogłoszeń: nie potwierdzono na oficjalnej stronie kariery"
+    ],
+    "benefity": [
+      "Rozszerzona prywatna opieka medyczna (możliwość objęcia rodziny)",
+      "Dodatkowy plan emerytalny, program lojalnościowy TACK!",
+      "Roczny system premiowy",
+      "Ubezpieczenie UNIQA opłacane przez IKEA",
+      "26 dni urlopu od początku; 4 dodatkowe tygodnie płatnego urlopu ojcowskiego",
+      "Rabat 15% i kredyt pracowniczy 0%",
+      "Nagrody jubileuszowe"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [],
+    "zrodla": [
+      "https://www.ikea.com/pl/pl/this-is-ikea/work-with-us/",
+      "https://www.ikea.com/pl/pl/this-is-ikea/work-with-us/rekrutacja-pub82350da0/",
+      "https://www.ikea.com/pl/pl/this-is-ikea/work-with-us/benefity-pubeded27c0/",
+      "https://jobs.ikea.com/pl"
+    ],
+    "uwagi": "Stanowiska podane jako działy sklepu z opisu IKEA; listy ofert jobs.ikea.com nie przeglądano. Wynagrodzenie nie jest publikowane na oficjalnej stronie kariery (w przejrzanych materiałach).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Leroy Merlin Polska",
+    "slug": "leroy-merlin",
+    "kariera_url": "https://kariera.leroymerlin.pl/",
+    "stanowiska": [
+      "Kasjer/Kasjerka",
+      "Doradca/Doradczyni Klienta",
+      "Pracownik/Pracownica magazynu sklepu",
+      "Dział Serwisu i Usług"
+    ],
+    "proces": "Na stanowiska Kasjer, Doradca Klienta i Pracownik magazynu sklepu można 'Aplikować bez CV'. Etapy: formularz aplikacyjny (na wybranych stanowiskach obowiązkowa ankieta) -> rozmowa z działem rekrutacji -> spotkanie z bezpośrednim przełożonym.",
+    "wymagania": [
+      "Język polski w stopniu komunikatywnym (dla obcokrajowców)",
+      "Magazyn: uprawnienia UDT na wózki mile widziane, niewymagane – firma zapewnia szkolenie i uprawnienia",
+      "Praca zmianowa (najczęściej poranna/popołudniowa)",
+      "Osoby z niepełnosprawnością: orzeczenie lekarskie dopuszczające do pracy na stanowisku"
+    ],
+    "benefity": [
+      "Umowa o pracę (99% pracowników)",
+      "Premia kwartalna do 30% 3-miesięcznego wynagrodzenia (zależna od wyników sklepu)",
+      "Udział w wynikach i akcjonariat",
+      "Prywatna opieka medyczna, ubezpieczenie grupowe",
+      "Kafeteria MyBenefit, goFLUENT, Mindgram",
+      "Rabat w sklepach Leroy Merlin i w Auchan",
+      "Fundusz mieszkaniowy, dofinansowanie termomodernizacji"
+    ],
+    "obcokrajowcy": "Tak (FAQ): 'Do Ekipy może dołączyć każdy, kto zna język polski w stopniu komunikatywnym'; na rozmowie pytają o dotychczasowe zatrudnienie i pobyt w Polsce.",
+    "wynagrodzenie_oficjalne": [],
+    "zrodla": [
+      "https://kariera.leroymerlin.pl/",
+      "https://kariera.leroymerlin.pl/sklepy.html",
+      "https://kariera.leroymerlin.pl/wyszukiwarka-aplikuj-bez-cv?area=Sklep"
+    ],
+    "uwagi": "194 oferty sklepowe w dniu sprawdzenia. Kwoty wynagrodzeń nie są publikowane. Wynagrodzenie nie jest publikowane na oficjalnej stronie kariery (w przejrzanych materiałach).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Castorama Polska",
+    "slug": "castorama",
+    "kariera_url": "https://kariera.castorama.pl/",
+    "stanowiska": [
+      "Doradca/Doradczyni Handlowy/-a (pełny, 3/4, 1/2 etatu)",
+      "Pracownik/-czka Magazynu (Sektor Logistyki)",
+      "Technik Serwisu",
+      "Zastępca/-czyni Kierownika Sektora Handlowego"
+    ],
+    "proces": "Wyszukiwarka ofert (wymaga zgody na cookies) i aplikacja online (eRecruiter). Gdy brak oferty – formularz aplikacyjny do konkretnego sklepu (osobne formularze dla sklepów Big box oraz Smart/Express). Wybrane osoby zapraszane na spotkanie stacjonarne lub online.",
+    "wymagania": [
+      "Można aplikować bez doświadczenia",
+      "Praca zmianowa, w równoważnym czasie pracy; sklepy otwarte pon–sob i w niedziele handlowe",
+      "Szczegółowe wymagania z ogłoszeń: nie potwierdzono na oficjalnej stronie kariery"
+    ],
+    "benefity": [
+      "Umowa o pracę od samego początku",
+      "Platforma kafeteryjna (karta sportowa, kino, zniżki)",
+      "Pakiet opieki medycznej, ubezpieczenie na życie, ZFŚS",
+      "Szkolenia od pierwszego dnia, możliwość uprawnień na wózki widłowe"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [],
+    "zrodla": [
+      "https://kariera.castorama.pl/",
+      "https://kariera.castorama.pl/sklepy/",
+      "https://kariera.castorama.pl/faq/",
+      "https://kariera.castorama.pl/poznajmy-sie/",
+      "https://kariera.castorama.pl/wyszukiwarka-ofert-pracy/"
+    ],
+    "uwagi": "Adres www.castorama.pl/kariera prowadzi do kariera.castorama.pl. Pojedynczych ogłoszeń nie otwierano. Wynagrodzenie nie jest publikowane na oficjalnej stronie kariery (w przejrzanych materiałach).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "LPP (Reserved, Cropp, House, Mohito, Sinsay)",
+    "slug": "lpp",
+    "kariera_url": "https://www.lpp.com/kariera/",
+    "stanowiska": [
+      "Sprzedawca/Sprzedawczyni w salonach LPP (0,25–1 etatu)",
+      "Lider zmiany",
+      "Pracownik magazynu w salonach Reserved",
+      "Pracownik LPP Logistics"
+    ],
+    "proces": "Aplikacja online przyciskiem 'APLIKUJ' -> rozmowa telefoniczna z rekruterem -> spotkanie z managerem zespołu -> informacja zwrotna niezależnie od decyzji, do 2 tygodni od ostatniego etapu.",
+    "wymagania": [
+      "Gotowość do pracy w systemie zmianowym i w weekendy",
+      "Dobry kontakt z ludźmi, współpraca zespołowa",
+      "Pozytywna energia i zaangażowanie",
+      "Możliwe zmiany także poza salonem macierzystym"
+    ],
+    "benefity": [
+      "25% zniżki w salonach marek LPP (także dla bliskich)",
+      "Opieka medyczna, karta sportowa, ubezpieczenie na życie na preferencyjnych warunkach",
+      "Program wsparcia heLPP (porady psychologiczne, finansowe, prawne)",
+      "Platforma e-learningowa"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [],
+    "zrodla": [
+      "https://www.lpp.com/kariera/",
+      "https://www.lpp.com/kariera/odkryj-lpp/stanowiska/salony/sprzedawca-w-salonach-lpp/",
+      "https://www.lpp.com/kariera/oferty-pracy/sprzedawca-sprzedawczyni-025-etatu-cropp-vivo-pila-pila-1773202"
+    ],
+    "uwagi": "Wynagrodzenie nie jest publikowane na oficjalnej stronie kariery (w przejrzanych materiałach).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Amazon (Amazon Fulfillment Poland)",
+    "slug": "amazon",
+    "kariera_url": "https://www.amazon.jobs/content/pl/teams/fulfillment-and-operations/poland",
+    "stanowiska": [
+      "Pracownik/Pracownica magazynu (pełny etat)",
+      "Pracownik/Pracownica magazynu (pół etatu / praca w weekend)",
+      "Pracownik magazynowy – Operator wózka widłowego",
+      "Fulfilment Associate (dla osób anglojęzycznych)"
+    ],
+    "proces": "Kliknij ofertę i zarejestruj się w portalu -> sprawdź dane i podpisz aplikację e-podpisem (imię i nazwisko) -> zaproszenie na rozmowę -> spotkanie z rekruterem, po pozytywnym wyniku 'tymczasowy przydział'. Wiele ofert prowadzą agencje (Adecco, Randstad – oznaczone w tytule). Dla osób z niepełnosprawnością: spotkania informacyjne online w każdą środę o 11:00.",
+    "wymagania": [
+      "Pełnoletność",
+      "Gotowość do pracy zmianowej, również w weekendy",
+      "Dobra znajomość języka polskiego i/lub angielskiego",
+      "Wysoka motywacja; doświadczenie niewymagane"
+    ],
+    "benefity": [
+      "26 dni urlopu rocznie",
+      "System 4 dni pracy / 3 dni wolnego; możliwa część etatu i weekendy",
+      "Obiad za 1 zł, darmowe napoje, kawa i herbata",
+      "Bezpłatny transport autobusowy z wybranych miejscowości",
+      "Klimatyzowane, nowoczesne środowisko pracy"
+    ],
+    "obcokrajowcy": "Tak: oferty publikowane także po ukraińsku ('Працівник/Працівниця складу') oraz dla osób anglojęzycznych ('English speakers only'); wymóg: polski i/lub angielski.",
+    "wynagrodzenie_oficjalne": [
+      {
+        "stanowisko": "Pracownik/Pracownica magazynu",
+        "kwota": "38,52 zł brutto/godz. (stawka podstawowa + premia specjalna za frekwencję) + 2200 zł brutto ekstra dodatku czasowego (szczegóły w procesie rekrutacji)",
+        "zrodlo": "https://www.amazon.jobs/content/pl/teams/fulfillment-and-operations/poland",
+        "stan_na": "2026-10-20"
+      }
+    ],
+    "zrodla": [
+      "https://www.amazon.jobs/content/pl/teams/fulfillment-and-operations/poland"
+    ],
+    "uwagi": "Zatrudnienie początkowe często przez agencję pracy tymczasowej – warto to zaznaczyć na stronie SEO.",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "DHL (DHL Supply Chain / DHL eCommerce Polska)",
+    "slug": "dhl",
+    "kariera_url": "https://careers.dhl.com/global/en/search-results?qcountry=Poland",
+    "stanowiska": [
+      "Pracownik magazynowy (także zmiana nocna)",
+      "Magazynier/Magazynierka (1/2, 3/4 etatu)",
+      "Operator wózka widłowego (także wysokiego składu)",
+      "Starszy magazynier"
+    ],
+    "proces": "Aplikacja online z CV w globalnym portalu DHL. Odpowiedź tylko do zakwalifikowanych – brak kontaktu w ciągu 14 dni roboczych oznacza wynik negatywny. Rozmowa telefoniczna ze specjalistą ds. rekrutacji, w zależności od procesu spotkanie w oddziale; decyzja e-mailem lub telefonicznie.",
+    "wymagania": [
+      "Operator wózka: doświadczenie w magazynie/produkcji, uprawnienia UDT, obsługa wózka wysokiego składu, praca ze skanerem",
+      "Dyspozycyjność do pracy w systemie 2-zmianowym",
+      "Prawo jazdy kat. B – mile widziane (operator)",
+      "Praca w oparciu o normy ilościowo-jakościowe"
+    ],
+    "benefity": [
+      "Opieka medyczna Medicover",
+      "Wczasy pod gruszą, aplikacja kafeteryjna, bony świąteczne",
+      "Dofinansowanie Multisport",
+      "Obiad za 1 zł",
+      "Ubezpieczenie grupowe na preferencyjnych warunkach",
+      "Bezpłatny transport pracowniczy (wybrane lokalizacje)",
+      "Ponad 70% rekrutacji wewnętrznych"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [],
+    "zrodla": [
+      "https://careers.dhl.com/global/en/search-results?qcountry=Poland",
+      "https://careers.dhl.com/global/en/job/DPDHGLOBALAV377908ENGLOBALEXTERNAL/Operator-W%C3%B3zka-Wid%C5%82owego-Wysokiego-Sk%C5%82adu-k-m"
+    ],
+    "uwagi": "Brak dedykowanej polskiej strony kariery (adresy dhl.com/pl-pl/... nie odpowiadały). Wyszukiwanie 'kurier' dla Polski zwróciło 0 ofert – rekrutacja kurierów DHL niepotwierdzona. Wynagrodzenie nie jest publikowane na oficjalnej stronie kariery (w przejrzanych materiałach).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "DPD Polska",
+    "slug": "dpd",
+    "kariera_url": "https://kariera.dpd.com.pl/",
+    "stanowiska": [
+      "Kurier/Kurierka DPD (umowa kurierska, B2B)",
+      "Kurier/Kurierka DPD z własnym autem",
+      "Wsparcie Prac Magazynowych (umowa zlecenia)",
+      "Kierownik Magazynu"
+    ],
+    "proces": "Mapa ofert wg miejscowości na kariera.dpd.com.pl, ogłoszenia w eRecruiter; 'prosimy o przesłanie CV poprzez aplikację'; odpowiedź tylko do wybranych. Osobny serwis rekrutacji kurierskich: kurier.dpd.com.pl.",
+    "wymagania": [
+      "Kurier: prawo jazdy min. kat. B i doświadczenie w prowadzeniu pojazdu",
+      "Dyspozycyjność, kultura osobista, samodzielność, rzetelność",
+      "Magazyn: elastyczność godzin, dokładność, praca w zespole"
+    ],
+    "benefity": [
+      "Pracownicy: prywatna opieka medyczna, NNW, platforma benefitów, świadczenia świąteczne, wczasy pod gruszą, nagrody stażowe, becikowe, szkolenia (w tym językowe)",
+      "Kurierzy: wynajem samochodu, wsparcie księgowe przy działalności, karta paliwowa z rabatem, gwarantowane wynagrodzenie na start, opcjonalnie opieka medyczna i Multisport"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [],
+    "zrodla": [
+      "https://kariera.dpd.com.pl/",
+      "https://kurier.dpd.com.pl/",
+      "https://skk.erecruiter.pl/Offer.aspx?oid=4979163&cfg=FA54905FAA184F7D85C4BCF6780F127D&ejoId=819445&ejorId=553355&comId=480",
+      "https://skk.erecruiter.pl/Offer.aspx?oid=4979128&cfg=FA54905FAA184F7D85C4BCF6780F127D&ejoId=819431&ejorId=553351&comId=480"
+    ],
+    "uwagi": "Kurierzy współpracują na podstawie umowy kurierskiej (działalność gospodarcza), a nie umowy o pracę; magazyn – umowa zlecenia. Wynagrodzenie nie jest publikowane na oficjalnej stronie kariery (w przejrzanych materiałach).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Poczta Polska",
+    "slug": "poczta-polska",
+    "kariera_url": "https://www.poczta-polska.pl/kariera/",
+    "stanowiska": [
+      "Listonosz",
+      "Pracownik placówki pocztowej",
+      "Pracownik sortowni",
+      "Kierowca",
+      "Pracownik ochrony"
+    ],
+    "proces": "Oferty publikowane na poczta-polska.pl/kariera/oferty-pracy (setki lokalizacji). Gdy brak pasującej oferty – CV przez formularz eRecruiter (https://form.erecruiter.pl/form/08dffb517ed048bc8b421d99df016899). Strona listonosza obiecuje 'szybką decyzję rekrutacyjną'.",
+    "wymagania": [
+      "Listonosz: umowa o pracę, praca od poniedziałku do piątku",
+      "Konkretne wymagania z ogłoszeń: nie potwierdzono na oficjalnej stronie kariery"
+    ],
+    "benefity": [
+      "Dofinansowanie wypoczynku (także rodziny), wczasy pod gruszą",
+      "Dofinansowanie kultury i sportu, karta Multisport",
+      "Ubezpieczenie na życie, opieka medyczna na preferencyjnych warunkach",
+      "PPK",
+      "Pożyczki mieszkaniowe, zapomogi",
+      "Dofinansowanie paczek świątecznych dla dzieci",
+      "Zniżki na paliwo (BiznesTank – Orlen), rabaty u partnerów, nagrody za polecenie"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [],
+    "zrodla": [
+      "https://www.poczta-polska.pl/kariera/",
+      "https://www.poczta-polska.pl/kariera/benefity/",
+      "https://www.poczta-polska.pl/kariera/oferty-pracy/",
+      "https://www.poczta-polska.pl/kariera/praca-listonosz/"
+    ],
+    "uwagi": "Serwis blokuje automatyczny dostęp (Incapsula) – lista ofert i wymagania z ogłoszeń nie zostały odczytane. Dane niepełne. Wynagrodzenie nie jest publikowane na oficjalnej stronie kariery (w przejrzanych materiałach).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Allegro (magazyny i logistyka)",
+    "slug": "allegro",
+    "kariera_url": "https://jobs.allegro.eu/job-areas/warehouses-couriers/",
+    "stanowiska": [
+      "Magazynier/Magazynierka (magazyn kurierski / centralny)",
+      "Operator Wózka Widłowego",
+      "Delivery Logistics Operator",
+      "Dispatcher"
+    ],
+    "proces": "Aplikacja online przez portal careers.allegro.eu (SAP SuccessFactors). Po zatrudnieniu szkolenie z procesów magazynowych. Etapy rekrutacji: nie potwierdzono na oficjalnej stronie kariery.",
+    "wymagania": [
+      "Doświadczenie w pracy w magazynie",
+      "Obsługa skanera (mile widziana) i komputera",
+      "Dokładność",
+      "Praca w systemie zmianowym, soboty pracujące"
+    ],
+    "benefity": [
+      "430 pkt/mies. w MyBenefit (opieka medyczna, karty sportowe, dojazdy, ubezpieczenia)",
+      "Posiłek za 1 zł (magazyn centralny)",
+      "Bezpłatny transport do Adamowa z wielu miejscowości",
+      "Mindgram (wsparcie psychologiczne 24/7)",
+      "Szkolenia, kursy językowe, mentoring",
+      "ZFŚS, dofinansowanie okularów, darmowe Allegro Smart!"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [
+      {
+        "stanowisko": "Magazynier/Magazynierka, Adamów",
+        "kwota": "Podstawa na start 5 500 zł brutto; premia za wydajność do 20%; dodatek nocny ok. 6 zł/h; łącznie 'nawet do 9 260 zł brutto miesięcznie w szczycie sezonu'",
+        "zrodlo": "https://careers.allegro.eu/job/Adam%C3%B3w-MagazynierMagazynierka-05-825/1369920355/",
+        "stan_na": "2026-10-20"
+      }
+    ],
+    "zrodla": [
+      "https://jobs.allegro.eu/",
+      "https://jobs.allegro.eu/job-areas/warehouses-couriers/",
+      "https://careers.allegro.eu/job/Adam%C3%B3w-MagazynierMagazynierka-05-825/1369920355/"
+    ],
+    "uwagi": "Allegro ma mniej ofert na zwykłe stanowiska niż sieci handlowe; zostawione, bo było w briefie. allegro.pl/praca blokuje dostęp (403).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "McDonald's Polska",
+    "slug": "mcdonalds",
+    "kariera_url": "https://praca.mcdonalds.pl/",
+    "stanowiska": [
+      "Pracownik/Pracownica restauracji",
+      "Pracownik/Pracownica zmiany nocnej",
+      "Pracownik/Pracownica McCafé",
+      "Lider/Liderka Gościnności",
+      "Konserwator/Konserwatorka",
+      "Instruktor/Instruktorka"
+    ],
+    "proces": "Wyszukiwarka ofert z geolokalizacją, aplikowanie online z pomocą wirtualnej asystentki 'Oliwia' na praca.mcdonalds.pl albo wypełnienie ulotki rekrutacyjnej w restauracji. W ogłoszeniu podany numer telefonu restauracji.",
+    "wymagania": [
+      "Nie trzeba mieć doświadczenia",
+      "Energia, otwartość na współpracę, gotowość do nauki",
+      "Praca zmianowa, możliwa wyłącznie zmiana nocna (wybrane lokalizacje)"
+    ],
+    "benefity": [
+      "Umowa o pracę dla wszystkich (deklaracja na stronie)",
+      "Elastyczny grafik, także niepełny wymiar",
+      "Dodatek 20% za godziny nocne 23:00–7:00",
+      "Zniżki w restauracjach w całej Polsce, rabaty na posiłki w pracy",
+      "Po okresie próbnym +5 zł za każdą godzinę w niedzielę i święto (przykładowa oferta)",
+      "Medicover Sport od 49 zł/mies., sprzęt i ubranie robocze, szkolenia"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [
+      {
+        "stanowisko": "Pracownik/Pracownica Restauracji, McDonald's Jędrzejów S7 (Job ID P8-328142-2-PL, publikacja 12.10.2026)",
+        "kwota": "od 28,70 zł brutto/godz.",
+        "zrodlo": "https://praca.mcdonalds.pl/oferta-pracy/1957/",
+        "stan_na": "2026-10-20"
+      }
+    ],
+    "zrodla": [
+      "https://praca.mcdonalds.pl/",
+      "https://praca.mcdonalds.pl/role/?openPositionAccordion=pracownik-pracownica-restauracji",
+      "https://praca.mcdonalds.pl/oferty-pracy/",
+      "https://praca.mcdonalds.pl/oferta-pracy/1957/"
+    ],
+    "uwagi": "1109 ofert restauracyjnych w dniu sprawdzenia. Stawka z pojedynczej oferty – w innych restauracjach może się różnić. Adres mcdonalds.pl/kariera zwraca 404.",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "KFC (AmRest)",
+    "slug": "kfc",
+    "kariera_url": "https://careers.amrest.eu/KFC/?locale=pl_PL",
+    "stanowiska": [
+      "Pracownik/Pracowniczka Restauracji KFC",
+      "(ścieżka awansu do menedżera)"
+    ],
+    "proces": "Aplikacja online ('Aplikuj teraz') w portalu AmRest Careers (SAP SuccessFactors); możliwość dołączenia do sieci talentów (e-mail + kilka informacji).",
+    "wymagania": [
+      "Zapał i chęć do nauki",
+      "Pozytywne nastawienie",
+      "Praca zespołowa"
+    ],
+    "benefity": [
+      "Elastyczny grafik",
+      "+20% za pracę 22:30–6:30 (przy umowie o pracę)",
+      "Umowa zlecenie lub umowa o pracę (UoP po 3 miesiącach)",
+      "Premia za polecenie min. 400 zł",
+      "Life Compass (wsparcie osobiste, prawne, finansowe)",
+      "Posiłek pracowniczy w atrakcyjnej cenie, lekcje 12 języków",
+      "Zniżki w KFC, Pizza Hut, Burger King, Starbucks; Medicover Sport"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [
+      {
+        "stanowisko": "Pracownik/Pracowniczka Restauracji KFC Piotrkowska, Łódź (oferta z 27 wrz 2026)",
+        "kwota": "31,40 zł brutto/godz. (umowa zlecenie)",
+        "zrodlo": "https://careers.amrest.eu/KFC/job/%C5%81%C3%B3d%C5%BA-PracownikPracowniczka-Restauracji-KFC-Piotrkowska-90-425/1362638155/",
+        "stan_na": "2026-10-20"
+      }
+    ],
+    "zrodla": [
+      "https://careers.amrest.eu/KFC/?locale=pl_PL",
+      "https://careers.amrest.eu/KFC/search/?createNewAlert=false&q=&locationsearch=Polska&locale=pl_PL",
+      "https://careers.amrest.eu/KFC/job/%C5%81%C3%B3d%C5%BA-PracownikPracowniczka-Restauracji-KFC-Piotrkowska-90-425/1362638155/"
+    ],
+    "uwagi": "437 ofert w Polsce w dniu sprawdzenia. kariera.kfc.pl przekierowuje do praca.kfc.pl -> careers.amrest.eu.",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Starbucks (AmRest Coffee)",
+    "slug": "starbucks",
+    "kariera_url": "https://careers.amrest.eu/Starbucks/?locale=pl_PL",
+    "stanowiska": [
+      "Barista/Baristka Kawiarni Starbucks"
+    ],
+    "proces": "Aplikacja online ('Aplikuj teraz') w portalu AmRest Careers.",
+    "wymagania": [
+      "Dyspozycyjność: poranki, wieczory, weekendy, święta",
+      "Punktualność i obecność",
+      "Przestrzeganie standardów ubioru i zasad operacyjnych",
+      "Spokój w stresujących sytuacjach",
+      "Doświadczenie nie jest najważniejsze – liczy się szybkie uczenie się"
+    ],
+    "benefity": [
+      "Darmowe napoje i posiłki w preferencyjnych cenach w trakcie zmiany",
+      "Dwie paczki kawy/kapsułek co miesiąc za 1 zł",
+      "Zniżki w Starbucks, KFC, Pizza Hut, Burger King",
+      "Szkolenia, GoFluent, Life Compass",
+      "Odpłatna prywatna opieka medyczna i Medicover Sport",
+      "Premia za polecenie, grafik dopasowany do potrzeb"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [
+      {
+        "stanowisko": "Barista/Baristka – Starbucks Focus, Bydgoszcz (oferta z 19 paź 2026)",
+        "kwota": "31,40 zł brutto/godz. (umowa zlecenie)",
+        "zrodlo": "https://careers.amrest.eu/starbucks/job/Bydgoszcz-BaristaBaristka-Kawiarni-Starbucks-Focus-85-097/1353618555/",
+        "stan_na": "2026-10-20"
+      }
+    ],
+    "zrodla": [
+      "https://careers.amrest.eu/Starbucks/?locale=pl_PL",
+      "https://careers.amrest.eu/search/?q=barista&locationsearch=Polska&locale=pl_PL",
+      "https://careers.amrest.eu/starbucks/job/Bydgoszcz-BaristaBaristka-Kawiarni-Starbucks-Focus-85-097/1353618555/"
+    ],
+    "uwagi": "98 ofert barista w Polsce w dniu sprawdzenia. starbucks.pl/kariera zwraca 404.",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Burger King (AmRest)",
+    "slug": "burger-king",
+    "kariera_url": "https://careers.amrest.eu/BurgerKing/?locale=pl_PL",
+    "stanowiska": [
+      "Pracownik/Pracowniczka Restauracji Burger King"
+    ],
+    "proces": "Aplikacja online ('Aplikuj teraz') w portalu AmRest Careers.",
+    "wymagania": [
+      "Chęć nauki i otwartość",
+      "Współpraca z zespołem",
+      "Pozytywne nastawienie"
+    ],
+    "benefity": [
+      "Elastyczny grafik",
+      "+20% za pracę 22:30–6:30 (UoP)",
+      "Umowa zlecenie lub UoP (po 3 miesiącach)",
+      "Premia za polecenie min. 400 zł, Life Compass",
+      "Posiłek pracowniczy, lekcje 12 języków",
+      "Zniżki w markach AmRest, Medicover Sport"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [
+      {
+        "stanowisko": "Pracownik/Pracowniczka Restauracji Burger King Manufaktura, Łódź",
+        "kwota": "31,40 zł brutto/godz. (umowa zlecenie)",
+        "zrodlo": "https://careers.amrest.eu/BurgerKing/job/%C5%81%C3%B3d%C5%BA-PracownikPracowniczka-Restauracji-Burger-King-Manufaktura-91-071/1354005355/",
+        "stan_na": "2026-10-20"
+      }
+    ],
+    "zrodla": [
+      "https://careers.amrest.eu/BurgerKing/search/?q=&locationsearch=Polska&locale=pl_PL",
+      "https://careers.amrest.eu/BurgerKing/job/%C5%81%C3%B3d%C5%BA-PracownikPracowniczka-Restauracji-Burger-King-Manufaktura-91-071/1354005355/"
+    ],
+    "uwagi": "47 ofert w Polsce. Dodana zamiast firm niedostępnych.",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "Pizza Hut (AmRest)",
+    "slug": "pizza-hut",
+    "kariera_url": "https://careers.amrest.eu/PizzaHut/?locale=pl_PL",
+    "stanowiska": [
+      "Pracownik/Pracowniczka Restauracji Pizza Hut (kuchnia, sala, dostawa)"
+    ],
+    "proces": "Aplikacja online ('Aplikuj teraz') w portalu AmRest Careers.",
+    "wymagania": [
+      "Lubisz pracę z ludźmi i współpracę zespołową",
+      "Otwartość na naukę",
+      "Dbałość o jakość, odnajdywanie się w dynamicznym środowisku"
+    ],
+    "benefity": [
+      "Elastyczny grafik",
+      "+20% za pracę 22:30–6:30 (UoP)",
+      "Umowa zlecenie lub UoP (po 3 miesiącach)",
+      "Premia za polecenie min. 400 zł, Life Compass",
+      "Posiłek pracowniczy, lekcje 12 języków",
+      "Zniżki w markach AmRest, Medicover Sport"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [
+      {
+        "stanowisko": "Pracownik/Pracowniczka Restauracji Pizza Hut Metropolia, Gdańsk",
+        "kwota": "31,40 zł brutto/godz. (umowa zlecenie)",
+        "zrodlo": "https://careers.amrest.eu/PizzaHut/job/Gda%C5%84sk-PracownikPracowniczka-Restauracji-Pizza-Hut-Metropolia-80-452/1352004755/",
+        "stan_na": "2026-10-20"
+      }
+    ],
+    "zrodla": [
+      "https://careers.amrest.eu/PizzaHut/search/?q=&locationsearch=Polska&locale=pl_PL",
+      "https://careers.amrest.eu/PizzaHut/job/Gda%C5%84sk-PracownikPracowniczka-Restauracji-Pizza-Hut-Metropolia-80-452/1352004755/"
+    ],
+    "uwagi": "155 ofert w Polsce. Dodana zamiast firm niedostępnych.",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "ORLEN (stacje paliw)",
+    "slug": "orlen",
+    "kariera_url": "https://www.orlen.pl/pl/praca-na-stacjach",
+    "stanowiska": [
+      "Kasjer/Kasjerka (obsługa klientów na stacji)",
+      "Osoba utrzymująca porządek",
+      "Obsługa klientów na podjeździe",
+      "Pracownik/Pracownica kuchni"
+    ],
+    "proces": "Strona kieruje do mapy stacji; zatrudnia Prowadzący/Prowadząca stację. Sposób aplikowania: nie potwierdzono na oficjalnej stronie kariery. Etaty w ORLEN S.A. (głównie specjaliści) – orlen.pl/pl/kariera/oferty-pracy.",
+    "wymagania": [
+      "Brak wymogu doświadczenia (strona zachęca osoby szukające pierwszej pracy)",
+      "Możliwość łączenia z nauką, elastyczny czas pracy"
+    ],
+    "benefity": [
+      "Wpływ na grafik",
+      "Tańsze paliwo i zakupy na stacji",
+      "Szkolenia Akademia Orłów (e-learning, warsztaty)",
+      "Ścieżka awansu do kierownika / prowadzącego stację"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [],
+    "zrodla": [
+      "https://www.orlen.pl/pl/kariera",
+      "https://www.orlen.pl/pl/praca-na-stacjach",
+      "https://www.orlen.pl/pl/praca-na-stacjach/pracownik-lub-pracownica-stacji"
+    ],
+    "uwagi": "WAŻNE: 'ORLEN nie jest formalnym pracodawcą dla osób pracujących na stacji paliw. Pracowników zatrudnia Prowadzący lub Prowadząca stację' (własna działalność). Strona SEO powinna to wyraźnie zaznaczyć. Wynagrodzenie nie jest publikowane na oficjalnej stronie kariery (w przejrzanych materiałach).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "PKP Intercity",
+    "slug": "pkp-intercity",
+    "kariera_url": "https://kariera.intercity.pl/",
+    "stanowiska": [
+      "Konduktor/Konduktorka",
+      "Kasjer/Kasjerka",
+      "Maszynista/Maszynistka",
+      "Obsługa klienta i sprzedaż"
+    ],
+    "proces": "Wyślij CV przez portal (SAP SuccessFactors) -> telefon do wybranych -> spotkanie online (informacje organizacyjne + weryfikacja angielskiego) -> rozmowa indywidualna osobiście -> szkolenie (dla konduktorów start w styczniu 2027, na umowie zlecenie), potem umowa o pracę. Aplikacje na konduktora do 02.11.2026.",
+    "wymagania": [
+      "Minimum średnie wykształcenie",
+      "Doświadczenie w pracy z klientem",
+      "Angielski na poziomie podstawowej komunikacji (dodatkowy język – atut)",
+      "Swobodna obsługa komputera, tabletu, urządzeń pokładowych",
+      "Gotowość do pracy w różnych godzinach (całodobowo)"
+    ],
+    "benefity": [
+      "Zniżka na przejazdy kolejowe",
+      "Pakiety medyczne i sportowe",
+      "Dofinansowanie nauki i szkoleń, wczasów",
+      "Drużyny sportowe firmowe",
+      "Umowa o pracę (po szkoleniu)"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [],
+    "zrodla": [
+      "https://kariera.intercity.pl/",
+      "https://kariera.intercity.pl/go/Konduktor/9628855/",
+      "https://kariera.intercity.pl/go/Kasjer/9628955/",
+      "https://kariera.intercity.pl/job/Konduktor-%28km%29/3626-pl_PL"
+    ],
+    "uwagi": "Mniejsza skala niż handel (4 oferty konduktorskie w dniu sprawdzenia), rekrutacja kursowa. Wynagrodzenie nie jest publikowane na oficjalnej stronie kariery (w przejrzanych materiałach).",
+    "stan_na": "2026-10-20"
+  },
+  {
+    "firma": "CCC (MODIVO Platform)",
+    "slug": "ccc",
+    "kariera_url": "https://career.modivoplatform.com/pl/pl/shop/ccc",
+    "stanowiska": [
+      "Sprzedawca CCC",
+      "Sprzedawca HalfPrice",
+      "Sprzedawca – zleceniobiorca",
+      "Praca w logistyce (MODIVO)"
+    ],
+    "proces": "CV na wybraną ofertę -> analiza CV -> rozmowa telefoniczna -> spotkanie rekrutacyjne. Gdy brak oferty – 'Prześlij CV' do bazy.",
+    "wymagania": [
+      "Zaangażowanie i proaktywność",
+      "Współpraca i chęć rozwoju",
+      "Otwartość na klientów, pasja do pracy z produktem",
+      "Zainteresowanie modą – mile widziane",
+      "Praca zmianowa (grafik)"
+    ],
+    "benefity": [
+      "Umowa o pracę",
+      "Rabaty w CCC, eobuwie.pl, MODIVO, HalfPrice",
+      "Buty służbowe finansowane przez firmę",
+      "Miesięczny system premiowy, konkursy",
+      "Multisport, BeActive, LuxMed, dodatkowe ubezpieczenie",
+      "Program poleceń, e-learning",
+      "Dodatkowe przywileje dla osób z niepełnosprawnością (krótszy czas pracy, dodatkowy urlop)"
+    ],
+    "obcokrajowcy": "Brak informacji.",
+    "wynagrodzenie_oficjalne": [],
+    "zrodla": [
+      "https://career.modivoplatform.com/pl/pl/",
+      "https://career.modivoplatform.com/pl/pl/shop/ccc",
+      "https://career.modivoplatform.com/pl/pl/offer/9409/sprzedawca-ccc-nisko-park-handlowy-k-n"
+    ],
+    "uwagi": "kariera.ccc.eu przekierowuje na kariera.grupaccc.eu -> career.modivoplatform.com. 239 ofert sklepowych. Dodana zamiast firm niedostępnych. Wynagrodzenie nie jest publikowane na oficjalnej stronie kariery (w przejrzanych materiałach).",
+    "stan_na": "2026-10-20"
+  }
+]
