@@ -70,12 +70,16 @@ test('Termin: poniedziałek od 6:30 czasu polskiego, identyfikator tygodnia = po
 });
 
 test('Lejek: etapy raz na osobę, język, źródło; raport tekstowy', async () => {
-  const app = express(); app.set('trust proxy', true); an.analyticsRoutes(app, BASE);
+  const app = express(); app.set('trust proxy', true); an.analyticsRoutes(app, BASE); app.post('/zamowienie', (req, res) => res.json(an.visitInfo(req)));
   const srv = app.listen(0), U = `http://127.0.0.1:${srv.address().port}`;
   const send = (ip, b) => fetch(`${U}/api/t`, { method: 'POST', headers: { 'X-Forwarded-For': ip, 'User-Agent': 'Mozilla/5.0 Test' }, body: JSON.stringify(b) });
   try {
     // źródło i język z pierwszego wejścia; kolejne zdarzenia (np. po powrocie z płatności, bez referrera) dziedziczą je po stronie serwera
-    for (const b of [{ e: 'pv', r: 'https://www.google.com/', l: 'pl' }, { e: 'pv', r: 'https://checkout.stripe.com/' }, { e: 'start' }, { e: 'step', s: 6 }, { e: 'checkout' }, { e: 'checkout' }, { e: 'paid', o: 'zam1' }, { e: 'paid', o: 'zam1' }]) await send('1.1.1.1', b);
+    for (const b of [{ e: 'pv', r: 'https://www.google.com/', l: 'pl' }, { e: 'pv', r: 'https://checkout.stripe.com/' }, { e: 'start' }, { e: 'step', s: 6 }, { e: 'checkout' }, { e: 'checkout' }, { e: 'paid', o: 'zam1' }]) await send('1.1.1.1', b);
+    // „Opłacone” liczy serwer przy płatności: źródło zapisane w zamówieniu przy jego tworzeniu; zdarzenie „paid” z przeglądarki jest ignorowane
+    const visit = await (await fetch(`${U}/zamowienie`, { method: 'POST', headers: { 'X-Forwarded-For': '1.1.1.1', 'User-Agent': 'Mozilla/5.0 Test' } })).json();
+    assert.deepEqual(visit, { src: 'google', lang: 'pl' });
+    await an.funnelPaid({ visit });
     for (const b of [{ e: 'pv', u: 'tiktok', l: 'uk' }, { e: 'start', l: 'pl' }, { e: 'step', s: 3 }]) await send('2.2.2.2', b);
     await send('3.3.3.3', { e: 'pv', l: 'de' });
     await send('4.4.4.4', { e: 'pv', src: 'google', r: 'https://l.instagram.com/', l: 'xx' });
@@ -83,7 +87,9 @@ test('Lejek: etapy raz na osobę, język, źródło; raport tekstowy', async () 
     const day = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Warsaw' }), f = await an.funnelRange(day, day);
     assert.deepEqual(f.stages.map((s) => s.n), [4, 2, 1, 1, 1]);
     assert.deepEqual(f.stages[0].src, { google: 1, tiktok: 1, direct: 1, instagram: 1 }, 'źródło liczy serwer z adresu odsyłającego, nie z treści zdarzenia');
-    assert.deepEqual(f.stages[4].src, { google: 1 }, 'opłacenie przypisane do źródła pierwszego wejścia, raz na zamówienie');
+    assert.deepEqual(f.stages[4].src, { google: 1 }, 'opłacenie przypisane do źródła pierwszego wejścia');
+    await an.funnelPaid({});
+    const f2 = await an.funnelRange(day, day); assert.equal(f2.stages[4].n, 2); assert.equal(f2.stages[4].src.inne, 1, 'zamówienie bez źródła → „inne”');
     assert.deepEqual(f.stages[1].lang, { pl: 1, uk: 1 }, 'język z pierwszego wejścia');
     assert.deepEqual(f.stages[0].lang, { pl: 2, uk: 1, de: 1 });
     assert.equal(f.stages[1].rate, 50); assert.equal(f.stages[4].rate, 100);
