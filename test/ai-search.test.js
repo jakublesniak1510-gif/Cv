@@ -77,5 +77,5 @@ test('/o-serwisie: Przelewy24 tylko przy aktywnym koncie P24', async () => {
 
 test('/o-serwisie: strona tylko z serwera (skrypt nie podmienia jej na stronę główną)', async () => {
   const { text } = await get('/o-serwisie');
-  assert.match(text, /window\.__ROUTE=""/); assert.match(text, /window\.__SSRPATH="\/o-serwisie"/);
+  assert.match(text, /<script src="\/lite\.js\?v=[0-9a-f]+" defer><\/script>/); assert.doesNotMatch(text, /<main id="landing"|id="wiz"/);
 });

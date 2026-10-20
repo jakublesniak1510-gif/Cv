@@ -1422,5 +1422,17 @@
 "Zobacz kartę": "Karte ansehen",
 "Link gotowy. Wyślij go znajomym albo wstaw w mediach społecznościowych.": "Der Link ist fertig. Senden Sie ihn an Freunde oder teilen Sie ihn in sozialen Medien.",
 "Wynik wygasł. Sprawdź CV jeszcze raz.": "Das Ergebnis ist abgelaufen. Prüfen Sie Ihren Lebenslauf erneut.",
-"Limit: 20 kart wyniku na godzinę. Spróbuj później.": "Limit: 20 Ergebniskarten pro Stunde. Bitte versuchen Sie es später erneut."
+"Limit: 20 kart wyniku na godzinę. Spróbuj później.": "Limit: 20 Ergebniskarten pro Stunde. Bitte versuchen Sie es später erneut.",
+"Polecany": "Empfohlen",
+"Dodaj do zamówienia": "Zur Bestellung hinzufügen",
+"Płacisz tylko za dodatek. Przygotujemy go do tych samych ogłoszeń i dodamy na tej stronie.": "Sie zahlen nur für die Zusatzleistung. Wir erstellen sie für dieselben Stellenanzeigen und fügen sie auf dieser Seite hinzu.",
+"List motywacyjny do każdego CV z tego zamówienia, pod to samo ogłoszenie.": "Ein Anschreiben zu jedem Lebenslauf dieser Bestellung, passend zur selben Anzeige.",
+"Pytania z tego ogłoszenia z przykładowymi odpowiedziami, autoprezentacja i lista rzeczy do przygotowania.": "Fragen zu dieser Anzeige mit Beispielantworten, Selbstpräsentation und Checkliste zur Vorbereitung.",
+"Rozmowa z AI w roli rekrutera pod to stanowisko, z oceną odpowiedzi.": "Ein Gespräch mit einer KI als Recruiter für diese Stelle, mit Bewertung Ihrer Antworten.",
+"Wszystko, czego brakuje do rozmowy: list, przygotowanie i symulator razem taniej.": "Alles, was für das Gespräch noch fehlt: Anschreiben, Vorbereitung und Simulator zusammen günstiger.",
+"Przygotowujemy dokupiony dodatek…": "Wir bereiten Ihre Zusatzleistung vor…",
+"To zwykle trwa do 2 minut. Strona odświeży się sama, a dokumenty wyślemy też e-mailem.": "Das dauert meist bis zu 2 Minuten. Die Seite aktualisiert sich selbst, und wir senden die Dokumente auch per E-Mail.",
+"Dodaj za {0} zł": "Für {0} zł hinzufügen",
+"Przechodzę do płatności…": "Zahlung wird geöffnet…",
+"Razem taniej: {0}.": "Zusammen günstiger: {0}."
 }
