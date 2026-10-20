@@ -570,14 +570,15 @@ async function ctDownload(btn, path, ext) {
 }
 $('#ctLetters').addEventListener('click', (e) => ctDownload(e.currentTarget, 'letters', 'pdf'));
 $('#ctEnvelo').addEventListener('click', (e) => ctDownload(e.currentTarget, 'envelo', 'zip'));
-$('#ctBulk').addEventListener('change', async (e) => {
-  const sel = e.currentTarget, status = sel.value; sel.value = ''; if (!status) return;
+$('#ctBulkGo').addEventListener('click', async () => {
+  const sel = $('#ctBulk'), btn = $('#ctBulkGo'), status = sel.value;
+  if (!status) return toast('Wybierz status z listy „Zmień status zaznaczonych…”.');
   if (!ctSel.size) return toast('Zaznacz kontakty (pole wyboru w pierwszej kolumnie).');
   const n = ctSel.size;
   if (status === 'odmowa' ? !confirm(`Odmowa dla ${n} kontaktów: kontakty zostaną usunięte, a ich e-maile trafią na listę blokad. Kontynuować?`) : !confirm(`Zmienić status ${n} zaznaczonych kontaktów na „${status}”?${status === 'nowy' ? ' Data wysłania listu zostanie wyczyszczona.' : ''}`)) return;
-  sel.disabled = true;
-  try { const r = await post('/contacts/bulk-status', { ids: [...ctSel], status }); const msg = `Zmieniono status: ${r.changed} z ${r.total} na „${status}”.`; $('#ctLetMsg').textContent = msg; toast(msg); ctSel.clear(); loaders.contacts(); }
-  catch (x) { toast(x.message); } finally { sel.disabled = false; }
+  if (btn.disabled) return; btn.disabled = sel.disabled = true;
+  try { const r = await post('/contacts/bulk-status', { ids: [...ctSel], status }); const msg = `Zmieniono status: ${r.changed} z ${r.total} na „${status}”.`; $('#ctLetMsg').textContent = msg; toast(msg); ctSel.clear(); sel.value = ''; loaders.contacts(); }
+  catch (x) { toast(x.message); } finally { btn.disabled = sel.disabled = false; }
 });
 $('#ctImport').addEventListener('submit', async (e) => {
   e.preventDefault(); const f = $('#ctFile').files[0]; if (!f) return toast('Wybierz plik CSV.');
