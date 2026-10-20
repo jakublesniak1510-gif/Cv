@@ -19,11 +19,37 @@ test('envelo: rozbijanie adresu na pola', () => {
   assert.deepEqual(parseAddress({ org: 'Urząd Miasta', address: 'Urząd Miasta\nRynek 1\n50-101 Wrocław' }),
     { company: 'Urząd Miasta', street: 'Rynek', building: '1', flat: '', postal: '50-101', city: 'Wrocław' });
   const a = parseAddress({ org: 'Szkoła', address: 'Wydział Nauk, al. 3 Maja 12A, bud. B, lok. 7, 00-950 Warszawa' });
-  assert.equal(a.company, 'Szkoła, Wydział Nauk, bud. B'); assert.equal(a.street, 'al. 3 Maja'); assert.equal(a.building, '12A'); assert.equal(a.flat, '7');
+  assert.equal(a.company, 'Wydział Nauk, bud. B', 'części adresu przed ulicą to nazwa adresata'); assert.equal(a.street, 'al. 3 Maja'); assert.equal(a.building, '12A'); assert.equal(a.flat, '7');
   assert.equal(parseAddress({ org: 'A', address: 'Wybrzeże Kościuszkowskie 31/33, 00-379 Warszawa' }).street, 'Wybrzeże Kościuszkowskie');
   assert.match(parseAddress({ org: 'A', address: 'ul. Długa 1, Poznań' }).error, /kod/);
   assert.match(parseAddress({ org: 'A', address: 'ul. Bez Numeru, 60-001 Poznań' }).error, /ulicy/);
   assert.match(parseAddress({ org: 'A', address: 'ul. Bardzo Bardzo Długiej Nazwy Ulicy Testowej 5, 60-001 Poznań' }).error, /35/);
+});
+
+test('envelo: nawiasy w adresie i nazwa adresata bez duplikatów (prawdziwe adresy uczelni)', () => {
+  const P = (address, org = 'Uczelnia', dept = 'Biuro Karier') => parseAddress({ org, dept, address });
+  const cases = [
+    ['ul. Zwierzyniecka 8 (D.S. nr 3), 15-333 Białystok', 'ul. Zwierzyniecka', '8', 'Biuro Karier, Uczelnia, D.S. nr 3'],
+    ['Wybrzeże Wyspiańskiego 40 (bud. H-14), 50-370 Wrocław', 'Wybrzeże Wyspiańskiego', '40', 'Biuro Karier, Uczelnia, bud. H-14'],
+    ['ul. Rakowicka 27 (bud. Księżówka, pok. K1), 31-510 Kraków', 'ul. Rakowicka', '27', 'Biuro Karier, Uczelnia, bud. Księżówka, pok. K1'],
+    ['al. Racławickie 1 (pok. 35), 20-059 Lublin', 'al. Racławickie', '1', 'Biuro Karier, Uczelnia, pok. 35'],
+    ['ul. Pomorska 253 (bud. U1, pok. 407), 92-213 Łódź', 'ul. Pomorska', '253', 'Biuro Karier, Uczelnia, bud. U1, pok. 407'],
+    ['ul. Gagarina 33 (DS nr 11), 87-100 Toruń', 'ul. Gagarina', '33', 'Biuro Karier, Uczelnia, DS nr 11'],
+    ['ul. prof. S. Pigonia 8 (Budynek Biblioteki UR), 35-310 Rzeszów', 'ul. prof. S. Pigonia', '8', 'Biuro Karier, Uczelnia, Budynek Biblioteki UR'],
+    ['ul. Grunwaldzka 6 (Collegium Heliodori Święcicki), 60-780 Poznań', 'ul. Grunwaldzka', '6', 'Biuro Karier, Uczelnia, Collegium Heliodori Święcicki'],
+    ['ul. Bankowa 5 (bud. spinPLACE), 40-007 Katowice', 'ul. Bankowa', '5', 'Biuro Karier, Uczelnia, bud. spinPLACE'],
+    ['ul. Nowoursynowska 166 (bud. 10, pok. 17), 02-787 Warszawa', 'ul. Nowoursynowska', '166', 'Biuro Karier, Uczelnia, bud. 10, pok. 17'],
+  ];
+  for (const [addr, street, building, company] of cases) {
+    const a = P(addr);
+    assert.ok(!a.error, `${addr}: ${a.error}`);
+    assert.deepEqual([a.street, a.building, a.company], [street, building, company], addr);
+  }
+  // nazwa z adresu (przed ulicą) zamiast działu i organizacji z kontaktu – bez dublowania
+  assert.equal(P('Biuro Karier Politechniki Warszawskiej, pl. Politechniki 1, 00-661 Warszawa', 'Politechnika Warszawska', 'Biuro Karier PW').company, 'Biuro Karier Politechniki Warszawskiej');
+  const car = P('CPMiU (ul. Żywiecka 16), Caritas Diecezji – Centrum Pomocy, ul. Mikołaja 2, 43-300 Bielsko-Biała', 'Caritas', 'CPMiU');
+  assert.equal(car.company, 'CPMiU, Caritas Diecezji – Centrum Pomocy', 'bez adresu ulicy w nazwie'); assert.equal(car.street, 'ul. Mikołaja'); assert.equal(car.building, '2');
+  assert.equal(P('Biuro Karier, Biuro karier, ul. A 1, 00-001 X').company, 'Biuro Karier', 'duplikaty bez względu na wielkość liter');
 });
 
 test('envelo: ZIP bez folderów, PDF na list (1 strona), XLSX z grupami i nagłówkami', async () => {
