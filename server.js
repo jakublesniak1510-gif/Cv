@@ -8,10 +8,14 @@ import { checkPhoto, recruiterAnswer, ToolError } from './lib/freeTools.js';
 import { alertRoutes, alertsHourly, addAlertFromOrder } from './lib/alerts.js';
 import { passRoutes, passesHourly, reservePass, passOrderPaid, releasePassOrder, passRefunded, confirmPassPayment, PassError } from './lib/passes.js';
 import { accountIdOf } from './lib/account.js';
+import { wizardDraftRoutes, wizardDraftsHourly, draftOrdered, draftPaid } from './lib/wizard-drafts.js';
+import { offerRoutes, feedSources } from './lib/jobfeed.js';
 import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUNDLE_OFF, withLetter as hasLetter, upsellOffers, upsellPlan } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads } from './lib/store.js';
 import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
+import { checkResult, hasCritical, recordQa, QA_LABELS } from './lib/qa.js';
+import { renderCv } from './lib/pdf.js';
 import { fetchAd, AdError } from './lib/fetchAd.js';
 import { adFromImage, AdImageError } from './lib/adImage.js';
 import { simTurn, SimError } from './lib/sim.js';
@@ -252,6 +256,8 @@ app.get('/health', async (_req, res) => {
   checks.platnosci = SALES_CLOSED ? 'błąd' : DEMO ? 'demo' : 'ok';
   checks.ai = aiEnabled() ? 'ok' : 'błąd';
   checks.poczta = mailEnabled() ? 'ok' : 'brak';
+  // Oferty w powiadomieniach (Adzuna/Jooble): tylko informacyjnie, bez kluczy e-maile mają same linki do portali.
+  checks.oferty_api = feedSources().join(', ') || 'wyłączone';
   const stuck = Object.values(await allOrders().catch(() => ({}))).filter((o) => o.status === 'paid' || (o.status === 'generating' && Date.now() - (o.paidAt || 0) > 30 * 60_000)).length;
   checks.zamowienia = stuck ? `${stuck} czeka na dokumenty` : 'ok';
   const ok = checks.dane === 'ok' && checks.platnosci !== 'błąd' && checks.ai === 'ok' && (DEMO || checks.poczta === 'ok');
@@ -438,7 +444,7 @@ previewRoutes(app, { cleanProfile, cleanAds });
 app.post('/api/orders', async (req, res) => {
   if (salesClosedFor(req)) return res.status(503).json({ error: CLOSED_MSG });
   try {
-    const { profile, ads, consent, design, addons, extraLangs, code, reminder, followUp, jobAlerts, reviewAsk, payReminder, uiLang, createAccount, invoice, adConsent, usePass } = req.body || {};
+    const { profile, ads, consent, design, addons, extraLangs, code, reminder, followUp, jobAlerts, reviewAsk, payReminder, uiLang, createAccount, invoice, adConsent, usePass, draftToken } = req.body || {};
     let { pkg } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
     const a = cleanAds(ads);
@@ -463,6 +469,7 @@ app.post('/api/orders', async (req, res) => {
     const disc = passUse ? 0 : discountFor(c, pkg, a.length, ad, false, langs), total = passUse ? passUse.total : calcTotal(pkg, a.length, ad, false, langs, disc);
     const shown = await previewFor(p, a[0]).catch(() => null); // podgląd z ostatniego kroku kreatora, jeśli był
     const order = { preview: shown, visit: visitInfo(req), invoice: total > 0 ? inv : null, id: orderId, ...(passUse ? { pass: { id: passUse.passId, use: passUse.use, items: passUse.items } } : {}), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
+    if (draftToken) { const ref = await draftOrdered(String(draftToken)).catch(() => null); if (ref) order.draftRef = ref; } // bez przypomnienia o szkicu po złożeniu zamówienia
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -488,7 +495,7 @@ app.post('/api/orders/:id/followup', async (req, res) => {
 });
 
 const view = (o, extra = {}) => ({
-  ...extra, id: o.id, pkg: o.pkg, addons: o.addons || {}, extraLangs: o.extraLangs || [], total: o.total, status: o.status, results: o.results, error: o.error, mail: o.mail,
+  ...extra, id: o.id, pkg: o.pkg, addons: o.addons || {}, extraLangs: o.extraLangs || [], total: o.total, status: o.status, results: (o.results || []).map(({ qa, ...r }) => r), error: o.error, mail: o.mail,
   design: cleanDesign(o.design), photo: o.profile.photo || '', email: o.profile.email, parentId: o.parentId || null,
   paidAt: o.paidAt || null, createAccount: !!o.createAccount, canPay: o.status === 'pending' && !DEMO, revisionsLeft: MAX_REVISIONS - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
   invoice: o.invoice?.pdf ? { number: o.invoice.number } : null,
@@ -637,20 +644,33 @@ async function markPaidAndGenerate(id) {
     const paidO = await updateOrder(id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
     if (!o.paidAt) funnelPaid(paidO).catch(() => {}); // etap „Opłacone” w lejku liczy serwer, raz na zamówienie
     if (o.pass) passOrderPaid(paidO).catch((e) => logEvent('karnet', e.message, { orderId: id })); // rezerwacja karnetu → zużycie
+    if (!o.paidAt && o.draftRef) draftPaid(o.draftRef).catch(() => {}); // szkic z „Wyślij mi link” usuwamy po opłaceniu
     if (!o.paidAt) { recordSale(paidO).catch((e) => console.error('Rejestr sprzedaży', e.message)); notifyNewOrder(paidO, BASE_URL).catch((e) => logEvent('e-mail', `Powiadomienie o zamówieniu: ${e.message}`)); }
     if (!o.paidAt && paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: id }));
     if (!o.paidAt && paidO.adConsent) sendPurchase(paidO, BASE_URL).then((r) => r && updateOrder(id, { capi: r })).catch((e) => logEvent('reklamy', `Meta CAPI: ${e.message}`, { orderId: id }));
     const withLetter = hasLetter(o.pkg);
     const results = await Promise.all(o.ads.map(async (ad, i) => {
-      const r = await generateForAd({ profile: o.profile, ad, withLetter, addons: o.addons, preview: i === 0 ? o.preview : null });
+      const gen = () => generateForAd({ profile: o.profile, ad, withLetter, addons: o.addons, preview: i === 0 ? o.preview : null });
+      let r = await gen(), qa = await qaOf(r, o, ad, withLetter);
+      // Błąd krytyczny (placeholder, firma spoza profilu, zły język, klauzula…): jedna ponowna generacja, zostaje lepsza wersja.
+      if (hasCritical(qa) && aiEnabled()) {
+        const r2 = await gen().catch(() => null), qa2 = r2 && (await qaOf(r2, o, ad, withLetter));
+        if (r2 && crit(qa2) <= crit(qa)) { r = r2; qa = qa2; }
+        qa = { ...qa, retried: true };
+      }
+      r.qa = qa;
       const langs = (o.extraLangs || []).filter((l) => l !== r.lang);
       if (langs.length) r.variants = Object.fromEntries(await Promise.all(langs.map(async (l) => [l, await translateResult(r, l)])));
       return r;
     }));
+    const qaScores = results.map((r) => r.qa.score).filter((x) => x != null);
+    const qaSum = { score: qaScores.length ? Math.min(...qaScores) : null, flags: [...new Set(results.flatMap((r) => r.qa.flags.map((f) => f.code)))], retried: results.some((r) => r.qa.retried) };
+    recordQa(results.map((r) => r.qa)).catch(() => {});
+    if (results.some((r) => hasCritical(r.qa))) qaAlert(id, results);
     const myCode = await afterPaid(o);
     if (o.jobAlerts) addAlertFromOrder({ email: o.profile.email, ...o.jobAlerts, lang: o.uiLang }).catch((e) => logEvent('oferty', e.message, { orderId: id }));
     const mail = await trySend({ ...o, results, myCode });
-    await updateOrder(id, { status: 'done', results, mail, myCode });
+    await updateOrder(id, { status: 'done', results, mail, myCode, qa: qaSum });
     results.forEach((r, i) => recordStatsSafe({ title: `${o.ads[i]?.title || ''} | ${r.position || ''}`, company: [r.company, o.ads[i]?.company], found: r.match?.found, missing: r.match?.missing }));
     stats.upsert('totals', (p = {}) => ({ cvs: (p.cvs || 0) + results.length, orders: (p.orders || 0) + 1 })).catch(() => {});
   } catch (e) {
@@ -704,6 +724,22 @@ async function autoInvoice(o, { force = false } = {}) {
   await updateOrder(o.id, (x) => ({ ...x, invoice: { ...x.invoice, issued: true, pdf: true, number: inv.number, issuedAt: inv.issued } }));
   if (mailEnabled()) await sendInvoiceMail(o, inv, await renderInvoice(inv), BASE_URL).catch((e) => logEvent('e-mail', `Faktura ${inv.number}: ${e.message}`, { orderId: o.id }));
   return inv;
+}
+
+// Kontrola jakości (lib/qa.js): liczba stron z PDF-u, który i tak dostanie klient.
+const crit = (qa) => qa.flags.filter((f) => f.level === 'critical').length;
+async function qaOf(r, o, ad, withLetter) {
+  let pages = null; try { pages = (await renderCv(r, o.design, o.profile?.photo)).pages; } catch {}
+  try { return checkResult(r, { profile: o.profile, ad, withLetter, pages }); } catch (e) { logEvent('generowanie', `Kontrola jakości: ${e.message}`); return { score: null, flags: [] }; }
+}
+// Dalej źle po ponownej generacji: alert do właściciela bez treści CV – tylko id zamówienia i kody flag (osobny limit: raz na godzinę).
+let lastQaAlert = 0;
+function qaAlert(id, results) {
+  logEvent('generowanie', 'Kontrola jakości: błędy krytyczne po ponownej generacji', { orderId: id });
+  if (!mailEnabled() || !process.env.CONTACT_EMAIL || Date.now() - lastQaAlert < 3600_000) return;
+  lastQaAlert = Date.now();
+  const lines = results.map((r, i) => `Ogłoszenie ${i + 1}: wynik ${r.qa.score}/100; ${r.qa.flags.map((f) => `${QA_LABELS[f.code] || f.code}${f.level === 'critical' ? ' (krytyczne)' : ''}`).join(', ') || 'bez uwag'}`);
+  sendAdminAlert('Kontrola jakości: dokumenty do sprawdzenia', `Zamówienie ${id}: po jednej ponownej generacji dokumenty nadal mają błędy krytyczne.\n\n${lines.join('\n')}\n\nSprawdź je w panelu → Zamówienia (możesz poprawić i wysłać ponownie).`).catch((e) => logEvent('e-mail', `Ostrzeżenie QA: ${e.message}`));
 }
 
 // Mail do właściciela najwyżej raz na godzinę, żeby przy awarii nie zasypać skrzynki.
@@ -816,6 +852,8 @@ accountRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 leadRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 alertRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 passRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED, cleanInvoice, closedFor: salesClosedFor });
+wizardDraftRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
+offerRoutes(app);
 analyticsRoutes(app, BASE_URL);
 seoReportRoutes(app);
 // Lejek z wczoraj w porannym podsumowaniu (same liczby).
@@ -851,6 +889,7 @@ async function hourly() {
     await ensurePromoCode().catch((e) => console.error('Promocja', e.message));
     await alertsHourly(BASE_URL).catch((e) => console.error('Powiadomienia o ofertach', e.message));
     await passesHourly(BASE_URL).catch((e) => console.error('Karnety', e.message));
+    await wizardDraftsHourly(BASE_URL).catch((e) => console.error('Szkice kreatora', e.message));
     await accountHourly(BASE_URL).catch((e) => console.error('Konta', e.message));
     await ownerDaily(BASE_URL).catch((e) => logEvent('e-mail', `Podsumowanie dnia / kopia: ${e.message}`));
     seoWeekly(BASE_URL).catch((e) => logEvent('seo', `Raport SEO: ${e.message}`)); // bez czekania: sprawdzanie adresów w Search Console trwa długo

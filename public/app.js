@@ -729,14 +729,25 @@ $('#usePass').onchange = () => refresh();
 
 const DKEY = 'cvpo-draft-v1', FIELDS = ['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'];
 let saveT, restoring = false;
+const draftData = () => ({ design, photo, addons: addons(), langs: extraLangs(), pkg: pkg(), f: Object.fromEntries(FIELDS.map((k) => [k, $('#' + k).value])), exp: rows('exp'), edu: rows('edu'), ads: rows('ads') });
+// Szkic na serwerze („Wyślij mi link do dokończenia”, lib/wizard-drafts.js): po wysłaniu linku formularz synchronizuje się z nim (bez zdjęcia).
+const SKEY = 'cvpo-srv-draft';
+const srvToken = () => { try { return localStorage.getItem(SKEY) || ''; } catch { return ''; } };
+let srvT;
+const syncSrvDraft = () => {
+  const t = srvToken(); if (!t) return;
+  clearTimeout(srvT);
+  srvT = setTimeout(() => fetch(`/api/wizard-draft/${encodeURIComponent(t)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: draftData() }) })
+    .then((r) => { if (r.status === 404) try { localStorage.removeItem(SKEY); } catch {} }).catch(() => {}), 3000);
+};
 function saveDraft() {
   if (restoring) return;
   clearTimeout(saveT);
-  saveT = setTimeout(() => { try { localStorage.setItem(DKEY, JSON.stringify({ design, photo, addons: addons(), langs: extraLangs(), pkg: pkg(), f: Object.fromEntries(FIELDS.map((k) => [k, $('#' + k).value])), exp: rows('exp'), edu: rows('edu'), ads: rows('ads') })); } catch {} }, 300);
+  saveT = setTimeout(() => { try { localStorage.setItem(DKEY, JSON.stringify(draftData())); } catch {} syncSrvDraft(); }, 300);
 }
-const clearDraft = () => { try { localStorage.removeItem(DKEY); } catch {} };
-function restoreDraft() {
-  let d; try { d = JSON.parse(localStorage.getItem(DKEY)); } catch {}
+const clearDraft = () => { try { localStorage.removeItem(DKEY); localStorage.removeItem(SKEY); } catch {} };
+function restoreDraft(from) {
+  let d = from; if (!d) try { d = JSON.parse(localStorage.getItem(DKEY)); } catch {}
   if (!d || !d.f || !(d.f.name || d.f.email || d.exp?.some((e) => e.title) || d.ads?.some((a) => a.text))) return false;
   restoring = true;
   const r = $(`input[name=pkg][value="${d.pkg}"]`); if (r) r.checked = true;
@@ -963,6 +974,7 @@ $('#wizForm').onsubmit = async (e) => {
   if (step < 6) return go(step + 1);
   const v = (id) => $('#' + id).value;
   const body = {
+    draftToken: srvToken() || undefined,
     usePass: passOn(), design, addons: addons(), extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
@@ -2350,6 +2362,46 @@ if ((q.get('zamow') || LANGS[q.get('jezyk')]) && !q.get('id') && !q.get('draft')
   const s = LANGS[q.get('jezyk')] && $('#ads .entry [data-k=lang]'); if (s) { s.value = q.get('jezyk'); refresh(); }
   openWiz(['cv', 'cv_letter', 'pack3'].includes(q.get('pkg')) ? q.get('pkg') : undefined);
 }
+// „Wyślij mi link do dokończenia” (krok 1): jeden e-mail z linkiem; przypomnienie tylko z osobnym, niezaznaczonym polem.
+{
+  const st = $('#slStatus'), send = $('#slSend'), em = $('#slEmail');
+  $('#saveLater').addEventListener('toggle', () => { if ($('#saveLater').open && !em.value) em.value = $('#email').value; });
+  em.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); send.click(); } });
+  send.onclick = async () => {
+    st.className = 'fstatus'; send.disabled = true; st.textContent = 'Wysyłam…';
+    try {
+      const r = await fetch('/api/wizard-draft', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: em.value, remind: $('#slRemind').checked, lang: window.I18N?.lang || 'pl', data: draftData() }) });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      try { localStorage.setItem(SKEY, j.token); } catch {}
+      st.classList.add('good'); st.textContent = 'Wysłaliśmy link. Szkic będzie się aktualizował, gdy dalej wypełniasz formularz.';
+      if (j.demoLink) st.append(' ', el('a', { href: j.demoLink, textContent: 'Podgląd linku' }));
+    } catch (x) { st.classList.add('bad'); st.textContent = x.message || 'Nie udało się wysłać linku.'; }
+    send.disabled = false;
+  };
+}
+// ?szkic=<token> (link z e-maila): dane ze szkicu na serwerze, dalsze zmiany zapisują się w tym samym szkicu.
+async function loadSrvDraft(t) {
+  try { history.replaceState(null, '', location.pathname + location.hash); } catch {}
+  let d; try { const r = await fetch(`/api/wizard-draft/${encodeURIComponent(t)}`); d = await r.json(); if (!r.ok) throw new Error(d.error); } catch (x) { openWiz(); flash(x.message || 'Nie udało się wczytać szkicu.', true); return; }
+  try { localStorage.setItem(SKEY, t); } catch {}
+  restoreDraft(d.data); $('#draftNote').hidden = true;
+  openWiz(); flash('Wczytaliśmy zapisany szkic. Możesz dokończyć zamówienie.');
+}
+if (q.get('szkic') && !q.get('id')) loadSrvDraft(q.get('szkic'));
+
+// ?oferta=<id> (przycisk „Dopasuj CV do tej oferty” z e-maila z ofertami): tytuł i link oferty w pierwszym ogłoszeniu,
+// treść pobieramy jak przy wklejonym linku; gdy się nie da, zostaje opis oferty z serwisu partnerskiego do uzupełnienia.
+async function loadOffer(id) {
+  try { history.replaceState(null, '', location.pathname + location.hash); } catch {}
+  let d; try { const r = await fetch(`/api/job-offer/${encodeURIComponent(id)}`); d = await r.json(); if (!r.ok) throw new Error(d.error); } catch (x) { openWiz(); flash(x.message || 'Nie udało się wczytać oferty.'); return; }
+  const first = $('#ads .entry');
+  if (first) {
+    $('[data-k=title]', first).value = d.title || ''; $('[data-k=url]', first).value = d.url || ''; $('[data-k=text]', first).value = d.text || '';
+    setMode(first, 'link'); if (d.url) $('.fetchbtn', first).click();
+  }
+  openWiz();
+}
+if (q.get('oferta') && !q.get('draft') && !q.get('id')) loadOffer(q.get('oferta'));
 if (q.get('draft')) loadDraft(q.get('draft'));
 if (q.get('id')) startResult(q.get('id'));
 else if (q.has('canceled')) { try { history.replaceState(null, '', location.pathname); } catch {} openWiz(); go(6); $('#werr').textContent = 'Płatność została anulowana. Twoje dane są zachowane, możesz spróbować ponownie.'; }
