@@ -7,6 +7,8 @@ import { activePromo, ensurePromoCode } from './lib/promos.js';
 import { checkPhoto, recruiterAnswer, ToolError } from './lib/freeTools.js';
 import { alertRoutes, alertsHourly, addAlertFromOrder } from './lib/alerts.js';
 import { wizardDraftRoutes, wizardDraftsHourly, draftOrdered, draftPaid } from './lib/wizard-drafts.js';
+
+import { offerRoutes, feedSources } from './lib/jobfeed.js';
 import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUNDLE_OFF, withLetter as hasLetter, upsellOffers, upsellPlan } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads } from './lib/store.js';
 import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
@@ -249,6 +251,8 @@ app.get('/health', async (_req, res) => {
   checks.platnosci = SALES_CLOSED ? 'błąd' : DEMO ? 'demo' : 'ok';
   checks.ai = aiEnabled() ? 'ok' : 'błąd';
   checks.poczta = mailEnabled() ? 'ok' : 'brak';
+  // Oferty w powiadomieniach (Adzuna/Jooble): tylko informacyjnie, bez kluczy e-maile mają same linki do portali.
+  checks.oferty_api = feedSources().join(', ') || 'wyłączone';
   const stuck = Object.values(await allOrders().catch(() => ({}))).filter((o) => o.status === 'paid' || (o.status === 'generating' && Date.now() - (o.paidAt || 0) > 30 * 60_000)).length;
   checks.zamowienia = stuck ? `${stuck} czeka na dokumenty` : 'ok';
   const ok = checks.dane === 'ok' && checks.platnosci !== 'błąd' && checks.ai === 'ok' && (DEMO || checks.poczta === 'ok');
@@ -804,6 +808,8 @@ accountRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 leadRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 alertRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 wizardDraftRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
+
+offerRoutes(app);
 analyticsRoutes(app, BASE_URL);
 seoReportRoutes(app);
 // Lejek z wczoraj w porannym podsumowaniu (same liczby).
