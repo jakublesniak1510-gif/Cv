@@ -1,21 +1,27 @@
 // Lekkie podstrony treściowe (zawody, poradnik, wzory, o serwisie…): bez kreatora i ukrytej strony głównej w kodzie.
 // Menu na telefonie, przełącznik języka, przyciski „Zamów” (prowadzą do kreatora na stronie głównej), statystyki i baner zgody.
 (() => {
-  const $ = (s) => document.querySelector(s), lang = (window.I18N?.lang || document.documentElement.lang || 'pl').slice(0, 2);
+  const $ = (s) => document.querySelector(s), lang = (document.documentElement.lang || window.I18N?.lang || 'pl').slice(0, 2);
   const home = lang === 'pl' ? '/' : `/${lang}`;
+  // Kod polecający (?ref=…) zapamiętany pod tym samym kluczem co na stronie głównej (app.js REF_KEY), żeby nie zginął po przejściu do kreatora.
+  const REF_KEY = 'cvpo-ref', urlRef = new URLSearchParams(location.search).get('ref');
+  try { if (urlRef) localStorage.setItem(REF_KEY, urlRef); } catch {}
+  const ref = () => { try { return urlRef || localStorage.getItem(REF_KEY) || ''; } catch { return urlRef || ''; } };
   const btn = $('#menuBtn'), nav = $('#mnav');
   btn?.addEventListener('click', () => { const open = nav.hidden; nav.hidden = !open; btn.setAttribute('aria-expanded', String(open)); });
   for (const a of document.querySelectorAll('.langsw a')) {
     a.classList.toggle('on', a.dataset.lang === lang);
     a.addEventListener('click', () => window.I18N?.set(a.dataset.lang));
   }
-  // „Zamów CV” na podstronie: kreator otwiera się na stronie głównej (z wybranym pakietem i dodatkami).
+  // „Zamów CV” na podstronie: kreator otwiera się na stronie głównej (z wybranym pakietem, dodatkami i kodem polecającym).
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-open]'); if (!b) return;
     e.preventDefault();
-    const q = new URLSearchParams({ zamow: '1', ...(b.dataset.pkg ? { pkg: b.dataset.pkg } : {}), ...(b.dataset.addon ? { dodatki: b.dataset.addon } : {}) });
+    const q = new URLSearchParams({ zamow: '1', ...(b.dataset.pkg ? { pkg: b.dataset.pkg } : {}), ...(b.dataset.addon ? { dodatki: b.dataset.addon } : {}), ...(ref() ? { ref: ref() } : {}) });
     location.href = `${home}?${q}`;
   });
+  // Linki „Zamów” w treści (…?zamow=1) też niosą kod polecający.
+  if (ref()) for (const a of document.querySelectorAll('a[href*="?zamow=1"]')) { const u = new URL(a.href); if (!u.searchParams.has('ref')) { u.searchParams.set('ref', ref()); a.href = u.pathname + u.search; } }
   // Formularz „Dla firm i uczelni”.
   const f = $('#b2bForm');
   f?.addEventListener('submit', async (e) => {
@@ -31,6 +37,6 @@
   // Statystyki bez cookies (jak na stronie głównej) i baner zgody na reklamy.
   fetch('/api/config').then((r) => r.json()).then((c) => {
     window.CONSENT?.init(c.ads);
-    if (!c.preview && navigator.sendBeacon) navigator.sendBeacon('/api/t', JSON.stringify({ e: 'pv', p: location.pathname, r: document.referrer, u: new URLSearchParams(location.search).get('utm_source') || '', l: lang }));
+    if (navigator.sendBeacon) navigator.sendBeacon('/api/t', JSON.stringify({ e: 'pv', p: location.pathname, r: document.referrer, u: new URLSearchParams(location.search).get('utm_source') || '', l: lang }));
   }).catch(() => {});
 })();
