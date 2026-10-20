@@ -23,7 +23,7 @@ function fakeGoogle(calls) {
     const json = (j) => ({ ok: true, status: 200, json: async () => j, text: async () => '' });
     if (url === SA.token_uri) return json({ access_token: 'tok', expires_in: 3600 });
     if (url.endsWith('/sitemap.xml')) return { ok: true, text: async () => Array.from({ length: 100 }, (_, i) => `<url><loc>${BASE}/p${i}</loc></url>`).join('') };
-    if (url.includes('urlInspection')) { const u = JSON.parse(o.body).inspectionUrl; return json({ inspectionResult: { indexStatusResult: { coverageState: /p1\d$/.test(u) ? 'Crawled - currently not indexed' : 'Submitted and indexed', verdict: 'PASS' } } }); }
+    if (url.includes('urlInspection')) { const u = JSON.parse(o.body).inspectionUrl; return json({ inspectionResult: { indexStatusResult: { coverageState: /p1\d$/.test(u) ? 'Crawled - currently not indexed' : u.endsWith('/p42') ? 'Duplicate, Google chose different canonical than user' : 'Submitted and indexed', verdict: 'PASS', userCanonical: u, googleCanonical: u.endsWith('/p42') ? `${BASE}/p7` : u } } }); }
     const b = JSON.parse(o.body), prev = b.startDate < '2025-09-01';
     if (!b.dimensions.length) return json({ rows: [{ clicks: prev ? 50 : 80, impressions: prev ? 2000 : 3000, ctr: prev ? 0.025 : 0.0267, position: prev ? 21.3 : 18.4 }] });
     if (b.dimensions[0] === 'query') return json({ rows: [
@@ -131,7 +131,9 @@ test('Raport tygodniowy: Search Console, próbka indeksowania, zapis, e-mail raz
   assert.equal(await rep.seoWeekly(BASE, { now: MON + 864e5, fetchFn: fakeGoogle([]) }), null);
   assert.ok(await rep.seoReports.get('2025-10-20'));
   const txt = rep.reportText(r, BASE, 'L');
-  assert.match(txt, /kliknięcia 80 \(\+60%\)/); assert.match(txt, /Blisko pierwszej strony[\s\S]*cv kasjer: poz\. 11\.4/); assert.match(txt, /Indeksowanie \(próbka 40/);
+  assert.match(txt, /kliknięcia 80 \(\+60%\)/);
+  if (sampled.includes(`${BASE}/p42`)) assert.match(txt, /Google wybrał inną stronę główną niż nasza:\n- https:\/\/example\.test\/p42 → https:\/\/example\.test\/p7/);
+  assert.ok(r.gsc.inspection.rows.every((x) => 'googleCanonical' in x)); assert.match(txt, /Blisko pierwszej strony[\s\S]*cv kasjer: poz\. 11\.4/); assert.match(txt, /Indeksowanie \(próbka 40/);
   // przechowujemy 12 ostatnich tygodni
   for (let i = 1; i <= 13; i++) await rep.seoReports.save({ ...r, id: `2024-01-${String(i).padStart(2, '0')}` });
   await rep.seoWeekly(BASE, { now: MON, force: true, fetchFn: fakeGoogle([]), mail: false });

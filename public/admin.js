@@ -489,7 +489,7 @@ loaders.seo = async () => {
   $('#seoZero').replaceChildren(simpleTable(g?.zeroClickPages, PC));
   $('#seoLang').replaceChildren(simpleTable(g?.byLang, [['key', 'Język'], ['clicks', 'Klik.', 1], ['impressions', 'Wyśw.', 1], ['ctr', 'CTR %', 1]]));
   $('#seoType').replaceChildren(simpleTable(g?.byType, [['key', 'Typ'], ['clicks', 'Klik.', 1], ['impressions', 'Wyśw.', 1], ['ctr', 'CTR %', 1]]));
-  $('#seoIdx').replaceChildren(g?.inspection?.error ? el('p', { className: 'help', textContent: g.inspection.error }) : '', simpleTable(g ? Object.entries(g.inspection.states).map(([k, v]) => ({ k, v })) : [], [['k', 'Stan'], ['v', 'Adresów', 1]]), simpleTable(g?.inspection.rows, [[(x) => shortUrl(x.url), 'Adres'], ['coverage', 'Stan'], ['lastCrawl', 'Ostatnie pobranie']]));
+  $('#seoIdx').replaceChildren(g?.inspection?.error ? el('p', { className: 'help', textContent: g.inspection.error }) : '', simpleTable(g ? Object.entries(g.inspection.states).map(([k, v]) => ({ k, v })) : [], [['k', 'Stan'], ['v', 'Adresów', 1]]), simpleTable(g?.inspection.rows, [[(x) => shortUrl(x.url), 'Adres'], ['coverage', 'Stan'], [(x) => (x.googleCanonical && x.googleCanonical !== x.userCanonical ? shortUrl(x.googleCanonical) : '–'), 'Inna strona główna wg Google'], ['lastCrawl', 'Ostatnie pobranie']]));
 };
 $('#seoRun').addEventListener('click', async () => {
   const b = $('#seoRun'); if (b.disabled) return; b.disabled = true;
