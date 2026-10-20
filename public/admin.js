@@ -521,6 +521,10 @@ loaders.problems = async () => {
   const r = await api('/problems');
   setBadge(r.orders.length);
   $('#probOrders').replaceChildren(r.orders.length ? orderTable(r.orders) : el('div', { className: 'empty', textContent: 'Wszystko w porządku. Nie ma zamówień wymagających uwagi.' }));
+  const q = r.qa || { weeks: [], labels: {}, orders: [] }, lab = (c) => q.labels[c] || c;
+  $('#qaWeeks').replaceChildren(simpleTable(q.weeks, [['id', 'Tydzień od'], ['docs', 'Dokumenty', 1], ['avg', 'Średni wynik', 1], ['critical', 'Z błędem krytycznym', 1], ['retried', 'Ponowione', 1], ['fixed', 'Naprawione ponowieniem', 1], [(w) => Object.entries(w.flags || {}).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${lab(k)}: ${n}`).join(', ') || '–', 'Najczęstsze uwagi']]));
+  $('#qaOrders').replaceChildren(q.orders.length ? el('table', {}, el('thead', {}, el('tr', {}, ['Kiedy', 'Wynik', 'Uwagi', 'Zamówienie'].map((t) => el('th', { textContent: t })))),
+    el('tbody', {}, q.orders.map((o) => { const b = el('button', { className: 'link', textContent: 'otwórz' }); b.onclick = () => openOrder(o.id); return el('tr', {}, el('td', { className: 'num', textContent: dt(o.created) }), el('td', { className: 'num', textContent: `${o.score}/100${o.retried ? ' (ponowione)' : ''}` }), el('td', { textContent: o.flags.map(lab).join(', ') }), el('td', {}, b)); }))) : '');
   $('#probEvents').replaceChildren(r.events.length ? el('table', {},
     el('thead', {}, el('tr', {}, ['Kiedy', 'Gdzie', 'Opis', 'Szczegóły'].map((t) => el('th', { textContent: t })))),
     el('tbody', {}, r.events.map((e) => {
