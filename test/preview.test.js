@@ -17,7 +17,8 @@ test('Podgląd przed płatnością: tani model, bez danych kontaktowych, pamię�
   const calls = [];
   const ask = async (system, user, o) => { calls.push({ system, user, o }); if (/AWARIA/.test(user)) throw new Error('503'); return { headline: 'Kasjerka', summary: 'Od trzech lat obsługuję kasę fiskalną i terminal płatniczy. Pracuję na zmiany.', keywords: ['obsługa kasy fiskalnej', 'obsługa terminala płatniczego', 'praca zmianowa', 'komunikatywność', 'dokładność', 'szósta'] }; };
   let on = true;
-  const app = express(); app.set('trust proxy', true); app.use(express.json()); pv.previewRoutes(app, { cleanProfile, cleanAds, ask, enabled: () => on });
+  let shown = 0;
+  const app = express(); app.set('trust proxy', true); app.use(express.json()); pv.previewRoutes(app, { cleanProfile, cleanAds, ask, enabled: () => on, daily: () => 5, onShown: async () => { shown++; } });
   const srv = app.listen(0), U = `http://127.0.0.1:${srv.address().port}`;
   const post = async (body, ip = '1.1.1.1') => (await fetch(`${U}/api/preview`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': ip }, body: JSON.stringify(body) })).json();
   try {
@@ -35,8 +36,15 @@ test('Podgląd przed płatnością: tani model, bez danych kontaktowych, pamię�
     for (let i = 2; i <= 3; i++) assert.ok((await post({ sid: `sesja-ip-${i}xx`, profile: { ...PROFILE, skills: `s${i}` }, ad: AD })).summary);
     assert.deepEqual(await post({ sid: 'sesja-ip-4xx', profile: { ...PROFILE, skills: 's4' }, ad: AD }), { off: true, reason: 'limit' });
     assert.ok((await post({ sid: 'sesja-ip-5xx', profile: { ...PROFILE, skills: 's5' }, ad: AD }, '2.2.2.2')).summary, 'inne IP');
-    // awaria AI i wyłączone AI: krok bez podglądu
+    // awaria AI: krok bez podglądu, ale nieudana próba nie zużywa limitu sesji, IP ani dziennego
     assert.deepEqual(await post({ sid: 'sesja-err-1', profile: { ...PROFILE, skills: 'AWARIA' }, ad: AD }, '3.3.3.3'), { off: true });
+    assert.ok((await post({ sid: 'sesja-err-1', profile: { ...PROFILE, skills: 'po awarii' }, ad: AD }, '3.3.3.3')).summary, 'ta sama sesja może spróbować ponownie');
+    // dzienny limit dla całej strony (tu 5 nowych podglądów): kolejny nowy → limit przed wywołaniem AI; z pamięci podręcznej dalej działa
+    const before = calls.length;
+    assert.deepEqual(await post({ sid: 'sesja-day-1', profile: { ...PROFILE, skills: 'dzień' }, ad: AD }, '6.6.6.6'), { off: true, reason: 'limit' });
+    assert.equal(calls.length, before, 'bez wywołania AI');
+    assert.equal((await post({ sid: 'sesja-day-2', profile: PROFILE, ad: AD }, '7.7.7.7')).headline, 'Kasjerka');
+    assert.equal(shown, 8, 'preview_shown liczony na serwerze po każdym pokazanym podglądzie');
     on = false; assert.deepEqual(await post({ sid: 'sesja-off-1', profile: PROFILE, ad: AD }, '4.4.4.4'), { off: true });
     on = true;
     // złe dane wejściowe

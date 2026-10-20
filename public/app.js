@@ -854,7 +854,7 @@ $('#pvBtn').onclick = async () => {
     const profile = { ...Object.fromEntries(['headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu') };
     const r = await (await fetch('/api/preview', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: pvSid, profile, ad }) })).json();
     if (r.off || !r.summary) { $('#pvOut').replaceChildren(el('p', { className: 'hint', textContent: r.reason === 'limit' ? 'Limit podglądów został wykorzystany. Możesz od razu przejść do zamówienia.' : 'Podgląd jest chwilowo niedostępny. Możesz od razu przejść do zamówienia.' })); b.hidden = true; return; }
-    pvShown = { ...r, sig: pvSig() }; drawPreview(r); track('preview');
+    pvShown = { ...r, sig: pvSig() }; drawPreview(r); // zdarzenie preview_shown liczy serwer
   } catch { $('#pvOut').replaceChildren(el('p', { className: 'hint', textContent: 'Podgląd jest chwilowo niedostępny. Możesz od razu przejść do zamówienia.' })); b.hidden = true; }
   finally { b.disabled = false; b.textContent = 'Pokaż podgląd'; }
 };
