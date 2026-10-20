@@ -33,6 +33,7 @@ import { invoices, issueInvoice, renderInvoice, invoiceFile, cleanupInvoices } f
 import { renderDocx } from './lib/docx.js';
 import { adminRoutes, isAdmin } from './lib/admin.js';
 import { accountRoutes, accountHourly } from './lib/account.js';
+import { templateRoutes } from './lib/templates.js';
 import { previewRoutes, previewFor, cleanupPreviews } from './lib/preview.js';
 import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText, visitInfo, funnelPaid } from './lib/analytics.js';
 import { seoReportRoutes, seoWeekly } from './lib/seo-report.js';
@@ -165,6 +166,7 @@ b2bRoutes(app, {
   } : null,
 });
 seoRoutes(app, BASE_URL);
+templateRoutes(app, BASE_URL);
 // Pliki z wersją w adresie (?v=…, wstawiana przez lib/seo.js) i czcionki można trzymać w pamięci przeglądarki na stałe.
 app.use(express.static('public', { setHeaders: (res, path) => { if (res.req.query.v || /\/fonts\//.test(path)) res.set('Cache-Control', 'public, max-age=31536000, immutable'); } }));
 
