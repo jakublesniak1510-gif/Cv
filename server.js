@@ -6,6 +6,8 @@ import crypto from 'node:crypto';
 import { activePromo, ensurePromoCode } from './lib/promos.js';
 import { checkPhoto, recruiterAnswer, ToolError } from './lib/freeTools.js';
 import { alertRoutes, alertsHourly, addAlertFromOrder } from './lib/alerts.js';
+import { wizardDraftRoutes, wizardDraftsHourly, draftOrdered, draftPaid } from './lib/wizard-drafts.js';
+import { offerRoutes, feedSources } from './lib/jobfeed.js';
 import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUNDLE_OFF, withLetter as hasLetter, upsellOffers, upsellPlan } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads } from './lib/store.js';
 import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
@@ -250,6 +252,8 @@ app.get('/health', async (_req, res) => {
   checks.platnosci = SALES_CLOSED ? 'błąd' : DEMO ? 'demo' : 'ok';
   checks.ai = aiEnabled() ? 'ok' : 'błąd';
   checks.poczta = mailEnabled() ? 'ok' : 'brak';
+  // Oferty w powiadomieniach (Adzuna/Jooble): tylko informacyjnie, bez kluczy e-maile mają same linki do portali.
+  checks.oferty_api = feedSources().join(', ') || 'wyłączone';
   const stuck = Object.values(await allOrders().catch(() => ({}))).filter((o) => o.status === 'paid' || (o.status === 'generating' && Date.now() - (o.paidAt || 0) > 30 * 60_000)).length;
   checks.zamowienia = stuck ? `${stuck} czeka na dokumenty` : 'ok';
   const ok = checks.dane === 'ok' && checks.platnosci !== 'błąd' && checks.ai === 'ok' && (DEMO || checks.poczta === 'ok');
@@ -436,7 +440,7 @@ previewRoutes(app, { cleanProfile, cleanAds });
 app.post('/api/orders', async (req, res) => {
   if (salesClosedFor(req)) return res.status(503).json({ error: CLOSED_MSG });
   try {
-    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, followUp, jobAlerts, reviewAsk, payReminder, uiLang, createAccount, invoice, adConsent } = req.body || {};
+    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, followUp, jobAlerts, reviewAsk, payReminder, uiLang, createAccount, invoice, adConsent, draftToken } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
     const a = cleanAds(ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
@@ -451,6 +455,7 @@ app.post('/api/orders', async (req, res) => {
     const disc = discountFor(c, pkg, a.length, ad, false, langs), total = calcTotal(pkg, a.length, ad, false, langs, disc);
     const shown = await previewFor(p, a[0]).catch(() => null); // podgląd z ostatniego kroku kreatora, jeśli był
     const order = { preview: shown, visit: visitInfo(req), invoice: total > 0 ? inv : null, id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
+    if (draftToken) { const ref = await draftOrdered(String(draftToken)).catch(() => null); if (ref) order.draftRef = ref; } // bez przypomnienia o szkicu po złożeniu zamówienia
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -624,6 +629,7 @@ async function markPaidAndGenerate(id) {
     if (o.upsellOf) return await applyUpsell(o);
     const paidO = await updateOrder(id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
     if (!o.paidAt) funnelPaid(paidO).catch(() => {}); // etap „Opłacone” w lejku liczy serwer, raz na zamówienie
+    if (!o.paidAt && o.draftRef) draftPaid(o.draftRef).catch(() => {}); // szkic z „Wyślij mi link” usuwamy po opłaceniu
     if (!o.paidAt) { recordSale(paidO).catch((e) => console.error('Rejestr sprzedaży', e.message)); notifyNewOrder(paidO, BASE_URL).catch((e) => logEvent('e-mail', `Powiadomienie o zamówieniu: ${e.message}`)); }
     if (!o.paidAt && paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: id }));
     if (!o.paidAt && paidO.adConsent) sendPurchase(paidO, BASE_URL).then((r) => r && updateOrder(id, { capi: r })).catch((e) => logEvent('reklamy', `Meta CAPI: ${e.message}`, { orderId: id }));
@@ -829,6 +835,8 @@ app.post('/api/orders/:id/retry', async (req, res) => {
 accountRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 leadRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 alertRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
+wizardDraftRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
+offerRoutes(app);
 analyticsRoutes(app, BASE_URL);
 seoReportRoutes(app);
 // Lejek z wczoraj w porannym podsumowaniu (same liczby).
@@ -863,6 +871,7 @@ async function hourly() {
     await cleanupAnalytics().catch(() => {});
     await ensurePromoCode().catch((e) => console.error('Promocja', e.message));
     await alertsHourly(BASE_URL).catch((e) => console.error('Powiadomienia o ofertach', e.message));
+    await wizardDraftsHourly(BASE_URL).catch((e) => console.error('Szkice kreatora', e.message));
     await accountHourly(BASE_URL).catch((e) => console.error('Konta', e.message));
     await ownerDaily(BASE_URL).catch((e) => logEvent('e-mail', `Podsumowanie dnia / kopia: ${e.message}`));
     seoWeekly(BASE_URL).catch((e) => logEvent('seo', `Raport SEO: ${e.message}`)); // bez czekania: sprawdzanie adresów w Search Console trwa długo
