@@ -875,3 +875,11 @@ table.rep th[scope=row]{font-weight:600;color:var(--mute);width:55%}
 .tpl-chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;font-weight:400}.tpl-chk input{margin-top:3px;flex:none}
 .tpl-news .f input{width:100%}
 .tpl-msg{margin:0;font-size:14px;color:var(--err)}.tpl-msg.good{color:var(--ok)}.tpl-msg:empty{display:none}
+/* podgląd CV przed płatnością */
+.pv{margin:14px 0;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.pv-head .hint{margin:4px 0 10px}
+.pv-doc{margin-top:12px;padding:16px;border-radius:10px;background:var(--bg)}
+.pv-name{font:700 20px var(--f-d)}.pv-hl{color:var(--brand);font-weight:600;margin-bottom:8px}
+.pv-kw{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}.pv-kw .hint{flex-basis:100%;margin:0}
+.pv-kw .chip{background:var(--soft-b);border-radius:999px;padding:3px 10px;font-size:13px}
+.pv-blur{filter:blur(5px);user-select:none;pointer-events:none;opacity:.7;margin:12px 0}.pv-blur p,.pv-blur b{margin:6px 0;display:block}

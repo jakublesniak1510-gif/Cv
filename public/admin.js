@@ -461,6 +461,36 @@ function drawTraffic(t) {
 loaders.traffic = async () => drawTraffic(await api('/traffic?days=' + trDays));
 $('#trRange').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; trDays = +b.dataset.k; $$('#trRange button').forEach((x) => x.setAttribute('aria-pressed', x === b)); loaders.traffic(); });
 
+// --- SEO i lejek (raport tygodniowy) ---
+function simpleTable(rows, cols) {
+  if (!rows?.length) return el('div', { className: 'empty', textContent: 'Brak danych.' });
+  return el('table', {}, el('thead', {}, el('tr', {}, cols.map(([, h, r]) => el('th', { className: r ? 'r' : '', textContent: h })))),
+    el('tbody', {}, rows.map((x) => el('tr', {}, cols.map(([k, , r]) => { const v = typeof k === 'function' ? k(x) : x[k]; return el('td', { className: r ? 'r' : 'ell', textContent: v ?? '–', title: r ? '' : String(v ?? '') }); })))));
+}
+const shortUrl = (u) => String(u || '').replace(/^https?:\/\/[^/]+/, '') || '/';
+const QC = [['key', 'Zapytanie'], ['clicks', 'Klik.', 1], ['impressions', 'Wyśw.', 1], ['ctr', 'CTR %', 1], ['position', 'Poz.', 1], ['prevPosition', 'Poz. wcześniej', 1]];
+const PC = [[(x) => shortUrl(x.key), 'Strona'], ['type', 'Typ'], ['lang', 'Język'], ['clicks', 'Klik.', 1], ['impressions', 'Wyśw.', 1], ['ctr', 'CTR %', 1], ['position', 'Poz.', 1]];
+loaders.seo = async () => {
+  const d = await api('/seo'), r = d.latest, g = r?.gsc;
+  $('#seoInfo').textContent = [d.enabled ? 'Search Console połączone.' : 'Search Console nie jest skonfigurowane: ustaw w Render GSC_SA_JSON (klucz konta serwisowego) i GSC_SITE, a konto serwisowe dodaj jako użytkownika w Search Console.', 'Raport powstaje co poniedziałek po 6:30 i przychodzi e-mailem.', d.link ? 'Link tylko do odczytu jest ustawiony (SEO_REPORT_TOKEN).' : 'Link tylko do odczytu: ustaw SEO_REPORT_TOKEN (min. 32 znaki).'].join(' ');
+  $('#seoTiles').replaceChildren(...(g ? [tile('Kliknięcia z Google', num(g.totals.cur.clicks), `28 dni, wcześniej ${num(g.totals.prev.clicks)}`), tile('Wyświetlenia', num(g.totals.cur.impressions), `wcześniej ${num(g.totals.prev.impressions)}`), tile('CTR', `${String(g.totals.cur.ctr).replace('.', ',')}%`, `wcześniej ${String(g.totals.prev.ctr).replace('.', ',')}%`), tile('Średnia pozycja', String(g.totals.cur.position).replace('.', ','), `wcześniej ${String(g.totals.prev.position).replace('.', ',')}`)] : [tile('Raport', r ? r.id : 'brak', r?.gscError || 'Kliknij „Wygeneruj teraz”')]));
+  $('#seoWeeks').replaceChildren(simpleTable(d.weeks, [['id', 'Tydzień od'], ['clicks', 'Kliknięcia', 1], ['impressions', 'Wyświetlenia', 1], ['visits', 'Wejścia', 1], ['paid', 'Opłacone', 1]]));
+  const f = r?.funnel;
+  $('#seoFunnel').replaceChildren(f ? simpleTable(f.stages, [['label', 'Etap'], ['n', 'Liczba', 1], [(s) => (s.rate == null ? '–' : `${String(s.rate).replace('.', ',')}%`), '% z poprz.', 1], ...['pl', 'en', 'uk', 'de'].map((l) => [(s) => s.lang[l] || 0, l, 1])]) : el('div', { className: 'empty', textContent: 'Brak raportu.' }));
+  $('#seoSrc').replaceChildren(f ? simpleTable(['google', 'youtube', 'facebook', 'instagram', 'tiktok', 'direct', 'inne'].map((k) => ({ k, v: f.stages.map((s) => s.src[k] || 0) })), [['k', 'Źródło'], ...f.stages.map((s, i) => [(x) => x.v[i], s.label, 1])]) : '');
+  $('#seoQueries').replaceChildren(simpleTable(g?.queries, QC));
+  $('#seoNear').replaceChildren(simpleTable(g?.nearFirstPage, QC));
+  $('#seoPages').replaceChildren(simpleTable(g?.pages, PC));
+  $('#seoZero').replaceChildren(simpleTable(g?.zeroClickPages, PC));
+  $('#seoLang').replaceChildren(simpleTable(g?.byLang, [['key', 'Język'], ['clicks', 'Klik.', 1], ['impressions', 'Wyśw.', 1], ['ctr', 'CTR %', 1]]));
+  $('#seoType').replaceChildren(simpleTable(g?.byType, [['key', 'Typ'], ['clicks', 'Klik.', 1], ['impressions', 'Wyśw.', 1], ['ctr', 'CTR %', 1]]));
+  $('#seoIdx').replaceChildren(g?.inspection?.error ? el('p', { className: 'help', textContent: g.inspection.error }) : '', simpleTable(g ? Object.entries(g.inspection.states).map(([k, v]) => ({ k, v })) : [], [['k', 'Stan'], ['v', 'Adresów', 1]]), simpleTable(g?.inspection.rows, [[(x) => shortUrl(x.url), 'Adres'], ['coverage', 'Stan'], ['lastCrawl', 'Ostatnie pobranie']]));
+};
+$('#seoRun').addEventListener('click', async () => {
+  const b = $('#seoRun'); if (b.disabled) return; b.disabled = true; b.textContent = 'Generuję…';
+  try { await post('/seo/run'); toast('Raport gotowy. Kopia poszła e-mailem (jeśli poczta jest ustawiona).'); await loaders.seo(); } catch (x) { toast(x.message); } finally { b.disabled = false; b.textContent = 'Wygeneruj teraz'; }
+});
+
 // --- problemy ---
 const EV = { 'ogłoszenie': 'Pobieranie ogłoszenia', import: 'Import CV', skaner: 'Skaner CV', asystent: 'Asystent', 'e-mail': 'Wysyłka e-mail', generowanie: 'Generowanie' };
 loaders.problems = async () => {

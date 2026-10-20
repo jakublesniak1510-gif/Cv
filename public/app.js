@@ -12,9 +12,11 @@ const STEPS = ['Pakiet i wygląd CV', 'Twoje dane', 'Doświadczenie', 'Wykształ
 let pendingDraft = ''; // ogłoszenie z rozszerzenia Chrome czekające na formularz skanera
 let cfg = { demo: false, maxAds: 5, noPrint: false, maxRevisions: 10, loading: true };
 // Statystyki bez cookies: zbiorcze odsłony i kroki kreatora (serwer nie zapisuje IP ani identyfikatorów).
+const trackLater = []; // zdarzenia sprzed wczytania konfiguracji (np. powrót z płatności), wysyłane po „pv”
 function track(e, x = {}) {
-  if (cfg.loading || cfg.preview || !navigator.sendBeacon) return;
-  try { navigator.sendBeacon('/api/t', JSON.stringify({ e, p: location.pathname, r: document.referrer, u: new URLSearchParams(location.search).get('utm_source') || '', ...x })); } catch {}
+  if (cfg.loading) { if (trackLater.length < 10) trackLater.push([e, x]); return; }
+  if (cfg.preview || !navigator.sendBeacon) return;
+  try { navigator.sendBeacon('/api/t', JSON.stringify({ e, p: location.pathname, r: document.referrer, u: new URLSearchParams(location.search).get('utm_source') || '', l: (document.documentElement.lang || 'pl').slice(0, 2), ...x })); } catch {}
 }
 // Szablony i kolory: muszą zgadzać się z lib/designs.js.
 const TPLS = [
@@ -213,7 +215,7 @@ function hl(text, kws) {
 }
 
 fetch('/api/config').then((r) => r.json()).then((c) => {
-  cfg = c; if (c.chromeExt) { $('#chromeExt').href = c.chromeExt; $('#chromeExtBox').hidden = false; } window.CONSENT?.init(c.ads); track('pv'); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; drawPromo(c.promo); if (c.salesClosed) $('#demoBar').textContent = 'Strona w przygotowaniu – zamówienia ruszą za kilka dni.'; $('#soonNote').hidden = !c.salesClosed; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
+  cfg = c; if (c.chromeExt) { $('#chromeExt').href = c.chromeExt; $('#chromeExtBox').hidden = false; } window.CONSENT?.init(c.ads); track('pv'); trackLater.splice(0).forEach(([e, x]) => track(e, x)); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; drawPromo(c.promo); if (c.salesClosed) $('#demoBar').textContent = 'Strona w przygotowaniu – zamówienia ruszą za kilka dni.'; $('#soonNote').hidden = !c.salesClosed; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
 }).catch(() => drawLists().catch(() => {})); // bez internetu (aplikacja na telefonie): treści z pamięci
 
 /* ---------- Przykład dopasowania ---------- */
@@ -831,7 +833,35 @@ function go(n) {
   $('#werr').textContent = '';
   $('.wiz-body').scrollTop = 0;
 }
+// Podgląd przed płatnością: na prośbę klienta, raz na sesję kreatora; reszta CV jako rozmazany szkielet z fikcyjnym tekstem.
+let pvSid = '', pvShown = null;
+const PV_FAKE = ['Doświadczenie zawodowe', 'Stanowisko, nazwa firmy · 2021 – obecnie', 'Punkt opisujący zakres obowiązków i rezultaty pracy', 'Kolejny punkt dopasowany do wymagań z ogłoszenia', 'Wykształcenie', 'Nazwa szkoły, kierunek · rok ukończenia', 'Umiejętności', 'Umiejętność, umiejętność, umiejętność, umiejętność'];
+const pvSig = () => JSON.stringify([['headline', 'summary', 'skills'].map((k) => $('#' + k).value), rows('exp'), rows('edu'), rows('ads')[0]?.text || '']);
+function drawPreview(r) {
+  $('#pvOut').replaceChildren(el('div', { className: 'pv-doc' },
+    el('div', { className: 'pv-name', textContent: $('#name').value }), el('div', { className: 'pv-hl', textContent: r.headline }),
+    el('p', { textContent: r.summary }),
+    el('div', { className: 'pv-kw' }, el('span', { className: 'hint', textContent: 'Słowa kluczowe z ogłoszenia w Twoim CV:' }), ...r.keywords.map((k) => el('span', { className: 'chip', textContent: k }))),
+    el('div', { className: 'pv-blur', ariaHidden: 'true' }, ...PV_FAKE.map((t, i) => el(i % 4 === 0 ? 'b' : 'p', { textContent: t }))),
+    el('p', { className: 'hint', textContent: 'Pełne CV, dopasowane do ogłoszenia, dostaniesz po płatności. Nagłówek i podsumowanie będą spójne z tym podglądem.' })));
+  $('#pvBtn').hidden = true;
+}
+$('#pvBtn').onclick = async () => {
+  const b = $('#pvBtn'), ad = rows('ads')[0], v = (id) => $('#' + id).value;
+  if (!ad?.text) return;
+  b.disabled = true; b.textContent = 'Przygotowuję podgląd…';
+  try {
+    const profile = { ...Object.fromEntries(['headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu') };
+    const r = await (await fetch('/api/preview', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: pvSid, profile, ad }) })).json();
+    if (r.off || !r.summary) { $('#pvOut').replaceChildren(el('p', { className: 'hint', textContent: r.reason === 'limit' ? 'Limit podglądów został wykorzystany. Możesz od razu przejść do zamówienia.' : 'Podgląd jest chwilowo niedostępny. Możesz od razu przejść do zamówienia.' })); b.hidden = true; return; }
+    pvShown = { ...r, sig: pvSig() }; drawPreview(r); // zdarzenie preview_shown liczy serwer
+  } catch { $('#pvOut').replaceChildren(el('p', { className: 'hint', textContent: 'Podgląd jest chwilowo niedostępny. Możesz od razu przejść do zamówienia.' })); b.hidden = true; }
+  finally { b.disabled = false; b.textContent = 'Pokaż podgląd'; }
+};
 function drawSummary() {
+  $('#pvBox').hidden = !cfg.preview || !rows('ads')[0]?.text;
+  if (pvShown && pvShown.sig !== pvSig()) pvShown = null; // dane zmienione po podglądzie: podgląd nieaktualny
+  if (!pvShown) { $('#pvOut').replaceChildren(); $('#pvBtn').hidden = false; }
   const ads = rows('ads');
   $('#sum').replaceChildren(
     el('div', { className: 'sumrow' }, el('span', { textContent: PKG_NAME[pkg()] }), el('span', { textContent: PRICE[pkg()] + ' zł' })),
@@ -881,6 +911,7 @@ const modal = (open) => {
 const openWiz = (p) => {
   if (p) { $(`input[name=pkg][value=${p}]`).checked = true; refresh(); }
   if (!$('#wizDesign').children.length) drawWizDesign();
+  if (!pvSid) { const r = new Uint8Array(12); crypto.getRandomValues(r); pvSid = [...r].map((x) => x.toString(16).padStart(2, '0')).join(''); }
   track('start'); modal(true); $('#wiz').hidden = false; $('#mcta').hidden = true; document.body.classList.remove('mcta-on'); go(step === 7 ? 6 : step);
   setTimeout(() => $('#wizClose').focus(), 0);
 };
@@ -908,6 +939,7 @@ $('#wizForm').onsubmit = async (e) => {
     const j = await r.json();
     if (!r.ok) throw new Error(j.error);
     orderId = j.id;
+    if (!j.free) track('checkout');
     if (j.free) { closeWiz(); startResult(j.id); } else if (j.demo) go(7); else location.href = j.url;
   } catch (x) { $('#werr').textContent = x.message; }
   $('#next').disabled = false;
