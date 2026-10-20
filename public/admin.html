@@ -25,6 +25,7 @@
     <nav id="nav" aria-label="Sekcje panelu">
       <button data-v="dash"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Pulpit</button>
       <button data-v="traffic"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-8"/><path d="M15 8h5v5"/></svg>Ruch</button>
+      <button data-v="seo"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg>SEO</button>
       <button data-v="orders"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg>Zamówienia<span class="badge info" id="invBadge" hidden title="Faktury do wystawienia"></span></button>
       <button data-v="codes"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/></svg>Kody rabatowe</button>
       <button data-v="reviews"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Opinie<span class="badge info" id="rvBadge" hidden></span></button>
@@ -69,6 +70,20 @@
       <div class="card" style="margin-bottom:12px"><h2>Lejek zamówienia</h2><p class="help" style="margin:-6px 0 12px">Ile osób doszło do każdego kroku kreatora. Duży spadek między krokami pokazuje, gdzie ludzie rezygnują.</p><div id="trFunnel" class="funnel"></div></div>
       <div class="grid2" style="grid-template-columns:1fr 1fr"><div class="card"><h2>Skąd przychodzą</h2><div class="tbl-wrap" id="trRefs"></div></div><div class="card"><h2>Najczęściej oglądane strony</h2><div class="tbl-wrap" id="trPages"></div></div></div>
       <p class="help">Statystyki bez plików cookie i bez zapisywania adresów IP. Linki z kampanii oznaczaj parametrem <code>?utm_source=nazwa</code>, np. <code>?utm_source=facebook</code>.</p>
+    </section>
+
+    <section data-view="seo" hidden>
+      <div class="head"><h1>SEO i lejek</h1><button class="btn sm" type="button" id="seoRun">Wygeneruj teraz</button></div>
+      <p class="help" id="seoInfo"></p>
+      <div class="tiles" id="seoTiles"></div>
+      <div class="card" style="margin-bottom:12px"><h2>Ostatnie tygodnie</h2><div class="tbl-wrap" id="seoWeeks"></div></div>
+      <div class="card" style="margin-bottom:12px"><h2>Lejek sprzedaży (poprzedni tydzień)</h2><div class="tbl-wrap" id="seoFunnel"></div><div class="tbl-wrap" id="seoSrc"></div></div>
+      <div class="card" style="margin-bottom:12px"><h2>Top zapytania</h2><div class="tbl-wrap" id="seoQueries"></div></div>
+      <div class="card" style="margin-bottom:12px"><h2>Blisko pierwszej strony (pozycja 8–20, co najmniej 20 wyświetleń)</h2><div class="tbl-wrap" id="seoNear"></div></div>
+      <div class="card" style="margin-bottom:12px"><h2>Top strony</h2><div class="tbl-wrap" id="seoPages"></div></div>
+      <div class="card" style="margin-bottom:12px"><h2>Wyświetlenia bez kliknięć</h2><div class="tbl-wrap" id="seoZero"></div></div>
+      <div class="grid2" style="grid-template-columns:1fr 1fr;margin-bottom:12px"><div class="card"><h2>Języki</h2><div class="tbl-wrap" id="seoLang"></div></div><div class="card"><h2>Typy stron</h2><div class="tbl-wrap" id="seoType"></div></div></div>
+      <div class="card"><h2>Indeksowanie (próbka adresów z mapy strony)</h2><div class="tbl-wrap" id="seoIdx"></div></div>
     </section>
 
     <!-- Zamówienia -->
