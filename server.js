@@ -21,6 +21,7 @@ import { b2bRoutes, b2bOrders, fulfillB2b, b2bRefunded, cleanupPartnerApps } fro
 import { b2bMonthly } from './lib/b2b-monthly.js';
 import { crmHourly } from './lib/crm.js';
 import { growthRoutes, welcomeSeries, telegramHourly, rememberScan } from './lib/growth.js';
+import { shareRoutes, cleanupShareCards } from './lib/share.js';
 import { sendPurchase, adContext } from './lib/capi.js';
 import { draftRoutes } from './lib/drafts.js';
 import { cleanDesign } from './lib/designs.js';
@@ -155,6 +156,7 @@ app.use('/api/admin/contacts/import', express.json({ limit: '3mb' }));
 draftRoutes(app);
 app.use(express.json({ limit: '700kb' }));
 growthRoutes(app, { BASE_URL });
+shareRoutes(app, { BASE_URL }); // karta wyniku skanera do udostępnienia (/wynik/<id>, 30 dni)
 // Instytucje i partnerzy: zamówienie paczki kodów, zgłoszenie do programu partnerskiego, raporty kodów (przed stronami SEO).
 b2bRoutes(app, {
   BASE_URL, demo: DEMO && !SALES_CLOSED, closedFor: (req) => salesClosedFor(req),
@@ -742,6 +744,7 @@ async function hourly() {
     await cleanupEvents(RETENTION_MS);
     await cleanupChats().catch(() => {});
     await cleanupPreviews().catch(() => {});
+    await cleanupShareCards().catch(() => {});
     await cleanupPartnerApps().catch(() => {});
     await crmHourly(BASE_URL).catch((e) => logEvent('kontakty', e.message));
     await b2bMonthly(BASE_URL).catch((e) => logEvent('e-mail', `Podsumowania miesiąca: ${e.message}`));

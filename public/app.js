@@ -1054,8 +1054,40 @@ function renderScan(j, box = $('#scanResult')) {
     j.tips?.length ? el('div', { className: 'tips' }, el('h3', { textContent: 'Co poprawić' }), el('ol', {}, ...j.tips.map((t) => el('li', { textContent: t })))) : null,
     el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Zrób CV pisane pod to ogłoszenie' }), el('p', { className: 'hint', textContent: 'Uzupełnimy formularz danymi z Twojego pliku, ułożymy CV pod te wymagania, a brakujące rzeczy, które masz, dopiszesz jednym kliknięciem. Od 39 zł, z darmową poprawką.' })),
       el('button', { type: 'button', className: 'btn', textContent: 'Zrób CV pod to ogłoszenie', onclick: fromScan })),
-    j.scanId ? scanMailForm(j.scanId) : null);
+    j.scanId ? scanShare(j.scanId) : null, j.scanId ? scanMailForm(j.scanId) : null);
   box.hidden = false; box.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+}
+// Karta wyniku do udostępnienia (/wynik/<id>): procent bierze serwer z zapamiętanego wyniku (scanId), z przeglądarki idzie tylko
+// opcjonalne stanowisko i język. Na karcie nie ma treści CV ani ogłoszenia; link działa 30 dni.
+function scanShare(scanId) {
+  const open = el('button', { type: 'button', className: 'btn ghost', textContent: 'Udostępnij wynik' });
+  const title = el('input', { type: 'text', maxLength: 60, placeholder: 'np. magazynier', autocomplete: 'off' }), make = el('button', { type: 'submit', className: 'btn', textContent: 'Utwórz link' });
+  const msg = el('p', { className: 'fstatus', role: 'status' }), links = el('div', { className: 'share-btns', hidden: true });
+  const form = el('form', { className: 'scan-share-form', hidden: true, noValidate: true },
+    el('label', { className: 'f' }, 'Stanowisko na karcie (opcjonalnie)', el('div', { className: 'filerow' }, title, make)),
+    el('p', { className: 'hint small', textContent: 'Na karcie pokażemy tylko procent dopasowania, to stanowisko i datę. Bez treści CV i ogłoszenia. Link działa 30 dni.' }), msg, links);
+  open.onclick = () => { open.hidden = true; form.hidden = false; title.focus(); };
+  const out = (text, href) => el('a', { className: 'btn ghost sm', href, target: '_blank', rel: 'noopener', textContent: text });
+  form.onsubmit = async (e) => {
+    e.preventDefault(); make.disabled = true; msg.className = 'fstatus'; msg.textContent = '';
+    try {
+      const r = await fetch('/api/scan/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scanId, title: title.value.trim(), lang: window.I18N?.lang || 'pl' }) });
+      const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || 'Nie udało się utworzyć linku.');
+      title.value = j.title; // po usunięciu adresów, e-maili i telefonów
+      const u = encodeURIComponent(j.shareUrl), link = el('input', { type: 'text', readOnly: true, value: j.shareUrl, className: 'share-link', ariaLabel: 'Link do karty wyniku' });
+      const copy = el('button', { type: 'button', className: 'btn ghost sm', textContent: 'Kopiuj link', onclick: async () => {
+        try { await navigator.clipboard.writeText(j.shareUrl); } catch { link.select(); document.execCommand?.('copy'); }
+        msg.className = 'fstatus ok'; msg.textContent = 'Skopiowano link';
+      } });
+      // Na telefonie systemowe „Udostępnij” (Web Share API), jeśli przeglądarka je ma.
+      const native = navigator.share && matchMedia('(pointer:coarse)').matches ? el('button', { type: 'button', className: 'btn sm', textContent: 'Udostępnij', onclick: () => navigator.share({ text: j.text, url: j.shareUrl }).catch(() => {}) }) : null;
+      links.replaceChildren(...[link, native].filter(Boolean), out('WhatsApp', `https://wa.me/?text=${encodeURIComponent(`${j.text} ${j.shareUrl}`)}`), out('Telegram', `https://t.me/share/url?url=${u}&text=${encodeURIComponent(j.text)}`),
+        out('Facebook', `https://www.facebook.com/sharer/sharer.php?u=${u}`), copy, out('Zobacz kartę', j.url));
+      links.hidden = false; msg.className = 'fstatus ok'; msg.textContent = 'Link gotowy. Wyślij go znajomym albo wstaw w mediach społecznościowych.';
+    } catch (x) { msg.className = 'fstatus err'; msg.textContent = x.message; }
+    make.disabled = false;
+  };
+  return el('div', { className: 'scan-share' }, open, form);
 }
 // Wynik skanera na e-mail (usługa na prośbę, bez zgody marketingowej); newsletter tylko po osobnym, niezaznaczonym polu.
 function scanMailForm(scanId) {

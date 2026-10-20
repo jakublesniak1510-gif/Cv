@@ -482,7 +482,7 @@ loaders.seo = async () => {
   $('#seoWeeks').replaceChildren(simpleTable(d.weeks, [['id', 'Tydzień od'], ['clicks', 'Kliknięcia', 1], ['impressions', 'Wyświetlenia', 1], ['visits', 'Wejścia', 1], ['paid', 'Opłacone', 1]]));
   const f = r?.funnel;
   $('#seoFunnel').replaceChildren(f ? simpleTable(f.stages, [['label', 'Etap'], ['n', 'Liczba', 1], [(s) => (s.rate == null ? '–' : `${String(s.rate).replace('.', ',')}%`), '% z poprz.', 1], ...['pl', 'en', 'uk', 'de'].map((l) => [(s) => s.lang[l] || 0, l, 1])]) : el('div', { className: 'empty', textContent: 'Brak raportu.' }));
-  $('#seoSrc').replaceChildren(f ? simpleTable(['google', 'youtube', 'facebook', 'instagram', 'tiktok', 'direct', 'inne'].map((k) => ({ k, v: f.stages.map((s) => s.src[k] || 0) })), [['k', 'Źródło'], ...f.stages.map((s, i) => [(x) => x.v[i], s.label, 1])]) : '');
+  $('#seoSrc').replaceChildren(f ? simpleTable(['google', 'youtube', 'facebook', 'instagram', 'tiktok', 'share', 'direct', 'inne'].map((k) => ({ k, v: f.stages.map((s) => s.src[k] || 0) })), [['k', 'Źródło'], ...f.stages.map((s, i) => [(x) => x.v[i], s.label, 1])]) : '');
   $('#seoQueries').replaceChildren(simpleTable(g?.queries, QC));
   $('#seoNear').replaceChildren(simpleTable(g?.nearFirstPage, QC));
   $('#seoPages').replaceChildren(simpleTable(g?.pages, PC));
