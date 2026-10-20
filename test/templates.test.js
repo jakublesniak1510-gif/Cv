@@ -13,6 +13,7 @@ let srv, port;
 before(() => { const app = express(); seoRoutes(app, base); templateRoutes(app, base); app.use((req, res) => sendNotFound(req, res, base)); srv = app.listen(0); port = srv.address().port; });
 after(() => srv.close());
 const get = async (p) => { const r = await fetch(`http://127.0.0.1:${port}${p}`); return { status: r.status, type: r.headers.get('content-type'), disp: r.headers.get('content-disposition'), buf: Buffer.from(await r.arrayBuffer()) }; };
+const main = (html) => /<section class="page" id="page" role="main"[^>]*>([\s\S]*?)<\/section>/.exec(html)?.[1] || '';
 const lds = (html) => [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
 const docText = (buf) => unzip(buf).find((f) => f.name === 'word/document.xml').data.toString('utf8').replace(/<[^>]+>/g, ' ');
 
@@ -26,7 +27,7 @@ test('Huby /wzor-cv i /list-motywacyjny: linki do 25 zawodów, CTA', async () =>
     const r = await get(`/${path}`), h = r.buf.toString();
     assert.equal(r.status, 200);
     for (const s of TEMPLATE_ORDER) assert.ok(h.includes(`href="/${kind}/${s}"`), `${path} → ${s}`);
-    assert.equal((h.match(/<h1[\s>]/g) || []).length, 1);
+    assert.equal((main(h).match(/<h1>/g) || []).length, 1);
     assert.match(h, /<link rel="canonical" href="https:\/\/example\.test\/[a-z-]+">/);
   }
 });
@@ -38,7 +39,7 @@ test('Strony wzorów: H1, unikalny tytuł, FAQPage, CTA z ceną, skaner, DOCX i 
     for (const [path, kind] of [['wzor-cv', 'cv'], ['list-motywacyjny', 'letter']]) {
       const r = await get(`/${path}/${s}`), h = r.buf.toString();
       assert.equal(r.status, 200, `${path}/${s}`);
-      assert.equal((h.match(/<h1[\s>]/g) || []).length, 1, `${path}/${s}: jeden H1`);
+      assert.equal((main(h).match(/<h1>/g) || []).length, 1, `${path}/${s}: jeden H1`);
       const title = h.match(/<title>(.*?)<\/title>/)[1]; assert.ok(!titles.has(title), `tytuł powtórzony: ${title}`); titles.add(title);
       const faq = lds(h).find((x) => x['@type'] === 'FAQPage');
       assert.equal(faq.mainEntity.length, t[kind].faq.length);
@@ -46,6 +47,7 @@ test('Strony wzorów: H1, unikalny tytuł, FAQPage, CTA z ceną, skaner, DOCX i 
       assert.ok(h.includes('href="/narzedzia/skaner-cv"'));
       assert.ok(h.includes(`href="/${path}/${s}.docx"`) && h.includes(`href="/${path}/${s}.pdf"`));
       assert.match(h, /<input type="checkbox" name="consent">/, 'zgoda na newsletter domyślnie niezaznaczona');
+      assert.match(h, /window\.__ROUTE=""/, 'strona tylko z serwera (skrypt nie podmienia jej na stronę główną)');
       assert.doesNotMatch(h, /gwarant|\d+\s?% (więcej|szans)/i);
     }
   }
