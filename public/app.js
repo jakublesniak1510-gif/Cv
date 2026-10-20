@@ -859,7 +859,7 @@ $('#pvBtn').onclick = async () => {
   finally { b.disabled = false; b.textContent = 'Pokaż podgląd'; }
 };
 function drawSummary() {
-  $('#pvBox').hidden = !cfg.preview || !rows('ads')[0]?.text;
+  $('#pvBox').hidden = !cfg.aiPreview || !rows('ads')[0]?.text;
   if (pvShown && pvShown.sig !== pvSig()) pvShown = null; // dane zmienione po podglądzie: podgląd nieaktualny
   if (!pvShown) { $('#pvOut').replaceChildren(); $('#pvBtn').hidden = false; }
   const ads = rows('ads');

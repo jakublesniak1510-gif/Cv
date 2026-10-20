@@ -249,7 +249,7 @@ app.get('/health', async (_req, res) => {
   res.status(ok ? 200 : 503).set('Cache-Control', 'no-store').json({ ok, checks, meta, at: new Date().toISOString() });
 });
 app.get('/api/config', (req, res) => res.json({
-  preview: aiEnabled(), ads: ADS, googleReview: GOOGLE_REVIEW, chromeExt: CHROME_EXT, demo: DEMO, salesClosed: salesClosedFor(req), ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
+  aiPreview: aiEnabled(), ads: ADS, googleReview: GOOGLE_REVIEW, chromeExt: CHROME_EXT, demo: DEMO, salesClosed: salesClosedFor(req), ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
   promo: salesClosedFor(req) ? null : activePromo(),
   prices: { ...Object.fromEntries(Object.entries(PRICES).map(([k, v]) => [k, v / 100])), bundleOff: BUNDLE_OFF / 100 },
 }));
