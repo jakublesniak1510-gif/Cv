@@ -2283,6 +2283,19 @@ if ((q.get('zamow') || LANGS[q.get('jezyk')]) && !q.get('id') && !q.get('draft')
   const s = LANGS[q.get('jezyk')] && $('#ads .entry [data-k=lang]'); if (s) { s.value = q.get('jezyk'); refresh(); }
   openWiz(['cv', 'cv_letter', 'pack3'].includes(q.get('pkg')) ? q.get('pkg') : undefined);
 }
+// ?oferta=<id> (przycisk „Dopasuj CV do tej oferty” z e-maila z ofertami): tytuł i link oferty w pierwszym ogłoszeniu,
+// treść pobieramy jak przy wklejonym linku; gdy się nie da, zostaje opis oferty z serwisu partnerskiego do uzupełnienia.
+async function loadOffer(id) {
+  try { history.replaceState(null, '', location.pathname + location.hash); } catch {}
+  let d; try { const r = await fetch(`/api/job-offer/${encodeURIComponent(id)}`); d = await r.json(); if (!r.ok) throw new Error(d.error); } catch (x) { openWiz(); flash(x.message || 'Nie udało się wczytać oferty.'); return; }
+  const first = $('#ads .entry');
+  if (first) {
+    $('[data-k=title]', first).value = d.title || ''; $('[data-k=url]', first).value = d.url || ''; $('[data-k=text]', first).value = d.text || '';
+    setMode(first, 'link'); if (d.url) $('.fetchbtn', first).click();
+  }
+  openWiz();
+}
+if (q.get('oferta') && !q.get('draft') && !q.get('id')) loadOffer(q.get('oferta'));
 if (q.get('draft')) loadDraft(q.get('draft'));
 if (q.get('id')) startResult(q.get('id'));
 else if (q.has('canceled')) { try { history.replaceState(null, '', location.pathname); } catch {} openWiz(); go(6); $('#werr').textContent = 'Płatność została anulowana. Twoje dane są zachowane, możesz spróbować ponownie.'; }
