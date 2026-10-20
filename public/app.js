@@ -2244,9 +2244,11 @@ async function loadDraft(id) {
   openWiz();
 }
 // ?zamow=1 (przycisk „Zamów” z lekkiej podstrony): kreator z wybranym pakietem i dodatkami.
-if (q.get('zamow') && !q.get('id') && !q.get('draft')) {
+// ?jezyk=de|en|… (strony „CV za granicę”): dodatkowo język dokumentów dla pierwszego ogłoszenia.
+if ((q.get('zamow') || LANGS[q.get('jezyk')]) && !q.get('id') && !q.get('draft')) {
   try { history.replaceState(null, '', location.pathname + location.hash); } catch {}
   (q.get('dodatki') || '').split(',').filter((a) => /^\w+$/.test(a)).forEach((a) => { const c = $('#ad' + a); if (c) c.checked = true; });
+  const s = LANGS[q.get('jezyk')] && $('#ads .entry [data-k=lang]'); if (s) { s.value = q.get('jezyk'); refresh(); }
   openWiz(['cv', 'cv_letter', 'pack3'].includes(q.get('pkg')) ? q.get('pkg') : undefined);
 }
 if (q.get('draft')) loadDraft(q.get('draft'));

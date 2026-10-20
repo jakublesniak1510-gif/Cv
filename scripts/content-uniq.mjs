@@ -9,6 +9,7 @@ import { PROFESSIONS, ARTICLES } from '../lib/content.js';
 import { PROF_LANGS } from '../lib/professions-i18n.js';
 import { ART_LANGS } from '../lib/articles-i18n.js';
 import { TEMPLATE_LIST } from '../lib/templates-content/index.js';
+import { abroadRoutes, ABROAD } from '../lib/abroad.js';
 
 const strip = (h) => h.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<template[\s\S]*?<\/template>/gi, ' ');
 const textOf = (h) => h.replace(/<[^>]+>/g, ' ').replace(/&[a-z#0-9]+;/gi, ' ').replace(/\s+/g, ' ').trim();
@@ -32,12 +33,13 @@ export const SAMPLE = () => {
     'zawody-pl': prof.map((s) => `/cv/${s}`), 'poradnik-pl': arts.map((s) => `/poradnik/${s}`), ...lang('en'), ...lang('uk'), ...lang('de'),
     narzedzia: ['/narzedzia/skaner-cv', '/narzedzia/klauzula-rodo', '/narzedzia/jaki-zawod-dla-mnie', '/narzedzia/kalkulator-wynagrodzen'],
     wzory: pick(TEMPLATE_LIST, 5).map((t) => `/wzor-cv/${t.slug}`), listy: pick(TEMPLATE_LIST, 4).map((t) => `/list-motywacyjny/${t.slug}`),
+    zagranica: ABROAD.map((a) => `/${a.slug}`),
     statyczne: ['/o-serwisie', '/jak-to-dziala', '/dla-firm', '/program-polecen'],
   };
 };
 
 export async function measure(base = 'https://cvpodogloszenie.pl', sample = SAMPLE()) {
-  const app = express(); seoRoutes(app, base); templateRoutes(app, base); app.use((req, res) => sendNotFound(req, res, base));
+  const app = express(); seoRoutes(app, base); templateRoutes(app, base); abroadRoutes(app, base); app.use((req, res) => sendNotFound(req, res, base));
   const srv = app.listen(0), U = `http://127.0.0.1:${srv.address().port}`, out = {};
   try {
     for (const [type, urls] of Object.entries(sample)) {
