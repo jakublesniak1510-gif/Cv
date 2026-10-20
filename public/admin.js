@@ -551,17 +551,18 @@ loaders.partners = async () => {
 };
 // Mini-CRM kontaktów B2B.
 let ctData = null; const ctSel = new Set();
+const plLetters = (n) => (n === 1 ? 'list' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 'listy' : 'listów');
 $('#ctLetters').addEventListener('click', async () => {
   if (!ctSel.size) return toast('Zaznacz kontakty (pole wyboru w pierwszej kolumnie).');
-  const b = $('#ctLetters'); b.disabled = true;
+  const b = $('#ctLetters'); if (b.disabled) return; b.disabled = true; b.textContent = 'Generuję…'; $('#ctLetMsg').textContent = '';
   try {
     const r = await fetch('/api/admin/contacts/letters', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin': '1' }, credentials: 'same-origin', body: JSON.stringify({ ids: [...ctSel] }) });
     if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `Błąd ${r.status}`);
-    const url = URL.createObjectURL(await r.blob()), a = el('a', { href: url, download: `listy-${new Date().toISOString().slice(0, 10)}.pdf` }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
-    const n = r.headers.get('X-Letters'), na = +r.headers.get('X-No-Address');
-    toast(`Listy: ${n}. Status „list wysłany” ustawiony przy nowych kontaktach.${na ? ` Pominięto ${na} bez adresu.` : ''}`);
+    const name = `listy-${new Date().toISOString().slice(0, 10)}.pdf`, url = URL.createObjectURL(await r.blob()), a = el('a', { href: url, download: name }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
+    const n = r.headers.get('X-Letters'), na = +r.headers.get('X-No-Address'), msg = `Pobrano: ${name} (${n} ${plLetters(+n)}${na ? `, pominięto ${na} bez adresu` : ''}). Status „list wysłany” ustawiony przy nowych kontaktach.`;
+    $('#ctLetMsg').textContent = msg; toast(msg);
     ctSel.clear(); loaders.contacts();
-  } catch (x) { toast(x.message); } finally { b.disabled = false; }
+  } catch (x) { toast(x.message); } finally { b.disabled = false; b.textContent = 'Listy PDF'; }
 });
 $('#ctImport').addEventListener('submit', async (e) => {
   e.preventDefault(); const f = $('#ctFile').files[0]; if (!f) return toast('Wybierz plik CSV.');
