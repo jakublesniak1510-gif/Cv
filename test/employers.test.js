@@ -7,7 +7,7 @@ import { employerRoutes, noMoney } from '../lib/employers.js';
 import { EMPLOYERS, employersFor } from '../lib/employers-data.js';
 import { PROFESSIONS } from '../lib/content.js';
 
-const RAW = JSON.parse(fs.readFileSync(new URL('../seo-data/pracodawcy.json', import.meta.url), 'utf8'));
+const RAW = JSON.parse(fs.readFileSync(new URL('../data/seo/pracodawcy.json', import.meta.url), 'utf8'));
 const base = 'https://example.test';
 
 test('Dane: wszystkie firmy z treścią redakcyjną, istniejące zawody, odmiana „w …”', () => {
