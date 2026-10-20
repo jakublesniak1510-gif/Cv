@@ -54,8 +54,9 @@ test('E-mail z ofertami: tytuł, firma, miasto, link partnerski, „Dopasuj CV d
   const jobs = [{ title: 'Magazynier', company: 'Firma A', city: 'Poznań', url: 'https://www.adzuna.pl/land/ad/1', src: 'adzuna', fit: 'https://example.test/?oferta=abc&utm_source=oferty' }];
   const info = await sendAlertIssue({ email: 'a@example.test', job: 'Magazynier', city: 'Poznań', lang: 'pl' }, { jobs, links: [['Pracuj.pl', 'https://www.pracuj.pl/']], order: 'https://example.test/', stop: 'https://example.test/oferty/wypisz?t=t', left: 3 });
   const m = JSON.parse(info.message);
-  for (const s of ['Magazynier – Firma A, Poznań', 'https://www.adzuna.pl/land/ad/1', 'Dopasuj CV do tej oferty: https://example.test/?oferta=abc&utm_source=oferty', 'Oferty pochodzą z serwisów partnerskich: Adzuna.', 'Wyłącz powiadomienia: https://example.test/oferty/wypisz?t=t']) assert.ok(m.text.includes(s), s);
+  for (const s of ['Magazynier – Firma A, Poznań', 'https://www.adzuna.pl/land/ad/1', 'Dopasuj CV do tej oferty: https://example.test/?oferta=abc&utm_source=oferty', 'Oferty pochodzą z serwisów partnerskich: Adzuna.', 'via Adzuna: https://www.adzuna.pl', 'Wyłącz powiadomienia: https://example.test/oferty/wypisz?t=t']) assert.ok(m.text.includes(s), s);
   assert.ok(m.html.includes('href="https://example.test/?oferta=abc&amp;utm_source=oferty"'));
+  assert.ok(m.html.includes('via <a href="https://www.adzuna.pl">Adzuna</a>'), 'atrybucja przy ofercie');
   assert.ok(m.headers['List-Unsubscribe-Post']);
   const plain = JSON.parse((await sendAlertIssue({ email: 'a@example.test', job: 'X', lang: 'en' }, { links: [['Indeed', 'https://pl.indeed.com/']], order: 'o', stop: 's', left: 0 })).message);
   assert.ok(plain.text.includes('Each one opens search results') && !plain.text.includes('partner services'), 'bez ofert z API: dotychczasowy e-mail');
@@ -85,4 +86,12 @@ test('Wysyłka tylko od poniedziałku 7:00 do środy', async () => {
   await alertsHourly('https://example.test', new Date(Date.parse('2026-10-19T04:00:00Z')), { env: ENV, fetchOpts: { get } }); // pon. 6:00
   await alertsHourly('https://example.test', new Date(Date.parse('2026-10-23T10:00:00Z')), { env: ENV, fetchOpts: { get } }); // piątek
   assert.equal((await alerts.get('b1')).lastSent, undefined);
+});
+
+test('Potwierdzenie zapisu: „raz w tygodniu”; limit /api/job-offer 60/h na IP', async () => {
+  const mail = fs.readFileSync(new URL('../lib/mail.js', import.meta.url), 'utf8');
+  assert.ok(!/co poniedziałek linki|every Monday:|щопонеділка отримувати|jeden Montag Links/.test(mail));
+  const express = (await import('express')).default, app = express(); jf.offerRoutes(app, { limitPerHour: 2 });
+  const srv = app.listen(0), U = `http://127.0.0.1:${srv.address().port}/api/job-offer/AAAAAAAAAAAAAAAA`;
+  try { const st = []; for (let i = 0; i < 3; i++) st.push((await fetch(U)).status); assert.deepEqual(st, [404, 404, 429]); } finally { srv.close(); }
 });
