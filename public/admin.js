@@ -552,18 +552,24 @@ loaders.partners = async () => {
 // Mini-CRM kontaktów B2B.
 let ctData = null; const ctSel = new Set();
 const plLetters = (n) => (n === 1 ? 'list' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 'listy' : 'listów');
-$('#ctLetters').addEventListener('click', async () => {
+// „Listy PDF” i „Paczka envelo (ZIP)”: pobranie pliku dla zaznaczonych kontaktów z adresem, potem status „list wysłany”.
+async function ctDownload(btn, path, ext) {
   if (!ctSel.size) return toast('Zaznacz kontakty (pole wyboru w pierwszej kolumnie).');
-  const b = $('#ctLetters'); if (b.disabled) return; b.disabled = true; b.textContent = 'Generuję…'; $('#ctLetMsg').textContent = '';
+  if (btn.disabled) return; const label = btn.textContent; btn.disabled = true; btn.textContent = 'Generuję…'; $('#ctLetMsg').textContent = '';
   try {
-    const r = await fetch('/api/admin/contacts/letters', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin': '1' }, credentials: 'same-origin', body: JSON.stringify({ ids: [...ctSel] }) });
+    const r = await fetch('/api/admin/contacts/' + path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin': '1' }, credentials: 'same-origin', body: JSON.stringify({ ids: [...ctSel] }) });
     if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `Błąd ${r.status}`);
-    const name = `listy-${new Date().toISOString().slice(0, 10)}.pdf`, url = URL.createObjectURL(await r.blob()), a = el('a', { href: url, download: name }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
-    const n = r.headers.get('X-Letters'), na = +r.headers.get('X-No-Address'), msg = `Pobrano: ${name} (${n} ${plLetters(+n)}${na ? `, pominięto ${na} bez adresu` : ''}). Status „list wysłany” ustawiony przy nowych kontaktach.`;
+    const name = (r.headers.get('Content-Disposition') || '').match(/filename="([^"]+)"/)?.[1] || `${path}-${new Date().toISOString().slice(0, 10)}.${ext}`;
+    const url = URL.createObjectURL(await r.blob()), a = el('a', { href: url, download: name }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
+    const n = +r.headers.get('X-Letters'), na = +r.headers.get('X-No-Address');
+    let bad = []; try { bad = JSON.parse(decodeURIComponent(r.headers.get('X-Skipped') || '[]')); } catch {}
+    const msg = `Pobrano: ${name} (${n} ${plLetters(n)}${na ? `, pominięto ${na} bez adresu` : ''}${bad.length ? `, pominięto ${bad.length} z adresem do poprawy: ${bad.map((x) => `${x.name} – ${x.reason}`).join('; ')}` : ''}). Status „list wysłany” ustawiony przy nowych kontaktach.`;
     $('#ctLetMsg').textContent = msg; toast(msg);
     ctSel.clear(); loaders.contacts();
-  } catch (x) { toast(x.message); } finally { b.disabled = false; b.textContent = 'Listy PDF'; }
-});
+  } catch (x) { toast(x.message); } finally { btn.disabled = false; btn.textContent = label; }
+}
+$('#ctLetters').addEventListener('click', (e) => ctDownload(e.currentTarget, 'letters', 'pdf'));
+$('#ctEnvelo').addEventListener('click', (e) => ctDownload(e.currentTarget, 'envelo', 'zip'));
 $('#ctImport').addEventListener('submit', async (e) => {
   e.preventDefault(); const f = $('#ctFile').files[0]; if (!f) return toast('Wybierz plik CSV.');
   try { const r = await post('/contacts/import', { csv: await f.text() }); $('#ctMsg').textContent = `Dodano ${r.added} z ${r.rows}. Duplikaty: ${r.dupes}, na liście blokad: ${r.blocked}, bez e-maila i adresu: ${r.invalid}.${r.noEmail ? ` Bez e-maila (tylko list): ${r.noEmail}.` : ''}`; $('#ctFile').value = ''; loaders.contacts(); }
