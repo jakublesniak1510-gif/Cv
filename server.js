@@ -12,6 +12,8 @@ import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUN
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads } from './lib/store.js';
 import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
+import { checkResult, hasCritical, recordQa, QA_LABELS } from './lib/qa.js';
+import { renderCv } from './lib/pdf.js';
 import { fetchAd, AdError } from './lib/fetchAd.js';
 import { adFromImage, AdImageError } from './lib/adImage.js';
 import { simTurn, SimError } from './lib/sim.js';
@@ -479,7 +481,7 @@ app.post('/api/orders/:id/followup', async (req, res) => {
 });
 
 const view = (o, extra = {}) => ({
-  ...extra, id: o.id, pkg: o.pkg, addons: o.addons || {}, extraLangs: o.extraLangs || [], total: o.total, status: o.status, results: o.results, error: o.error, mail: o.mail,
+  ...extra, id: o.id, pkg: o.pkg, addons: o.addons || {}, extraLangs: o.extraLangs || [], total: o.total, status: o.status, results: (o.results || []).map(({ qa, ...r }) => r), error: o.error, mail: o.mail,
   design: cleanDesign(o.design), photo: o.profile.photo || '', email: o.profile.email, parentId: o.parentId || null,
   paidAt: o.paidAt || null, createAccount: !!o.createAccount, canPay: o.status === 'pending' && !DEMO, revisionsLeft: MAX_REVISIONS - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
   invoice: o.invoice?.pdf ? { number: o.invoice.number } : null,
@@ -633,15 +635,27 @@ async function markPaidAndGenerate(id) {
     if (!o.paidAt && paidO.adConsent) sendPurchase(paidO, BASE_URL).then((r) => r && updateOrder(id, { capi: r })).catch((e) => logEvent('reklamy', `Meta CAPI: ${e.message}`, { orderId: id }));
     const withLetter = hasLetter(o.pkg);
     const results = await Promise.all(o.ads.map(async (ad, i) => {
-      const r = await generateForAd({ profile: o.profile, ad, withLetter, addons: o.addons, preview: i === 0 ? o.preview : null });
+      const gen = () => generateForAd({ profile: o.profile, ad, withLetter, addons: o.addons, preview: i === 0 ? o.preview : null });
+      let r = await gen(), qa = await qaOf(r, o, ad, withLetter);
+      // Błąd krytyczny (placeholder, firma spoza profilu, zły język, klauzula…): jedna ponowna generacja, zostaje lepsza wersja.
+      if (hasCritical(qa) && aiEnabled()) {
+        const r2 = await gen().catch(() => null), qa2 = r2 && (await qaOf(r2, o, ad, withLetter));
+        if (r2 && crit(qa2) <= crit(qa)) { r = r2; qa = qa2; }
+        qa = { ...qa, retried: true };
+      }
+      r.qa = qa;
       const langs = (o.extraLangs || []).filter((l) => l !== r.lang);
       if (langs.length) r.variants = Object.fromEntries(await Promise.all(langs.map(async (l) => [l, await translateResult(r, l)])));
       return r;
     }));
+    const qaScores = results.map((r) => r.qa.score).filter((x) => x != null);
+    const qaSum = { score: qaScores.length ? Math.min(...qaScores) : null, flags: [...new Set(results.flatMap((r) => r.qa.flags.map((f) => f.code)))], retried: results.some((r) => r.qa.retried) };
+    recordQa(results.map((r) => r.qa)).catch(() => {});
+    if (results.some((r) => hasCritical(r.qa))) qaAlert(id, results);
     const myCode = await afterPaid(o);
     if (o.jobAlerts) addAlertFromOrder({ email: o.profile.email, ...o.jobAlerts, lang: o.uiLang }).catch((e) => logEvent('oferty', e.message, { orderId: id }));
     const mail = await trySend({ ...o, results, myCode });
-    await updateOrder(id, { status: 'done', results, mail, myCode });
+    await updateOrder(id, { status: 'done', results, mail, myCode, qa: qaSum });
     results.forEach((r, i) => recordStatsSafe({ title: `${o.ads[i]?.title || ''} | ${r.position || ''}`, company: [r.company, o.ads[i]?.company], found: r.match?.found, missing: r.match?.missing }));
     stats.upsert('totals', (p = {}) => ({ cvs: (p.cvs || 0) + results.length, orders: (p.orders || 0) + 1 })).catch(() => {});
   } catch (e) {
@@ -695,6 +709,22 @@ async function autoInvoice(o, { force = false } = {}) {
   await updateOrder(o.id, (x) => ({ ...x, invoice: { ...x.invoice, issued: true, pdf: true, number: inv.number, issuedAt: inv.issued } }));
   if (mailEnabled()) await sendInvoiceMail(o, inv, await renderInvoice(inv), BASE_URL).catch((e) => logEvent('e-mail', `Faktura ${inv.number}: ${e.message}`, { orderId: o.id }));
   return inv;
+}
+
+// Kontrola jakości (lib/qa.js): liczba stron z PDF-u, który i tak dostanie klient.
+const crit = (qa) => qa.flags.filter((f) => f.level === 'critical').length;
+async function qaOf(r, o, ad, withLetter) {
+  let pages = null; try { pages = (await renderCv(r, o.design, o.profile?.photo)).pages; } catch {}
+  try { return checkResult(r, { profile: o.profile, ad, withLetter, pages }); } catch (e) { logEvent('generowanie', `Kontrola jakości: ${e.message}`); return { score: null, flags: [] }; }
+}
+// Dalej źle po ponownej generacji: alert do właściciela bez treści CV – tylko id zamówienia i kody flag (osobny limit: raz na godzinę).
+let lastQaAlert = 0;
+function qaAlert(id, results) {
+  logEvent('generowanie', 'Kontrola jakości: błędy krytyczne po ponownej generacji', { orderId: id });
+  if (!mailEnabled() || !process.env.CONTACT_EMAIL || Date.now() - lastQaAlert < 3600_000) return;
+  lastQaAlert = Date.now();
+  const lines = results.map((r, i) => `Ogłoszenie ${i + 1}: wynik ${r.qa.score}/100; ${r.qa.flags.map((f) => `${QA_LABELS[f.code] || f.code}${f.level === 'critical' ? ' (krytyczne)' : ''}`).join(', ') || 'bez uwag'}`);
+  sendAdminAlert('Kontrola jakości: dokumenty do sprawdzenia', `Zamówienie ${id}: po jednej ponownej generacji dokumenty nadal mają błędy krytyczne.\n\n${lines.join('\n')}\n\nSprawdź je w panelu → Zamówienia (możesz poprawić i wysłać ponownie).`).catch((e) => logEvent('e-mail', `Ostrzeżenie QA: ${e.message}`));
 }
 
 // Mail do właściciela najwyżej raz na godzinę, żeby przy awarii nie zasypać skrzynki.
