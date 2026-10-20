@@ -2219,6 +2219,12 @@ async function loadDraft(id) {
   if ($('#scanAd')) $('#scanAd').value = text;
   openWiz();
 }
+// ?zamow=1 (przycisk „Zamów” z lekkiej podstrony): kreator z wybranym pakietem i dodatkami.
+if (q.get('zamow') && !q.get('id') && !q.get('draft')) {
+  try { history.replaceState(null, '', location.pathname + location.hash); } catch {}
+  (q.get('dodatki') || '').split(',').filter((a) => /^\w+$/.test(a)).forEach((a) => { const c = $('#ad' + a); if (c) c.checked = true; });
+  openWiz(['cv', 'cv_letter', 'pack3'].includes(q.get('pkg')) ? q.get('pkg') : undefined);
+}
 if (q.get('draft')) loadDraft(q.get('draft'));
 if (q.get('id')) startResult(q.get('id'));
 else if (q.has('canceled')) { try { history.replaceState(null, '', location.pathname); } catch {} openWiz(); go(6); $('#werr').textContent = 'Płatność została anulowana. Twoje dane są zachowane, możesz spróbować ponownie.'; }
