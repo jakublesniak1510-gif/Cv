@@ -28,13 +28,14 @@ import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes, sendNotFound } from './lib/seo.js';
 import { p24Enabled, p24Register, p24NotificationOk, p24Verify, p24BySession } from './lib/p24.js';
 import { stripeEnabled, stripeCheckout, stripeSession, stripeEvent } from './lib/stripe.js';
-import { recordSale, notifyNewOrder, setRefunded, commissionBack, ownerDaily, getSettings, DATA_DIR } from './lib/ops.js';
+import { recordSale, notifyNewOrder, setRefunded, commissionBack, ownerDaily, getSettings, DATA_DIR, addDailySection, dayKey } from './lib/ops.js';
 import { invoices, issueInvoice, renderInvoice, invoiceFile, cleanupInvoices } from './lib/invoice.js';
 import { renderDocx } from './lib/docx.js';
 import { adminRoutes, isAdmin } from './lib/admin.js';
 import { accountRoutes, accountHourly } from './lib/account.js';
 import { previewRoutes, previewFor, cleanupPreviews } from './lib/preview.js';
-import { analyticsRoutes, cleanupAnalytics } from './lib/analytics.js';
+import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText, visitInfo, funnelPaid } from './lib/analytics.js';
+import { seoReportRoutes, seoWeekly } from './lib/seo-report.js';
 import { logEvent, cleanupEvents } from './lib/events.js';
 import { leadRoutes, cleanupLeads } from './lib/leads.js';
 import { emailHash, codeDiscount, applyPaidCode, isOwner, CODE_TTL } from './lib/referral.js';
@@ -438,7 +439,7 @@ app.post('/api/orders', async (req, res) => {
     if (inv?.error) return res.status(400).json({ error: inv.error });
     const disc = discountFor(c, pkg, a.length, ad, false, langs), total = calcTotal(pkg, a.length, ad, false, langs, disc);
     const shown = await previewFor(p, a[0]).catch(() => null); // podgląd z ostatniego kroku kreatora, jeśli był
-    const order = { preview: shown, invoice: total > 0 ? inv : null, id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
+    const order = { preview: shown, visit: visitInfo(req), invoice: total > 0 ? inv : null, id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -573,6 +574,7 @@ async function markPaidAndGenerate(id) {
   inFlight.add(id);
   try {
     const paidO = await updateOrder(id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
+    if (!o.paidAt) funnelPaid(paidO).catch(() => {}); // etap „Opłacone” w lejku liczy serwer, raz na zamówienie
     if (!o.paidAt) { recordSale(paidO).catch((e) => console.error('Rejestr sprzedaży', e.message)); notifyNewOrder(paidO, BASE_URL).catch((e) => logEvent('e-mail', `Powiadomienie o zamówieniu: ${e.message}`)); }
     if (!o.paidAt && paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: id }));
     if (!o.paidAt && paidO.adConsent) sendPurchase(paidO, BASE_URL).then((r) => r && updateOrder(id, { capi: r })).catch((e) => logEvent('reklamy', `Meta CAPI: ${e.message}`, { orderId: id }));
@@ -717,6 +719,9 @@ accountRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 leadRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 alertRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 analyticsRoutes(app, BASE_URL);
+seoReportRoutes(app);
+// Lejek z wczoraj w porannym podsumowaniu (same liczby).
+addDailySection(async (now) => { const y = dayKey(now.getTime() - 864e5); return funnelText(await funnelRange(y, y)); });
 adminRoutes(app, { DEMO, BASE_URL, markPaidAndGenerate, trySend, retentionMs: RETENTION_MS, autoInvoice });
 
 // Dane zamówień (w tym zdjęcia) kasujemy po 30 dniach.
@@ -748,6 +753,7 @@ async function hourly() {
     await alertsHourly(BASE_URL).catch((e) => console.error('Powiadomienia o ofertach', e.message));
     await accountHourly(BASE_URL).catch((e) => console.error('Konta', e.message));
     await ownerDaily(BASE_URL).catch((e) => logEvent('e-mail', `Podsumowanie dnia / kopia: ${e.message}`));
+    seoWeekly(BASE_URL).catch((e) => logEvent('seo', `Raport SEO: ${e.message}`)); // bez czekania: sprawdzanie adresów w Search Console trwa długo
     if (!mailEnabled()) return;
     for (const o of Object.values(await allOrders())) {
       if (o.status !== 'done' || !o.reminder?.consent || o.reminder.sent || Date.now() - o.created < REMINDER_AFTER) continue;

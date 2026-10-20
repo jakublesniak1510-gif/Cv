@@ -12,9 +12,11 @@ const STEPS = ['Pakiet i wygląd CV', 'Twoje dane', 'Doświadczenie', 'Wykształ
 let pendingDraft = ''; // ogłoszenie z rozszerzenia Chrome czekające na formularz skanera
 let cfg = { demo: false, maxAds: 5, noPrint: false, maxRevisions: 10, loading: true };
 // Statystyki bez cookies: zbiorcze odsłony i kroki kreatora (serwer nie zapisuje IP ani identyfikatorów).
+const trackLater = []; // zdarzenia sprzed wczytania konfiguracji (np. powrót z płatności), wysyłane po „pv”
 function track(e, x = {}) {
-  if (cfg.loading || cfg.preview || !navigator.sendBeacon) return;
-  try { navigator.sendBeacon('/api/t', JSON.stringify({ e, p: location.pathname, r: document.referrer, u: new URLSearchParams(location.search).get('utm_source') || '', ...x })); } catch {}
+  if (cfg.loading) { if (trackLater.length < 10) trackLater.push([e, x]); return; }
+  if (cfg.preview || !navigator.sendBeacon) return;
+  try { navigator.sendBeacon('/api/t', JSON.stringify({ e, p: location.pathname, r: document.referrer, u: new URLSearchParams(location.search).get('utm_source') || '', l: (document.documentElement.lang || 'pl').slice(0, 2), ...x })); } catch {}
 }
 // Szablony i kolory: muszą zgadzać się z lib/designs.js.
 const TPLS = [
@@ -213,7 +215,7 @@ function hl(text, kws) {
 }
 
 fetch('/api/config').then((r) => r.json()).then((c) => {
-  cfg = c; if (c.chromeExt) { $('#chromeExt').href = c.chromeExt; $('#chromeExtBox').hidden = false; } window.CONSENT?.init(c.ads); track('pv'); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; drawPromo(c.promo); if (c.salesClosed) $('#demoBar').textContent = 'Strona w przygotowaniu – zamówienia ruszą za kilka dni.'; $('#soonNote').hidden = !c.salesClosed; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
+  cfg = c; if (c.chromeExt) { $('#chromeExt').href = c.chromeExt; $('#chromeExtBox').hidden = false; } window.CONSENT?.init(c.ads); track('pv'); trackLater.splice(0).forEach(([e, x]) => track(e, x)); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; drawPromo(c.promo); if (c.salesClosed) $('#demoBar').textContent = 'Strona w przygotowaniu – zamówienia ruszą za kilka dni.'; $('#soonNote').hidden = !c.salesClosed; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
 }).catch(() => drawLists().catch(() => {})); // bez internetu (aplikacja na telefonie): treści z pamięci
 
 /* ---------- Przykład dopasowania ---------- */
@@ -937,6 +939,7 @@ $('#wizForm').onsubmit = async (e) => {
     const j = await r.json();
     if (!r.ok) throw new Error(j.error);
     orderId = j.id;
+    if (!j.free) track('checkout');
     if (j.free) { closeWiz(); startResult(j.id); } else if (j.demo) go(7); else location.href = j.url;
   } catch (x) { $('#werr').textContent = x.message; }
   $('#next').disabled = false;
