@@ -74,3 +74,8 @@ test('/o-serwisie: Przelewy24 tylko przy aktywnym koncie P24', async () => {
   const { text } = await get('/o-serwisie');
   assert.match(text, /<li>Płatności obsługuje Stripe; danych karty/, 'bez aktywnego konta P24 tylko Stripe');
 });
+
+test('/o-serwisie: strona tylko z serwera (skrypt nie podmienia jej na stronę główną)', async () => {
+  const { text } = await get('/o-serwisie');
+  assert.match(text, /window\.__ROUTE=""/); assert.match(text, /window\.__SSRPATH="\/o-serwisie"/);
+});
