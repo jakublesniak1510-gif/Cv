@@ -33,7 +33,7 @@ test('Generator bez AI (tailor) przechodzi kontrolę bez błędów krytycznych (
 });
 
 test('Błędy krytyczne: placeholder, firma spoza profilu, język, klauzula, puste CV, brak listu', () => {
-  const r1 = good(); r1.cv.experience[0].bullets.push('Współpraca z [nazwa działu].'); r1.letter = 'Z poważaniem, [Imię Nazwisko]'.padEnd(250, ' x');
+  const r1 = good(); r1.cv.experience[0].bullets.push('Współpraca z [nazwa firmy klienta].'); r1.letter = 'Z poważaniem, [Imię Nazwisko]'.padEnd(250, ' x');
   assert.ok(codes(checkResult(r1, { profile: PROFILE, ad: AD })).includes('placeholder'));
   const r2 = good(); r2.cv.experience.push({ title: 'Kierownik', company: 'Amazon Fulfillment', bullets: [] });
   const q2 = checkResult(r2, { profile: PROFILE, ad: AD }); assert.deepEqual(q2.flags.find((f) => f.code === 'firma_spoza_profilu'), { code: 'firma_spoza_profilu', level: 'critical', n: 1 });
@@ -90,4 +90,18 @@ test('Zamówienie: kontrola jakości zapisana w zamówieniu i w statystykach, be
     const stats = JSON.parse(fs.readFileSync(path.join(dir, 'qa-stats.json'), 'utf8'));
     assert.equal(Object.values(stats)[0].docs, 1);
   } finally { srv.kill(); }
+});
+
+test('Bez fałszywych alarmów: warianty klauzuli RODO, nawiasy z latami i […], hiszpańskie „todo”, firma przy pustym profilu', () => {
+  for (const cl of ['Wyrażam zgodę na przetwarzanie moich danych osobowych w celu rekrutacji zgodnie z RODO.', 'Wyrażam zgodę na przetwarzanie danych osobowych dla potrzeb rekrutacji (art. 6 ust. 1 lit. a RODO).', 'Wyrażam zgodę na przetwarzanie danych w procesie rekrutowania zgodnie z rozporządzeniem z dnia 27 kwietnia 2016 r.']) {
+    const r = good(); r.cv.clause = cl; assert.deepEqual(checkResult(r, { profile: PROFILE, ad: AD }).flags, [], cl);
+  }
+  const r = good(); r.cv.experience[0].bullets.push('Praca zmianowa [2019–2021], inwentaryzacje [...] i […].');
+  assert.deepEqual(checkResult(r, { profile: PROFILE, ad: AD }).flags, []);
+  assert.ok(!codes(checkResult({ ...good(), lang: 'es', cv: { ...good().cv, summary: 'Tengo experiencia en todo tipo de almacenes.' } }, { profile: PROFILE, ad: { ...AD, lang: 'es' } })).includes('placeholder'));
+  for (const t of ['Z poważaniem, [imię]', 'TODO: dopisać', '{{company}}']) { const x = good(); x.letter = t.padEnd(250, ' x'); assert.ok(codes(checkResult(x, { profile: PROFILE, ad: AD })).includes('placeholder'), t); }
+  const noFirm = { ...PROFILE, experience: [{ title: 'Magazynier w Logistyka Kowalski', company: '', period: '2020 – 2024' }] };
+  const r2 = good(); r2.cv.experience.push({ title: 'Pomocnik', company: 'Hurtownia Nowak', bullets: [] });
+  assert.deepEqual(checkResult(r2, { profile: noFirm, ad: AD }).flags, [{ code: 'firma_spoza_profilu', level: 'warn', n: 1 }], 'pusta firma w profilu → ostrzeżenie; firma z tytułu nie jest flagowana');
+  assert.equal(checkResult(r2, { profile: PROFILE, ad: AD }).flags[0].level, 'critical', 'firma spoza pełnego profilu → krytyczne');
 });

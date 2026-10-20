@@ -648,7 +648,8 @@ async function markPaidAndGenerate(id) {
       if (langs.length) r.variants = Object.fromEntries(await Promise.all(langs.map(async (l) => [l, await translateResult(r, l)])));
       return r;
     }));
-    const qaSum = { score: Math.min(...results.map((r) => r.qa.score)), flags: [...new Set(results.flatMap((r) => r.qa.flags.map((f) => f.code)))], retried: results.some((r) => r.qa.retried) };
+    const qaScores = results.map((r) => r.qa.score).filter((x) => x != null);
+    const qaSum = { score: qaScores.length ? Math.min(...qaScores) : null, flags: [...new Set(results.flatMap((r) => r.qa.flags.map((f) => f.code)))], retried: results.some((r) => r.qa.retried) };
     recordQa(results.map((r) => r.qa)).catch(() => {});
     if (results.some((r) => hasCritical(r.qa))) qaAlert(id, results);
     const myCode = await afterPaid(o);
