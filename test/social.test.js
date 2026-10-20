@@ -71,8 +71,13 @@ test('Bot Meta: diagnostyka do /health bez sekretów', async () => {
   const resp = (ok, j) => ({ ok, json: async () => j });
   const good = async (u) => (u.includes('subscribed_apps') ? resp(true, { data: [{ subscribed_fields: ['messages', 'messaging_postbacks'] }] }) : resp(true, { id: '1', name: 'CV Pod Ogłoszenie', instagram_business_account: { id: '2' } }));
   assert.deepEqual(await botStatus({ fetchFn: good, now: 1 }), { bot: 'ok', strona: 'CV Pod Ogłoszenie', instagram: 'połączony' });
-  const noSubs = async (u) => (u.includes('subscribed_apps') ? resp(true, { data: [] }) : resp(true, { id: '1', name: 'X' }));
-  assert.match((await botStatus({ fetchFn: noSubs, now: 1e9 })).bot, /brak subskrypcji/);
+  const noSubs = async (u, o = {}) => (o.method === 'POST' ? resp(false, { error: { message: '(#200) Permissions error' } }) : u.includes('subscribed_apps') ? resp(true, { data: [] }) : resp(true, { id: '1', name: 'X' }));
+  const ns = await botStatus({ fetchFn: noSubs, now: 1e9 });
+  assert.match(ns.bot, /brak subskrypcji/); assert.match(ns.szczegol, /Permissions error/);
+  const posted = [];
+  const autoSub = async (u, o = {}) => (o.method === 'POST' ? (posted.push(u), resp(true, { success: true })) : u.includes('subscribed_apps') ? resp(true, { data: [] }) : resp(true, { id: '1', name: 'X' }));
+  assert.equal((await botStatus({ fetchFn: autoSub, now: 1.5e9 })).bot, 'ok', 'brak subskrypcji → włączamy ją sami');
+  assert.match(posted[0], /me\/subscribed_apps\?subscribed_fields=messages,messaging_postbacks,message_echoes&access_token=/);
   const bad = async () => resp(false, { error: { message: 'Error validating access token: Session has expired' } });
   const r = await botStatus({ fetchFn: bad, now: 2e9 });
   assert.match(r.bot, /token/); assert.ok(!JSON.stringify(r).includes('page-token'));
