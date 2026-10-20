@@ -470,8 +470,13 @@ function simpleTable(rows, cols) {
 const shortUrl = (u) => String(u || '').replace(/^https?:\/\/[^/]+/, '') || '/';
 const QC = [['key', 'Zapytanie'], ['clicks', 'Klik.', 1], ['impressions', 'Wyśw.', 1], ['ctr', 'CTR %', 1], ['position', 'Poz.', 1], ['prevPosition', 'Poz. wcześniej', 1]];
 const PC = [[(x) => shortUrl(x.key), 'Strona'], ['type', 'Typ'], ['lang', 'Język'], ['clicks', 'Klik.', 1], ['impressions', 'Wyśw.', 1], ['ctr', 'CTR %', 1], ['position', 'Poz.', 1]];
+let seoPoll = null;
 loaders.seo = async () => {
   const d = await api('/seo'), r = d.latest, g = r?.gsc;
+  const err = d.manual?.error || (d.enabled && r?.gscError) || '';
+  $('#seoErr').hidden = !err; $('#seoErrMsg').textContent = err ? `${err} Sprawdź GSC_SA_JSON i GSC_SITE w Render oraz czy konto serwisowe (client_email z klucza) jest dodane jako użytkownik właściwości w Search Console.` : '';
+  const b = $('#seoRun'); b.disabled = !!d.manual?.running; b.textContent = d.manual?.running ? 'Generuję raport…' : 'Wygeneruj raport teraz';
+  if (d.manual?.running && !seoPoll) seoPoll = setTimeout(() => { seoPoll = null; if (!$('section[data-view="seo"]').hidden) loaders.seo().catch(() => {}); }, 8000);
   $('#seoInfo').textContent = [d.enabled ? 'Search Console połączone.' : 'Search Console nie jest skonfigurowane: ustaw w Render GSC_SA_JSON (klucz konta serwisowego) i GSC_SITE, a konto serwisowe dodaj jako użytkownika w Search Console.', 'Raport powstaje co poniedziałek po 6:30 i przychodzi e-mailem.', d.link ? 'Link tylko do odczytu jest ustawiony (SEO_REPORT_TOKEN).' : 'Link tylko do odczytu: ustaw SEO_REPORT_TOKEN (min. 32 znaki).'].join(' ');
   $('#seoTiles').replaceChildren(...(g ? [tile('Kliknięcia z Google', num(g.totals.cur.clicks), `28 dni, wcześniej ${num(g.totals.prev.clicks)}`), tile('Wyświetlenia', num(g.totals.cur.impressions), `wcześniej ${num(g.totals.prev.impressions)}`), tile('CTR', `${String(g.totals.cur.ctr).replace('.', ',')}%`, `wcześniej ${String(g.totals.prev.ctr).replace('.', ',')}%`), tile('Średnia pozycja', String(g.totals.cur.position).replace('.', ','), `wcześniej ${String(g.totals.prev.position).replace('.', ',')}`)] : [tile('Raport', r ? r.id : 'brak', r?.gscError || 'Kliknij „Wygeneruj teraz”')]));
   $('#seoWeeks').replaceChildren(simpleTable(d.weeks, [['id', 'Tydzień od'], ['clicks', 'Kliknięcia', 1], ['impressions', 'Wyświetlenia', 1], ['visits', 'Wejścia', 1], ['paid', 'Opłacone', 1]]));
@@ -487,8 +492,9 @@ loaders.seo = async () => {
   $('#seoIdx').replaceChildren(g?.inspection?.error ? el('p', { className: 'help', textContent: g.inspection.error }) : '', simpleTable(g ? Object.entries(g.inspection.states).map(([k, v]) => ({ k, v })) : [], [['k', 'Stan'], ['v', 'Adresów', 1]]), simpleTable(g?.inspection.rows, [[(x) => shortUrl(x.url), 'Adres'], ['coverage', 'Stan'], ['lastCrawl', 'Ostatnie pobranie']]));
 };
 $('#seoRun').addEventListener('click', async () => {
-  const b = $('#seoRun'); if (b.disabled) return; b.disabled = true; b.textContent = 'Generuję…';
-  try { await post('/seo/run'); toast('Raport gotowy. Kopia poszła e-mailem (jeśli poczta jest ustawiona).'); await loaders.seo(); } catch (x) { toast(x.message); } finally { b.disabled = false; b.textContent = 'Wygeneruj teraz'; }
+  const b = $('#seoRun'); if (b.disabled) return; b.disabled = true;
+  try { await post('/seo/run'); toast('Generuję raport (zwykle 1–3 minuty). Tabela odświeży się sama, a kopia przyjdzie e-mailem.'); } catch (x) { toast(x.message); }
+  await loaders.seo().catch(() => {});
 });
 
 // --- problemy ---

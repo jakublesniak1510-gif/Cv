@@ -154,3 +154,19 @@ test('Raport tygodniowy: Search Console, próbka indeksowania, zapis, e-mail raz
     assert.equal(rep.reportLink(BASE), `${BASE}/raport-seo/${T}`);
   } finally { srv.close(); delete process.env.SEO_REPORT_TOKEN; }
 });
+
+test('Panel → SEO: ręczne generowanie w tle, raz na godzinę, błąd Search Console widoczny', async () => {
+  let t = MON, done; const gate = new Promise((r) => { done = r; });
+  const app = express(), api = express.Router(); app.use(express.json()); rep.seoAdmin(api, { BASE_URL: BASE, now: () => t, run: async () => { await gate; return { gscError: 'Search Console: User does not have sufficient permission' }; } }); app.use('/api/admin', api);
+  const srv = app.listen(0), U = `http://127.0.0.1:${srv.address().port}/api/admin`;
+  const post = () => fetch(`${U}/seo/run`, { method: 'POST' }), get = async () => (await fetch(`${U}/seo`)).json();
+  try {
+    assert.deepEqual(await (await post()).json(), { ok: true, started: true });
+    assert.equal((await get()).manual.running, true);
+    assert.deepEqual(await (await post()).json(), { ok: true, running: true }, 'drugie kliknięcie w trakcie nic nie uruchamia');
+    done(); await new Promise((r) => setTimeout(r, 20));
+    const d = await get(); assert.equal(d.manual.running, false); assert.match(d.manual.error, /sufficient permission/);
+    t += 30 * 60e3; const r = await post(); assert.equal(r.status, 429); assert.match((await r.json()).error, /raz na godzinę.*30 min/);
+    t += 31 * 60e3; assert.equal((await (await post()).json()).started, true, 'po godzinie znowu można');
+  } finally { srv.close(); }
+});
