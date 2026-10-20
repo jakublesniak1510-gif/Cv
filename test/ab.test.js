@@ -52,7 +52,7 @@ test('Strona główna z wariantem, lejek per wariant, wariant w zamówieniu, rap
     for (let i = 1; i <= 40; i++) {
       const r = await fetch(U + '/', { headers: ua(i) }), h = await r.text();
       assert.equal(r.headers.get('cache-control'), 'private, no-store');
-      if (h.includes('<h1>CV dopasowane do ogłoszenia w 5&nbsp;minut')) seenB.add('hero');
+      if (h.includes('<h1>CV dopasowane do ogłoszenia w kilka minut')) seenB.add('hero');
       if (h.includes('href="#skaner">Sprawdź za darmo, potem zrób CV</a>')) seenB.add('cta');
       assert.ok(h.includes('<link rel="canonical" href="https://example.test/">'));
     }
@@ -76,6 +76,9 @@ test('Strona główna z wariantem, lejek per wariant, wariant w zamówieniu, rap
     process.env.EXPERIMENTS = '';
     const plain = await fetch(U + '/', { headers: ua(2) });
     assert.notEqual(plain.headers.get('cache-control'), 'private, no-store');
-    assert.ok((await plain.text()).includes('<h1>Jedno ogłoszenie. Jedno CV pisane właśnie pod nie.</h1>'), 'bez EXPERIMENTS: obecna strona');
+    const home = await plain.text();
+    assert.equal(plain.headers.get('cache-control'), null, 'bez EXPERIMENTS: nagłówki jak dotąd');
+    assert.equal(home, (await (await fetch(U + '/', { headers: ua(3) })).text()), 'bez EXPERIMENTS: ta sama strona dla każdego');
+    assert.ok(home.includes('<h1>Jedno ogłoszenie. Jedno CV pisane właśnie pod nie.</h1>') && home.includes('<button class="btn lg" data-open>Zamów CV od 39 zł</button>'), 'bez EXPERIMENTS: obecna strona');
   } finally { srv.close(); delete process.env.EXPERIMENTS; }
 });
