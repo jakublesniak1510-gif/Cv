@@ -47,7 +47,7 @@ test('SSR: strony prawne zwracają 200 z tytułem, lang, canonical, hreflang na 
       const sec = /<section class="page" id="page" role="main"[^>]*>([\s\S]*?)<\/section>/.exec(text)?.[1] || '';
       assert.equal((sec.match(/<h1>/g) || []).length, 1, `${path}: jeden H1 w treści`);
       assert.ok(!sec.includes('[E-MAIL]'), `${path}: bez znacznika e-maila`);
-      assert.ok(text.includes(`window.__ROUTE="legal/${name}"`), `${path}: trasa dla skryptu`);
+      assert.ok(/<script src="\/lite\.js\?v=/.test(text) && !text.includes('id="wiz"'), `${path}: lekka strona (bez kreatora w kodzie)`);
       assert.ok(sitemap.includes(`<loc>${base}/${path}</loc>`), `${path}: sitemap`);
       if (lang !== 'pl') assert.ok(text.includes(`href="/${LEGAL_PAGES.regulamin[lang].path}"`) && text.includes(`href="/${LEGAL_PAGES.prywatnosc[lang].path}"`), `${path}: linki w stopce w języku`);
     }

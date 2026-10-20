@@ -47,7 +47,7 @@ test('Strony wzorów: H1, unikalny tytuł, FAQPage, CTA z ceną, skaner, DOCX i 
       assert.ok(h.includes('href="/narzedzia/skaner-cv"'));
       assert.ok(h.includes(`href="/${path}/${s}.docx"`) && h.includes(`href="/${path}/${s}.pdf"`));
       assert.match(h, /<input type="checkbox" name="consent">/, 'zgoda na newsletter domyślnie niezaznaczona');
-      assert.match(h, /window\.__ROUTE=""/, 'strona tylko z serwera (skrypt nie podmienia jej na stronę główną)');
+      assert.match(h, /<script src="\/lite\.js\?v=[0-9a-f]+" defer><\/script>/, 'lekka strona tylko z serwera');
       assert.doesNotMatch(h, /gwarant|\d+\s?% (więcej|szans)/i);
     }
   }

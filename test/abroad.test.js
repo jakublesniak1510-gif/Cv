@@ -46,13 +46,13 @@ test('Strony: 200, jeden H1 w treści, canonical, FAQPage i BreadcrumbList, CTA 
     assert.equal((m.match(/<h1>/g) || []).length, 1, `${a.slug}: jeden H1`);
     assert.ok(h.includes(`<link rel="canonical" href="${base}/${a.slug}">`), `${a.slug}: canonical`);
     assert.doesNotMatch(h, /<meta name="robots" content="noindex">/);
-    assert.match(h, /window\.__ROUTE=""/, 'strona tylko z serwera');
+    assert.ok(/<script src="\/lite\.js\?v=/.test(h) && !h.includes('id="wiz"'), 'lekka strona (bez kreatora w kodzie)');
     const data = lds(h), faq = data.find((x) => x['@type'] === 'FAQPage');
     assert.equal(faq.mainEntity.length, a.faq.length);
     assert.ok(data.some((x) => x['@type'] === 'BreadcrumbList'));
     const inLang = a.lang === 'de' ? 'po niemiecku' : 'po angielsku';
     assert.ok(m.includes(`Zrób CV ${inLang} pod konkretne ogłoszenie – od ${price}`), `${a.slug}: CTA`);
-    assert.ok(m.includes(`href="${wizardUrl(a.lang)}"`) && wizardUrl(a.lang) === `/?jezyk=${a.lang}#cennik`);
+    assert.ok(m.includes(`href="${wizardUrl(a.lang)}"`) && wizardUrl(a.lang) === `/?zamow=1&jezyk=${a.lang}`);
     assert.ok(m.includes('href="/narzedzia/skaner-cv"'));
     for (const o of SLUGS.filter((s) => s !== a.slug)) assert.ok(m.includes(`href="/${o}"`), `${a.slug} → ${o}`);
   }

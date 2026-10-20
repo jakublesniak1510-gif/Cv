@@ -86,7 +86,7 @@ test('Strony: zamówienie, program partnerski, regulamin, raport bez danych osob
   try {
     const order = await get('/dla-instytucji/zamow?pkg=pack3');
     assert.equal(order.status, 200); assert.match(order.text, /<option value="pack3" selected>/); assert.match(order.text, /<td>51 zł<\/td>/); assert.match(order.text, /src="\/b2b\.js"/);
-    assert.match(order.text, /window\.__SSRPATH="\/dla-instytucji\/zamow"/); assert.match(order.text, /rel="canonical"/);
+    assert.match(order.text, /<script src="\/lite\.js\?v=[0-9a-f]+" defer><\/script>/); assert.match(order.text, /rel="canonical"/);
     const pp = await get('/program-partnerski'); assert.equal(pp.status, 200); assert.match(pp.text, /id="partnerForm"/);
     const reg = await get('/program-partnerski/regulamin'); assert.equal(reg.status, 200); assert.match(reg.text, /§8\. Zmiany Regulaminu/);
     const sm = (await get('/sitemap.xml')).text; for (const p of ['dla-instytucji/zamow', 'program-partnerski', 'program-partnerski/regulamin']) assert.ok(sm.includes(`${BASE}/${p}<`), p);
@@ -191,7 +191,7 @@ test('Przegląd #15: jeden <h1> na stronach z serwera, pułapka na boty w zamów
     for (const p of [`/raport/${c.report}`, '/dla-instytucji/zamow', '/program-partnerski']) {
       const html = (await (await fetch(U + p)).text()).replace(/<template[\s\S]*?<\/template>/g, '');
       assert.equal((html.match(/<h1[\s>]/g) || []).length, 1, `${p}: jeden <h1>`);
-      assert.match(html, /<p class="h1">/, `${p}: nagłówek strony głównej jako akapit`);
+      assert.doesNotMatch(html, /<main id="landing"/, `${p}: lekka strona bez ukrytej strony głównej`);
     }
     const r = await fetch(U + '/api/b2b/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body({ email: 'bot@example.test' }), website: 'http://spam' }) });
     assert.equal(r.status, 400);
