@@ -84,3 +84,19 @@ test('envelo: kontakty → status „list wysłany”, pominięte bez adresu i z
   await assert.rejects(() => crm.enveloFor([id('E3')], BASE), /Nie udało się rozbić.*E3/);
   await assert.rejects(() => crm.enveloFor([id('E2')], BASE), /pominięto 1 bez adresu/);
 });
+
+test('Kontakty: zbiorcza zmiana statusu (cofnięcie na „nowy” czyści list, „zgoda na ofertę” tylko pojedynczo, odmowa zbiorczo)', async () => {
+  await crm.importContacts('organizacja;adres;email\nB1;ul. Polna 1, 10-100 Olsztyn;b1@x.example\nB2;ul. Polna 2, 10-100 Olsztyn;b2@x.example\nB3;ul. Polna 3, 10-100 Olsztyn;');
+  const all = Object.values(await crm.contacts.all()), ids = ['B1', 'B2', 'B3'].map((o) => all.find((c) => c.org === o).id);
+  await crm.lettersFor(ids, BASE);
+  for (const id of ids) assert.equal((await crm.contacts.get(id)).status, 'list wysłany');
+  const r = await crm.bulkStatus([...ids, 'nie-ma'], 'nowy');
+  assert.deepEqual(r, { changed: 3, missing: 1, total: 4 });
+  for (const id of ids) { const c = await crm.contacts.get(id); assert.equal(c.status, 'nowy'); assert.equal(c.letter, undefined); assert.equal(c.log.at(-1).status, 'nowy'); }
+  await assert.rejects(() => crm.bulkStatus(ids, 'zgoda na ofertę'), /pojedynczo/);
+  await assert.rejects(() => crm.bulkStatus(ids, 'xyz'), /Nieznany/);
+  await assert.rejects(() => crm.bulkStatus([], 'nowy'), /Zaznacz/);
+  assert.equal((await crm.bulkStatus(ids, 'rozmowa')).changed, 3);
+  assert.equal((await crm.bulkStatus(ids.slice(0, 2), 'odmowa')).changed, 2);
+  assert.equal(await crm.contacts.get(ids[0]), null); assert.ok(await crm.isBlocked('b1@x.example')); assert.ok(await crm.contacts.get(ids[2]));
+});
