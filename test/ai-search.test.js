@@ -66,5 +66,11 @@ test('JSON-LD Organization na stronie głównej i /o-serwisie: jeden, poprawny, 
     assert.equal(o.address.addressCountry, 'PL');
     assert.match(o.email, /@/);
     assert.ok(Array.isArray(o.sameAs) && o.sameAs.includes(TP), `${p}: sameAs`);
+    for (const u of ['https://www.youtube.com/@cvpodogloszenie', 'https://www.facebook.com/cvpodogloszenie', 'https://www.instagram.com/cvpodogloszenie']) assert.ok(o.sameAs.includes(u), `${p}: ${u}`);
   }
+});
+
+test('/o-serwisie: Przelewy24 tylko przy aktywnym koncie P24', async () => {
+  const { text } = await get('/o-serwisie');
+  assert.match(text, /<li>Płatności obsługuje Stripe; danych karty/, 'bez aktywnego konta P24 tylko Stripe');
 });
