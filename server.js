@@ -6,7 +6,7 @@ import crypto from 'node:crypto';
 import { activePromo, ensurePromoCode } from './lib/promos.js';
 import { checkPhoto, recruiterAnswer, ToolError } from './lib/freeTools.js';
 import { alertRoutes, alertsHourly, addAlertFromOrder } from './lib/alerts.js';
-import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUNDLE_OFF, withLetter as hasLetter } from './lib/pricing.js';
+import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUNDLE_OFF, withLetter as hasLetter, upsellOffers, upsellPlan } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads } from './lib/store.js';
 import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
@@ -35,7 +35,7 @@ import { adminRoutes, isAdmin } from './lib/admin.js';
 import { accountRoutes, accountHourly } from './lib/account.js';
 import { templateRoutes } from './lib/templates.js';
 import { previewRoutes, previewFor, cleanupPreviews } from './lib/preview.js';
-import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText, visitInfo, funnelPaid } from './lib/analytics.js';
+import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText, visitInfo, funnelPaid, countEvent } from './lib/analytics.js';
 import { seoReportRoutes, seoWeekly } from './lib/seo-report.js';
 import { logEvent, cleanupEvents } from './lib/events.js';
 import { leadRoutes, cleanupLeads } from './lib/leads.js';
@@ -356,9 +356,9 @@ async function checkout(order, lang) {
     const l = lang || order.uiLang, n = order.ads?.length || 1;
     const sess = await stripeCheckout({
       orderId: order.id, amount: order.total, email: order.profile.email, lang: l,
-      name: `CV Pod Ogłoszenie: ${PACKAGES[order.pkg]?.name || 'zamówienie'}`,
-      description: [`${n} ${n === 1 ? 'ogłoszenie' : 'ogłoszenia'}`, ...Object.keys(ADDONS).filter((k) => order.addons?.[k]).map((k) => ADDONS[k])].join(', ').slice(0, 300),
-      returnUrl: `${BASE_URL}/${['en', 'uk', 'de'].includes(l) ? l : ''}?id=${order.id}`,
+      name: `CV Pod Ogłoszenie: ${order.upsell ? `dodatek – ${order.upsell.name}` : PACKAGES[order.pkg]?.name || 'zamówienie'}`,
+      description: order.upsell ? `Dodatek do zamówienia ${order.upsellOf.slice(0, 8)}` : [`${n} ${n === 1 ? 'ogłoszenie' : 'ogłoszenia'}`, ...Object.keys(ADDONS).filter((k) => order.addons?.[k]).map((k) => ADDONS[k])].join(', ').slice(0, 300),
+      returnUrl: `${BASE_URL}/${['en', 'uk', 'de'].includes(l) ? l : ''}?id=${order.upsellOf || order.id}`, // dodatek: powrót na stronę dokumentów zamówienia
     });
     await updateOrder(order.id, { payAttempts: (order.payAttempts || 0) + 1, stripe: { sessionId: sess.id } });
     return { id: order.id, url: sess.url };
@@ -367,7 +367,7 @@ async function checkout(order, lang) {
   const { token, url } = await p24Register({
     sessionId, amount: order.total, email: order.profile.email, language: lang || order.uiLang,
     description: `CV Pod Ogłoszenie, zamówienie ${order.id}`,
-    urlReturn: `${BASE_URL}/?id=${order.id}`, urlStatus: `${BASE_URL}/api/p24/status`,
+    urlReturn: `${BASE_URL}/?id=${order.upsellOf || order.id}`, urlStatus: `${BASE_URL}/api/p24/status`,
   });
   await updateOrder(order.id, { payAttempts: attempt, p24: { sessionId, token } });
   return { id: order.id, url };
@@ -481,9 +481,8 @@ app.get('/api/orders/:id/invoice.pdf', async (req, res) => {
 });
 
 // Stan zamówienia; po powrocie z Przelewy24 sprawdza płatność u źródła (gdyby powiadomienie się spóźniło).
-app.get('/api/orders/:id', async (req, res) => {
-  let o = await getOrder(req.params.id);
-  if (!o) return res.sendStatus(404);
+// Po powrocie z płatności (gdy powiadomienie jeszcze nie dotarło): sprawdzenie sesji Stripe / transakcji Przelewy24.
+async function refreshPayment(o) {
   if (o.status === 'pending' && o.stripe?.sessionId && stripeEnabled()) {
     const sess = await stripeSession(o.stripe.sessionId).catch(() => null);
     if (sess && (await confirmStripe(o, sess).catch(() => false))) o = await getOrder(o.id);
@@ -492,6 +491,21 @@ app.get('/api/orders/:id', async (req, res) => {
     const t = await p24BySession(o.p24.sessionId);
     if (t && (t.status === 1 || t.status === 2) && (await confirmP24(o, t.orderId, t.amount, t.status === 2).catch(() => false))) o = await getOrder(o.id);
   }
+  return o;
+}
+app.get('/api/orders/:id', async (req, res) => {
+  let o = await getOrder(req.params.id);
+  if (!o) return res.sendStatus(404);
+  o = await refreshPayment(o);
+  // Dodatki dokupione po zamówieniu: powrót z płatności prowadzi na stronę zamówienia, więc tu potwierdzamy też ich płatność.
+  let upsellBusy = false;
+  for (const uid of o.upsellIds || []) {
+    const u = await getOrder(uid).then((x) => x && refreshPayment(x)).catch(() => null);
+    if (u && ['generating', 'paid'].includes(u.status)) upsellBusy = true;
+  }
+  if (o.upsellIds?.length) o = await getOrder(o.id);
+  const offers = upsellBusy ? [] : upsellOffers(o);
+  if (offers.length && !o.upsellShown) { await updateOrder(o.id, { upsellShown: Date.now() }); countEvent('upsell_shown').catch(() => {}); }
   // Kod klienta (program poleceń): rabat dla znajomych, liczba poleceń i saldo do wykorzystania przez właściciela.
   let myCode = null;
   if (o.status === 'done' && o.myCode) {
@@ -502,7 +516,29 @@ app.get('/api/orders/:id', async (req, res) => {
     }
   }
   const rv = await reviews.get(o.id);
-  res.json(view(o, { myCode, review: rv ? { rating: rv.rating, text: rv.text } : null }));
+  res.json(view(o, { myCode, review: rv ? { rating: rv.rating, text: rv.text } : null, upsells: offers.map(({ key, name, price }) => ({ key, name, price: price / 100 })), upsellBusy }));
+});
+
+// Karta „Dodaj do zamówienia”: osobna płatność tylko za dodatek (różnica ceny), po opłaceniu dodatek trafia do tego zamówienia.
+app.post('/api/orders/:id/upsell', async (req, res) => {
+  if (salesClosedFor(req)) return res.status(503).json({ error: CLOSED_MSG });
+  try {
+    const p = await getOrder(req.params.id);
+    if (!p || p.status !== 'done' || p.upsellOf) return res.status(409).json({ error: 'Dodatki można dokupić do gotowego zamówienia.' });
+    const plan = upsellOffers(p).find((x) => x.key === req.body?.key);
+    if (!plan) return res.status(400).json({ error: 'Ten dodatek nie jest już dostępny dla tego zamówienia.' });
+    // Niezapłacona wcześniejsza próba tego samego dodatku: używamy jej ponownie (bez mnożenia zamówień).
+    let u = null;
+    for (const uid of p.upsellIds || []) { const x = await getOrder(uid); if (x?.status === 'pending' && x.upsell?.key === plan.key) u = x; }
+    if (u && u.total !== plan.price) u = null;
+    if (!u) {
+      u = { id: crypto.randomUUID(), upsellOf: p.id, upsell: { key: plan.key, name: plan.name, pkg: plan.pkg, addons: plan.addons }, pkg: p.pkg, addons: {}, extraLangs: [], ads: [], total: plan.price, discount: 0,
+        profile: { name: p.profile.name, email: p.profile.email }, invoice: p.invoice ? { name: p.invoice.name, address: p.invoice.address, nip: p.invoice.nip || '' } : null, uiLang: p.uiLang, status: 'pending', results: [], created: Date.now() };
+      await saveOrder(u);
+      await updateOrder(p.id, (x) => ({ ...x, upsellIds: [...(x.upsellIds || []), u.id].slice(-20) }));
+    }
+    res.json(await checkout(u));
+  } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
 });
 
 // Opinia klienta: tylko po gotowym zamówieniu, jedna na zamówienie (można ją zmienić).
@@ -575,6 +611,7 @@ async function markPaidAndGenerate(id) {
   if (!o || o.status !== 'pending' || inFlight.has(id)) return;
   inFlight.add(id);
   try {
+    if (o.upsellOf) return await applyUpsell(o);
     const paidO = await updateOrder(id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
     if (!o.paidAt) funnelPaid(paidO).catch(() => {}); // etap „Opłacone” w lejku liczy serwer, raz na zamówienie
     if (!o.paidAt) { recordSale(paidO).catch((e) => console.error('Rejestr sprzedaży', e.message)); notifyNewOrder(paidO, BASE_URL).catch((e) => logEvent('e-mail', `Powiadomienie o zamówieniu: ${e.message}`)); }
@@ -599,6 +636,32 @@ async function markPaidAndGenerate(id) {
     await updateOrder(id, (x) => ({ ...x, status: 'paid', attempts: (x.attempts || 0) + 1, error: 'Generowanie nie powiodło się.' }));
     alertOwner(`Zamówienie ${id} jest opłacone, ale nie udało się wygenerować dokumentów.\n\nBłąd: ${e.message}\n\nStrona ponawia generowanie co 15 minut przez 3 dni, a klient dostanie dokumenty e-mailem. Jeśli błąd mówi o środkach (credit balance / billing), doładuj konto na console.anthropic.com. Szczegóły: panel → Problemy.`);
   } finally { inFlight.delete(id); }
+}
+
+// Opłacony dodatek: rejestr sprzedaży, faktura, a w zamówieniu nowy pakiet/dodatki i wygenerowane brakujące części
+// (list motywacyjny, przygotowanie do rozmowy). CV, które klient mógł już poprawić, zostaje bez zmian.
+async function applyUpsell(o) {
+  const paidO = await updateOrder(o.id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
+  if (!o.paidAt) {
+    recordSale(paidO).catch((e) => console.error('Rejestr sprzedaży', e.message));
+    notifyNewOrder(paidO, BASE_URL).catch((e) => logEvent('e-mail', `Powiadomienie o zamówieniu: ${e.message}`));
+    if (paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: o.id }));
+    countEvent('upsell_paid').catch(() => {});
+  }
+  const p = await getOrder(o.upsellOf);
+  if (!p) throw new Error('Nie ma zamówienia, do którego kupiono dodatek.');
+  const u = o.upsell, letter = hasLetter(u.pkg) && !hasLetter(p.pkg), interview = !!u.addons.interview && !p.addons?.interview;
+  let results = p.results;
+  if (letter || interview) results = await Promise.all(p.ads.map(async (ad, i) => {
+    const old = p.results?.[i] || {}, r = await generateForAd({ profile: p.profile, ad, withLetter: hasLetter(u.pkg), addons: u.addons });
+    const merged = { ...old, ...(letter ? { letter: r.letter } : {}), ...(interview ? { interview: r.interview, prep: r.prep } : {}) };
+    const langs = Object.keys(old.variants || {});
+    if (langs.length) merged.variants = Object.fromEntries(await Promise.all(langs.map(async (l) => [l, await translateResult(merged, l)])));
+    return merged;
+  }));
+  const next = await updateOrder(p.id, (x) => ({ ...x, pkg: u.pkg, addons: { ...x.addons, ...u.addons }, results }));
+  await updateOrder(o.id, { status: 'done' });
+  if (letter || interview) trySend({ ...next, results, myCode: next.myCode }).then((mail) => updateOrder(p.id, { mail })).catch((e) => logEvent('e-mail', `Dodatek: ${e.message}`, { orderId: p.id }));
 }
 
 // Faktura bez VAT na życzenie klienta: numer, PDF w e-mailu i na stronie dokumentów (wyłączane w panelu → Ustawienia).
