@@ -137,8 +137,25 @@ test('Listy papierowe: PDF z listem na osobnej stronie, adres w okienku, status 
   await crm.importContacts('email;organizacja;adres;segment\nlist1@u.example;Uczelnia L;ul. Krótka 2, 00-001 Warszawa;Uczelnia\nlist2@u.example;Szkoła L;;Liceum');
   const ids = Object.values(await crm.contacts.all()).filter((c) => /^list\d@/.test(c.email)).map((c) => c.id);
   const r = await crm.lettersFor(ids, 'https://example.test');
-  assert.equal(r.count, 2); assert.equal(r.noAddress, 1); assert.ok(r.pdf.length > 1000);
-  for (const id of ids) { const c = await crm.contacts.get(id); assert.equal(c.status, 'list wysłany'); assert.ok(c.letter.at); }
+  assert.equal(r.count, 1, 'kontakt bez adresu pominięty'); assert.equal(r.noAddress, 1); assert.ok(r.pdf.length > 1000);
+  for (const id of ids) { const c = await crm.contacts.get(id); if (c.address) { assert.equal(c.status, 'list wysłany'); assert.ok(c.letter.at); } else { assert.equal(c.status, 'nowy'); assert.equal(c.letter, undefined); } }
   assert.ok(crm.STATUSES.includes('list wysłany') && !crm.STATUSES.includes('zadzwoniono'));
   await assert.rejects(() => crm.lettersFor([], 'https://example.test'), /Zaznacz/);
+});
+
+test('Kontakty bez e-maila (tylko list), priorytet, deduplikacja po organizacji i adresie', async () => {
+  const csv = 'organizacja;adres;email;priorytet;segment\nSzkoła Bez Maila;ul. Polna 3, 10-100 Olsztyn;;1;Liceum\nSzkoła Bez Maila;ul. Polna 3, 10-100 Olsztyn;;2;Liceum\nSzkoła Bez Maila;ul. Leśna 9, 10-200 Olsztyn;zly-mail;9;Liceum\nNic;;;;Firma\nZ Mailem;;prio@x.example;3;Firma';
+  const r = await crm.importContacts(csv);
+  assert.deepEqual({ added: r.added, dupes: r.dupes, invalid: r.invalid, noEmail: r.noEmail }, { added: 3, dupes: 1, invalid: 1, noEmail: 2 });
+  const all = Object.values(await crm.contacts.all()), a = all.find((c) => c.address === 'ul. Polna 3, 10-100 Olsztyn'), b = all.find((c) => c.address === 'ul. Leśna 9, 10-200 Olsztyn'), m = all.find((c) => c.email === 'prio@x.example');
+  assert.equal(a.email, ''); assert.equal(a.priority, 1); assert.equal(b.priority, null, 'priorytet spoza 1–3 pominięty'); assert.equal(m.priority, 3);
+  assert.equal((await crm.importContacts(csv)).dupes, 4, 'ponowny import nie dubluje kontaktów bez e-maila');
+  await crm.updateContact(a.id, { status: 'zgoda na ofertę', consent: 'telefon 20.10 – prosili o list' });
+  await assert.rejects(() => crm.sendOffer(a.id, BASE), /nie ma e-maila/);
+  assert.equal((await crm.updateContact(a.id, { priority: '2' })).priority, 2);
+  assert.equal((await crm.updateContact(a.id, { priority: null })).priority, null);
+  const L = await crm.lettersFor([a.id, m.id], BASE); assert.equal(L.count, 1); assert.equal(L.noAddress, 1);
+  await assert.rejects(() => crm.lettersFor([m.id], BASE), /pominięto 1 bez adresu/);
+  assert.equal(await crm.updateContact(b.id, { status: 'odmowa' }), null, 'odmowa bez e-maila usuwa kontakt');
+  assert.equal(await crm.contacts.get(b.id), null); assert.equal(await crm.isBlocked(''), false);
 });

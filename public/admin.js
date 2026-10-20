@@ -559,45 +559,48 @@ $('#ctLetters').addEventListener('click', async () => {
     if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `Błąd ${r.status}`);
     const url = URL.createObjectURL(await r.blob()), a = el('a', { href: url, download: `listy-${new Date().toISOString().slice(0, 10)}.pdf` }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
     const n = r.headers.get('X-Letters'), na = +r.headers.get('X-No-Address');
-    toast(`Listy: ${n}. Status „list wysłany” ustawiony przy nowych kontaktach.${na ? ` Bez adresu: ${na} (sprawdź przed drukiem).` : ''}`);
+    toast(`Listy: ${n}. Status „list wysłany” ustawiony przy nowych kontaktach.${na ? ` Pominięto ${na} bez adresu.` : ''}`);
     ctSel.clear(); loaders.contacts();
   } catch (x) { toast(x.message); } finally { b.disabled = false; }
 });
 $('#ctImport').addEventListener('submit', async (e) => {
   e.preventDefault(); const f = $('#ctFile').files[0]; if (!f) return toast('Wybierz plik CSV.');
-  try { const r = await post('/contacts/import', { csv: await f.text() }); $('#ctMsg').textContent = `Dodano ${r.added} z ${r.rows}. Duplikaty: ${r.dupes}, na liście blokad: ${r.blocked}, bez poprawnego e-maila: ${r.invalid}.`; $('#ctFile').value = ''; loaders.contacts(); }
+  try { const r = await post('/contacts/import', { csv: await f.text() }); $('#ctMsg').textContent = `Dodano ${r.added} z ${r.rows}. Duplikaty: ${r.dupes}, na liście blokad: ${r.blocked}, bez e-maila i adresu: ${r.invalid}.${r.noEmail ? ` Bez e-maila (tylko list): ${r.noEmail}.` : ''}`; $('#ctFile').value = ''; loaders.contacts(); }
   catch (x) { toast(x.message); }
 });
-['#ctStatus', '#ctQ'].forEach((s) => $(s).addEventListener('input', () => drawContacts()));
+['#ctStatus', '#ctSeg', '#ctPrio', '#ctQ'].forEach((s) => $(s).addEventListener('input', () => drawContacts()));
 loaders.contacts = async () => {
   ctData = await api('/contacts');
   if ($('#ctStatus').options.length === 1) ctData.statuses.forEach((x) => $('#ctStatus').append(el('option', { value: x, textContent: x })));
+  if ($('#ctSeg').options.length === 1) Object.entries(ctData.segments).forEach(([k, v]) => $('#ctSeg').append(el('option', { value: k, textContent: v })));
   drawContacts();
 };
 function drawContacts() {
-  const st = $('#ctStatus').value, q = $('#ctQ').value.trim().toLowerCase();
-  const list = ctData.list.filter((c) => (!st || c.status === st) && (!q || `${c.org} ${c.city} ${c.email}`.toLowerCase().includes(q)));
+  const st = $('#ctStatus').value, sg = $('#ctSeg').value, pr = $('#ctPrio').value, q = $('#ctQ').value.trim().toLowerCase();
+  const list = ctData.list.filter((c) => (!st || c.status === st) && (!sg || c.segment === sg) && (!pr || String(c.priority || 0) === pr) && (!q || `${c.org} ${c.city} ${c.email} ${c.address || ''}`.toLowerCase().includes(q)));
   $('#ctSum').textContent = `${list.length} z ${ctData.list.length} · na liście blokad: ${ctData.blocked}`;
   if (!list.length) return $('#ctTable').replaceChildren(el('div', { className: 'empty', textContent: ctData.list.length ? 'Brak kontaktów dla tego filtra.' : 'Brak kontaktów. Zaimportuj plik CSV.' }));
   const save = async (c, patch, ok) => { try { const r = await post(`/contacts/${c.id}`, patch); if (ok) toast(ok); if (!r.contact) return loaders.contacts(); Object.assign(c, r.contact); drawContacts(); } catch (x) { toast(x.message); drawContacts(); } };
   $('#ctTable').replaceChildren(el('table', {},
-    el('thead', {}, el('tr', {}, (() => { const all = el('input', { type: 'checkbox', ariaLabel: 'Zaznacz widoczne', checked: list.length && list.slice(0, 300).every((c) => ctSel.has(c.id)) }); all.onchange = () => { list.slice(0, 300).forEach((c) => (all.checked ? ctSel.add(c.id) : ctSel.delete(c.id))); drawContacts(); }; return el('th', {}, all); })(), ['Organizacja', 'Kontakt', 'Segment', 'Status', 'Zgoda (jak i kiedy)', 'Notatka', ''].map((t) => el('th', { textContent: t })))),
+    el('thead', {}, el('tr', {}, (() => { const all = el('input', { type: 'checkbox', ariaLabel: 'Zaznacz wszystkie widoczne', title: 'Zaznacz wszystkie widoczne (po filtrach)', checked: list.every((c) => ctSel.has(c.id)) }); all.onchange = () => { list.forEach((c) => (all.checked ? ctSel.add(c.id) : ctSel.delete(c.id))); toast(`Zaznaczone: ${ctSel.size}`); drawContacts(); }; return el('th', {}, all); })(), ['Organizacja', 'Kontakt', 'Segment', 'Prio', 'Status', 'Zgoda (jak i kiedy)', 'Notatka', ''].map((t) => el('th', { textContent: t })))),
     el('tbody', {}, list.slice(0, 300).map((c) => {
       const sel = el('select', { ariaLabel: 'Status' }, ctData.statuses.map((x) => el('option', { value: x, textContent: x, selected: x === c.status })));
-      sel.onchange = () => { if (sel.value === 'odmowa' && !confirm('Odmowa usuwa kontakt i zostawia sam e-mail na liście blokad. Kontynuować?')) { sel.value = c.status; return; } save(c, { status: sel.value, consent: cons.value }, sel.value === 'odmowa' ? 'Kontakt usunięty, e-mail na liście blokad.' : 'Zapisano.'); };
+      sel.onchange = () => { if (sel.value === 'odmowa' && !confirm(c.email ? 'Odmowa usuwa kontakt i zostawia sam e-mail na liście blokad. Kontynuować?' : 'Odmowa usuwa kontakt. Kontynuować?')) { sel.value = c.status; return; } save(c, { status: sel.value, consent: cons.value }, sel.value === 'odmowa' ? 'Kontakt usunięty, e-mail na liście blokad.' : 'Zapisano.'); };
       const seg = el('select', { ariaLabel: 'Segment' }, Object.entries(ctData.segments).map(([k, v]) => el('option', { value: k, textContent: v, selected: k === c.segment })));
       seg.onchange = () => save(c, { segment: seg.value }, 'Zapisano.');
+      const pri = el('select', { ariaLabel: 'Priorytet' }, ['', '1', '2', '3'].map((x) => el('option', { value: x, textContent: x || '—', selected: x === String(c.priority || '') })));
+      pri.onchange = () => save(c, { priority: pri.value || null }, 'Zapisano.');
       const cons = el('input', { value: c.consent?.text || '', placeholder: 'np. odpisali na list 28.10 mailem', maxLength: 500 });
       cons.onchange = () => save(c, { consent: cons.value }, 'Zapisano zgodę.');
       const note = el('input', { value: c.note || '', maxLength: 1000 }); note.onchange = () => save(c, { note: note.value }, 'Zapisano notatkę.');
-      const send = el('button', { className: 'btn sm', textContent: 'Wyślij ofertę', disabled: c.status !== 'zgoda na ofertę' || !c.consent?.text, title: c.status !== 'zgoda na ofertę' ? 'Najpierw ustaw status „zgoda na ofertę” i opisz zgodę' : '' });
+      const send = el('button', { className: 'btn sm', textContent: 'Wyślij ofertę', disabled: !c.email || c.status !== 'zgoda na ofertę' || !c.consent?.text, title: !c.email ? 'brak e-maila – tylko list' : c.status !== 'zgoda na ofertę' ? 'Najpierw ustaw status „zgoda na ofertę” i opisz zgodę' : '' });
       send.onclick = async () => { if (!confirm(`Wysłać ofertę (${ctData.segments[c.segment]}) na ${c.email}?`)) return; send.disabled = true; try { await post(`/contacts/${c.id}/offer`); toast('Oferta wysłana.'); loaders.contacts(); } catch (x) { toast(x.message); send.disabled = false; } };
       const del = el('button', { className: 'btn danger sm', textContent: 'Usuń' });
       del.onclick = async () => { if (del.dataset.sure !== '1') { del.dataset.sure = '1'; del.textContent = 'Na pewno?'; return; } try { await api('/contacts/' + c.id, { method: 'DELETE' }); loaders.contacts(); } catch (x) { toast(x.message); } };
       const pick = el('input', { type: 'checkbox', ariaLabel: `Zaznacz ${c.org || c.email}`, checked: ctSel.has(c.id) }); pick.onchange = () => (pick.checked ? ctSel.add(c.id) : ctSel.delete(c.id));
       return el('tr', {}, el('td', {}, pick), el('td', {}, c.org || '—', el('div', { className: 'mute', style: 'font-size:12px', textContent: [c.city, c.dept].filter(Boolean).join(' · ') + (c.address ? '' : ' · brak adresu') }), c.letter ? el('div', { className: 'mute', style: 'font-size:12px', textContent: `list ${dd(c.letter.at)}` }) : null),
-        el('td', {}, el('a', { href: 'mailto:' + c.email, textContent: c.email }), c.phone ? el('div', { className: 'mute', style: 'font-size:12px', textContent: c.phone }) : null),
-        el('td', {}, seg), el('td', {}, sel, c.offer ? el('div', { className: 'mute', style: 'font-size:12px', textContent: `oferta ${dd(c.offer.at)}${c.reminder ? `, przyp. ${dd(c.reminder.at)}` : ''}` }) : null),
+        el('td', {}, c.email ? el('a', { href: 'mailto:' + c.email, textContent: c.email }) : el('span', { className: 'mute', textContent: 'brak e-maila – tylko list' }), c.phone ? el('div', { className: 'mute', style: 'font-size:12px', textContent: c.phone }) : null),
+        el('td', {}, seg), el('td', {}, pri), el('td', {}, sel, c.offer ? el('div', { className: 'mute', style: 'font-size:12px', textContent: `oferta ${dd(c.offer.at)}${c.reminder ? `, przyp. ${dd(c.reminder.at)}` : ''}` }) : null),
         el('td', {}, cons), el('td', {}, note), el('td', { className: 'r' }, send, ' ', del));
     }))));
 }
