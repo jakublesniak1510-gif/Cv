@@ -354,6 +354,20 @@ function codeReport(c) {
   };
   return b;
 }
+// --- karnety ---
+loaders.passes = async () => {
+  const list = await api('/passes'), day = (t) => (t ? new Date(t).toLocaleDateString('pl-PL') : '–'), ST = { active: 'aktywny', expired: 'wygasł', refunded: 'zwrócony' };
+  $('#passList').replaceChildren(list.length ? el('table', {}, el('thead', {}, el('tr', {}, ['Kupiony', 'Karnet', 'E-mail', 'Cena', 'Zostało', 'Ważny do', 'Stan', 'Alerty', ''].map((t) => el('th', { textContent: t })))),
+    el('tbody', {}, list.map((p) => {
+      const b = el('button', { className: 'link', textContent: p.status === 'refunded' ? '' : `zwrot ${zl(p.proportional / 100)}` });
+      b.onclick = async () => {
+        const v = prompt(`Kwota zwrotu w zł (proporcjonalnie za niewykorzystane: ${zl(p.proportional / 100)}). Karnet przestanie działać.`, String(p.proportional / 100)); if (v == null) return;
+        try { await post(`/passes/${encodeURIComponent(p.id)}/refund`, { amount: Number(String(v).replace(',', '.')) }); toast('Zwrot zlecony, karnet wyłączony.'); loaders.passes(); } catch (x) { toast(x.message); }
+      };
+      return el('tr', {}, el('td', { className: 'num', textContent: day(p.paidAt) }), el('td', { textContent: p.name }), el('td', { className: 'ell', textContent: p.email }), el('td', { className: 'num', textContent: zl(p.total / 100) + (p.refunded ? ` (zwrot ${zl(p.refunded / 100)})` : '') }),
+        el('td', { textContent: `${p.left.matches}/${p.plan.matches} dop., ${p.left.sim} sym., ${p.left.interview} przyg.` }), el('td', { className: 'num', textContent: day(p.expires) }), el('td', { textContent: ST[p.status] || p.status }), el('td', { className: 'num', textContent: p.flagged ? String(p.flagged) : '' }), el('td', {}, p.status === 'refunded' ? '' : b));
+    }))) : el('div', { className: 'empty', textContent: 'Nie ma jeszcze sprzedanych karnetów.' }));
+};
 loaders.codes = async () => {
   const list = (await api('/codes')).filter((c) => !codeFilter || c.kind === codeFilter);
   if (!list.length) return $('#codeTable').replaceChildren(el('div', { className: 'empty', textContent: 'Brak kodów.' }));

@@ -6,6 +6,8 @@ import crypto from 'node:crypto';
 import { activePromo, ensurePromoCode } from './lib/promos.js';
 import { checkPhoto, recruiterAnswer, ToolError } from './lib/freeTools.js';
 import { alertRoutes, alertsHourly, addAlertFromOrder } from './lib/alerts.js';
+import { passRoutes, passesHourly, reservePass, passOrderPaid, releasePassOrder, passRefunded, confirmPassPayment, PassError } from './lib/passes.js';
+import { accountIdOf } from './lib/account.js';
 import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUNDLE_OFF, withLetter as hasLetter, upsellOffers, upsellPlan } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads } from './lib/store.js';
 import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
@@ -115,12 +117,14 @@ app.post('/api/stripe/webhook', express.raw({ type: '*/*', limit: '1mb' }), asyn
   // Zwrot zrobiony w panelu Stripe (albo z naszego panelu): zapis w zamówieniu i w rejestrze sprzedaży.
   if (ev.type === 'charge.refunded') {
     const ch = ev.data?.object;
+    if (String(ch?.metadata?.orderId || '').startsWith('PASS-')) { passRefunded(ch.metadata.orderId, ch.amount_refunded || 0).catch((e) => logEvent('płatność', `Zwrot karnetu: ${e.message}`)); return; }
     if (String(ch?.metadata?.orderId || '').startsWith('B2B-')) { b2bRefunded(ch.metadata.orderId, ch.amount_refunded || 0).catch((e) => logEvent('płatność', `Zwrot B2B: ${e.message}`)); return; }
     if (ch?.payment_intent) setRefunded({ orderId: ch.metadata?.orderId, paymentIntent: ch.payment_intent, total: ch.amount_refunded || 0, source: 'stripe' })
       .then((r) => r?.changed && r.code && commissionBack(r.code, r.delta)).catch((e) => logEvent('płatność', `Zwrot: ${e.message}`));
     return;
   }
   if (!['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(ev.type)) return;
+  if (String(ev.data?.object?.client_reference_id || '').startsWith('PASS-')) { confirmPassPayment(null, ev.data.object, BASE_URL).catch((e) => logEvent('płatność', `Karnet: ${e.message}`)); return; }
   if (String(ev.data?.object?.client_reference_id || '').startsWith('B2B-')) { confirmB2b(null, ev.data.object).catch((e) => logEvent('płatność', `B2B: ${e.message}`)); return; }
   const sess = ev.data?.object, o = sess && (await getOrder(sess.client_reference_id));
   if (o) confirmStripe(o, sess).catch((e) => logEvent('płatność', e.message, { orderId: o.id }));
@@ -357,7 +361,7 @@ app.post('/api/fetch-ad', async (req, res) => {
 // Płatność przez Przelewy24. sessionId = numer zamówienia + numer próby, więc wpłatę zawsze da się przypisać do zamówienia.
 async function checkout(order, lang) {
   // Zamówienie za 0 zł (kod od instytucji): bez płatności, dokumenty powstają od razu.
-  if (order.total === 0) { await updateOrder(order.id, { payment: { provider: 'kod', code: order.code, at: Date.now() } }); markPaidAndGenerate(order.id).catch(console.error); return { id: order.id, free: true }; }
+  if (order.total === 0) { await updateOrder(order.id, { payment: order.pass ? { provider: 'karnet', pass: order.pass.id, at: Date.now() } : { provider: 'kod', code: order.code, at: Date.now() } }); markPaidAndGenerate(order.id).catch(console.error); return { id: order.id, free: true }; }
   if (DEMO) return { id: order.id, demo: true };
   if (PROVIDER === 'stripe') {
     const l = lang || order.uiLang, n = order.ads?.length || 1;
@@ -434,7 +438,8 @@ previewRoutes(app, { cleanProfile, cleanAds });
 app.post('/api/orders', async (req, res) => {
   if (salesClosedFor(req)) return res.status(503).json({ error: CLOSED_MSG });
   try {
-    const { pkg, profile, ads, consent, design, addons, extraLangs, code, reminder, followUp, jobAlerts, reviewAsk, payReminder, uiLang, createAccount, invoice, adConsent } = req.body || {};
+    const { profile, ads, consent, design, addons, extraLangs, code, reminder, followUp, jobAlerts, reviewAsk, payReminder, uiLang, createAccount, invoice, adConsent, usePass } = req.body || {};
+    let { pkg } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
     const a = cleanAds(ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
@@ -442,13 +447,22 @@ app.post('/api/orders', async (req, res) => {
     if (!p.name || !/^\S+@\S+\.\S+$/.test(p.email)) return res.status(400).json({ error: 'Podaj imię i nazwisko oraz poprawny e-mail.' });
     if (!p.experience.length && !p.education.length) return res.status(400).json({ error: 'Dodaj doświadczenie lub wykształcenie.' });
     const ad = cleanAddons(addons), langs = usefulExtraLangs(cleanLangs(extraLangs), a);
-    const c = await checkCode(code, p.email);
+    // Karnet (lib/passes.js): każde ogłoszenie = 1 dopasowanie (CV + list), bez kodów rabatowych; dopłata tylko za to, czego karnet nie obejmuje.
+    const orderId = crypto.randomUUID();
+    let passUse = null;
+    if (usePass) {
+      if (code) return res.status(400).json({ error: 'Kodu rabatowego nie łączymy z karnetem.' });
+      try { passUse = await reservePass(accountIdOf(req), { ads: a.length, addons: ad, extraLangs: langs, orderId }); }
+      catch (e) { return res.status(e instanceof PassError ? 400 : 500).json({ error: e instanceof PassError ? e.message : 'Nie udało się użyć karnetu.' }); }
+      pkg = a.length > 1 ? 'pack3' : 'cv_letter';
+    }
+    const c = passUse ? {} : await checkCode(code, p.email);
     if (c.error) return res.status(400).json({ error: c.error });
     const inv = cleanInvoice(invoice);
-    if (inv?.error) return res.status(400).json({ error: inv.error });
-    const disc = discountFor(c, pkg, a.length, ad, false, langs), total = calcTotal(pkg, a.length, ad, false, langs, disc);
+    if (inv?.error) { if (passUse) releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {}); return res.status(400).json({ error: inv.error }); }
+    const disc = passUse ? 0 : discountFor(c, pkg, a.length, ad, false, langs), total = passUse ? passUse.total : calcTotal(pkg, a.length, ad, false, langs, disc);
     const shown = await previewFor(p, a[0]).catch(() => null); // podgląd z ostatniego kroku kreatora, jeśli był
-    const order = { preview: shown, visit: visitInfo(req), invoice: total > 0 ? inv : null, id: crypto.randomUUID(), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
+    const order = { preview: shown, visit: visitInfo(req), invoice: total > 0 ? inv : null, id: orderId, ...(passUse ? { pass: { id: passUse.passId, use: passUse.use, items: passUse.items } } : {}), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -622,6 +636,7 @@ async function markPaidAndGenerate(id) {
     if (o.upsellOf) return await applyUpsell(o);
     const paidO = await updateOrder(id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
     if (!o.paidAt) funnelPaid(paidO).catch(() => {}); // etap „Opłacone” w lejku liczy serwer, raz na zamówienie
+    if (o.pass) passOrderPaid(paidO).catch((e) => logEvent('karnet', e.message, { orderId: id })); // rezerwacja karnetu → zużycie
     if (!o.paidAt) { recordSale(paidO).catch((e) => console.error('Rejestr sprzedaży', e.message)); notifyNewOrder(paidO, BASE_URL).catch((e) => logEvent('e-mail', `Powiadomienie o zamówieniu: ${e.message}`)); }
     if (!o.paidAt && paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: id }));
     if (!o.paidAt && paidO.adConsent) sendPurchase(paidO, BASE_URL).then((r) => r && updateOrder(id, { capi: r })).catch((e) => logEvent('reklamy', `Meta CAPI: ${e.message}`, { orderId: id }));
@@ -800,6 +815,7 @@ app.post('/api/orders/:id/retry', async (req, res) => {
 accountRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 leadRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 alertRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
+passRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED, cleanInvoice, closedFor: salesClosedFor });
 analyticsRoutes(app, BASE_URL);
 seoReportRoutes(app);
 // Lejek z wczoraj w porannym podsumowaniu (same liczby).
@@ -834,6 +850,7 @@ async function hourly() {
     await cleanupAnalytics().catch(() => {});
     await ensurePromoCode().catch((e) => console.error('Promocja', e.message));
     await alertsHourly(BASE_URL).catch((e) => console.error('Powiadomienia o ofertach', e.message));
+    await passesHourly(BASE_URL).catch((e) => console.error('Karnety', e.message));
     await accountHourly(BASE_URL).catch((e) => console.error('Konta', e.message));
     await ownerDaily(BASE_URL).catch((e) => logEvent('e-mail', `Podsumowanie dnia / kopia: ${e.message}`));
     seoWeekly(BASE_URL).catch((e) => logEvent('seo', `Raport SEO: ${e.message}`)); // bez czekania: sprawdzanie adresów w Search Console trwa długo

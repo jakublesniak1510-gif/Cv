@@ -895,3 +895,6 @@ table.rep th[scope=row]{font-weight:600;color:var(--mute);width:55%}
 .upsell-list{display:grid;gap:10px;margin-top:10px}
 .upsell-item{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 14px;border:1px solid var(--line);border-radius:12px}
 .upsell-item .hint{margin:4px 0 0}.upsell-item>div{flex:1 1 220px}
+/* Karnety: opcja w kreatorze i formularz zakupu na /karnety */
+.pass-use{border:2px solid var(--brand);border-radius:12px;padding:12px 14px;margin-bottom:16px;background:var(--surface)}.pass-use .check{margin-top:0;font-weight:600}.pass-use .hint{margin:6px 0 0}
+.pass-form{display:grid;gap:10px;max-width:640px}.pass-form .opts{margin-bottom:6px}.pass-form .check{margin-top:4px}
