@@ -361,7 +361,7 @@ loaders.passes = async () => {
     el('tbody', {}, list.map((p) => {
       const b = el('button', { className: 'link', textContent: p.status === 'refunded' ? '' : `zwrot ${zl(p.proportional / 100)}` });
       b.onclick = async () => {
-        const v = prompt(`Kwota zwrotu w zł (proporcjonalnie za niewykorzystane: ${zl(p.proportional / 100)}). Karnet przestanie działać.`, String(p.proportional / 100)); if (v == null) return;
+        const c = p.refundCalc, v = prompt(`Kwota zwrotu w zł. Wyliczenie: ${zl(p.total / 100)} × (wartość karnetu ${zl(c.all / 100)} − wykorzystane ${zl(c.usedV / 100)}: ${c.used.matches} dop., ${c.used.sim} sym., ${c.used.interview} przyg.) ÷ ${zl(c.all / 100)} = ${zl(p.proportional / 100)}. Karnet przestanie działać.`, String(p.proportional / 100)); if (v == null) return;
         try { await post(`/passes/${encodeURIComponent(p.id)}/refund`, { amount: Number(String(v).replace(',', '.')) }); toast('Zwrot zlecony, karnet wyłączony.'); loaders.passes(); } catch (x) { toast(x.message); }
       };
       return el('tr', {}, el('td', { className: 'num', textContent: day(p.paidAt) }), el('td', { textContent: p.name }), el('td', { className: 'ell', textContent: p.email }), el('td', { className: 'num', textContent: zl(p.total / 100) + (p.refunded ? ` (zwrot ${zl(p.refunded / 100)})` : '') }),

@@ -71,15 +71,20 @@ test('Wygaśnięcie: przypomnienie 3 dni przed i w dniu wygaśnięcia, potem kar
   await assert.rejects(P.reservePass(p.acc, { ads: 1, addons: {}, extraLangs: [], orderId: 'po' }, now + 31 * 864e5), /Nie masz aktywnego karnetu/);
 });
 
-test('Zwrot: proporcjonalny (dopasowania + symulatory/przygotowania wg cennika), po zwrocie karnet nieaktywny', async () => {
-  const p = await buy('ref@example.test', 'aktywny30');
-  assert.equal(P.proportionalRefund(p), 12900, 'nic nie wykorzystano – zwrot całości');
-  await P.passes.update(p.id, (x) => ({ ...x, left: { matches: 15, sim: 2, interview: 1 } }));
-  assert.equal(P.proportionalRefund(await P.passes.get(p.id)), 12900 - Math.round(12900 * 5 / 20) - PRICES.sim);
-  await P.passes.update(p.id, (x) => ({ ...x, left: { matches: 18, sim: 0, interview: 0 } }));
-  assert.equal(P.proportionalRefund(await P.passes.get(p.id)), 0, 'nie mniej niż 0');
-  const r = await P.passRefunded(p.id, 5000);
-  assert.equal(r.status, 'refunded'); assert.deepEqual(r.left, { matches: 0, sim: 0, interview: 0 }); assert.equal((await sales.get(p.id)).refunded, 5000);
+test('Zwrot: proporcjonalnie do ceny według wag z cennika, tylko zużycia (nie rezerwacje); po zwrocie karnet nieaktywny', async () => {
+  const p = await buy('ref@example.test', 'start30');
+  assert.equal(P.proportionalRefund(p), 9900, 'nic nie wykorzystano – zwrot całości');
+  await P.reservePass(p.acc, { ads: 1, addons: { sim: true }, extraLangs: [], orderId: 'R1' });
+  assert.equal(P.proportionalRefund(await P.passes.get(p.id)), 9900, 'rezerwacja nie obniża zwrotu');
+  await P.passOrderPaid({ id: 'R1', pass: { id: p.id } });
+  const W = P.REFUND_WEIGHTS(), all = 8 * W.matches + 1 * W.sim, used = W.matches + W.sim;
+  assert.equal(P.proportionalRefund(await P.passes.get(p.id)), Math.round(9900 * (all - used) / all));
+  assert.equal(P.proportionalRefund(await P.passes.get(p.id)), 8066, 'przykład z review: 80,66 zł');
+  await P.reservePass(p.acc, { ads: 1, addons: {}, extraLangs: [], orderId: 'R2' });
+  const r = await P.passRefunded(p.id, 8066);
+  assert.equal(r.status, 'refunded'); assert.deepEqual(r.left, { matches: 0, sim: 0, interview: 0 }); assert.equal((await sales.get(p.id)).refunded, 8066);
+  await P.releasePassOrder({ id: 'R2', pass: { id: p.id } });
+  assert.deepEqual((await P.passes.get(p.id)).left, { matches: 0, sim: 0, interview: 0 }, 'zwolnienie po zwrocie nie przywraca limitów');
   assert.equal(await P.activePassFor(p.acc), null);
 });
 
@@ -100,15 +105,21 @@ test('Serwer (demo): /karnety, zakup, logowanie po płatności, zamówienie z ka
     const b = await call('POST', '/api/passes', { kind: 'aktywny30', email: 'k@example.test', terms: true, start: true });
     assert.equal(b.j.url, `/konto?karnet=${b.j.id}`);
     assert.equal((await call('POST', `/api/passes/${b.j.id}/login`)).status, 200);
+    const keep = cookie; cookie = '';
+    assert.equal((await call('POST', `/api/passes/${b.j.id}/login`)).status, 409, 'logowanie z powrotu z płatności tylko raz');
+    cookie = keep;
     const mine = (await call('GET', '/api/passes/mine')).j;
     assert.equal(mine.active.left.matches, 20);
     const ad = 'Szukamy magazyniera. Wymagania: obsługa wózka widłowego, doświadczenie w magazynie, sumienność i dokładność. '.repeat(2);
-    const prof = { name: 'Kasia Test', email: 'inny@example.test', experience: [{ title: 'Magazynier', company: 'Firma', period: '2020 – 2024' }] };
+    const prof = { name: 'Kasia Test', email: 'k@example.test', experience: [{ title: 'Magazynier', company: 'Firma', period: '2020 – 2024' }] };
     assert.equal((await call('POST', '/api/orders', { usePass: true, code: 'KOD-1', pkg: 'cv', consent: true, profile: prof, ads: [{ title: 'Magazynier', text: ad }] })).status, 400, 'kod rabatowy nie z karnetem');
     const o1 = await call('POST', '/api/orders', { usePass: true, pkg: 'cv', consent: true, profile: prof, addons: { sim: true }, ads: [{ title: 'Magazynier', text: ad }, { title: 'Kierowca', text: ad }] });
     assert.equal(o1.j.free, true, 'karnet pokrywa całość');
     let o; for (let i = 0; i < 60; i++) { o = (await call('GET', `/api/orders/${o1.j.id}`)).j; if (o.status === 'done') break; await wait(150); }
-    assert.equal(o.status, 'done'); assert.equal(o.pkg, 'pack3'); assert.ok(o.results.every((r) => r.letter), 'list w cenie dopasowania');
+    assert.equal(o.status, 'done'); assert.equal(o.pkg, 'pack3');
+    const acct = (await (await fetch(U + '/api/account', { headers: { cookie, 'X-Acc': '1' } })).json()).orders.find((x) => x.id === o1.j.id);
+    assert.equal(acct.pkg, 'Karnet: 2 × CV + list');
+    assert.ok(!JSON.parse(fs.readFileSync(path.join(dir, 'sales.json'), 'utf8'))[o1.j.id], 'zamówienie za 0 zł z karnetu nie jest sprzedażą'); assert.ok(o.results.every((r) => r.letter), 'list w cenie dopasowania');
     let m = (await call('GET', '/api/passes/mine')).j.active;
     assert.deepEqual(m.left, { matches: 18, sim: 2, interview: 1 }); assert.equal(m.used[0].state, 'used');
     const o2 = await call('POST', '/api/orders', { usePass: true, consent: true, profile: prof, addons: { docx: true }, ads: [{ title: 'Magazynier', text: ad }] });
