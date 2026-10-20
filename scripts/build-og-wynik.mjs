@@ -7,9 +7,9 @@ const OUT = new URL('../lib/og-wynik/', import.meta.url).pathname;
 fs.mkdirSync(OUT, { recursive: true });
 const LOGO = fs.readFileSync(new URL('../public/logo.svg', import.meta.url), 'utf8').replace(/width="512" height="512"/, 'width="56" height="56"');
 const T = {
-  pl: { tag: 'Wynik skanera CV', head: 'Moje CV pasuje do oferty w', cta: 'Sprawdź swoje CV za darmo' },
+  pl: { tag: 'Wynik skanera CV', head: 'Moje CV pasuje do oferty', cta: 'Sprawdź swoje CV za darmo' },
   en: { tag: 'CV scanner result', head: 'How well my CV matches the job offer:', cta: 'Check your CV for free' },
-  uk: { tag: 'Результат сканера резюме', head: 'Моє резюме відповідає вакансії на', cta: 'Перевірте своє резюме безкоштовно' },
+  uk: { tag: 'Результат сканера резюме', head: 'Наскільки моє резюме відповідає вакансії:', cta: 'Перевірте своє резюме безкоштовно' },
   de: { tag: 'Ergebnis des Lebenslauf-Scanners', head: 'So gut passt mein Lebenslauf zur Stelle:', cta: 'Prüfen Sie Ihren Lebenslauf kostenlos' },
 };
 const page = (t) => `<!doctype html><meta charset="utf-8"><style>
