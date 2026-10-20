@@ -704,7 +704,28 @@ const extraLangs = () => $$('#langPick input:checked').map((i) => i.value);
 const bundleOn = () => pkg() !== 'cv' && addons().interview && addons().sim;
 const addonsTotal = () => Object.entries(addons()).reduce((s, [k, on]) => s + (on ? PRICE[k] : 0), 0) + PRICE.extraLang * extraLangs().length - (bundleOn() ? PRICE.bundleOff : 0);
 const discount = () => (promo?.voucher ? Math.min(PRICE[pkg()], PRICE[promo.voucher]) : promo ? Math.min(promo.percent ? Math.round((PRICE[pkg()] + addonsTotal()) * promo.percent) / 100 : promo.discount, PRICE[pkg()] - 2) : 0);
-const total = () => PRICE[pkg()] + addonsTotal() - discount();
+// Karnet (lib/passes.js): zalogowany klient z aktywnym karnetem płaci karnetem; kwotę do dopłaty liczy serwer (/api/passes/quote).
+let myPass = null, passQuote = null, passQT;
+const passOn = () => !!myPass && $('#usePass').checked;
+const orderPkg = () => (passOn() ? (nAds() > 1 ? 'pack3' : 'cv_letter') : pkg());
+const total = () => (passOn() ? (passQuote ? passQuote.total / 100 : 0) : PRICE[pkg()] + addonsTotal() - discount());
+function quotePass() {
+  clearTimeout(passQT); if (!passOn()) return;
+  passQT = setTimeout(async () => {
+    try { const r = await fetch('/api/passes/quote', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ads: nAds(), addons: addons(), extraLangs: extraLangs() }) }); const j = await r.json(); passQuote = r.ok ? j : null; if (!r.ok) $('#werr').textContent = j.error; }
+    catch { passQuote = null; }
+    $('#total').textContent = total() + ' zł'; if (step === 6) drawSummary();
+  }, 250);
+}
+// Sprawdzane przy starcie i przy każdym otwarciu kreatora (klient mógł się zalogować w międzyczasie, np. po zakupie karnetu).
+const loadMyPass = () => fetch('/api/passes/mine', { credentials: 'same-origin' }).then((r) => r.json()).then(({ active }) => {
+  myPass = active && active.left.matches > 0 ? active : null;
+  $('#passUse').hidden = !myPass;
+  if (myPass) $('#passUseTxt').textContent = `Użyj karnetu „${myPass.name}” (zostało ${myPass.left.matches} dopasowań, ważny do ${new Date(myPass.expires).toLocaleDateString('pl-PL')})`;
+  refresh();
+}).catch(() => {});
+loadMyPass();
+$('#usePass').onchange = () => refresh();
 
 const DKEY = 'cvpo-draft-v1', FIELDS = ['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'];
 let saveT, restoring = false;
@@ -748,7 +769,9 @@ function refresh() {
   $('#bundleTip').hidden = pkg() === 'cv';
   $('#brk').textContent = [addonsTotal() ? `dodatki ${addonsTotal()} zł` : '', discount() ? `rabat −${discount()} zł` : ''].filter(Boolean).join(' · ');
   $$('.opt b[data-price]').forEach((b) => (b.textContent = `+${PRICE[b.dataset.price]} zł`));
-  const maxA = PKG_ADS[pkg()];
+  $('#pkgOpts').hidden = passOn();
+  quotePass();
+  const maxA = passOn() ? Math.min(3, myPass.left.matches) : PKG_ADS[pkg()];
   $('#addAd').hidden = maxA === 1; $('#addAd').disabled = nAds() >= maxA;
   $('#packTip').hidden = maxA !== 1;
 }
@@ -874,6 +897,16 @@ function drawSummary() {
   if (pvShown && pvShown.sig !== pvSig()) pvShown = null; // dane zmienione po podglądzie: podgląd nieaktualny
   if (!pvShown) { $('#pvOut').replaceChildren(); $('#pvBtn').hidden = false; }
   const ads = rows('ads');
+  if (passOn()) {
+    const q = passQuote, u = q?.use || { matches: nAds(), sim: 0, interview: 0 };
+    $('#sum').replaceChildren(
+      el('div', { className: 'sumrow' }, el('span', { textContent: `Karnet „${myPass.name}”: ${u.matches} ${u.matches === 1 ? 'dopasowanie' : 'dopasowania'} (CV + list)${u.sim ? ', symulator' : ''}${u.interview ? ', przygotowanie do rozmowy' : ''}` }), el('span', { textContent: 'z karnetu' })),
+      el('div', { className: 'sumrow' }, el('span', { textContent: `Wygląd: ${tplName(design.tpl)}, kolor ${COLOR_NAMES[design.color]}` }), el('span', { textContent: 'w cenie' })),
+      ...ads.map((a, i) => el('div', { className: 'sumrow' }, el('span', { textContent: `Ogłoszenie ${i + 1}: ${a.title}` }), el('span', { textContent: 'z karnetu' }))),
+      ...(q?.items || []).map((it) => el('div', { className: 'sumrow' }, el('span', { textContent: it.name }), el('span', { textContent: '+' + it.amount / 100 + ' zł' }))),
+      el('div', { className: 'sumrow' }, el('span', { textContent: 'Do zapłaty' }), el('span', { textContent: total() + ' zł' })));
+    return;
+  }
   $('#sum').replaceChildren(
     el('div', { className: 'sumrow' }, el('span', { textContent: PKG_NAME[pkg()] }), el('span', { textContent: PRICE[pkg()] + ' zł' })),
     el('div', { className: 'sumrow' }, el('span', { textContent: `Wygląd: ${tplName(design.tpl)}, kolor ${COLOR_NAMES[design.color]}` }), el('span', { textContent: 'w cenie' })),
@@ -897,7 +930,8 @@ function validate(n) {
   const v = (id) => $('#' + id).value.trim();
   if (n === 2) { if (!v('name')) return 'Podaj imię i nazwisko.'; if (!/^\S+@\S+\.\S+$/.test(v('email'))) return 'Podaj poprawny adres e-mail.'; }
   if (n === 4 && !rows('exp').some((e) => e.title || e.company) && !rows('edu').some((e) => e.school)) return 'Dodaj co najmniej jedno stanowisko (krok 3) lub szkołę.';
-  if (n === 5 && nAds() > PKG_ADS[pkg()]) return 'Wybrany pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe ogłoszenia albo wybierz Pakiet 3 za 79 zł.';
+  if (n === 5 && passOn() && nAds() > Math.min(3, myPass.left.matches)) return `W karnecie zostało ${myPass.left.matches} dopasowań. Usuń dodatkowe ogłoszenia albo odznacz „Użyj karnetu”.`;
+  if (n === 5 && !passOn() && nAds() > PKG_ADS[pkg()]) return 'Wybrany pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe ogłoszenia albo wybierz Pakiet 3 za 79 zł.';
   if (n === 5) for (const [i, a] of rows('ads').entries()) {
     if (!a.text) return `Ogłoszenie ${i + 1}: kliknij „Pobierz” przy linku albo wklej treść oferty.`;
     if (!a.title) return `Ogłoszenie ${i + 1}: podaj nazwę stanowiska.`;
@@ -920,6 +954,7 @@ const modal = (open) => {
   if (open) lastFocus = document.activeElement; else if (lastFocus?.focus) lastFocus.focus();
 };
 const openWiz = (p) => {
+  loadMyPass();
   if (p) { $(`input[name=pkg][value=${p}]`).checked = true; refresh(); }
   if (!$('#wizDesign').children.length) drawWizDesign();
   if (!pvSid) { const r = new Uint8Array(12); crypto.getRandomValues(r); pvSid = [...r].map((x) => x.toString(16).padStart(2, '0')).join(''); }
@@ -940,7 +975,7 @@ $('#wizForm').onsubmit = async (e) => {
   const v = (id) => $('#' + id).value;
   const body = {
     draftToken: srvToken() || undefined,
-    design, addons: addons(), extraLangs: extraLangs(), code: promo?.code || '', reminder: $('#reminder').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: pkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    usePass: passOn(), design, addons: addons(), extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   // Zgoda na cookies reklamowe (baner): tylko wtedy serwer zgłosi zakup do Meta (Conversions API) z identyfikatorami piksela.
@@ -2128,6 +2163,20 @@ async function showAccount() {
   $('#landing').hidden = true; $('#page').hidden = $('#pageNote').hidden = true;
   const box = $('#account'); box.hidden = false; window.scrollTo(0, 0);
   try { document.title = 'Moje konto – CV Pod Ogłoszenie'; } catch {}
+  // Powrót z płatności za karnet: płatność może dotrzeć kilka sekund później, więc kilka prób.
+  const kar = new URLSearchParams(location.search).get('karnet');
+  if (kar) {
+    box.replaceChildren(el('div', { className: 'inner narrow' }, el('h1', { textContent: 'Aktywujemy karnet…' }), el('p', { className: 'hint', textContent: 'Sprawdzamy płatność, to potrwa chwilę.' })));
+    let err = '';
+    for (let i = 0; i < 8; i++) {
+      const r = await fetch(`/api/passes/${encodeURIComponent(kar)}/login`, { method: 'POST', credentials: 'same-origin' }).catch(() => null), j = r ? await r.json().catch(() => ({})) : {};
+      if (r?.ok) { err = ''; break; }
+      err = j.error || 'Nie udało się sprawdzić płatności.'; if (!j.pending) break;
+      await new Promise((ok) => setTimeout(ok, 2000));
+    }
+    try { history.replaceState(null, '', '/konto'); } catch {}
+    if (err) flash(err, true); else flash('Karnet jest aktywny. Link do logowania wysłaliśmy też e-mailem.');
+  }
   const t = new URLSearchParams(location.search).get('t');
   if (t) {
     try { await accApi('/login', { method: 'POST', body: JSON.stringify({ token: t }) }); } catch (x) { box.replaceChildren(accLogin(x.message)); return; }
@@ -2196,8 +2245,26 @@ function accDash(d) {
   const delAcc = el('button', { className: 'link', type: 'button', textContent: 'Usuń konto i listę aplikacji' });
   delAcc.onclick = async () => { if (delAcc.dataset.sure !== '1') { delAcc.dataset.sure = '1'; delAcc.textContent = 'Kliknij jeszcze raz, aby usunąć na zawsze'; return; } await accApi('', { method: 'DELETE' }).catch(() => {}); showAccount(); };
   const addBox = el('div', { className: 'acct-card' }, el('h2', { textContent: 'Dodaj aplikację' }), appForm());
+  // Karnet: stan, ważność i historia zużycia (karta widoczna tylko, gdy klient ma albo miał karnet).
+  const passBox = el('div', { className: 'acct-card', hidden: true });
+  fetch('/api/passes/mine', { credentials: 'same-origin' }).then((r) => r.json()).then(({ active, all }) => {
+    if (!all?.length) return;
+    const day = (t) => new Date(t).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' });
+    const STATE = { used: 'wykorzystane', reserved: 'zarezerwowane (czeka na płatność)' }, STATUS = { expired: 'wygasł', refunded: 'zwrócony', active: 'aktywny' };
+    const hist = all.flatMap((p) => p.used.map((u) => ({ ...u, name: p.name }))).sort((a, b) => b.at - a.at).slice(0, 30);
+    passBox.hidden = false;
+    passBox.replaceChildren(...[el('h2', { textContent: 'Twój karnet' }),
+      active ? el('p', {}, el('b', { textContent: active.name }), ` – zostało ${active.left.matches} z ${active.plan.matches} dopasowań (CV + list), ${active.left.sim} z ${active.plan.sim} symulatorów, ${active.left.interview} z ${active.plan.interview} przygotowań do rozmowy. Ważny do ${day(active.expires)}.`)
+        : el('p', { className: 'hint', textContent: 'Nie masz aktywnego karnetu.' }),
+      active ? el('p', {}, el('button', { className: 'btn sm', type: 'button', textContent: 'Zamów CV z karnetu', onclick: () => { $('#account').hidden = true; $('#landing').hidden = false; openWiz(); } })) : null,
+      el('p', { className: 'hint', textContent: 'Karnet nie odnawia się. Po terminie ważności niewykorzystane dopasowania przepadają.' }),
+      ...all.filter((p) => !active || p.id !== active.id).map((p) => el('p', { className: 'hint', textContent: `${p.name}: ${STATUS[p.status] || p.status}${p.expires ? `, ważny do ${day(p.expires)}` : ''}.` })),
+      hist.length ? el('div', { className: 'tbl-wrap' }, el('table', {}, el('thead', {}, el('tr', {}, ['Kiedy', 'Karnet', 'Dopasowania', 'Symulator', 'Przygotowanie', 'Stan'].map((h) => el('th', { textContent: h })))),
+        el('tbody', {}, hist.map((u) => el('tr', {}, el('td', { textContent: new Date(u.at).toLocaleString('pl-PL') }), el('td', { textContent: u.name }), el('td', { textContent: String(u.matches) }), el('td', { textContent: String(u.sim) }), el('td', { textContent: String(u.interview) }), el('td', { textContent: STATE[u.state] || u.state })))))) : null].filter(Boolean));
+  }).catch(() => {});
   wrap.append(
     el('div', { className: 'acct-head' }, el('div', {}, el('h1', { textContent: 'Moje konto' }), el('p', { className: 'hint', textContent: d.email })), out),
+    passBox,
     el('div', { className: 'acct-card' }, el('h2', { textContent: 'Twoje zamówienia' }), el('p', { className: 'hint', textContent: 'Zamówienia z ostatnich 30 dni (starsze usuwamy automatycznie razem z dokumentami).' }),
       ...(d.orders.length ? d.orders.map((o) => el('div', { className: 'acct-order' },
         el('div', {}, el('b', { textContent: o.pkg }), el('small', { textContent: ` · ${new Date(o.created).toLocaleDateString('pl-PL')}` })),
