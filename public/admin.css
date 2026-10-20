@@ -144,3 +144,5 @@ tbody tr.click{cursor:pointer}tbody tr.click:hover{background:var(--alt)}
 .app>main{min-width:0}
 .setlist input{flex:none}
 .grid-set{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}@media(max-width:1000px){.grid-set{grid-template-columns:minmax(0,1fr)}}
+/* Dane: zawody z małą próbą wyszarzone */
+.tbl-wrap td.wrap{white-space:normal;min-width:240px;line-height:1.5}.da-low td{color:var(--mute)}.da-low .note{font-size:12px;font-style:italic}
