@@ -19,7 +19,8 @@ test('Dodatki po zakupie: oferty i ceny = różnica cennika (bez zmian cen)', ()
   assert.deepEqual(m(done('pack3', { interview: true, sim: true }, 3)), {}, 'nic do dokupienia');
   assert.deepEqual(m({ ...done('cv'), status: 'pending' }), {}, 'tylko gotowe zamówienia');
   assert.deepEqual(m({ ...done('cv'), upsellOf: 'x' }), {}, 'nie do dodatku');
-  assert.deepEqual(upsellPlan(done('cv'), 'bundle'), { key: 'bundle', name: 'Pakiet „Pewna rozmowa”', pkg: 'cv_letter', addons: { interview: true, sim: true }, price: m(done('cv')).bundle });
+  assert.deepEqual(upsellPlan(done('cv'), 'bundle'), { key: 'bundle', name: 'Pakiet „Pewna rozmowa”', pkg: 'cv_letter', addons: { interview: true, sim: true }, includes: ['letter', 'interview', 'sim'], price: m(done('cv')).bundle });
+  assert.deepEqual(upsellPlan(done('cv_letter', { interview: true }), 'bundle').includes, ['sim'], 'opis pakietu: tylko brakujące części');
   assert.deepEqual(invoiceLines({ upsell: { name: 'List motywacyjny' }, upsellOf: 'abcdef12-3456', total: 1000 }), [{ name: 'List motywacyjny – dodatek do zamówienia abcdef12', qty: 1, price: 1000, value: 1000 }]);
 });
 
@@ -43,6 +44,8 @@ test('Dodatki po zakupie: osobna płatność, po opłaceniu dodatek dopisany i w
     assert.equal(o.status, 'done'); assert.equal(o.results[0].letter || '', '');
     assert.deepEqual(o.upsells.map((x) => [x.key, x.price]), [['letter', 10], ['interview', 50], ['sim', 29], ['bundle', 70]]);
     assert.equal((await post(`/api/orders/${r.j.id}/upsell`, { key: 'linkedin' })).status, 400);
+    // Oczekujący „symulator” utworzony, gdy pakiet był jeszcze bez listu – opłacony później nie może cofnąć pakietu.
+    const early = await post(`/api/orders/${r.j.id}/upsell`, { key: 'sim' });
     const u = await post(`/api/orders/${r.j.id}/upsell`, { key: 'letter' });
     assert.equal(u.j.demo, true); assert.notEqual(u.j.id, r.j.id);
     const again = await post(`/api/orders/${r.j.id}/upsell`, { key: 'letter' });
@@ -53,9 +56,12 @@ test('Dodatki po zakupie: osobna płatność, po opłaceniu dodatek dopisany i w
     assert.equal(o.pkg, 'cv_letter'); assert.ok(o.results[0].letter.length > 100, 'list wygenerowany w tym zamówieniu');
     assert.deepEqual(o.upsells.map((x) => [x.key, x.price]), [['interview', 50], ['sim', 29], ['bundle', 60]]);
     assert.equal((await get(u.j.id)).status, 'done');
-    const s = await post(`/api/orders/${r.j.id}/upsell`, { key: 'sim' }); await post(`/api/orders/${s.j.id}/demo-pay`);
+    const s = await post(`/api/orders/${r.j.id}/upsell`, { key: 'sim' });
+    assert.notEqual(s.j.id, early.j.id, 'stara próba z innym pakietem nie jest używana ponownie (inna cena)');
+    await post(`/api/orders/${early.j.id}/demo-pay`); // opłacona stara próba
     o = await until(r.j.id, (x) => x.addons.sim);
-    assert.equal(o.addons.sim, true); assert.deepEqual(o.upsells.map((x) => x.key), ['interview']);
+    assert.equal(o.addons.sim, true); assert.equal(o.pkg, 'cv_letter', 'pakiet nie jest obniżany'); assert.ok(o.results[0].letter.length > 100, 'list zostaje');
+    assert.deepEqual(o.upsells.map((x) => x.key), ['interview']);
     assert.equal(o.upsells[0].price, zl(PRICES.interview - BUNDLE_OFF));
   } finally { srv.kill(); }
 });

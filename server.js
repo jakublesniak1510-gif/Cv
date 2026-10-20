@@ -500,11 +500,12 @@ app.get('/api/orders/:id', async (req, res) => {
   // Dodatki dokupione po zamówieniu: powrót z płatności prowadzi na stronę zamówienia, więc tu potwierdzamy też ich płatność.
   let upsellBusy = false;
   for (const uid of o.upsellIds || []) {
-    const u = await getOrder(uid).then((x) => x && refreshPayment(x)).catch(() => null);
+    // W Stripe/P24 sprawdzamy tylko świeże próby (do 24 h); starsze zostają, jak są.
+    const u = await getOrder(uid).then((x) => x && (Date.now() - x.created < 864e5 ? refreshPayment(x) : x)).catch(() => null);
     if (u && ['generating', 'paid'].includes(u.status)) upsellBusy = true;
   }
   if (o.upsellIds?.length) o = await getOrder(o.id);
-  const offers = upsellBusy ? [] : upsellOffers(o);
+  const offers = upsellBusy || Date.now() - (o.created || 0) > RETENTION_MS - 3 * 864e5 ? [] : upsellOffers(o); // dodatki do ok. 27. dnia (dane znikają po 30)
   if (offers.length && !o.upsellShown) { await updateOrder(o.id, { upsellShown: Date.now() }); countEvent('upsell_shown').catch(() => {}); }
   // Kod klienta (program poleceń): rabat dla znajomych, liczba poleceń i saldo do wykorzystania przez właściciela.
   let myCode = null;
@@ -516,7 +517,7 @@ app.get('/api/orders/:id', async (req, res) => {
     }
   }
   const rv = await reviews.get(o.id);
-  res.json(view(o, { myCode, review: rv ? { rating: rv.rating, text: rv.text } : null, upsells: offers.map(({ key, name, price }) => ({ key, name, price: price / 100 })), upsellBusy }));
+  res.json(view(o, { myCode, review: rv ? { rating: rv.rating, text: rv.text } : null, upsells: offers.map(({ key, name, price, includes }) => ({ key, name, price: price / 100, includes })), upsellBusy }));
 });
 
 // Karta „Dodaj do zamówienia”: osobna płatność tylko za dodatek (różnica ceny), po opłaceniu dodatek trafia do tego zamówienia.
@@ -530,7 +531,7 @@ app.post('/api/orders/:id/upsell', async (req, res) => {
     // Niezapłacona wcześniejsza próba tego samego dodatku: używamy jej ponownie (bez mnożenia zamówień).
     let u = null;
     for (const uid of p.upsellIds || []) { const x = await getOrder(uid); if (x?.status === 'pending' && x.upsell?.key === plan.key) u = x; }
-    if (u && u.total !== plan.price) u = null;
+    if (u && !(u.upsell.pkg === plan.pkg && u.total === plan.price)) u = null;
     if (!u) {
       u = { id: crypto.randomUUID(), upsellOf: p.id, upsell: { key: plan.key, name: plan.name, pkg: plan.pkg, addons: plan.addons }, pkg: p.pkg, addons: {}, extraLangs: [], ads: [], total: plan.price, discount: 0,
         profile: { name: p.profile.name, email: p.profile.email }, invoice: p.invoice ? { name: p.invoice.name, address: p.invoice.address, nip: p.invoice.nip || '' } : null, uiLang: p.uiLang, status: 'pending', results: [], created: Date.now() };
@@ -641,6 +642,14 @@ async function markPaidAndGenerate(id) {
 // Opłacony dodatek: rejestr sprzedaży, faktura, a w zamówieniu nowy pakiet/dodatki i wygenerowane brakujące części
 // (list motywacyjny, przygotowanie do rozmowy). CV, które klient mógł już poprawić, zostaje bez zmian.
 async function applyUpsell(o) {
+  const p = await getOrder(o.upsellOf);
+  if (!p) {
+    // Główne zamówienie już nie istnieje (np. usunięte po 30 dniach): bez ponawiania, właściciel robi zwrot.
+    await updateOrder(o.id, (x) => ({ ...x, status: 'failed', paidAt: x.paidAt || Date.now(), error: 'Brak zamówienia, do którego kupiono dodatek.' }));
+    logEvent('płatność', 'Opłacony dodatek bez zamówienia głównego – zwrot', { orderId: o.id });
+    alertOwner(`Opłacony dodatek ${o.id} (${o.upsell?.name}) dotyczy zamówienia, którego już nie ma. Zrób zwrot w panelu → Zamówienia.`);
+    return;
+  }
   const paidO = await updateOrder(o.id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
   if (!o.paidAt) {
     recordSale(paidO).catch((e) => console.error('Rejestr sprzedaży', e.message));
@@ -648,20 +657,20 @@ async function applyUpsell(o) {
     if (paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: o.id }));
     countEvent('upsell_paid').catch(() => {});
   }
-  const p = await getOrder(o.upsellOf);
-  if (!p) throw new Error('Nie ma zamówienia, do którego kupiono dodatek.');
   const u = o.upsell, letter = hasLetter(u.pkg) && !hasLetter(p.pkg), interview = !!u.addons.interview && !p.addons?.interview;
-  let results = p.results;
-  if (letter || interview) results = await Promise.all(p.ads.map(async (ad, i) => {
-    const old = p.results?.[i] || {}, r = await generateForAd({ profile: p.profile, ad, withLetter: hasLetter(u.pkg), addons: u.addons });
-    const merged = { ...old, ...(letter ? { letter: r.letter } : {}), ...(interview ? { interview: r.interview, prep: r.prep } : {}) };
-    const langs = Object.keys(old.variants || {});
-    if (langs.length) merged.variants = Object.fromEntries(await Promise.all(langs.map(async (l) => [l, await translateResult(merged, l)])));
-    return merged;
-  }));
-  const next = await updateOrder(p.id, (x) => ({ ...x, pkg: u.pkg, addons: { ...x.addons, ...u.addons }, results }));
+  // Generujemy tylko nowe części; tłumaczymy też tylko je (CV w innych językach zostaje bez zmian).
+  const parts = (letter || interview) ? await Promise.all(p.ads.map(async (ad, i) => {
+    const r = await generateForAd({ profile: p.profile, ad, withLetter: hasLetter(u.pkg), addons: u.addons });
+    const add = { ...(letter ? { letter: r.letter } : {}), ...(interview ? { interview: r.interview, prep: r.prep } : {}) };
+    const langs = Object.keys(p.results?.[i]?.variants || {}), tr = {};
+    for (const l of langs) { const t = await translateResult({ lang: r.lang, cv: { name: p.results[i].cv?.name || '' }, ...add }, l); tr[l] = Object.fromEntries(Object.keys(add).map((k) => [k, t[k]])); }
+    return { add, tr };
+  })) : [];
+  // Scalanie na aktualnym stanie zamówienia (poprawki klienta i równoległy drugi dodatek zostają); pakietu nigdy nie obniżamy.
+  const next = await updateOrder(p.id, (x) => ({ ...x, pkg: hasLetter(x.pkg) ? x.pkg : u.pkg, addons: { ...x.addons, ...u.addons },
+    results: parts.length ? (x.results || []).map((r, i) => (parts[i] ? { ...r, ...parts[i].add, ...(r.variants ? { variants: Object.fromEntries(Object.entries(r.variants).map(([l, v]) => [l, { ...v, ...(parts[i].tr[l] || {}) }])) } : {}) } : r)) : x.results }));
   await updateOrder(o.id, { status: 'done' });
-  if (letter || interview) trySend({ ...next, results, myCode: next.myCode }).then((mail) => updateOrder(p.id, { mail })).catch((e) => logEvent('e-mail', `Dodatek: ${e.message}`, { orderId: p.id }));
+  if (letter || interview) trySend({ ...next, myCode: next.myCode }).then((mail) => updateOrder(p.id, { mail })).catch((e) => logEvent('e-mail', `Dodatek: ${e.message}`, { orderId: p.id }));
 }
 
 // Faktura bez VAT na życzenie klienta: numer, PDF w e-mailu i na stronie dokumentów (wyłączane w panelu → Ustawienia).

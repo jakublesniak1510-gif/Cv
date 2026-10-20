@@ -1377,6 +1377,7 @@ function drawFollowup() {
 
 // Dodatki po zakupie: osobna płatność tylko za dodatek, potem dodatek pojawia się w tym zamówieniu.
 let upsellTimer = null;
+const UPSELL_PART = { letter: 'list motywacyjny', interview: 'przygotowanie do rozmowy', sim: 'symulator rozmowy' };
 const UPSELL_HINT = { letter: 'List motywacyjny do każdego CV z tego zamówienia, pod to samo ogłoszenie.', interview: 'Pytania z tego ogłoszenia z przykładowymi odpowiedziami, autoprezentacja i lista rzeczy do przygotowania.', sim: 'Rozmowa z AI w roli rekrutera pod to stanowisko, z oceną odpowiedzi.', bundle: 'Wszystko, czego brakuje do rozmowy: list, przygotowanie i symulator razem taniej.' };
 function drawUpsell() {
   const box = $('#upsell'), offers = data.upsells || [];
@@ -1386,7 +1387,7 @@ function drawUpsell() {
   if (box.hidden) return;
   box.replaceChildren(el('h3', { textContent: 'Dodaj do zamówienia' }), el('p', { className: 'hint', textContent: 'Płacisz tylko za dodatek. Przygotujemy go do tych samych ogłoszeń i dodamy na tej stronie.' }),
     el('div', { className: 'upsell-list' }, ...offers.map((o) => el('div', { className: 'upsell-item' },
-      el('div', {}, el('b', { textContent: o.name }), el('p', { className: 'hint', textContent: UPSELL_HINT[o.key] || '' })),
+      el('div', {}, el('b', { textContent: o.name }), el('p', { className: 'hint', textContent: o.key === 'bundle' ? `Razem taniej: ${(o.includes || []).map((k) => UPSELL_PART[k]).join(', ')}.` : UPSELL_HINT[o.key] || '' })),
       el('button', { type: 'button', className: 'btn sm', textContent: `Dodaj za ${o.price} zł`, onclick: async (e) => {
         const b = e.currentTarget; if (b.disabled) return; b.disabled = true; b.textContent = 'Przechodzę do płatności…';
         try {
@@ -1404,7 +1405,7 @@ function drawMyCode() {
   if (!k) return;
   const link = cfg.preview ? `https://twojadomena.pl/?ref=${k.code}` : `${location.origin}/?ref=${k.code}`;
   const uk = (window.I18N?.lang || document.documentElement.lang) === 'uk';
-  const share = uk ? `Я зробив(-ла) резюме під конкретну вакансію на cvpodogloszenie.pl – з моїм кодом ${k.code} у тебе на ${k.discount} зл дешевше: ${link}` : `Zrobiłem CV pod konkretne ogłoszenie na cvpodogloszenie.pl – z moim kodem ${k.code} masz ${k.discount} zł taniej: ${link}`;
+  const share = uk ? `У мене резюме під конкретну вакансію з cvpodogloszenie.pl – з моїм кодом ${k.code} у тебе на ${k.discount} зл дешевше: ${link}` : `Mam CV dopasowane do konkretnego ogłoszenia z cvpodogloszenie.pl – z moim kodem ${k.code} masz ${k.discount} zł taniej: ${link}`;
   box.replaceChildren(el('h3', { textContent: `Polecaj i zbieraj ${k.discount} zł za każdego znajomego` }),
     el('p', { className: 'hint', textContent: `Twój kod ${k.code}: znajomi płacą z nim ${k.discount} zł mniej, a Ty za każdego, kto zapłaci, dostajesz ${k.discount} zł na kolejne zamówienia (saldo do 50 zł). Każda osoba może użyć kodu raz. Ważny do ${new Date(k.expires).toLocaleDateString('pl-PL')}.` }),
     el('div', { className: 'refstats' },
