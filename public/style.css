@@ -883,6 +883,13 @@ table.rep th[scope=row]{font-weight:600;color:var(--mute);width:55%}
 .pv-kw{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}.pv-kw .hint{flex-basis:100%;margin:0}
 .pv-kw .chip{background:var(--soft-b);border-radius:999px;padding:3px 10px;font-size:13px}
 .pv-blur{filter:blur(5px);user-select:none;pointer-events:none;opacity:.7;margin:12px 0}.pv-blur p,.pv-blur b{margin:6px 0;display:block}
+/* Karta wyniku skanera do udostępnienia (/wynik/<id>) i panel „Udostępnij wynik” pod wynikiem skanera */
+.share-page{padding-block:40px 56px}.share-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px;display:grid;gap:12px;justify-items:start;min-width:0}
+.share-card h1{font-size:clamp(26px,4.4vw,38px);font-weight:800;letter-spacing:-.02em}.share-card .eyebrow{margin:0}.share-card p{margin:0}.share-card .cta-box{width:100%;margin-top:10px}
+.ring.big{width:150px;height:150px}.ring.big b{width:118px;height:118px;font-size:36px}
+.share-btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-width:0}.share-link{flex:1 1 100%;min-width:0;font-size:14px}
+.scan-share{grid-column:1/-1;margin-top:4px}.scan-share-form{display:grid;gap:10px}.scan-share-form .filerow{display:flex;gap:8px;flex-wrap:wrap}.scan-share-form input[type=text]:not(.share-link){flex:1 1 220px;min-width:0}
+@media(max-width:520px){.share-card{padding:20px}}
 /* dodatki po zakupie */
 .upsell{margin-top:26px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
 .upsell-list{display:grid;gap:10px;margin-top:10px}

@@ -94,6 +94,7 @@ test('Lejek: etapy raz na osobę, język, źródło; raport tekstowy', async () 
     assert.deepEqual(f.stages[0].lang, { pl: 2, uk: 1, de: 1 });
     assert.equal(f.stages[1].rate, 50); assert.equal(f.stages[4].rate, 100);
     assert.equal(an.sourceOf('m.facebook.com', ''), 'facebook'); assert.equal(an.sourceOf('', 'fb'), 'facebook'); assert.equal(an.sourceOf('youtube.com', ''), 'youtube'); assert.equal(an.sourceOf('bing.com', ''), 'inne'); assert.equal(an.sourceOf('', ''), 'direct');
+    assert.equal(an.sourceOf('l.facebook.com', 'share'), 'share', 'link z karty wyniku (utm_source=share) ma własne źródło'); assert.ok(an.SOURCES.includes('share'));
     const t = an.funnelText(f);
     assert.match(t, /Wejścia: 4 → Start kreatora: 2 \(50%\) → Ostatni krok: 1 \(50%\) → Płatność rozpoczęta: 1 \(100%\) → Opłacone: 1 \(100%\)/);
     assert.match(t, /tiktok: 1 → 1 → 0 → 0 → 0/);
