@@ -38,6 +38,7 @@ import { previewRoutes, previewFor, cleanupPreviews } from './lib/preview.js';
 import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText, visitInfo, funnelPaid } from './lib/analytics.js';
 import { seoReportRoutes, seoWeekly } from './lib/seo-report.js';
 import { logEvent, cleanupEvents } from './lib/events.js';
+import { recordStatsSafe } from './lib/stats-agg.js';
 import { leadRoutes, cleanupLeads } from './lib/leads.js';
 import { emailHash, codeDiscount, applyPaidCode, isOwner, CODE_TTL } from './lib/referral.js';
 
@@ -144,8 +145,10 @@ app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
       cvText = await extractText(buf);
     }
     if (cvText.length < 60) return res.status(400).json({ error: 'CV jest za krótkie, żeby je ocenić.' });
-    const result = await scanCv({ cvText, adText });
+    const { company, ...result } = await scanCv({ cvText, adText });
     res.json({ ...result, scanId: rememberScan(result) });
+    // Anonimowe liczniki wymagań (bez treści CV i ogłoszenia); firma służy tylko do odfiltrowania jej nazwy.
+    recordStatsSafe({ title: `${result.position} | ${adText.split('\n').find((l) => l.trim()) || ''}`.slice(0, 200), company, found: result.found, missing: result.missing });
   } catch (e) { console.error('Skaner', e.message); logEvent('skaner', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się ocenić CV. Spróbuj ponownie.' }); }
 });
 
@@ -591,6 +594,7 @@ async function markPaidAndGenerate(id) {
     if (o.jobAlerts) addAlertFromOrder({ email: o.profile.email, ...o.jobAlerts, lang: o.uiLang }).catch((e) => logEvent('oferty', e.message, { orderId: id }));
     const mail = await trySend({ ...o, results, myCode });
     await updateOrder(id, { status: 'done', results, mail, myCode });
+    results.forEach((r, i) => recordStatsSafe({ title: `${o.ads[i]?.title || ''} | ${r.position || ''}`, company: [r.company, o.ads[i]?.company], found: r.match?.found, missing: r.match?.missing }));
     stats.upsert('totals', (p = {}) => ({ cvs: (p.cvs || 0) + results.length, orders: (p.orders || 0) + 1 })).catch(() => {});
   } catch (e) {
     console.error('Generowanie nie powiodło się', id, e);

@@ -470,6 +470,24 @@ function simpleTable(rows, cols) {
 const shortUrl = (u) => String(u || '').replace(/^https?:\/\/[^/]+/, '') || '/';
 const QC = [['key', 'Zapytanie'], ['clicks', 'Klik.', 1], ['impressions', 'Wyśw.', 1], ['ctr', 'CTR %', 1], ['position', 'Poz.', 1], ['prevPosition', 'Poz. wcześniej', 1]];
 const PC = [[(x) => shortUrl(x.key), 'Strona'], ['type', 'Typ'], ['lang', 'Język'], ['clicks', 'Klik.', 1], ['impressions', 'Wyśw.', 1], ['ctr', 'CTR %', 1], ['position', 'Poz.', 1]];
+// --- Dane: anonimowe statystyki wymagań (n < 30 wyszarzone, poza CSV) ---
+let daMonth = '';
+loaders.data = async () => {
+  const d = await api('/stats-agg?month=' + encodeURIComponent(daMonth)), sel = $('#daMonth');
+  sel.replaceChildren(el('option', { value: 'last3', textContent: 'Ostatnie 3 miesiące' }), ...[...new Set([d.month === 'last3' ? '' : d.month, ...d.months])].filter(Boolean).map((m) => el('option', { value: m, textContent: m })));
+  sel.value = d.month; daMonth = d.month;
+  $('#daCsv').href = '/api/admin/stats-agg.csv?month=' + encodeURIComponent(d.month);
+  const ok = d.professions.filter((p) => p.ok);
+  $('#daTiles').replaceChildren(tile('Ogłoszenia', num(d.professions.reduce((a, p) => a + p.n, 0)), d.label), tile('Zawody', num(d.professions.length), `${ok.length} z n ≥ ${d.minN}`));
+  $('#daTable').replaceChildren(!d.professions.length ? el('div', { className: 'empty', textContent: 'Brak danych w tym okresie.' }) : el('table', {},
+    el('thead', {}, el('tr', {}, el('th', { textContent: 'Zawód' }), el('th', { className: 'r', textContent: 'n' }), el('th', { textContent: 'Najczęstsze wymagania (wystąpienia, % w CV)' }))),
+    el('tbody', {}, d.professions.map((p) => el('tr', { className: p.ok ? '' : 'da-low' },
+      el('td', {}, p.name, p.ok ? null : el('div', { className: 'note', textContent: 'za mało danych do publikacji' })),
+      el('td', { className: 'r', textContent: num(p.n) }),
+      el('td', { className: 'wrap', textContent: p.keywords.map((k) => `${k.kw} (${k.seen}, ${String(k.pct).replace('.', ',')}%)`).join(' · ') || '–' }))))));
+};
+$('#daMonth').addEventListener('change', (e) => { daMonth = e.target.value; loaders.data().catch((x) => toast(x.message)); });
+
 let seoPoll = null;
 loaders.seo = async () => {
   const d = await api('/seo'), r = d.latest, g = r?.gsc;
