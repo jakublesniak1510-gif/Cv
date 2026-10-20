@@ -64,3 +64,12 @@ test('Pełna generacja po płatności dostaje podgląd w poleceniu (spójność)
   assert.match(srv, /preview: i === 0 \? o\.preview : null/);
   assert.match(srv, /previewFor\(p, a\[0\]\)/);
 });
+
+// cfg.preview w public/app.js oznacza tryb podglądu bez serwera (wyłącza statystyki, pobieranie DOCX itd.),
+// więc flaga podglądu AI w /api/config musi mieć inną nazwę.
+test('/api/config: podgląd AI jako aiPreview, nie preview', () => {
+  const srv = fs.readFileSync(new URL('../server.js', import.meta.url), 'utf8'), app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(srv, /aiPreview: aiEnabled\(\)/);
+  assert.doesNotMatch(srv, /\bpreview: aiEnabled\(\)/);
+  assert.match(app, /\$\('#pvBox'\)\.hidden = !cfg\.aiPreview/);
+});
