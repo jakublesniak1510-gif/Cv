@@ -28,12 +28,13 @@ import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes, sendNotFound } from './lib/seo.js';
 import { p24Enabled, p24Register, p24NotificationOk, p24Verify, p24BySession } from './lib/p24.js';
 import { stripeEnabled, stripeCheckout, stripeSession, stripeEvent } from './lib/stripe.js';
-import { recordSale, notifyNewOrder, setRefunded, commissionBack, ownerDaily, getSettings, DATA_DIR } from './lib/ops.js';
+import { recordSale, notifyNewOrder, setRefunded, commissionBack, ownerDaily, getSettings, DATA_DIR, addDailySection, dayKey } from './lib/ops.js';
 import { invoices, issueInvoice, renderInvoice, invoiceFile, cleanupInvoices } from './lib/invoice.js';
 import { renderDocx } from './lib/docx.js';
 import { adminRoutes, isAdmin } from './lib/admin.js';
 import { accountRoutes, accountHourly } from './lib/account.js';
-import { analyticsRoutes, cleanupAnalytics } from './lib/analytics.js';
+import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText } from './lib/analytics.js';
+import { seoReportRoutes, seoWeekly } from './lib/seo-report.js';
 import { logEvent, cleanupEvents } from './lib/events.js';
 import { leadRoutes, cleanupLeads } from './lib/leads.js';
 import { emailHash, codeDiscount, applyPaidCode, isOwner, CODE_TTL } from './lib/referral.js';
@@ -713,6 +714,9 @@ accountRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 leadRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 alertRoutes(app, { BASE_URL, DEMO: DEMO && !SALES_CLOSED });
 analyticsRoutes(app, BASE_URL);
+seoReportRoutes(app);
+// Lejek z wczoraj w porannym podsumowaniu (same liczby).
+addDailySection(async (now) => { const y = dayKey(now.getTime() - 864e5); return funnelText(await funnelRange(y, y)); });
 adminRoutes(app, { DEMO, BASE_URL, markPaidAndGenerate, trySend, retentionMs: RETENTION_MS, autoInvoice });
 
 // Dane zamówień (w tym zdjęcia) kasujemy po 30 dniach.
@@ -743,6 +747,7 @@ async function hourly() {
     await alertsHourly(BASE_URL).catch((e) => console.error('Powiadomienia o ofertach', e.message));
     await accountHourly(BASE_URL).catch((e) => console.error('Konta', e.message));
     await ownerDaily(BASE_URL).catch((e) => logEvent('e-mail', `Podsumowanie dnia / kopia: ${e.message}`));
+    await seoWeekly(BASE_URL).catch((e) => logEvent('seo', `Raport SEO: ${e.message}`));
     if (!mailEnabled()) return;
     for (const o of Object.values(await allOrders())) {
       if (o.status !== 'done' || !o.reminder?.consent || o.reminder.sent || Date.now() - o.created < REMINDER_AFTER) continue;
