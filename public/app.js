@@ -2219,6 +2219,12 @@ async function loadDraft(id) {
   if ($('#scanAd')) $('#scanAd').value = text;
   openWiz();
 }
+// ?jezyk=de|en|…: strony „CV za granicę” → kreator z językiem dokumentów ustawionym dla pierwszego ogłoszenia.
+if (LANGS[q.get('jezyk')] && !q.get('draft') && !q.get('id')) {
+  const s = $('#ads .entry [data-k=lang]'); if (s) { s.value = q.get('jezyk'); refresh(); }
+  try { history.replaceState(null, '', location.pathname + location.hash); } catch {}
+  openWiz();
+}
 if (q.get('draft')) loadDraft(q.get('draft'));
 if (q.get('id')) startResult(q.get('id'));
 else if (q.has('canceled')) { try { history.replaceState(null, '', location.pathname); } catch {} openWiz(); go(6); $('#werr').textContent = 'Płatność została anulowana. Twoje dane są zachowane, możesz spróbować ponownie.'; }
