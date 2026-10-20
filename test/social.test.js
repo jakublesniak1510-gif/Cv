@@ -70,7 +70,10 @@ test('Bot Meta: diagnostyka do /health bez sekretów', async () => {
   const { botStatus } = await import('../lib/social.js');
   const resp = (ok, j) => ({ ok, json: async () => j });
   const good = async (u) => (u.includes('subscribed_apps') ? resp(true, { data: [{ subscribed_fields: ['messages', 'messaging_postbacks'] }] }) : resp(true, { id: '1', name: 'CV Pod Ogłoszenie', instagram_business_account: { id: '2' } }));
-  assert.deepEqual(await botStatus({ fetchFn: good, now: 1 }), { bot: 'ok', strona: 'CV Pod Ogłoszenie', instagram: 'połączony' });
+  const st = await botStatus({ fetchFn: good, now: 1 });
+  assert.deepEqual({ bot: st.bot, strona: st.strona, instagram: st.instagram }, { bot: 'ok', strona: 'CV Pod Ogłoszenie', instagram: 'połączony' });
+  assert.match(st.ostatni_webhook, /^\d{4}-/, 'czas ostatniego webhooka'); assert.match(st.ostatnia_odpowiedz, /^\d{4}-/);
+  assert.ok(!JSON.stringify(st).includes('Dzień dobry'), 'bez treści wiadomości');
   const noSubs = async (u, o = {}) => (o.method === 'POST' ? resp(false, { error: { message: '(#200) Permissions error' } }) : u.includes('subscribed_apps') ? resp(true, { data: [] }) : resp(true, { id: '1', name: 'X' }));
   const ns = await botStatus({ fetchFn: noSubs, now: 1e9 });
   assert.match(ns.bot, /brak subskrypcji/); assert.match(ns.szczegol, /Permissions error/);
