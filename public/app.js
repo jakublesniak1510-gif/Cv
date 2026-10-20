@@ -859,7 +859,7 @@ $('#pvBtn').onclick = async () => {
   finally { b.disabled = false; b.textContent = 'Pokaż podgląd'; }
 };
 function drawSummary() {
-  $('#pvBox').hidden = !cfg.preview || !rows('ads')[0]?.text;
+  $('#pvBox').hidden = !cfg.aiPreview || !rows('ads')[0]?.text;
   if (pvShown && pvShown.sig !== pvSig()) pvShown = null; // dane zmienione po podglądzie: podgląd nieaktualny
   if (!pvShown) { $('#pvOut').replaceChildren(); $('#pvBtn').hidden = false; }
   const ads = rows('ads');
@@ -1375,13 +1375,37 @@ function drawFollowup() {
   addRow('fuAds'); drawPick();
 }
 
+// Dodatki po zakupie: osobna płatność tylko za dodatek, potem dodatek pojawia się w tym zamówieniu.
+let upsellTimer = null;
+const UPSELL_PART = { letter: 'list motywacyjny', interview: 'przygotowanie do rozmowy', sim: 'symulator rozmowy' };
+const UPSELL_HINT = { letter: 'List motywacyjny do każdego CV z tego zamówienia, pod to samo ogłoszenie.', interview: 'Pytania z tego ogłoszenia z przykładowymi odpowiedziami, autoprezentacja i lista rzeczy do przygotowania.', sim: 'Rozmowa z AI w roli rekrutera pod to stanowisko, z oceną odpowiedzi.', bundle: 'Wszystko, czego brakuje do rozmowy: list, przygotowanie i symulator razem taniej.' };
+function drawUpsell() {
+  const box = $('#upsell'), offers = data.upsells || [];
+  clearTimeout(upsellTimer);
+  if (data.upsellBusy) { box.hidden = false; box.replaceChildren(el('h3', { textContent: 'Przygotowujemy dokupiony dodatek…' }), el('p', { className: 'hint', textContent: 'To zwykle trwa do 2 minut. Strona odświeży się sama, a dokumenty wyślemy też e-mailem.' })); upsellTimer = setTimeout(() => startResult(orderId), 8000); return; }
+  box.hidden = !offers.length || data.status !== 'done';
+  if (box.hidden) return;
+  box.replaceChildren(el('h3', { textContent: 'Dodaj do zamówienia' }), el('p', { className: 'hint', textContent: 'Płacisz tylko za dodatek. Przygotujemy go do tych samych ogłoszeń i dodamy na tej stronie.' }),
+    el('div', { className: 'upsell-list' }, ...offers.map((o) => el('div', { className: 'upsell-item' },
+      el('div', {}, el('b', { textContent: o.name }), el('p', { className: 'hint', textContent: o.key === 'bundle' ? `Razem taniej: ${(o.includes || []).map((k) => UPSELL_PART[k]).join(', ')}.` : UPSELL_HINT[o.key] || '' })),
+      el('button', { type: 'button', className: 'btn sm', textContent: `Dodaj za ${o.price} zł`, onclick: async (e) => {
+        const b = e.currentTarget; if (b.disabled) return; b.disabled = true; b.textContent = 'Przechodzę do płatności…';
+        try {
+          const r = await fetch(`/api/orders/${orderId}/upsell`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: o.key }) }); const j = await r.json();
+          if (!r.ok) throw new Error(j.error || 'Nie udało się otworzyć płatności.');
+          if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); return startResult(orderId); }
+          location.href = j.url;
+        } catch (x) { flash(x.message); b.disabled = false; b.textContent = `Dodaj za ${o.price} zł`; }
+      } })))));
+}
 // Kod klienta: −10 zł dla niego na kolejne zamówienie i dla znajomych (każda osoba raz).
 function drawMyCode() {
   const box = $('#referral'), k = data.myCode;
   box.hidden = !k;
   if (!k) return;
   const link = cfg.preview ? `https://twojadomena.pl/?ref=${k.code}` : `${location.origin}/?ref=${k.code}`;
-  const share = `Robię CV pod konkretne ogłoszenie na CV Pod Ogłoszenie. Z moim linkiem zapłacisz ${k.discount} zł mniej: ${link}`;
+  const uk = (window.I18N?.lang || document.documentElement.lang) === 'uk';
+  const share = uk ? `У мене резюме під конкретну вакансію з cvpodogloszenie.pl – з моїм кодом ${k.code} у тебе на ${k.discount} зл дешевше: ${link}` : `Mam CV dopasowane do konkretnego ogłoszenia z cvpodogloszenie.pl – z moim kodem ${k.code} masz ${k.discount} zł taniej: ${link}`;
   box.replaceChildren(el('h3', { textContent: `Polecaj i zbieraj ${k.discount} zł za każdego znajomego` }),
     el('p', { className: 'hint', textContent: `Twój kod ${k.code}: znajomi płacą z nim ${k.discount} zł mniej, a Ty za każdego, kto zapłaci, dostajesz ${k.discount} zł na kolejne zamówienia (saldo do 50 zł). Każda osoba może użyć kodu raz. Ważny do ${new Date(k.expires).toLocaleDateString('pl-PL')}.` }),
     el('div', { className: 'refstats' },
@@ -1389,8 +1413,8 @@ function drawMyCode() {
       el('div', {}, el('b', { textContent: `${k.credit || 0} zł` }), el('span', { textContent: 'saldo do wykorzystania' })),
       el('div', {}, el('b', { textContent: `${k.mine || 0} zł` }), el('span', { textContent: 'mniej przy Twoim kolejnym zamówieniu' }))),
     el('div', { className: 'refrow' }, el('code', { textContent: k.code }), el('input', { type: 'text', readOnly: true, value: link, ariaLabel: 'Link z kodem dla znajomych', onfocus: (e) => e.target.select() }),
-      el('button', { type: 'button', className: 'btn sm', textContent: 'Kopiuj link', onclick: async (e) => { try { await navigator.clipboard.writeText(link); e.target.textContent = 'Skopiowano'; } catch { e.target.previousSibling.select(); e.target.textContent = 'Zaznaczono, skopiuj'; } } })),
-    el('div', { className: 'refshare' },
+      el('button', { type: 'button', className: 'btn sm', textContent: 'Kopiuj link', onclick: async (e) => { track('refshare'); try { await navigator.clipboard.writeText(link); e.target.textContent = 'Skopiowano'; } catch { e.target.previousSibling.select(); e.target.textContent = 'Zaznaczono, skopiuj'; } } })),
+    el('div', { className: 'refshare', onclick: (e) => { if (e.target.closest('a,button')) track('refshare'); } },
       navigator.share ? el('button', { type: 'button', className: 'btn ghost sm', textContent: 'Udostępnij', onclick: () => navigator.share({ title: 'CV Pod Ogłoszenie', text: share, url: link }).catch(() => {}) }) : null,
       el('a', { className: 'btn ghost sm', href: `https://wa.me/?text=${encodeURIComponent(share)}`, target: '_blank', rel: 'noopener', textContent: 'WhatsApp' }),
       // Messenger tylko na telefonie (link otwiera aplikację); SMS z gotową treścią (iOS i Android rozumieją ?&body=).
@@ -1484,7 +1508,7 @@ function showResult() {
   $('#reviseBtn').onclick = openRevise;
   $('#editor').hidden = $('#reviseBox').hidden = true; editing = null;
   if (data.expires) $('#retention').textContent = `Dane tego zamówienia, w tym dokumenty${data.photo ? ' i zdjęcie' : ''}, usuniemy automatycznie ${new Date(data.expires).toLocaleDateString('pl-PL')}. Zapisz PDF-y u siebie.`;
-  drawFollowup(); drawMyCode(); drawRate(); drawAcctOffer();
+  drawFollowup(); drawUpsell(); drawMyCode(); drawRate(); drawAcctOffer();
   draw();
   if (location.hash === '#ocena') setTimeout(() => $('#rate').scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
   if (location.hash === '#kolejne') setTimeout(() => $('#followup').scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
@@ -2218,6 +2242,12 @@ async function loadDraft(id) {
   if (first) { $('[data-k=title]', first).value = d.title || ''; $('[data-k=text]', first).value = text; first.dataset.fetched = '1'; setMode(first, 'paste'); }
   if ($('#scanAd')) $('#scanAd').value = text;
   openWiz();
+}
+// ?zamow=1 (przycisk „Zamów” z lekkiej podstrony): kreator z wybranym pakietem i dodatkami.
+if (q.get('zamow') && !q.get('id') && !q.get('draft')) {
+  try { history.replaceState(null, '', location.pathname + location.hash); } catch {}
+  (q.get('dodatki') || '').split(',').filter((a) => /^\w+$/.test(a)).forEach((a) => { const c = $('#ad' + a); if (c) c.checked = true; });
+  openWiz(['cv', 'cv_letter', 'pack3'].includes(q.get('pkg')) ? q.get('pkg') : undefined);
 }
 if (q.get('draft')) loadDraft(q.get('draft'));
 if (q.get('id')) startResult(q.get('id'));
