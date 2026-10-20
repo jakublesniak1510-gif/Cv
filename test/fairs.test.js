@@ -4,7 +4,7 @@ import express from 'express';
 import { datesOf, split, loadFairs, setFairs, fairRoutes, fairUrls, citySlug, eventsLd } from '../lib/fairs.js';
 import fs from 'node:fs';
 
-const RAW = JSON.parse(fs.readFileSync(new URL('../data/seo/targi.json', import.meta.url), 'utf8'));
+const RAW = JSON.parse(fs.readFileSync(new URL('../seo-data/targi.json', import.meta.url), 'utf8'));
 const at = (iso) => Date.parse(`${iso}T12:00:00Z`);
 
 test('Daty: pojedyncza, zakres i seria DD.MM.RRRR; niepotwierdzone bez dat', () => {
