@@ -77,3 +77,21 @@ test('Wypis: wyłączenie przypomnienia i usunięcie szkicu; sprzątanie po 7 dn
   await W.wizardDraftsHourly('https://example.test', Date.now() + 8 * 864e5);
   assert.equal(Object.keys(await W.wizardDrafts.all()).length, 0, 'wszystko starsze niż 7 dni usunięte');
 });
+
+test('Limity: dzienny limit szkiców (DRAFT_DAILY), 120 zapisów PUT na godzinę na szkic; nagłówki wypisu w e-mailach', async () => {
+  const { sendDraftLink, sendDraftReminder } = await import('../lib/mail.js');
+  for (const f of [sendDraftLink, sendDraftReminder]) {
+    const m = JSON.parse((await f({ email: 'g@example.test', lang: 'pl' }, { link: 'https://example.test/?szkic=x', stop: 'https://example.test/szkic/wypisz?t=x', until: Date.now() + 864e5 })).message);
+    assert.equal(m.headers['List-Unsubscribe-Post'], 'List-Unsubscribe=One-Click'); assert.equal(m.list.unsubscribe.url, 'https://example.test/szkic/wypisz?t=x');
+  }
+  const app3 = express(); W.wizardDraftRoutes(app3, { BASE_URL: 'https://example.test' }); const s3 = app3.listen(0), U3 = `http://127.0.0.1:${s3.address().port}`;
+  const post = (email) => fetch(U3 + '/api/wizard-draft', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, data: DATA }) });
+  try {
+    const r = await (await post('h@example.test')).json();
+    process.env.DRAFT_DAILY = '1';
+    assert.equal((await post('i@example.test')).status, 429, 'dzienny limit');
+    delete process.env.DRAFT_DAILY;
+    const st = []; for (let i = 0; i < 121; i++) st.push((await fetch(`${U3}/api/wizard-draft/${r.token}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: DATA }) })).status);
+    assert.equal(st.filter((x) => x === 200).length, 120); assert.equal(st.at(-1), 429);
+  } finally { s3.close(); delete process.env.DRAFT_DAILY; }
+});
