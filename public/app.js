@@ -10,7 +10,7 @@ let promo = null; // zastosowany kod rabatowy: { code, discount, label }
 let data; // bieżące zamówienie na stronie wyniku
 const STEPS = ['Pakiet i wygląd CV', 'Twoje dane', 'Doświadczenie', 'Wykształcenie i umiejętności', 'Ogłoszenia', 'Podsumowanie'];
 let pendingDraft = ''; // ogłoszenie z rozszerzenia Chrome czekające na formularz skanera
-let cfg = { demo: false, maxAds: 5, noPrint: false, maxRevisions: 10, loading: true };
+let cfg = { demo: false, maxAds: 5, noPrint: false, maxRevisions: 5, loading: true };
 // Statystyki bez cookies: zbiorcze odsłony i kroki kreatora (serwer nie zapisuje IP ani identyfikatorów).
 const trackLater = []; // zdarzenia sprzed wczytania konfiguracji (np. powrót z płatności), wysyłane po „pv”
 function track(e, x = {}) {
