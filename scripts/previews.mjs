@@ -4,27 +4,30 @@
 // Uruchamiane przy przygotowaniu wydania (w obrazie Dockera nie ma narzędzi do rasteryzacji), wynik w public/podglad/ i seo-data/previews.json.
 //   node scripts/previews.mjs            # wszystkie
 //   node scripts/previews.mjs kasjer     # tylko pliki z tym slugiem
+//   node scripts/previews.mjs --zmienione  # tylko te, których treść zmieniła się od wygenerowania (skrót w manifeście)
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
-const ROOT = new URL('..', import.meta.url).pathname, OUT = path.join(ROOT, 'public/podglad'), only = process.argv[2] || '';
+const ROOT = new URL('..', import.meta.url).pathname, OUT = path.join(ROOT, 'public/podglad'), arg = process.argv[2] || '';
 const { templatePdf, TEMPLATES } = await import(path.join(ROOT, 'lib/templates.js'));
 const { PROFESSIONS } = await import(path.join(ROOT, 'lib/content.js'));
 const { renderCv } = await import(path.join(ROOT, 'lib/pdf.js'));
+const { previewSources, contentHash } = await import(path.join(ROOT, 'lib/preview-sources.js'));
+const HASH = Object.fromEntries(previewSources().map(([name, , data]) => [name, contentHash(data)]));
 const { chromium } = await import(process.env.PLAYWRIGHT || '/opt/node-tools/node_modules/playwright/index.mjs');
 const DESIGN = { tpl: 'nowoczesny', color: 'granat' };
 const profPdf = (p) => { const s = p.sample; return renderCv({ lang: 'pl', cv: { name: s.name, headline: s.headline, contact: s.contact || [], summary: s.summary, experience: (s.jobs || []).map((j) => ({ title: j.title, company: j.company, period: j.period, bullets: j.bullets })), education: s.education || [], skills: s.skills || [], languages: s.languages || [], certificates: [], interests: '' } }, DESIGN, '', 'PRZYKŁAD'); };
 
+const manifestFile = path.join(ROOT, 'seo-data/previews.json'), manifest = fs.existsSync(manifestFile) ? JSON.parse(fs.readFileSync(manifestFile, 'utf8')) : {};
 const jobs = [
   ...Object.values(TEMPLATES).flatMap((t) => [[`wzor-cv-${t.slug}`, () => templatePdf(t, 'cv'), 800, 80], [`list-motywacyjny-${t.slug}`, () => templatePdf(t, 'letter'), 800, 80]]),
   ...PROFESSIONS.map((p) => [`cv-${p.slug}`, () => profPdf(p), 480, 40]),
-].filter(([name]) => !only || name.endsWith(only));
+].filter(([name]) => (arg === '--zmienione' ? manifest[name]?.[2] !== HASH[name] : !arg || name.endsWith(arg)));
 
 fs.mkdirSync(OUT, { recursive: true });
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'podglad-')), manifestFile = path.join(ROOT, 'seo-data/previews.json');
-const manifest = fs.existsSync(manifestFile) ? JSON.parse(fs.readFileSync(manifestFile, 'utf8')) : {};
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'podglad-'));
 const b = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium' }), page = await b.newPage();
 for (const [name, pdf, width, maxKb] of jobs) {
   const pdfFile = path.join(tmp, `${name}.pdf`); fs.writeFileSync(pdfFile, await pdf());
@@ -37,7 +40,7 @@ for (const [name, pdf, width, maxKb] of jobs) {
     return { w: c.width, h: c.height, data: url.split(',')[1] };
   }, { png, maxKb });
   const buf = Buffer.from(r.data, 'base64'); fs.writeFileSync(path.join(OUT, `${name}.webp`), buf);
-  manifest[name] = [r.w, r.h];
+  manifest[name] = [r.w, r.h, HASH[name]];
   console.log(name, `${r.w}×${r.h}`, `${Math.round(buf.length / 1000)} KB`);
 }
 await b.close();
