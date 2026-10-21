@@ -18,7 +18,15 @@ test('30 rozbudowanych stron zawodów: ≥ 600 słów, kompletne sekcje, bez lic
     const txt = JSON.stringify(e);
     assert.doesNotMatch(txt, /\d+\s?%|\d[\d\s]*zł|gwarant|na pewno dostaniesz|zapewniamy zatrudnienie|średnio \d|badania pokazują|statystyki/i, `${s}: bez liczb bez źródła i obietnic`);
     assert.equal(new Set(p.faq.map((f) => f.q)).size, p.faq.length, `${s}: pytania FAQ bez powtórzeń`);
+    assert.doesNotMatch(txt, /zwiększa(ją)? szans[eęy] na zatrudnienie|skraca(ją)? zatrudnienie/i, `${s}: bez obietnic zatrudnienia`);
+    // Wskazówki i FAQ bezosobowo: bez form „-łeś/-łaś” (przykładowe zdania mogą mieć rodzaj).
+    const hints = [e.rekruter, ...e.wymagania.flat(), ...e.bledy, ...e.faq.flatMap((f) => [f.q, f.a])].join('\n');
+    assert.deepEqual(hints.match(/[a-ząćęłńóśźż]+(łeś|łaś)(?=[\s,.;:!?)–-]|$)/gi), null, `${s}: formy rodzajowe we wskazówkach`);
+    if (txt.includes('UDT')) assert.match(txt, /[I]{1,2} WJO/, `${s}: UDT z kategorią (I/II WJO)`);
   }
+  // Pytania FAQ nie powtarzają się między zawodami po podmianie nazwy zawodu.
+  const kw = Object.values(PROF_EXTRA).flatMap((e) => e.faq.map((f) => f.q)).filter((q) => /^Jakie słowa kluczowe pasują do CV/.test(q));
+  assert.ok(kw.length <= 3, `zróżnicowane pytania o słowa kluczowe (${kw.length})`);
 });
 
 test('Strona zawodu: nowe sekcje w treści i dodatkowe pytania w FAQPage', async () => {
