@@ -28,8 +28,9 @@ test('Formularze i zgody na telefonie: pola 16px, checkbox 22px, cele dotykowe 4
 });
 
 test('Płatność: linia zaufania z metodami włączonymi w Stripe, „Zapłać” w jednej linii', () => {
-  assert.deepEqual(methodNames({ blik: { available: true }, card: { available: true }, apple_pay: { available: true }, google_pay: { available: true }, p24: { available: false } }), ['BLIK', 'karta', 'Apple Pay / Google Pay']);
-  assert.deepEqual(methodNames({ card: { available: true }, link: { available: true } }), ['karta']);
+  const ON = { available: true, display_preference: { value: 'on' } };
+  assert.deepEqual(methodNames({ blik: ON, card: ON, apple_pay: ON, google_pay: ON, p24: { available: false, display_preference: { value: 'on' } } }), ['BLIK', 'karta', 'Apple Pay / Google Pay'], 'P24 „Ineligible” pominięte');
+  assert.deepEqual(methodNames({ card: ON, blik: { available: true, display_preference: { value: 'off' } } }), ['karta'], 'wyłączona w panelu pominięta');
   assert.deepEqual(methodNames(null), []);
   assert.match(html, /<button type="submit" class="btn" id="next">Dalej<\/button><p class="paytrust" id="payTrust" hidden><\/p>/);
   assert.match(app, /bezpieczna płatność przez \$\{cfg\.pay\.provider\}/); assert.match(app, /dokumenty zwykle gotowe w kilka minut/); assert.match(app, /PDF także na e-mail/);
