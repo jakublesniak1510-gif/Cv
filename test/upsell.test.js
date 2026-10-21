@@ -13,10 +13,12 @@ const zl = (gr) => gr / 100;
 test('Dodatki po zakupie: oferty i ceny = różnica cennika (bez zmian cen)', () => {
   const done = (pkg, addons = {}, ads = 1) => ({ status: 'done', pkg, addons, ads: Array(ads).fill({}), extraLangs: [] });
   const m = (o) => Object.fromEntries(upsellOffers(o).map((x) => [x.key, x.price]));
-  assert.deepEqual(m(done('cv')), { letter: PRICES.cv_letter - PRICES.cv, interview: PRICES.interview, sim: PRICES.sim, bundle: PRICES.cv_letter - PRICES.cv + PRICES.interview + PRICES.sim - BUNDLE_OFF });
-  assert.deepEqual(m(done('cv_letter')), { interview: PRICES.interview, sim: PRICES.sim, bundle: PRICES.interview + PRICES.sim - BUNDLE_OFF });
-  assert.deepEqual(m(done('cv_letter', { interview: true })), { sim: PRICES.sim - BUNDLE_OFF }, 'symulator domyka „Pewną rozmowę”, więc jest taniej');
-  assert.deepEqual(m(done('pack3', { interview: true, sim: true }, 3)), {}, 'nic do dokupienia');
+  assert.deepEqual(m(done('cv')), { letter: PRICES.cv_letter - PRICES.cv, interview: PRICES.interview, sim: PRICES.sim, bundle: PRICES.cv_letter - PRICES.cv + PRICES.interview + PRICES.sim - BUNDLE_OFF, linkedin: PRICES.linkedin });
+  assert.deepEqual(m(done('cv_letter')), { interview: PRICES.interview, sim: PRICES.sim, bundle: PRICES.interview + PRICES.sim - BUNDLE_OFF, linkedin: PRICES.linkedin });
+  assert.deepEqual(m(done('cv_letter', { interview: true })), { sim: PRICES.sim - BUNDLE_OFF, linkedin: PRICES.linkedin }, 'symulator domyka „Pewną rozmowę”, więc jest taniej');
+  assert.deepEqual(m(done('pack3', { interview: true, sim: true }, 3)), { linkedin: PRICES.linkedin }, 'tylko profil LinkedIn');
+  assert.deepEqual(m(done('pack3', { interview: true, sim: true, linkedin: true }, 3)), {}, 'nic do dokupienia');
+  assert.deepEqual(upsellPlan(done('cv'), 'linkedin'), { key: 'linkedin', name: 'Profil LinkedIn', pkg: 'cv', addons: { linkedin: true }, includes: ['linkedin'], price: PRICES.linkedin });
   assert.deepEqual(m({ ...done('cv'), status: 'pending' }), {}, 'tylko gotowe zamówienia');
   assert.deepEqual(m({ ...done('cv'), upsellOf: 'x' }), {}, 'nie do dodatku');
   assert.deepEqual(upsellPlan(done('cv'), 'bundle'), { key: 'bundle', name: 'Pakiet „Pewna rozmowa”', pkg: 'cv_letter', addons: { interview: true, sim: true }, includes: ['letter', 'interview', 'sim'], price: m(done('cv')).bundle });
@@ -42,8 +44,8 @@ test('Dodatki po zakupie: osobna płatność, po opłaceniu dodatek dopisany i w
     await post(`/api/orders/${r.j.id}/demo-pay`);
     let o = await until(r.j.id, (x) => x.status === 'done');
     assert.equal(o.status, 'done'); assert.equal(o.results[0].letter || '', '');
-    assert.deepEqual(o.upsells.map((x) => [x.key, x.price]), [['letter', 10], ['interview', 50], ['sim', 29], ['bundle', 70]]);
-    assert.equal((await post(`/api/orders/${r.j.id}/upsell`, { key: 'linkedin' })).status, 400);
+    assert.deepEqual(o.upsells.map((x) => [x.key, x.price]), [['letter', 10], ['interview', 50], ['sim', 29], ['bundle', 70], ['linkedin', 19]]);
+    assert.equal((await post(`/api/orders/${r.j.id}/upsell`, { key: 'docx' })).status, 400, 'tylko dodatki z listy');
     // Oczekujący „symulator” utworzony, gdy pakiet był jeszcze bez listu – opłacony później nie może cofnąć pakietu.
     const early = await post(`/api/orders/${r.j.id}/upsell`, { key: 'sim' });
     const u = await post(`/api/orders/${r.j.id}/upsell`, { key: 'letter' });
@@ -54,14 +56,23 @@ test('Dodatki po zakupie: osobna płatność, po opłaceniu dodatek dopisany i w
     await post(`/api/orders/${u.j.id}/demo-pay`);
     o = await until(r.j.id, (x) => x.pkg === 'cv_letter' && !x.upsellBusy);
     assert.equal(o.pkg, 'cv_letter'); assert.ok(o.results[0].letter.length > 100, 'list wygenerowany w tym zamówieniu');
-    assert.deepEqual(o.upsells.map((x) => [x.key, x.price]), [['interview', 50], ['sim', 29], ['bundle', 60]]);
+    assert.deepEqual(o.upsells.map((x) => [x.key, x.price]), [['interview', 50], ['sim', 29], ['bundle', 60], ['linkedin', 19]]);
     assert.equal((await get(u.j.id)).status, 'done');
     const s = await post(`/api/orders/${r.j.id}/upsell`, { key: 'sim' });
     assert.notEqual(s.j.id, early.j.id, 'stara próba z innym pakietem nie jest używana ponownie (inna cena)');
     await post(`/api/orders/${early.j.id}/demo-pay`); // opłacona stara próba
     o = await until(r.j.id, (x) => x.addons.sim);
     assert.equal(o.addons.sim, true); assert.equal(o.pkg, 'cv_letter', 'pakiet nie jest obniżany'); assert.ok(o.results[0].letter.length > 100, 'list zostaje');
-    assert.deepEqual(o.upsells.map((x) => x.key), ['interview']);
+    assert.deepEqual(o.upsells.map((x) => x.key), ['interview', 'linkedin']);
     assert.equal(o.upsells[0].price, zl(PRICES.interview - BUNDLE_OFF));
+    // Profil LinkedIn dokupiony po zakupie: generowany do gotowego CV (CV i list bez zmian), w limitach LinkedIna.
+    const cvBefore = JSON.stringify(o.results[0].cv), li = await post(`/api/orders/${r.j.id}/upsell`, { key: 'linkedin' });
+    assert.equal((await get(li.j.id)).total, PRICES.linkedin);
+    await post(`/api/orders/${li.j.id}/demo-pay`);
+    o = await until(r.j.id, (x) => x.addons.linkedin && x.results[0].linkedin && !x.upsellBusy);
+    const L = o.results[0].linkedin;
+    assert.ok(L.headline && L.headline.length <= 220 && L.about.length <= 2600 && L.skills.length <= 15 && L.experience.length <= 3, 'profil w limitach');
+    assert.equal(JSON.stringify(o.results[0].cv), cvBefore, 'CV bez zmian'); assert.ok(o.results[0].letter.length > 100, 'list zostaje');
+    assert.deepEqual(o.upsells.map((x) => x.key), ['interview'], 'LinkedIn znika z ofert po zakupie');
   } finally { srv.kill(); }
 });

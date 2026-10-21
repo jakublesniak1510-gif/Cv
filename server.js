@@ -12,7 +12,7 @@ import { wizardDraftRoutes, wizardDraftsHourly, draftOrdered, draftPaid } from '
 import { offerRoutes, feedSources } from './lib/jobfeed.js';
 import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUNDLE_OFF, withLetter as hasLetter, upsellOffers, upsellPlan } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads } from './lib/store.js';
-import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
+import { generateForAd, generateLinkedin, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
 import { checkResult, hasCritical, recordQa, QA_LABELS } from './lib/qa.js';
 import { renderCv } from './lib/pdf.js';
@@ -272,7 +272,8 @@ const creditUsedFor = (c, full, total) => (c.credit ? Math.max(0, Math.min(c.cre
 const discountFor = (c, pkg, n, ad, returning, langs) => c.voucher ? (PRICES[pkg] <= PRICES[c.voucher] ? 'voucher' : PRICES[c.voucher]) : (c.percent ? Math.round((calcTotal(pkg, n, ad, returning, langs, 0) * c.percent) / 100) : c.discount || 0);
 const discountGr = (disc, pkg) => (disc === 'voucher' ? PRICES[pkg] : disc); // do zapisu w zamówieniu (grosze)
 const newCode = (prefix) => `${prefix}-${crypto.randomBytes(4).toString('hex').toUpperCase().slice(0, 6)}`;
-const cleanAddons = (a = {}) => Object.fromEntries(Object.keys(ADDONS).map((k) => [k, !!a[k]]));
+// linkedinEn: bezpłatna opcja dodatku „Profil LinkedIn” (profil także po angielsku), tylko razem z nim.
+const cleanAddons = (a = {}) => ({ ...Object.fromEntries(Object.keys(ADDONS).map((k) => [k, !!a[k]])), ...(a.linkedin && a.linkedinEn ? { linkedinEn: true } : {}) });
 // Edytowane przez klienta CV: ten sam kształt co z generatora, przycięte długości.
 const cleanCv = (c = {}) => ({
   name: str(c.name, 100), headline: str(c.headline, 140), contact: arr(c.contact, 6).map((x) => str(x, 200)).filter(Boolean),
@@ -766,7 +767,7 @@ async function applyUpsell(o) {
     if (paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: o.id }));
     countEvent('upsell_paid').catch(() => {});
   }
-  const u = o.upsell, letter = hasLetter(u.pkg) && !hasLetter(p.pkg), interview = !!u.addons.interview && !p.addons?.interview;
+  const u = o.upsell, letter = hasLetter(u.pkg) && !hasLetter(p.pkg), interview = !!u.addons.interview && !p.addons?.interview, linkedin = !!u.addons.linkedin && !p.addons?.linkedin;
   // Generujemy tylko nowe części; tłumaczymy też tylko je (CV w innych językach zostaje bez zmian).
   const parts = (letter || interview) ? await Promise.all(p.ads.map(async (ad, i) => {
     const r = await generateForAd({ profile: p.profile, ad, withLetter: hasLetter(u.pkg), addons: u.addons });
@@ -775,11 +776,17 @@ async function applyUpsell(o) {
     for (const l of langs) { const t = await translateResult({ lang: r.lang, cv: { name: p.results[i].cv?.name || '' }, ...add }, l); tr[l] = Object.fromEntries(Object.keys(add).map((k) => [k, t[k]])); }
     return { add, tr };
   })) : [];
+  // Profil LinkedIn dokupiony po zakupie: tylko profil, na podstawie gotowego CV (bez generowania CV od nowa).
+  if (linkedin) await Promise.all(p.ads.map(async (ad, i) => {
+    const r = p.results?.[i]; if (!r) return;
+    const li = await generateLinkedin({ profile: p.profile, ad, result: r, lang: r.lang });
+    parts[i] = { add: { ...(parts[i]?.add || {}), linkedin: li }, tr: parts[i]?.tr || {} };
+  }));
   // Scalanie na aktualnym stanie zamówienia (poprawki klienta i równoległy drugi dodatek zostają); pakietu nigdy nie obniżamy.
   const next = await updateOrder(p.id, (x) => ({ ...x, pkg: hasLetter(x.pkg) ? x.pkg : u.pkg, addons: { ...x.addons, ...u.addons },
-    results: parts.length ? (x.results || []).map((r, i) => (parts[i] ? { ...r, ...parts[i].add, ...(r.variants ? { variants: Object.fromEntries(Object.entries(r.variants).map(([l, v]) => [l, { ...v, ...(parts[i].tr[l] || {}) }])) } : {}) } : r)) : x.results }));
+    results: parts.some(Boolean) ? (x.results || []).map((r, i) => (parts[i] ? { ...r, ...parts[i].add, ...(r.variants ? { variants: Object.fromEntries(Object.entries(r.variants).map(([l, v]) => [l, { ...v, ...(parts[i].tr[l] || {}) }])) } : {}) } : r)) : x.results }));
   await updateOrder(o.id, { status: 'done' });
-  if (letter || interview) trySend({ ...next, myCode: next.myCode }).then((mail) => updateOrder(p.id, { mail })).catch((e) => logEvent('e-mail', `Dodatek: ${e.message}`, { orderId: p.id }));
+  if (letter || interview || linkedin) trySend({ ...next, myCode: next.myCode }).then((mail) => updateOrder(p.id, { mail })).catch((e) => logEvent('e-mail', `Dodatek: ${e.message}`, { orderId: p.id }));
 }
 
 // Faktura bez VAT na życzenie klienta: numer, PDF w e-mailu i na stronie dokumentów (wyłączane w panelu → Ustawienia).
@@ -796,7 +803,7 @@ async function autoInvoice(o, { force = false } = {}) {
 const crit = (qa) => qa.flags.filter((f) => f.level === 'critical').length;
 async function qaOf(r, o, ad, withLetter) {
   let pages = null; try { pages = (await renderCv(r, o.design, o.profile?.photo)).pages; } catch {}
-  try { return checkResult(r, { profile: o.profile, ad, withLetter, pages }); } catch (e) { logEvent('generowanie', `Kontrola jakości: ${e.message}`); return { score: null, flags: [] }; }
+  try { return checkResult(r, { profile: o.profile, ad, withLetter, pages, linkedin: !!o.addons?.linkedin }); } catch (e) { logEvent('generowanie', `Kontrola jakości: ${e.message}`); return { score: null, flags: [] }; }
 }
 // Dalej źle po ponownej generacji: alert do właściciela bez treści CV – tylko id zamówienia i kody flag (osobny limit: raz na godzinę).
 let lastQaAlert = 0;
