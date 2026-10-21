@@ -101,10 +101,40 @@ test('Przypomnienie o follow-up: tylko ustawione, od 8:00 w wybranym dniu, raz; 
   });
 });
 
+test('Dwa przypomnienia jednego konta w tym samym przebiegu: ten sam token, wypis z pierwszego e-maila działa', async () => {
+  await withApp('two@x.test', async ({ U, call }) => {
+    await call('');
+    for (const c of ['Lidl', 'Żabka']) await call('/apps', { method: 'POST', body: JSON.stringify({ company: c, applied: '2026-10-10', followAt: '2026-10-17', status: 'wysłane' }) });
+    const links = [];
+    assert.equal(await A.followupHourly(BASE, Date.parse('2026-10-17T09:00:00Z'), async (_e, _p, _d, l) => links.push(l.unsub)), 2);
+    assert.equal(links.length, 2); assert.equal(links[0], links[1], 'ten sam link wypisu w obu e-mailach');
+    const t = new URL(links[0]).searchParams.get('t');
+    await fetch(`${U}/konto/przypomnienia/wypisz?t=${t}`, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'List-Unsubscribe=One-Click' });
+    assert.equal((await call('')).j.followOff, true, 'wypis z pierwszego e-maila ustawia followOff');
+  });
+});
+
+test('orderId i resultIndex tylko od serwera: cudze zamówienie nie jest podpinane, PUT nie zmienia powiązania', async () => {
+  await saveOrder({ id: 'cudze', status: 'done', created: Date.now(), profile: { email: 'inny@x.test' }, ads: [], results: [] });
+  await saveOrder({ id: 'moje', status: 'done', created: Date.now(), profile: { email: 'own@x.test' }, ads: [], results: [] });
+  await withApp('own@x.test', async ({ call }) => {
+    await call('');
+    const x = (await call('/apps', { method: 'POST', body: JSON.stringify({ company: 'A', orderId: 'cudze', resultIndex: 0 }) })).j;
+    assert.equal(x.orderId, null); assert.equal(x.resultIndex, null);
+    const y = (await call('/apps', { method: 'POST', body: JSON.stringify({ company: 'B', orderId: 'moje', resultIndex: 0 }) })).j;
+    assert.equal(y.orderId, 'moje');
+    const z = (await call(`/apps/${y.id}`, { method: 'PUT', body: JSON.stringify({ orderId: 'cudze', resultIndex: 5 }) })).j;
+    assert.equal(z.orderId, 'moje'); assert.equal(z.resultIndex, 0);
+  });
+});
+
 test('E-mail follow-up i polityka prywatności', async () => {
   const { sendFollowupReminder } = await import('../lib/mail.js');
   const m = JSON.parse((await sendFollowupReminder('k@x.test', { company: 'Lidl', position: 'Magazynier' }, 7, { account: `${BASE}/konto`, unsub: `${BASE}/konto/przypomnienia/wypisz?t=abc` })).message);
   assert.equal(m.subject, 'Minęło 7 dni od wysłania CV do Lidl – czas na follow-up?');
+  assert.doesNotMatch(m.text + m.html, /ustawiłeś/); assert.match(m.text, /przypomnienie, które ustawiono na koncie/);
+  const bad = JSON.parse((await sendFollowupReminder('k@x.test', { company: 'Firma\r\nBcc: x@y.z' }, 3, { account: 'a', unsub: 'u' })).message);
+  assert.doesNotMatch(bad.subject, /[\r\n]/);
   assert.ok(m.text.includes('/konto/przypomnienia/wypisz?t=abc')); assert.equal(m.list.unsubscribe.url, `${BASE}/konto/przypomnienia/wypisz?t=abc`);
   const pp = read('public/legal/prywatnosc.html');
   for (const t of ['przypomnienie o follow-up w wybranym przez Ciebie dniu', 'Follow-up-Erinnerung an einem von Ihnen gewählten Tag', 'a follow-up reminder on a day you choose', 'нагадування про follow-up у вибраний вами день', 'rozszerzono listę aplikacji na koncie', 'Bewerbungsliste im Konto erweitert', 'extended the list of applications', 'розширено список заявок']) assert.ok(pp.includes(t), t);
