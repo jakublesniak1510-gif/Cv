@@ -1446,5 +1446,7 @@
 "Nie udało się wysłać linku.": "Could not send the link.",
 "Nie udało się wczytać szkicu.": "Could not load the draft.",
 "Wczytaliśmy zapisany szkic. Możesz dokończyć zamówienie.": "We've loaded your saved draft. You can finish your order.",
-"Link do szkicu wygasł (szkice przechowujemy 7 dni). Wypełnij formularz od nowa.": "The draft link has expired (we keep drafts for 7 days). Please fill in the form again."
+"Link do szkicu wygasł (szkice przechowujemy 7 dni). Wypełnij formularz od nowa.": "The draft link has expired (we keep drafts for 7 days). Please fill in the form again.",
+"Dla instytucji": "For institutions",
+"Dla instytucji i firm": "For institutions and companies"
 }
