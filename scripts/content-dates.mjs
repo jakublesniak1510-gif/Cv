@@ -12,7 +12,9 @@ const day = (t) => new Date(t * 1000).toISOString().slice(0, 10);
 const today = day(Math.floor(Date.now() / 1000));
 // Czas commita każdej linii (linie niezatwierdzone → dziś).
 function lineTimes(file) {
-  const out = execFileSync('git', ['blame', '--line-porcelain', '--', file], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 28 });
+  let out;
+  try { out = execFileSync('git', ['blame', '--line-porcelain', '--', file], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 28, stdio: ['ignore', 'pipe', 'ignore'] }); }
+  catch { return fs.readFileSync(path.join(ROOT, file), 'utf8').split('\n').map(() => null); } // plik jeszcze nie w gicie
   const times = []; let t = 0, uncommitted = false;
   for (const l of out.split('\n')) {
     if (/^[0-9a-f]{40} /.test(l)) uncommitted = l.startsWith('0000000000000000000000000000000000000000');
