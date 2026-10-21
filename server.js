@@ -43,6 +43,7 @@ import { adminRoutes, isAdmin } from './lib/admin.js';
 import { accountRoutes, accountHourly } from './lib/account.js';
 import { templateRoutes } from './lib/templates.js';
 import { abroadRoutes } from './lib/abroad.js';
+import { officialRoutes } from './lib/official.js';
 import { employerRoutes } from './lib/employers.js';
 import { fairRoutes } from './lib/fairs.js';
 import { previewRoutes, previewFor, cleanupPreviews } from './lib/preview.js';
@@ -187,6 +188,7 @@ b2bRoutes(app, {
 seoRoutes(app, BASE_URL);
 templateRoutes(app, BASE_URL);
 abroadRoutes(app, BASE_URL);
+officialRoutes(app, BASE_URL);
 employerRoutes(app, BASE_URL);
 // Stary adres oferty dla instytucji (z ulotek i wyszukiwarek) → strona dla firm i instytucji.
 app.get('/dla-instytucji', (_req, res) => res.redirect(301, '/dla-firm'));
