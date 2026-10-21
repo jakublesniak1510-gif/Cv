@@ -944,3 +944,4 @@ details>summary{min-height:44px;padding-block:11px;box-sizing:border-box}
 @media(max-width:560px){.author-head{flex-direction:column;align-items:flex-start}.author-photo{width:88px;height:88px;font-size:30px}}
 .tpl-img,.prof-img{margin:16px 0}.tpl-img img,.prof-img img{display:block;max-width:100%;height:auto;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow)}
 .tpl-img img{width:min(560px,100%)}.prof-img img{width:min(320px,100%)}
+.reqs dt{font-weight:700;margin-top:12px}.reqs dd{margin:4px 0 0;color:var(--mute)}.phrases li{margin-bottom:6px}
