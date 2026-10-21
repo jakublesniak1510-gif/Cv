@@ -17,7 +17,8 @@ test('Przed i po: procent w sekcji = wynik skanera dla tych tekstów, etykieta �
       const h = await (await fetch(U + p)).text(), sec = /<section class="sec" id="przed-po">[\s\S]*?<\/section>/.exec(h)?.[0];
       assert.ok(sec, `${p}: sekcja`);
       if (p !== '/') continue;
-      assert.ok(h.indexOf('id="jak"') < h.indexOf('id="przed-po"'), 'pod „Jak to działa”');
+      assert.ok(h.indexOf('id="top"') < h.indexOf('id="przed-po"') && h.indexOf('id="przed-po"') < h.indexOf('id="skaner"'), 'druga sekcja: pod hero, przed skanerem');
+      assert.match(sec, /nie gwarancja zaproszenia na rozmowę/);
       assert.match(sec, /Przykład – dane fikcyjne/);
       const s = baScores();
       for (const side of ['before', 'after']) {
@@ -34,7 +35,7 @@ test('Przed i po: procent w sekcji = wynik skanera dla tych tekstów, etykieta �
       for (const k of ['UDT', 'skaner', 'zmianow', 'e-commerce']) assert.match(after, new RegExp(`<mark>[^<]*${k}`), `po: zaznaczone ${k}`);
       assert.match(sec, /<button class="btn" data-open><span>Zrób takie CV pod swoje ogłoszenie – od<\/span> 39 zł<\/button>/);
       assert.match(sec, /href="\/narzedzia\/skaner-cv">Sprawdź za darmo, ile pasujesz/);
-      assert.doesNotMatch(sec, /gwarant|zatrudnienie gwar|na pewno dostaniesz/i, 'bez obietnic zatrudnienia');
+      assert.doesNotMatch(sec, /gwarantuj|zapewniamy|na pewno dostaniesz/i, 'bez obietnic zatrudnienia');
       assert.match(sec, /role="tablist"[\s\S]*Przed[\s\S]*Po/, 'przełącznik na telefonie');
     }
   } finally { srv.close(); }

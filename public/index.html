@@ -51,8 +51,9 @@
   <div>
     <p class="eyebrow">CV i listy motywacyjne na zamówienie</p>
     <h1>Jedno ogłoszenie. Jedno CV pisane właśnie pod nie.</h1>
-    <p class="lead">Podajesz swoje doświadczenie raz. Wklejasz ogłoszenia, a my przygotowujemy osobne CV i list dla każdego stanowiska, z tymi słowami kluczowymi, których szuka rekruter.</p>
+    <p class="lead">Wklejasz ogłoszenie i swoje doświadczenie – dostajesz CV i list ze słowami, których szuka rekruter.</p>
     <div class="cta"><button class="btn lg" data-open>Zamów CV od 39 zł</button><button class="btn ghost lg" data-example>Zobacz przykład</button></div>
+    <p class="hero-micro">Gotowe w kilka minut · BLIK lub karta · bez subskrypcji</p>
     <a class="hero-rating" id="heroRating" href="#opinie" hidden></a>
     <p class="counter" id="cvCounter" hidden></p>
     <ul class="ticks"><li>Raport dopasowania do ogłoszenia</li><li>Darmowa poprawka</li><li>Dane usuwane po 30 dniach</li></ul>
@@ -65,6 +66,8 @@
     <div class="demo-cv"><div class="tagline">2 · Dostajesz CV pisane pod nie</div><div class="hero-thumb" id="heroThumb"></div></div>
   </div>
 </div></section>
+
+<!--przed-po-->
 
 <section class="sec scan" id="skaner"><div class="inner scan-grid">
   <div>
@@ -100,7 +103,7 @@
     <li><b>Klikasz „Zamów”</b><span>Otwiera się krótki kreator. Nic nie wypełniasz na tej stronie.</span></li>
     <li><b>Opisujesz siebie</b><span>Dane kontaktowe, doświadczenie, szkoły i umiejętności. Raz.</span></li>
     <li><b>Wklejasz link</b><span>Do ogłoszenia (lub kilku). Gdy link się nie uda, wklejasz treść sam.</span></li>
-    <li><b>Płacisz i pobierasz</b><span>Osobne CV i list dla każdego ogłoszenia. PDF trafia też na Twój e-mail.</span></li>
+    <li><b>Płacisz i pobierasz</b><span>Osobne CV i list dla każdego ogłoszenia. PDF trafia też na Twój e-mail.</span><span>W cenie: PDF. Wersja Word (.docx): +9 zł.</span></li>
   </ol>
   <p class="more-link"><a href="/jak-to-dziala" data-page="jak-to-dziala">Zobacz cały proces na przykładzie →</a></p>
 </div></section>
@@ -108,7 +111,7 @@
 <section class="sec trust" id="gwarancja"><div class="inner">
   <div class="trust-grid">
     <div><span class="ti" aria-hidden="true">↺</span><b>Darmowa poprawka</b><p>Jeśli CV albo list nie pasuje do ogłoszenia, opisujesz, co zmienić, a poprawiona wersja jest gotowa w minutę. Bez dopłaty.</p></div>
-    <div><span class="ti" aria-hidden="true">%</span><b>Raport dopasowania</b><p>Przy każdym CV widzisz, które wymagania z ogłoszenia spełniasz i czego brakuje. Masz to, a zapomniałeś wpisać? Dopiszesz jednym kliknięciem.</p></div>
+    <div><span class="ti" aria-hidden="true">%</span><b>Raport dopasowania</b><p>Przy każdym CV widzisz, które wymagania z ogłoszenia spełniasz i czego brakuje. Masz to, a nie ma tego w CV? Dopiszesz jednym kliknięciem.</p></div>
     <div><span class="ti" aria-hidden="true">30</span><b>Dane usuwane po 30 dniach</b><p>Zamówienie, w tym zdjęcie i treść CV, kasujemy automatycznie po 30 dniach. Plik ze starym CV nie jest zapisywany.</p></div>
   </div>
 </div></section>
@@ -119,9 +122,9 @@
   <p class="sub2 small">Opinie wystawiają wyłącznie osoby, które kupiły dokumenty, na stronie swojego zamówienia. Średnia obejmuje wszystkie oceny.</p>
 </div></section>
 
-<!--przed-po-->
 
 <section class="sec alt" id="przyklad"><div class="inner">
+  <p class="eyebrow">Zobacz więcej przykładów</p>
   <h2>To samo doświadczenie, trzy różne CV</h2>
   <p class="sub2">Jedna osoba aplikuje na trzy stanowiska. Zmienia się nagłówek, profil, kolejność umiejętności i punktów w opisie pracy. Żółte są słowa z ogłoszenia. Niczego nie dopisujemy, czego nie podałeś.</p>
   <div class="seg" id="exTabs" role="tablist" aria-label="Przykładowe ogłoszenia"></div>
@@ -541,7 +544,7 @@
     </section>
     <section data-step="5" hidden>
       <p class="hint">Dla <b>każdego</b> ogłoszenia powstanie osobne CV. Wklej link, wgraj zdjęcie ogłoszenia albo wklej jego treść.</p>
-      <div class="note"><b>Ważne:</b> jeśli strona nie przetworzy ogłoszenia z linku (np. serwis blokuje pobieranie), <b>musisz wkleić treść ogłoszenia samodzielnie</b>. Bez treści nie przejdziesz do płatności.</div>
+      <p class="hint">Jeśli link się nie wczyta, wklej treść ogłoszenia – zajmie to chwilę.</p>
       <div id="ads"></div><button type="button" class="btn ghost sm" id="addAd">+ Dodaj ogłoszenie (w pakiecie do 3)</button>
       <p class="note" id="packTip" hidden>Masz więcej ogłoszeń w tym samym zawodzie? <button type="button" class="link" id="toPack">Wybierz Pakiet 3 za 79 zł</button>: trzy CV i list do każdego.</p>
     </section>
@@ -549,9 +552,6 @@
       <div id="sum"></div>
       <div id="pvBox" class="pv" hidden><div class="pv-head"><b>Zobacz za darmo początek swojego CV</b><p class="hint">Pokażemy nagłówek, podsumowanie zawodowe i 5 słów kluczowych z ogłoszenia, które znajdą się w CV. W tym celu Twoje dane i ogłoszenie trafią do dostawcy AI, tak jak przy zamówieniu.</p><button class="btn ghost sm" type="button" id="pvBtn">Pokaż podgląd</button></div><div id="pvOut" aria-live="polite"></div></div>
       <div class="codebox"><label class="f">Kod rabatowy<span class="urlrow"><input type="text" id="codeInput" autocomplete="off" placeholder="np. KOD-AB12CD"><button type="button" class="btn ghost sm" id="codeApply">Zastosuj</button></span></label><p class="fstatus" id="codeMsg" role="status"></p></div>
-      <label class="check"><input type="checkbox" id="createAccount"> <span><b>Załóż darmowe konto</b> na ten e-mail (opcjonalnie): wszystkie zamówienia w jednym miejscu i lista aplikacji z przypomnieniem przed rozmową. Możesz też kupić bez konta.</span></label>
-      <label class="check"><input type="checkbox" id="reviewAsk"> <span>Poproś mnie raz o ocenę dokumentów (jeden e-mail po 4 dniach, opcjonalnie).</span></label>
-      <label class="check"><input type="checkbox" id="payRem"> <span>Jeśli nie dokończę płatności, przypomnijcie mi raz e-mailem (opcjonalnie).</span></label>
       <label class="check"><input type="checkbox" id="wantInv"> <span>Potrzebuję faktury (bez VAT – sprzedawca jest zwolniony z VAT).</span></label>
       <div class="invbox" id="invBox" hidden>
        <label class="f">Nazwa firmy albo imię i nazwisko<input type="text" id="invName" maxlength="200" autocomplete="organization"></label>
@@ -559,17 +559,22 @@
        <label class="f">NIP (pomiń, jeśli kupujesz prywatnie)<input type="text" id="invNip" maxlength="16" inputmode="numeric" placeholder="np. 1234563218"></label>
        <p class="hint">Fakturę wyślemy na e-mail podany w zamówieniu.</p>
       </div>
+      <details class="optbox" id="optMail"><summary>Powiadomienia e-mail (opcjonalnie)</summary>
+      <label class="check"><input type="checkbox" id="createAccount"> <span><b>Załóż darmowe konto</b> na ten e-mail (opcjonalnie): wszystkie zamówienia w jednym miejscu i lista aplikacji z przypomnieniem przed rozmową. Możesz też kupić bez konta.</span></label>
+      <label class="check"><input type="checkbox" id="reviewAsk"> <span>Poproś mnie raz o ocenę dokumentów (jeden e-mail po 4 dniach, opcjonalnie).</span></label>
+      <label class="check"><input type="checkbox" id="payRem"> <span>Jeśli nie dokończę płatności, przypomnijcie mi raz e-mailem (opcjonalnie).</span></label>
       <label class="check"><input type="checkbox" id="reminder"> <span>Przypomnij mi raz po 7 dniach o możliwości zamówienia CV pod kolejne ogłoszenie (opcjonalnie, jedna wiadomość e-mail).</span></label>
-      <label class="check"><input type="checkbox" id="wantAlerts"> <span><b>Oferty pracy na e-mail:</b> wysyłaj mi co poniedziałek linki do nowych ofert w moim zawodzie i mieście (za darmo, przez 12 tygodni, opcjonalnie).</span></label>
+      <label class="check"><input type="checkbox" id="wantAlerts"> <span><b>Oferty pracy na e-mail:</b> wysyłaj mi raz w tygodniu linki do nowych ofert w moim zawodzie i mieście (za darmo, przez 12 tygodni, opcjonalnie).</span></label>
       <div class="invbox" id="alertBox" hidden>
        <label class="f">Zawód lub stanowisko<input type="text" id="alJob" maxlength="60" placeholder="np. magazynier"></label>
        <label class="f">Miasto<input type="text" id="alCity" maxlength="40" placeholder="np. Zielona Góra (opcjonalnie)"></label>
        <p class="hint">Linki do Pracuj.pl, OLX i Indeed przyjdą na e-mail z zamówienia. Wypiszesz się jednym kliknięciem w każdej wiadomości.</p>
       </div>
       <label class="check"><input type="checkbox" id="followUp"> <span>Zapytajcie mnie raz po miesiącu, jak poszła rekrutacja (jeden e-mail z kodem rabatowym na kolejne CV, opcjonalnie).</span></label>
+      </details>
       <p class="perk small">Po opłaceniu dostaniesz <b>swój kod −10 zł</b> (ważny 90 dni): na kolejne zamówienie dla Ciebie i dla Twoich znajomych.</p>
       <p class="hint trust-mini">W cenie: raport dopasowania, darmowa poprawka i edycja tekstu. Dane usuwamy automatycznie po 30 dniach.</p>
-      <label class="check"><input type="checkbox" id="consent"> <span>Akceptuję <a href="/regulamin" target="_blank" rel="noopener">Regulamin</a> i zapoznałem/am się z <a href="/polityka-prywatnosci" target="_blank" rel="noopener">Polityką prywatności</a>. Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów.</span></label>
+      <label class="check"><input type="checkbox" id="consent"> <span>Akceptuję <a href="/regulamin" target="_blank" rel="noopener">Regulamin</a> i <a href="/polityka-prywatnosci" target="_blank" rel="noopener">Politykę prywatności</a>. Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów.</span></label>
       <label class="check"><input type="checkbox" id="waiver"> <span>Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.</span></label>
     </section>
     <section data-step="7" hidden>
@@ -578,7 +583,7 @@
     </section>
     <div class="err" id="werr" role="alert"></div>
    </div>
-   <div class="wiz-foot"><button type="button" class="btn ghost" id="back">Wstecz</button><div class="tot">Razem <strong id="total">49 zł</strong><small id="brk"></small></div><button type="submit" class="btn" id="next">Dalej</button></div>
+   <div class="wiz-foot"><button type="button" class="btn ghost" id="back">Wstecz</button><div class="tot">Razem <strong id="total">49 zł</strong><small id="brk"></small></div><button type="submit" class="btn" id="next">Dalej</button><p class="paytrust" id="payTrust" hidden></p></div>
   </form>
  </div>
 </div>
@@ -642,6 +647,6 @@
   <form class="chat-form" id="chatForm"><input type="text" id="chatInput" maxlength="1000" placeholder="Np. jak opisać przerwę w pracy?" aria-label="Twoje pytanie" autocomplete="off"><button class="btn sm" type="submit">Wyślij</button></form>
 </div>
 <p class="offline" id="offline" role="status" hidden>Brak internetu – widzisz zapisaną wersję strony. Zamówienie i płatność zadziałają po połączeniu.</p>
-<script src="/consent.js"></script>
-<script src="/app.js"></script>
+<script src="/consent.js" defer></script>
+<script src="/app.js" defer></script>
 </body></html>

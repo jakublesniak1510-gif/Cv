@@ -16,8 +16,8 @@ test('Strony zawodów: przycisk „Zrób CV pod ogłoszenie – od 39 zł” po 
   const app = express(); seoRoutes(app, 'https://example.test'); passRoutes(app, { BASE_URL: 'https://example.test' });
   const srv = app.listen(0), U = `http://127.0.0.1:${srv.address().port}`, get = async (p) => (await fetch(U + p)).text();
   try {
-    const pages = { pl: ['/cv/kasjer', '/?zamow=1', 'Zrób CV pod ogłoszenie – od 39 zł'] };
-    for (const [l, txt] of [['en', 'from 39 zł'], ['uk', 'від 39 zł'], ['de', 'ab 39 zł']]) pages[l] = [`/${l}/${PROF_LANGS[l].seg}/${PROF_LANGS[l].prof.kasjer.slugLang}`, `/${l}?zamow=1`, txt];
+    const pages = { pl: ['/cv/kasjer', '/?zamow=1&amp;zawod=kasjer', 'Zrób CV pod ogłoszenie – od 39 zł'] };
+    for (const [l, txt] of [['en', 'from 39 zł'], ['uk', 'від 39 zł'], ['de', 'ab 39 zł']]) pages[l] = [`/${l}/${PROF_LANGS[l].seg}/${PROF_LANGS[l].prof.kasjer.slugLang}`, `/${l}?zamow=1&amp;zawod=kasjer`, txt];
     for (const [l, [url, href, txt]] of Object.entries(pages)) {
       const h = await get(url), ctas = [...h.matchAll(/<p class="prof-cta"><a class="btn" href="([^"]+)">([^<]+)<\/a><\/p>/g)];
       assert.equal(ctas.length, 2, `${l}: dwa przyciski`);
@@ -35,7 +35,7 @@ test('Lekkie strony: lite.js pokazuje pasek „Zacznij” po przewinięciu; krea
   assert.match(lite, /#mcta[\s\S]*scrollY > 500[\s\S]*mcta-on/);
   assert.match(css, /\.wiz\{padding-bottom:calc\(16px \+ var\(--consent-h,0px\)\)\}/);
   assert.match(css, /@media\(max-width:640px\)\{\.wiz\{padding:0 0 var\(--consent-h,0px\)\}\}/);
-  assert.match(css, /body:has\(\.wiz:not\(\[hidden\]\)\) \.consent\{/);
+  assert.match(css, /body:has\(\.wiz:not\(\[hidden\]\)\) \.consent p span\{display:none\}/);
   assert.match(consent, /--consent-h/); assert.match(consent, /removeProperty\('--consent-h'\)/);
   assert.match(consent, /data-c="denied"/, 'wybór „Tylko niezbędne” zostaje (bez wymuszania zgody)');
 });

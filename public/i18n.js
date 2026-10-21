@@ -79,7 +79,8 @@
     };
     document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', go) : go();
   };
+  // Adres z wersją (__I18N_V) jest ten sam co <link rel=preload> z serwera, więc słownik zwykle jest już pobrany.
   if (window.__I18N_DICT?.[lang]) start(window.__I18N_DICT[lang]);
-  else I.ready = fetch(`/i18n/${lang}.json`).then((r) => r.json()).then(start).catch(() => html.classList.remove('i18n-wait'));
+  else I.ready = fetch(`/i18n/${lang}.json${window.__I18N_V ? `?v=${window.__I18N_V}` : ''}`).then((r) => r.json()).then(start).catch(() => html.classList.remove('i18n-wait'));
   setTimeout(() => html.classList.remove('i18n-wait'), 2500);
 })();
