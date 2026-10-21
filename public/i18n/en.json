@@ -493,7 +493,6 @@
 "12 pytań do tego ogłoszenia z przykładowymi odpowiedziami z Twojego doświadczenia, gotowe „Opowiedz o sobie”, pytania do pracodawcy, rozmowa o pieniądzach i lista kontrolna. PDF.": "12 questions for this job ad with sample answers from your experience, a ready “Tell me about yourself”, questions for the employer, the money talk and a checklist. PDF.",
 "Wiadomość do rekrutera": "Message to the recruiter",
 "Krótka wiadomość na LinkedIn i gotowy e-mail z aplikacją": "A short LinkedIn message and a ready application email",
-"Nagłówek, sekcja „Informacje”, 15 umiejętności i opisy stanowisk pod to ogłoszenie, do skopiowania": "Headline, “About” section, 15 skills and job descriptions for this job ad, ready to copy",
 "CV i list w edytowalnym pliku Word, gdy pracodawca prosi o .doc/.docx": "CV and letter as an editable Word file, for when the employer asks for .doc/.docx",
 "(+5 zł za każdy język, dla wszystkich ogłoszeń)": "(+5 PLN per language, for all job ads)",
 "polski": "Polish",
@@ -1499,9 +1498,10 @@
 "Powiązane": "Related",
 "Pracodawcy, którzy często szukają": "Employers who often hire",
 "Wzór CV i list": "CV and cover letter template",
-"Nagłówek (do 220 znaków), sekcja „Informacje” (do 2600 znaków), 10–15 umiejętności, opisy 3 stanowisk i wskazówki do profilu, w języku CV, do skopiowania": "Headline (up to 220 characters), “About” section (up to 2,600 characters), 10–15 skills, descriptions of 3 positions and profile tips, in the language of your CV, ready to copy",
 "Profil LinkedIn także po angielsku (bez dopłaty)": "LinkedIn profile also in English (no extra charge)",
-"Nagłówek, sekcja „Informacje”, 10–15 umiejętności i opisy stanowisk spójne z Twoim CV, do skopiowania na LinkedIn.": "Headline, “About” section, 10–15 skills and position descriptions consistent with your CV, ready to copy to LinkedIn.",
+"Nagłówek, sekcja „Informacje”, do 15 umiejętności i opisy stanowisk spójne z Twoim CV, do skopiowania na LinkedIn.": "Headline, “About” section, up to 15 skills and position descriptions consistent with your CV, ready to copy to LinkedIn.",
 "{0}/{1} znaków": "{0}/{1} characters",
-"Wersja angielska (English)": "English version"
+"Wersja angielska (English)": "English version",
+"Nagłówek (do 220 znaków), sekcja „Informacje” (do 2600 znaków), do 15 umiejętności, opisy do 3 stanowisk i wskazówki do profilu, w języku CV, do skopiowania": "Headline (up to 220 characters), “About” section (up to 2,600 characters), up to 15 skills, descriptions of up to 3 positions and profile tips, in the language of your CV, ready to copy",
+"LinkedIn jest znakiem towarowym LinkedIn Corp.; serwis nie jest z nim powiązany.": "LinkedIn is a trademark of LinkedIn Corp.; this service is not affiliated with it."
 }

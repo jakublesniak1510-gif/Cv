@@ -493,7 +493,6 @@
 "12 pytań do tego ogłoszenia z przykładowymi odpowiedziami z Twojego doświadczenia, gotowe „Opowiedz o sobie”, pytania do pracodawcy, rozmowa o pieniądzach i lista kontrolna. PDF.": "12 Fragen zu dieser Stellenanzeige mit Beispielantworten aus Ihrer Erfahrung, eine fertige Antwort auf „Erzählen Sie etwas über sich“, Fragen an den Arbeitgeber, das Gehaltsgespräch und eine Checkliste. PDF.",
 "Wiadomość do rekrutera": "Nachricht an den Recruiter",
 "Krótka wiadomość na LinkedIn i gotowy e-mail z aplikacją": "Eine kurze LinkedIn-Nachricht und eine fertige Bewerbungs-E-Mail",
-"Nagłówek, sekcja „Informacje”, 15 umiejętności i opisy stanowisk pod to ogłoszenie, do skopiowania": "Headline, Abschnitt „Info“, 15 Kenntnisse und Positionsbeschreibungen für diese Stellenanzeige, zum Kopieren",
 "CV i list w edytowalnym pliku Word, gdy pracodawca prosi o .doc/.docx": "Lebenslauf und Anschreiben als bearbeitbare Word-Datei, wenn der Arbeitgeber .doc/.docx verlangt",
 "(+5 zł za każdy język, dla wszystkich ogłoszeń)": "(+5 PLN pro Sprache, für alle Stellenanzeigen)",
 "polski": "Polnisch",
@@ -1499,9 +1498,10 @@
 "Powiązane": "Verwandte Themen",
 "Pracodawcy, którzy często szukają": "Arbeitgeber, die oft suchen",
 "Wzór CV i list": "Lebenslauf- und Anschreiben-Vorlage",
-"Nagłówek (do 220 znaków), sekcja „Informacje” (do 2600 znaków), 10–15 umiejętności, opisy 3 stanowisk i wskazówki do profilu, w języku CV, do skopiowania": "Überschrift (bis 220 Zeichen), Abschnitt „Info“ (bis 2.600 Zeichen), 10–15 Kenntnisse, Beschreibungen von 3 Stellen und Tipps zum Profil, in der Sprache des Lebenslaufs, zum Kopieren",
 "Profil LinkedIn także po angielsku (bez dopłaty)": "LinkedIn-Profil auch auf Englisch (ohne Aufpreis)",
-"Nagłówek, sekcja „Informacje”, 10–15 umiejętności i opisy stanowisk spójne z Twoim CV, do skopiowania na LinkedIn.": "Überschrift, Abschnitt „Info“, 10–15 Kenntnisse und Stellenbeschreibungen passend zu Ihrem Lebenslauf, zum Kopieren in LinkedIn.",
+"Nagłówek, sekcja „Informacje”, do 15 umiejętności i opisy stanowisk spójne z Twoim CV, do skopiowania na LinkedIn.": "Überschrift, Abschnitt „Info“, bis zu 15 Kenntnisse und Stellenbeschreibungen passend zu Ihrem Lebenslauf, zum Kopieren in LinkedIn.",
 "{0}/{1} znaków": "{0}/{1} Zeichen",
-"Wersja angielska (English)": "Englische Version (English)"
+"Wersja angielska (English)": "Englische Version (English)",
+"Nagłówek (do 220 znaków), sekcja „Informacje” (do 2600 znaków), do 15 umiejętności, opisy do 3 stanowisk i wskazówki do profilu, w języku CV, do skopiowania": "Überschrift (bis 220 Zeichen), Abschnitt „Info“ (bis 2.600 Zeichen), bis zu 15 Kenntnisse, Beschreibungen von bis zu 3 Stellen und Tipps zum Profil, in der Sprache des Lebenslaufs, zum Kopieren",
+"LinkedIn jest znakiem towarowym LinkedIn Corp.; serwis nie jest z nim powiązany.": "LinkedIn ist eine Marke der LinkedIn Corp.; dieser Dienst steht in keiner Verbindung zu ihr."
 }
