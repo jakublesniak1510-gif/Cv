@@ -51,7 +51,7 @@ test('Serwer (demo): 5 równoległych zamówień z kodem maxUses 1 → dokładni
     const U = `http://localhost:${port}`;
     for (let i = 0; i < 50; i++) { try { await fetch(U + '/api/config'); break; } catch { await wait(150); } }
     const ad = 'Szukamy magazyniera. Wymagania: obsługa wózka widłowego, doświadczenie w magazynie, sumienność i dokładność. '.repeat(2);
-    const order = (email, code) => fetch(U + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pkg: 'cv', consent: true, code, profile: { name: 'Test Osoba', email, experience: [{ title: 'Magazynier', company: 'X' }] }, ads: [{ title: 'Magazynier', text: ad }] }) }).then(async (r) => ({ status: r.status, j: await r.json() }));
+    const order = (email, code) => fetch(U + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pkg: 'cv', consent: true, waiver: true, code, profile: { name: 'Test Osoba', email, experience: [{ title: 'Magazynier', company: 'X' }] }, ads: [{ title: 'Magazynier', text: ad }] }) }).then(async (r) => ({ status: r.status, j: await r.json() }));
     const rs = await Promise.all([1, 2, 3, 4, 5].map((i) => order(`osoba${i}@x.pl`, 'INST1')));
     assert.equal(rs.filter((r) => r.status === 200 && r.j.free).length, 1, JSON.stringify(rs.map((r) => r.j.error || 'ok')));
     assert.ok(rs.filter((r) => r.status !== 200).every((r) => /Limit|wykorzystany/.test(r.j.error)));
@@ -82,7 +82,7 @@ test('Serwer (demo): samopolecenie bez nagrody (to samo IP co zamówienie właś
     for (let i = 0; i < 50; i++) { try { await fetch(U + '/api/config'); break; } catch { await wait(150); } }
     const ad = 'Szukamy magazyniera. Wymagania: obsługa wózka widłowego, doświadczenie w magazynie, sumienność i dokładność. '.repeat(2);
     const call = (p, body, ip) => fetch(U + p, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': ip }, body: JSON.stringify(body) }).then(async (r) => ({ status: r.status, j: await r.json().catch(() => ({})) }));
-    const order = (email, code, ip) => call('/api/orders', { pkg: 'cv', consent: true, code, profile: { name: `Osoba ${email}`, email, experience: [{ title: 'Magazynier', company: 'X' }] }, ads: [{ title: 'Magazynier', text: ad }] }, ip);
+    const order = (email, code, ip) => call('/api/orders', { pkg: 'cv', consent: true, waiver: true, code, profile: { name: `Osoba ${email}`, email, experience: [{ title: 'Magazynier', company: 'X' }] }, ads: [{ title: 'Magazynier', text: ad }] }, ip);
     const payDone = async (id, ip) => { await call(`/api/orders/${id}/demo-pay`, {}, ip); let o; for (let i = 0; i < 80; i++) { o = await (await fetch(`${U}/api/orders/${id}`)).json(); if (o.status === 'done') return o; await wait(150); } return o; };
     const code = () => JSON.parse(fs.readFileSync(path.join(dir, 'codes.json'), 'utf8'))['KOD-OWN2'];
 

@@ -46,7 +46,7 @@ const TPLS = [
   ['kompetencje', 'Kompetencje', 'Jasna kolumna z umiejętnościami i poziomem języków. Do IT, logistyki i pracy technicznej.'],
   ['wstega', 'Wstęga', 'Kolorowa wstęga u góry, zdjęcie na jej krawędzi i wyśrodkowane sekcje.'],
   ['lebenslauf', 'Lebenslauf', 'Niemiecki układ: dane osobowe w tabeli, zdjęcie, daty w kolumnie, miejsce, data i podpis. Do pracy w Niemczech i Austrii.'],
-  ['europass', 'Europass', 'Układ wzorowany na unijnym CV Europass, z tabelą języków. Do ofert z UE i pracy za granicą.'],
+  ['europass', 'W układzie Europass', 'Kolejność sekcji jak w CV Europass: języki z poziomami CEFR, umiejętności cyfrowe, prawo jazdy. Do projektów UE, uczelni i staży za granicą. To nie jest oficjalny dokument Europass.'],
 ];
 const LEGACY = { wyrazisty: 'geometria' };
 const COLORS = { niebieski: '#2548E8', granat: '#1E3A5F', morski: '#0F766E', bordo: '#9F1239', fiolet: '#6D28D9', grafit: '#374151' };
@@ -68,6 +68,17 @@ const LBL = {
   fr: { summary: 'Profil professionnel', exp: 'Expérience professionnelle', edu: 'Formation', skills: 'Compétences', langs: 'Langues', certs: 'Certifications et formations', interests: "Centres d'intérêt", contact: 'Contact', locale: 'fr-FR' },
 };
 // Etykiety szablonów Lebenslauf i Europass (dane osobowe, miejsce i data, podpis, poziom języka).
+// „W układzie Europass”: te same wyrażenia i etykiety co lib/europass.js (zgodność pilnuje test/europass.test.js).
+const EU_DIGITAL = /(^|[^\p{L}])(excel|word|powerpoint|outlook|ms office|microsoft office|office 365|pakiet office|google (docs|sheets|workspace)|sap|wms|erp|crm|photoshop|canva|autocad|python|javascript|sql|html|css|jira|power bi|tableau|wordpress|figma|salesforce|subiekt|optima|symfonia|płatnik|enova|comarch|windows|linux|komputer\p{L}*|computer|programowani\p{L}*|programming)(?![\p{L}])/iu;
+const EU_DRIVING = /prawo jazdy|prawa jazdy|driving licen[cs]e|führerschein|fahrerlaubnis|водійськ|посвідчення водія|permis de conduire|permiso de conducir|carnet de conducir|(^|[^\p{L}])kat\.?\s?[ABCDET](\+E)?(?![\p{L}])/iu;
+const EU_LBL = {
+  pl: { digital: 'Umiejętności cyfrowe', driving: 'Prawo jazdy', note: 'Układ wzorowany na Europass, przygotowany w cvpodogloszenie.pl. To nie jest oficjalny dokument Europass.' },
+  en: { digital: 'Digital skills', driving: 'Driving licence', note: 'Layout modelled on the Europass CV, prepared at cvpodogloszenie.pl. This is not an official Europass document.' },
+  de: { digital: 'Digitale Kompetenzen', driving: 'Führerschein', note: 'Aufbau in Anlehnung an den Europass-Lebenslauf, erstellt auf cvpodogloszenie.pl. Dies ist kein offizielles Europass-Dokument.' },
+  uk: { digital: 'Цифрові навички', driving: 'Посвідчення водія', note: 'Структура за зразком Europass, підготовлено на cvpodogloszenie.pl. Це не офіційний документ Europass.' },
+  es: { digital: 'Competencias digitales', driving: 'Permiso de conducir', note: 'Formato inspirado en el CV Europass, preparado en cvpodogloszenie.pl. No es un documento oficial de Europass.' },
+  fr: { digital: 'Compétences numériques', driving: 'Permis de conduire', note: 'Mise en page inspirée d’Europass, préparée sur cvpodogloszenie.pl. Ce n’est pas un document officiel Europass.' },
+};
 const LBL2 = {
   pl: { cvTitle: 'Życiorys', personal: 'Dane osobowe', phone: 'Telefon', email: 'E-mail', city: 'Miejsce zamieszkania', web: 'Profil', more: 'Umiejętności i języki', native: 'ojczysty', placeDate: 'Miejscowość, data', sign: 'Podpis', level: 'Poziom' },
   en: { cvTitle: 'Curriculum Vitae', personal: 'Personal details', phone: 'Phone', email: 'Email', city: 'Location', web: 'Profile', more: 'Skills and languages', native: 'native', placeDate: 'Place, date', sign: 'Signature', level: 'Level' },
@@ -104,7 +115,7 @@ const mainLang = (ad) => (ad.lang && ad.lang !== 'auto' ? ad.lang : detectLang(a
 // Tłumaczenie na język, w którym i tak powstaną wszystkie dokumenty, nie ma sensu — nie liczymy go.
 const usefulExtraLangs = (langs, ads) => langs.filter((l) => !ads.length || !ads.every((a) => mainLang(a) === l));
 function parts(c, kw, lang = 'pl', photo = '') {
-  const L = LBL[lang] || LBL.pl, M = LBL2[lang] || LBL2.pl;
+  const L = LBL[lang] || LBL.pl, M = LBL2[lang] || LBL2.pl, EL = EU_LBL[lang] || EU_LBL.pl;
   const contact = (c.contact || []).filter(Boolean);
   const [first = '', ...rest] = String(c.name || '').split(/\s+/);
   const sec = (t, ...k) => el('section', {}, el('h3', { textContent: t }), el('div', { className: 'cnt' }, ...k));
@@ -156,6 +167,13 @@ function parts(c, kw, lang = 'pl', photo = '') {
       e.bullets?.length ? el('ul', {}, ...e.bullets.map((b) => el('li', {}, hl(b, kw)))) : null)),
     eExp: function () { return c.experience?.length ? sec(L.exp, ...this.eRows(c.experience, (e) => e.title, (e) => e.company)) : null; },
     eEdu: function () { return c.education?.length ? sec(L.edu, ...this.eRows(c.education, (e) => e.degree || e.school, (e) => (e.degree ? e.school : ''))) : null; },
+    eList: (title, items) => (items.length ? sec(title, el('div', { textContent: items.join(' · ') })) : null),
+    eRest: function () {
+      const isD = (s) => EU_DRIVING.test(s), sk = c.skills || [], ce = c.certificates || [];
+      return [this.eList(EL.digital, sk.filter((s) => EU_DIGITAL.test(s) && !isD(s))), this.eList(L.skills, sk.filter((s) => !EU_DIGITAL.test(s) && !isD(s))),
+        this.eList(EL.driving, [...sk, ...ce].filter(isD)), this.eList(L.certs, ce.filter((s) => !isD(s)))];
+    },
+    euNote: () => el('p', { className: 'eu-note', textContent: EL.note }),
     eLangs: () => (c.languages?.length ? sec(L.langs, el('table', { className: 'lt' }, el('tr', {}, el('th', { textContent: L.langs }), el('th', { textContent: M.level + ' (CEFR)' })),
       ...c.languages.map((t) => { const [n, lv] = langLevel(t, M); return el('tr', {}, el('td', { textContent: n }), el('td', { textContent: lv || '—' })); }))) : null),
   };
@@ -179,7 +197,7 @@ const CV_LAYOUT = {
     el('div', { className: 'side' }, k.pic(), k.contactSec(), k.skills(), k.langsLv(), k.certs(), k.intr())],
   wstega: (k) => [el('div', { className: 'band' }, k.mono()), el('header', { className: 'top' }, k.name(), k.head(), k.ct()), k.summary(), k.exp(), k.edu(), k.skills(), k.langs(), k.certs(), k.intr(), k.clause()],
   lebenslauf: (k) => [el('header', { className: 'top' }, el('div', { className: 'who' }, k.kicker(), k.name(), k.head()), k.pic()), k.persData(), k.summary(), k.tExp(), k.tEdu(), k.tMore(), k.clause(), k.sign()],
-  europass: (k) => [el('header', { className: 'top' }, k.pic(), el('div', { className: 'who' }, k.name(), k.head(), k.persLine())), k.summary(), k.eExp(), k.eEdu(), k.eLangs(), k.skills(), k.certs(), k.intr(), k.clause()],
+  europass: (k) => [el('header', { className: 'top' }, k.pic(), el('div', { className: 'who' }, k.name(), k.head(), k.persLine())), k.summary(), k.eExp(), k.eEdu(), k.eLangs(), ...k.eRest(), k.intr(), k.clause(), k.euNote()],
 };
 const LETTER_HEAD = {
   geometria: (k) => el('header', { className: 'band' }, el('div', {}, k.name(), k.ct()), k.mono()),
@@ -1492,14 +1510,16 @@ function drawFollowup() {
     pick, el('p', { className: 'hint', id: 'fuInfo' }), el('div', { id: 'fuAds' }),
     el('button', { type: 'button', className: 'btn ghost sm', id: 'fuAdd', textContent: '+ Dodaj ogłoszenie (w pakiecie do 3)', onclick: () => { addRow('fuAds'); drawPick(); } }),
     el('label', { className: 'f fucode' }, 'Kod rabatowy ', el('input', { type: 'text', id: 'fuCode', placeholder: 'opcjonalnie', autocomplete: 'off', value: data.myCode && !data.myCode.usedByMe ? data.myCode.code : '' })),
+    el('label', { className: 'check' }, el('input', { type: 'checkbox', id: 'fuWaiver' }), ' ', el('span', { textContent: 'Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.' })),
     el('p', {}, el('button', { type: 'button', className: 'btn', id: 'fuPay', textContent: '', onclick: async (e) => {
       const ads = rows('fuAds'), err = $('#fuErr'), code = $('#fuCode').value.trim();
       if (ads.length > FU_ADS(fpkg)) { err.textContent = 'Ten pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe albo wybierz Pakiet 3.'; return; }
       const bad = ads.find((a) => !a.title || a.text.length < 80);
       if (bad) { err.textContent = 'Podaj nazwę stanowiska i pełną treść ogłoszenia (min. 80 znaków).'; return; }
+      if (!$('#fuWaiver').checked) { err.textContent = 'Zaznacz zgodę na wykonanie usługi od razu po płatności.'; return; }
       e.target.disabled = true; err.textContent = '';
       try {
-        const r = await fetch(`/api/orders/${orderId}/followup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pkg: fpkg === 'bundle' ? 'cv_letter' : fpkg, addons: fpkg === 'bundle' ? { interview: true, sim: true } : {}, ads, code }) });
+        const r = await fetch(`/api/orders/${orderId}/followup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pkg: fpkg === 'bundle' ? 'cv_letter' : fpkg, addons: fpkg === 'bundle' ? { interview: true, sim: true } : {}, ads, code, waiver: true }) });
         const j = await r.json(); if (!r.ok) throw new Error(j.error);
         if (j.free) { delete box.dataset.ready; startResult(j.id); } else if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); delete box.dataset.ready; startResult(j.id); } else location.href = j.url;
       } catch (x) { err.textContent = x.message; e.target.disabled = false; }
@@ -2450,6 +2470,8 @@ if ((q.get('zamow') || LANGS[q.get('jezyk')]) && !q.get('id') && !q.get('draft')
   try { history.replaceState(null, '', location.pathname + location.hash); } catch {}
   (q.get('dodatki') || '').split(',').filter((a) => /^\w+$/.test(a)).forEach((a) => { const c = $('#ad' + a); if (c) c.checked = true; });
   const s = LANGS[q.get('jezyk')] && $('#ads .entry [data-k=lang]'); if (s) { s.value = q.get('jezyk'); refresh(); }
+  // ?szablon=<id> (strony „CV Europass”, „CV do urzędu”): wybrany szablon w kreatorze.
+  if (TPLS.some((t) => t[0] === q.get('szablon'))) { design = { ...design, tpl: q.get('szablon') }; drawWizDesign(); saveDraft(); }
   openWiz(['cv', 'cv_letter', 'pack3'].includes(q.get('pkg')) ? q.get('pkg') : undefined);
   // ?zawod=<slug> (przycisk na stronie zawodu): nazwa zawodu jako ogólne stanowisko, jeśli pole jest puste.
   const zaw = q.get('zawod') || '';

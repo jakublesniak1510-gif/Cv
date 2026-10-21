@@ -40,7 +40,7 @@ test('Przelewy24: rejestracja, powiadomienie, weryfikacja', { timeout: 30_000 },
     const cfg = await (await fetch(U + '/api/config')).json();
     assert.equal(cfg.demo, false);
     const ad = 'Szukamy magazyniera. Wymagania: obsługa wózka widłowego, doświadczenie w magazynie, sumienność i dokładność. '.repeat(2);
-    const r = await (await fetch(U + '/api/orders', { method: 'POST', headers: H, body: JSON.stringify({ pkg: 'cv', consent: true, profile: { name: 'Jan Test', email: 'jan@test.pl', experience: [{ title: 'Magazynier', company: 'X' }] }, ads: [{ title: 'Magazynier', text: ad }] }) })).json();
+    const r = await (await fetch(U + '/api/orders', { method: 'POST', headers: H, body: JSON.stringify({ pkg: 'cv', consent: true, waiver: true, profile: { name: 'Jan Test', email: 'jan@test.pl', experience: [{ title: 'Magazynier', company: 'X' }] }, ads: [{ title: 'Magazynier', text: ad }] }) })).json();
     assert.equal(r.url, `http://localhost:${mockPort}/trnRequest/TOKEN1`);
     const reg = calls.find((c) => c.url.endsWith('/register'));
     assert.equal(reg.auth, 'Basic ' + Buffer.from(`${MERCHANT}:${KEY}`).toString('base64'));
