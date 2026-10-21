@@ -1449,5 +1449,19 @@
 "Link do szkicu wygasł (szkice przechowujemy 7 dni). Wypełnij formularz od nowa.": "Der Link zum Entwurf ist abgelaufen (Entwürfe speichern wir 7 Tage). Bitte füllen Sie das Formular neu aus.",
 "Dla instytucji": "Für Institutionen",
 "Dla instytucji i firm": "Für Institutionen und Unternehmen",
-"Zrób CV pod ogłoszenie – od {X}": "Lebenslauf passend zur Stellenanzeige – ab {X}"
+"Zrób CV pod ogłoszenie – od {X}": "Lebenslauf passend zur Stellenanzeige – ab {X}",
+"Przed i po: to samo doświadczenie, inne CV": "Vorher und nachher: gleiche Erfahrung, anderer Lebenslauf",
+"To samo doświadczenie opisane ogólnie i językiem ogłoszenia. Zaznaczone są słowa z ogłoszenia, a procent to wynik naszego skanera dla tych tekstów.": "Dieselbe Erfahrung, einmal allgemein und einmal in der Sprache der Anzeige beschrieben. Wörter aus der Anzeige sind markiert, der Prozentwert ist das Ergebnis unseres Scanners für diese Texte.",
+"Przykład – dane fikcyjne": "Beispiel – fiktive Daten",
+"Ogłoszenie": "Stellenanzeige",
+"Przed": "Vorher",
+"Po": "Nachher",
+"Zadania": "Aufgaben",
+"Dopasowanie do ogłoszenia": "Übereinstimmung mit der Anzeige",
+"przed": "vorher",
+"po": "nachher",
+"Wymagania, których ta osoba nie spełnia, nie dopisujemy – zostają w raporcie jako brak:": "Anforderungen, die diese Person nicht erfüllt, ergänzen wir nicht – sie bleiben im Bericht als fehlend:",
+"Sprawdź za darmo, ile pasujesz": "Kostenlos prüfen, wie gut Sie passen",
+"Porównanie CV": "Lebenslauf-Vergleich",
+"Zrób takie CV pod swoje ogłoszenie – od": "So einen Lebenslauf für Ihre Anzeige – ab"
 }
