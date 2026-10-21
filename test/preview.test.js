@@ -73,3 +73,26 @@ test('/api/config: podgląd AI jako aiPreview, nie preview', () => {
   assert.doesNotMatch(srv, /\bpreview: aiEnabled\(\)/);
   assert.match(app, /\$\('#pvBox'\)\.hidden = !cfg\.aiPreview/);
 });
+
+test('Podgląd: zapytanie dla Claude Haiku 5.5 bez fallbacks/betas (400) i bez myślenia; powód błędu AI w dzienniku', async () => {
+  const { buildRequest } = await import('../lib/ai.js');
+  const h = buildRequest('s', 'u', { model: 'claude-haiku-5-5', effort: 'low', maxTokens: 900, thinking: { type: 'disabled' } });
+  assert.equal(h.fallbacks, undefined); assert.equal(h.betas, undefined); assert.deepEqual(h.thinking, { type: 'disabled' });
+  assert.equal(h.output_config.effort, 'low'); assert.equal(h.max_tokens, 900);
+  const d = buildRequest('s', 'u', { model: 'claude-opus-5-5' });
+  assert.equal(d.fallbacks, 'default'); assert.equal(d.thinking, undefined);
+  let opts; await pv.makePreview(PROFILE, AD, { ask: async (_s, _u, o) => { opts = o; return { summary: 'x', keywords: ['a', 'b', 'c'] }; } });
+  assert.deepEqual(opts.thinking, { type: 'disabled' });
+
+  const { events } = await import('../lib/store.js');
+  const app = express(); pv.previewRoutes(app, { cleanProfile, cleanAds, enabled: () => true, ask: async () => { throw new Error('400 invalid_request_error: fallbacks'); }, onShown: async () => {} });
+  const srv = app.listen(0);
+  try {
+    const r = await (await fetch(`http://127.0.0.1:${srv.address().port}/api/preview`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: 'sesja-log-1', profile: { ...PROFILE, skills: 'LOG' }, ad: AD }) })).json();
+    assert.deepEqual(r, { off: true });
+    await new Promise((ok) => setTimeout(ok, 50));
+    const ev = Object.values(await events.all()).filter((e) => e.type === 'podgląd');
+    assert.ok(ev.some((e) => /400 invalid_request_error: fallbacks/.test(e.message)), 'powód błędu w dzienniku');
+    assert.ok(ev.every((e) => !/Anna Test|anna@example\.com|600000000/.test(e.message)), 'bez danych klienta');
+  } finally { srv.close(); }
+});

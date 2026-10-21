@@ -729,6 +729,11 @@ $('#setTest').addEventListener('click', async (e) => {
   try { const r = await post('/settings/test-daily'); m.className = 'msg good'; m.textContent = r.backup ? 'Wysłane, z kopią w załączniku. Sprawdź skrzynkę.' : 'Wysłane (kopia za duża na e-mail: pobierz ją przyciskiem obok).'; }
   catch (x) { m.className = 'msg bad'; m.textContent = x.message; } finally { b.disabled = false; }
 });
+$('#pvTest').addEventListener('click', async (e) => {
+  const b = e.target, m = $('#pvMsg'); b.disabled = true; m.className = 'msg'; m.textContent = 'Sprawdzam…';
+  try { const r = await post('/preview-test'); m.className = 'msg good'; m.textContent = `Działa (${r.model}, ${(r.ms / 1000).toFixed(1)} s): ${r.headline} · ${r.keywords.join(', ')}`; }
+  catch (x) { m.className = 'msg bad'; m.textContent = `Błąd: ${x.message}`; } finally { b.disabled = false; }
+});
 $('#rsFile').addEventListener('change', () => { $('#rsBtn').disabled = !$('#rsFile').files.length; $('#rsConfirm').hidden = true; });
 $('#rsBtn').addEventListener('click', () => {
   const file = $('#rsFile').files[0]; if (!file) return;

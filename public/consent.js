@@ -38,18 +38,28 @@
   }
 
   function banner() {
-    document.getElementById('consentBar')?.remove();
+    document.getElementById('consentBar')?.remove(); space(null);
     const bar = document.createElement('div');
     bar.id = 'consentBar'; bar.className = 'consent'; bar.setAttribute('role', 'dialog'); bar.setAttribute('aria-label', 'Pliki cookie');
     bar.innerHTML = '<p><b>Pliki cookie reklam</b> <span>Za Twoją zgodą używamy plików cookie Google i Meta, żeby mierzyć skuteczność naszych reklam. Bez zgody strona działa tak samo.</span> <a href="#prywatnosc">Polityka prywatności</a></p>'
       + '<div class="consent-btns"><button type="button" class="btn ghost sm" data-c="denied">Tylko niezbędne</button><button type="button" class="btn sm" data-c="granted" data-i18n-key="Akceptuję (pliki cookie)">Akceptuję</button></div>';
     bar.addEventListener('click', (e) => {
       const v = e.target.closest('button')?.dataset.c; if (!v) return;
-      set(KEY, v); bar.remove();
+      set(KEY, v); bar.remove(); space(null);
       if (v === 'granted') load();
       else if (loaded) location.reload(); // wycofanie zgody: przeładowanie strony bez skryptów reklamowych
     });
     document.body.append(bar);
+    space(bar);
+  }
+  // Miejsce zajęte przez baner (--consent-h): otwarty kreator kończy się nad nim, więc „Dalej” i kwota są zawsze widoczne.
+  let cur = null, ro = null;
+  const measure = () => { if (cur?.isConnected) document.documentElement.style.setProperty('--consent-h', `${Math.max(0, Math.ceil(window.innerHeight - cur.getBoundingClientRect().top) + 8)}px`); };
+  function space(bar) {
+    cur = bar; ro?.disconnect(); ro = null; window.removeEventListener('resize', measure);
+    if (!bar) return document.documentElement.style.removeProperty('--consent-h');
+    if (window.ResizeObserver) { ro = new ResizeObserver(measure); ro.observe(bar); }
+    window.addEventListener('resize', measure); measure();
   }
 
   window.CONSENT = {
