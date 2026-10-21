@@ -14,7 +14,7 @@ test('/api/config odpowiada od razu, gdy API Stripe wisi; metody uzupełniają s
   const mock = http.createServer((req, res) => {
     if (mode === 'hang') return; // brak odpowiedzi
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ data: [{ is_default: true, active: true, blik: { available: true }, card: { available: true } }] }));
+    res.end(JSON.stringify({ data: [{ is_default: true, active: true, blik: { available: true, display_preference: { value: 'on' } }, card: { available: true, display_preference: { value: 'on' } } }] }));
   }).listen(0);
   const port = 5900 + Math.floor(Math.random() * 90), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-pm-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', P24_MERCHANT_ID: '', STRIPE_SECRET_KEY: 'sk_test_x', STRIPE_WEBHOOK_SECRET: 'whsec_x', STRIPE_API_BASE: `http://localhost:${mock.address().port}`, SALES_OPEN: '1' };
@@ -29,7 +29,8 @@ test('/api/config odpowiada od razu, gdy API Stripe wisi; metody uzupełniają s
 
   // W procesie: odświeżenie (z limitem 3 s) wypełnia listę, a stripeMethods() zwraca ją bez czekania.
   mode = 'ok';
-  const m2 = http.createServer((req, res) => { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify({ data: [{ is_default: true, active: true, blik: { available: true }, card: { available: true }, apple_pay: { available: true }, google_pay: { available: true } }] })); }).listen(0);
+  const ON = { available: true, display_preference: { value: 'on' } };
+  const m2 = http.createServer((req, res) => { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify({ data: [{ is_default: true, active: true, blik: ON, card: ON, apple_pay: ON, google_pay: ON, p24: { available: false, display_preference: { value: 'on' } }, link: { available: true, display_preference: { value: 'off' } } }] })); }).listen(0);
   process.env.STRIPE_SECRET_KEY = 'sk_test_x'; process.env.STRIPE_API_BASE = `http://localhost:${m2.address().port}`;
   try {
     const { stripeMethods, refreshStripeMethods } = await import('../lib/stripe.js');
