@@ -185,6 +185,8 @@ seoRoutes(app, BASE_URL);
 templateRoutes(app, BASE_URL);
 abroadRoutes(app, BASE_URL);
 employerRoutes(app, BASE_URL);
+// Stary adres oferty dla instytucji (z ulotek i wyszukiwarek) → strona dla firm i instytucji.
+app.get('/dla-instytucji', (_req, res) => res.redirect(301, '/dla-firm'));
 fairRoutes(app, BASE_URL);
 // Pliki z wersją w adresie (?v=…, wstawiana przez lib/seo.js) i czcionki można trzymać w pamięci przeglądarki na stałe.
 app.use(express.static('public', { setHeaders: (res, path) => { if (res.req.query.v || /\/fonts\//.test(path)) res.set('Cache-Control', 'public, max-age=31536000, immutable'); } }));

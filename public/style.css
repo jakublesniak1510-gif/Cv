@@ -823,6 +823,12 @@ html[lang="en"] .legal-pl,html[lang="uk"] .legal-pl,html[lang="de"] .legal-pl{di
 .consent{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:70;max-width:720px;margin:0 auto;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:14px 16px;display:flex;gap:12px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
 .consent p{margin:0;flex:1 1 320px}.consent a{color:var(--brand)}
 .consent-btns{display:flex;gap:8px;flex:none}
+/* Otwarty kreator: kompaktowy baner, a kreator kończy się nad nim (stopka z „Dalej” i kwotą nie jest zasłonięta). */
+body:has(.wiz:not([hidden])) .consent{bottom:calc(8px + env(safe-area-inset-bottom,0px));padding:8px 12px;font-size:13px;gap:8px 12px}
+body:has(.wiz:not([hidden])) .consent p span{display:none}
+body:has(.wiz:not([hidden])) .consent p{flex-basis:200px}
+.wiz{padding-bottom:calc(16px + var(--consent-h,0px))}
+@media(max-width:640px){.wiz{padding:0 0 var(--consent-h,0px)}}
 /* Sekcje poza ekranem: przeglądarka liczy ich układ dopiero przy przewijaniu (krótsze blokowanie przy wczytaniu na telefonie). */
 .sec{content-visibility:auto;contain-intrinsic-size:auto 900px}
 /* Przy przejściu do kotwicy (#cennik itp.) liczymy pełny układ, żeby przewinięcie trafiło dokładnie. */
@@ -904,3 +910,4 @@ table.rep th[scope=row]{font-weight:600;color:var(--mute);width:55%}
 .fair{border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:10px 0;background:var(--surface)}.fair h3{margin:0 0 4px;font-size:17px}.fair p{margin:4px 0}
 .mat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.mat{display:flex;flex-direction:column;gap:6px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);text-decoration:none}.mat b{font-size:17px}.mat span{color:var(--mute);font-size:14px}.mat:hover{border-color:var(--brand)}
 @media(max-width:900px){.mat-grid{grid-template-columns:1fr 1fr}}@media(max-width:480px){.mat-grid{grid-template-columns:1fr}}
+.prof-cta{margin:18px 0}.single-cv{text-align:center;margin:14px 0 4px}.single-cv a{color:var(--brand);font-weight:600}
