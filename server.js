@@ -34,7 +34,7 @@ import { cleanDesign } from './lib/designs.js';
 import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes, sendNotFound } from './lib/seo.js';
 import { p24Enabled, p24Register, p24NotificationOk, p24Verify, p24BySession } from './lib/p24.js';
-import { stripeEnabled, stripeCheckout, stripeSession, stripeEvent, stripeExpire, stripeMethods } from './lib/stripe.js';
+import { stripeEnabled, stripeCheckout, stripeSession, stripeEvent, stripeExpire, stripeMethods, refreshStripeMethods } from './lib/stripe.js';
 import { recordSale, notifyNewOrder, setRefunded, commissionBack, ownerDaily, getSettings, DATA_DIR, addDailySection, dayKey } from './lib/ops.js';
 import { invoices, issueInvoice, renderInvoice, invoiceFile, cleanupInvoices } from './lib/invoice.js';
 import { renderDocx } from './lib/docx.js';
@@ -307,9 +307,11 @@ app.get('/health', async (_req, res) => {
   res.status(ok ? 200 : 503).set('Cache-Control', 'no-store').json({ ok, checks, meta, at: new Date().toISOString() });
 });
 // Metody płatności do linii zaufania w kreatorze: Stripe – włączone w panelu (lib/stripe.js), Przelewy24 – stała lista.
-const payInfo = async () => (DEMO ? null : PROVIDER === 'stripe' ? { provider: 'Stripe', methods: await stripeMethods() } : { provider: 'Przelewy24', methods: ['BLIK', 'przelew online', 'karta'] });
-app.get('/api/config', async (req, res) => res.json({
-  pay: await payInfo().catch(() => null),
+// /api/config to też health check Rendera: lista metod zawsze z pamięci, odświeżana w tle (lib/stripe.js).
+const payInfo = () => (DEMO ? null : PROVIDER === 'stripe' ? { provider: 'Stripe', methods: stripeMethods() } : { provider: 'Przelewy24', methods: ['BLIK', 'przelew online', 'karta'] });
+if (PROVIDER === 'stripe') refreshStripeMethods().catch(() => {}); // raz przy starcie
+app.get('/api/config', (req, res) => res.json({
+  pay: payInfo(),
   aiPreview: aiEnabled(), ads: ADS, googleReview: GOOGLE_REVIEW, chromeExt: CHROME_EXT, demo: DEMO, salesClosed: salesClosedFor(req), ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
   promo: salesClosedFor(req) ? null : activePromo(),
   prices: { ...Object.fromEntries(Object.entries(PRICES).map(([k, v]) => [k, v / 100])), bundleOff: BUNDLE_OFF / 100 },
