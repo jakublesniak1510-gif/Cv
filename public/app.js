@@ -803,7 +803,11 @@ $('#ads').addEventListener('change', refresh);
 /* kod rabatowy */
 const REF_KEY = 'cvpo-ref';
 // Przed i po: suwak (range) przesuwa granicę między zwykłym CV a CV pod ogłoszenie.
-{ const r = $('#baRange'); if (r) r.addEventListener('input', () => $('#ba').style.setProperty('--p', r.value + '%')); }
+// „Przed i po”: na telefonie przełącznik Przed / Po (na szerokim ekranie oba fragmenty obok siebie).
+for (const b of document.querySelectorAll('.ba-tabs [role=tab]')) b.addEventListener('click', () => {
+  b.closest('section').querySelector('.ba2').dataset.show = b.id.slice(5);
+  for (const x of document.querySelectorAll('.ba-tabs [role=tab]')) x.setAttribute('aria-selected', String(x === b));
+});
 // Pasek promocji z kalendarza (lib/promos.js): kod wpisuje się sam w kreatorze.
 // Omnibus: przy obniżce pokazujemy najniższą cenę z 30 dni przed nią (dla każdego pakietu). Dane z /api/config i /api/code.
 // Kwoty w złotych z przecinkiem (np. 29,25), bez zbędnych zer (39).

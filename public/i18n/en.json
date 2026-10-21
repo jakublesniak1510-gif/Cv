@@ -1449,5 +1449,19 @@
 "Link do szkicu wygasł (szkice przechowujemy 7 dni). Wypełnij formularz od nowa.": "The draft link has expired (we keep drafts for 7 days). Please fill in the form again.",
 "Dla instytucji": "For institutions",
 "Dla instytucji i firm": "For institutions and companies",
-"Zrób CV pod ogłoszenie – od {X}": "Get a CV tailored to the job ad – from {X}"
+"Zrób CV pod ogłoszenie – od {X}": "Get a CV tailored to the job ad – from {X}",
+"Przed i po: to samo doświadczenie, inne CV": "Before and after: same experience, different CV",
+"To samo doświadczenie opisane ogólnie i językiem ogłoszenia. Zaznaczone są słowa z ogłoszenia, a procent to wynik naszego skanera dla tych tekstów.": "The same experience described in general terms and in the language of the job ad. Words from the ad are highlighted, and the percentage is our scanner's result for these texts.",
+"Przykład – dane fikcyjne": "Example – fictitious data",
+"Ogłoszenie": "Job ad",
+"Przed": "Before",
+"Po": "After",
+"Zadania": "Duties",
+"Dopasowanie do ogłoszenia": "Match with the job ad",
+"przed": "before",
+"po": "after",
+"Wymagania, których ta osoba nie spełnia, nie dopisujemy – zostają w raporcie jako brak:": "We don't add requirements this person doesn't meet – they stay in the report as missing:",
+"Sprawdź za darmo, ile pasujesz": "Check for free how well you match",
+"Porównanie CV": "CV comparison",
+"Zrób takie CV pod swoje ogłoszenie – od": "Get a CV like this for your job ad – from"
 }

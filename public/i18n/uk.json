@@ -1449,5 +1449,19 @@
 "Link do szkicu wygasł (szkice przechowujemy 7 dni). Wypełnij formularz od nowa.": "Посилання на чернетку застаріло (чернетки зберігаємо 7 днів). Заповніть форму заново.",
 "Dla instytucji": "Для установ",
 "Dla instytucji i firm": "Для установ і компаній",
-"Zrób CV pod ogłoszenie – od {X}": "Зробіть CV під вакансію – від {X}"
+"Zrób CV pod ogłoszenie – od {X}": "Зробіть CV під вакансію – від {X}",
+"Przed i po: to samo doświadczenie, inne CV": "До і після: той самий досвід, інше CV",
+"To samo doświadczenie opisane ogólnie i językiem ogłoszenia. Zaznaczone są słowa z ogłoszenia, a procent to wynik naszego skanera dla tych tekstów.": "Той самий досвід, описаний загально і мовою вакансії. Виділено слова з оголошення, а відсоток — це результат нашого сканера для цих текстів.",
+"Przykład – dane fikcyjne": "Приклад — вигадані дані",
+"Ogłoszenie": "Оголошення",
+"Przed": "До",
+"Po": "Після",
+"Zadania": "Обов’язки",
+"Dopasowanie do ogłoszenia": "Відповідність вакансії",
+"przed": "до",
+"po": "після",
+"Wymagania, których ta osoba nie spełnia, nie dopisujemy – zostają w raporcie jako brak:": "Вимоги, яким ця особа не відповідає, ми не дописуємо — вони залишаються у звіті як відсутні:",
+"Sprawdź za darmo, ile pasujesz": "Перевірте безкоштовно, наскільки ви підходите",
+"Porównanie CV": "Порівняння CV",
+"Zrób takie CV pod swoje ogłoszenie – od": "Зробіть таке CV під свою вакансію — від"
 }
