@@ -2219,7 +2219,7 @@ const accApi = async (path = '', opts = {}) => {
   if (!r.ok) { const e = new Error(j.error || 'Nie udało się połączyć z serwerem. Spróbuj ponownie za chwilę.'); e.status = r.status; throw e; }
   return j;
 };
-const STATUS_CLS = { 'wysłane': 'st-sent', rozmowa: 'st-int', oferta: 'st-ok', odmowa: 'st-no', 'brak odpowiedzi': 'st-none' };
+const STATUS_CLS = { przygotowane: 'st-prep', 'wysłane': 'st-sent', rozmowa: 'st-int', oferta: 'st-ok', odmowa: 'st-no', 'brak odpowiedzi': 'st-none' };
 const dtLocal = (t) => (t ? new Date(t - new Date(t).getTimezoneOffset() * 60e3).toISOString().slice(0, 16) : '');
 async function showAccount() {
   $('#landing').hidden = true; $('#page').hidden = $('#pageNote').hidden = true;
@@ -2284,21 +2284,35 @@ function accDash(d) {
     const put = async (a, patch) => { try { Object.assign(a, await accApi('/apps/' + a.id, { method: 'PUT', body: JSON.stringify(patch) })); drawApps(); } catch (x) { flash(x.message, true); } };
     const rows = d.apps.map((a) => {
       const st = el('select', { ariaLabel: 'Status', className: STATUS_CLS[a.status] || '' }, ...d.statuses.map((s) => el('option', { value: s, textContent: s, selected: s === a.status })));
-      st.onchange = () => put(a, { status: st.value });
+      st.onchange = () => put(a, { status: st.value, ...(a.status === 'przygotowane' && st.value === 'wysłane' ? { applied: new Date().toISOString().slice(0, 10) } : {}) });
       const when = el('input', { type: 'datetime-local', value: dtLocal(a.interviewAt), ariaLabel: 'Termin rozmowy' });
       when.onchange = () => put(a, { interviewAt: when.value ? new Date(when.value).toISOString() : '', status: when.value && a.status === 'wysłane' ? 'rozmowa' : a.status });
       const rem = el('input', { type: 'checkbox', checked: !!a.remind, disabled: !a.interviewAt });
       rem.onchange = () => put(a, { remind: rem.checked, interviewAt: a.interviewAt ? new Date(a.interviewAt).toISOString() : '' });
+      // Przypomnienie o follow-up: e-mail w wybranym dniu (domyślna propozycja: 7 dni po wysłaniu).
+      const fol = el('input', { type: 'date', value: a.followAt || '', min: new Date().toISOString().slice(0, 10), ariaLabel: 'Przypomnienie o follow-up' });
+      fol.onchange = () => put(a, { followAt: fol.value || '' });
+      const plus7 = el('button', { className: 'link', type: 'button', textContent: '+7 dni', hidden: !!a.followAt || a.status !== 'wysłane' });
+      plus7.onclick = () => { const t = Math.max(Date.parse(a.applied) + 7 * 864e5, Date.now() + 864e5); put(a, { followAt: new Date(t).toISOString().slice(0, 10) }); };
+      const note = el('input', { type: 'text', value: a.note || '', maxLength: 500, placeholder: 'np. kontakt: p. Anna, HR', ariaLabel: 'Notatka' });
+      note.onchange = () => put(a, { note: note.value });
+      const fit = el('button', { className: 'btn ghost sm', type: 'button', textContent: 'Dopasuj CV do tej oferty', hidden: !a.hasAd && !a.link });
+      fit.onclick = () => fitToApp(a);
       const del = el('button', { className: 'link', type: 'button', textContent: 'Usuń' });
       del.onclick = async () => { if (del.dataset.sure !== '1') { del.dataset.sure = '1'; del.textContent = 'Na pewno?'; return; } await accApi('/apps/' + a.id, { method: 'DELETE' }).catch(() => {}); reload(); };
       return el('div', { className: 'app-row' },
-        el('div', { className: 'app-main' }, el('b', { textContent: a.position || '—' }), el('span', { textContent: a.company || '' }), a.link ? el('a', { href: a.link, target: '_blank', rel: 'noopener noreferrer', textContent: 'ogłoszenie ↗' }) : null, el('small', { textContent: `wysłano ${new Date(a.applied).toLocaleDateString('pl-PL')}` })),
+        el('div', { className: 'app-main' }, el('b', { textContent: a.position || '—' }), el('span', { textContent: a.company || '' }), a.link ? el('a', { href: a.link, target: '_blank', rel: 'noopener noreferrer', textContent: 'ogłoszenie ↗' }) : null, el('small', { textContent: `${a.status === 'przygotowane' ? 'przygotowano' : 'wysłano'} ${new Date(a.applied).toLocaleDateString('pl-PL')}` })),
         el('label', { className: 'f' }, 'Status', st),
         el('label', { className: 'f' }, 'Rozmowa', when),
         el('label', { className: 'check' }, rem, el('span', { textContent: a.reminded ? 'Przypomnienie wysłane' : 'Przypomnij dzień wcześniej (e-mail)' })),
-        del);
+        el('label', { className: 'f' }, a.followSent ? 'Follow-up (przypomnienie wysłane)' : 'Przypomnij o follow-up', el('span', { className: 'app-fol' }, fol, plus7)),
+        el('label', { className: 'f app-note' }, 'Notatka', note),
+        el('div', { className: 'app-act' }, fit, del));
     });
     appsBox.replaceChildren(
+      el('div', { className: 'app-tools' }, el('span', { className: 'hint', textContent: `${d.apps.length} z ${d.max || 500} pozycji` }),
+        d.apps.length ? el('a', { className: 'btn ghost sm', href: '/api/account/apps.csv', download: '', textContent: 'Pobierz CSV' }) : null,
+        el('label', { className: 'check' }, (() => { const c = el('input', { type: 'checkbox', checked: !d.followOff }); c.onchange = async () => { try { await accApi('/follow-off', { method: 'POST', body: JSON.stringify({ off: !c.checked }) }); d.followOff = !c.checked; } catch (x) { flash(x.message, true); } }; return c; })(), el('span', { textContent: 'Wysyłaj przypomnienia o follow-up' }))),
       counts().length ? el('div', { className: 'app-stats' }, ...counts().map(([s, n]) => el('span', { className: STATUS_CLS[s], textContent: `${s}: ${n}` }))) : null,
       ...(rows.length ? rows : [el('p', { className: 'hint', textContent: 'Nie masz jeszcze żadnych aplikacji. Dodaj pierwszą powyżej albo z listy zamówień.' })]));
   }
@@ -2334,7 +2348,7 @@ function accDash(d) {
         el('a', { className: 'btn ghost sm', href: `/?id=${o.id}`, textContent: 'Otwórz dokumenty', onclick: cfg.preview ? (ev) => { ev.preventDefault(); $('#account').hidden = true; startResult(o.id); } : null })))
         : [el('p', { className: 'hint', textContent: 'Nie ma zamówień z ostatnich 30 dni na ten adres.' })])),
     addBox,
-    el('div', { className: 'acct-card' }, el('h2', { textContent: 'Moje aplikacje' }), el('p', { className: 'hint', textContent: 'Zapisuj, gdzie wysłałeś CV. Gdy wpiszesz termin rozmowy i zaznaczysz przypomnienie, dzień wcześniej dostaniesz e-mail z krótką listą kontrolną (i linkiem do przygotowania do rozmowy, jeśli je zamówiłeś).' }), appsBox),
+    el('div', { className: 'acct-card' }, el('h2', { textContent: 'Moje aplikacje' }), el('p', { className: 'hint', textContent: 'Zapisuj, gdzie wysyłasz CV. CV z zamówień dodają się same jako „przygotowane”. Przypomnienie o follow-up przyjdzie e-mailem w wybranym dniu, a przypomnienie o rozmowie – dzień przed terminem. Wpisy znikają razem z kontem.' }), appsBox),
     el('p', { className: 'hint' }, 'Konto nieużywane przez 12 miesięcy usuwamy automatycznie. ', delAcc));
   drawApps();
   return wrap;
@@ -2399,6 +2413,18 @@ $('#clearDraft').onclick = () => { clearDraft(); resetWizard(); $('#draftNote').
 const q = new URLSearchParams(location.search);
 if (window.__ROUTE?.startsWith('legal/')) $$('.langsw a').forEach((a) => a.setAttribute('href', legalUrl(window.__ROUTE.slice(6), a.dataset.lang)));
 else if (window.__ROUTE) showPage(window.__ROUTE, false);
+// „Dopasuj CV do tej oferty” z listy aplikacji: ogłoszenie (treść albo link) w pierwszym polu kreatora; karnet działa jak zwykle.
+async function fitToApp(a) {
+  let d; try { d = await accApi(`/apps/${a.id}/ad`); } catch (x) { flash(x.message, true); return; }
+  $('#account').hidden = true; $('#landing').hidden = false;
+  const first = $('#ads .entry');
+  if (first) {
+    $('[data-k=title]', first).value = d.title || ''; $('[data-k=text]', first).value = d.text || '';
+    if (d.text && d.text.length >= 80) { first.dataset.fetched = '1'; setMode(first, 'paste'); }
+    else if (d.url) { $('[data-k=url]', first).value = d.url; setMode(first, 'link'); $('.fetchbtn', first).click(); }
+  }
+  openWiz();
+}
 // ?draft=<id>: ogłoszenie przysłane przez rozszerzenie Chrome → do skanera (strona narzędzia) albo do kreatora.
 async function loadDraft(id) {
   try { history.replaceState(null, '', location.pathname + location.hash); } catch {}
@@ -2415,6 +2441,8 @@ async function loadDraft(id) {
   if (first) { $('[data-k=title]', first).value = d.title || ''; $('[data-k=text]', first).value = text; first.dataset.fetched = '1'; setMode(first, 'paste'); }
   if ($('#scanAd')) $('#scanAd').value = text;
   openWiz();
+  // Zalogowany klient: ogłoszenie trafia też na listę aplikacji („przygotowane”), żeby nie zgubić oferty.
+  accApi('/apps/from-draft', { method: 'POST', body: JSON.stringify({ draftId: id }) }).then((r) => { if (!r.duplicate) flash('Zapisaliśmy tę ofertę w Twoich aplikacjach na koncie.'); }).catch(() => {});
 }
 // ?zamow=1 (przycisk „Zamów” z lekkiej podstrony): kreator z wybranym pakietem i dodatkami.
 // ?jezyk=de|en|… (strony „CV za granicę”): dodatkowo język dokumentów dla pierwszego ogłoszenia.

@@ -1503,5 +1503,19 @@
 "{0}/{1} znaków": "{0}/{1} characters",
 "Wersja angielska (English)": "English version",
 "Nagłówek (do 220 znaków), sekcja „Informacje” (do 2600 znaków), do 15 umiejętności, opisy do 3 stanowisk i wskazówki do profilu, w języku CV, do skopiowania": "Headline (up to 220 characters), “About” section (up to 2,600 characters), up to 15 skills, descriptions of up to 3 positions and profile tips, in the language of your CV, ready to copy",
-"LinkedIn jest znakiem towarowym LinkedIn Corp.; serwis nie jest z nim powiązany.": "LinkedIn is a trademark of LinkedIn Corp.; this service is not affiliated with it."
+"LinkedIn jest znakiem towarowym LinkedIn Corp.; serwis nie jest z nim powiązany.": "LinkedIn is a trademark of LinkedIn Corp.; this service is not affiliated with it.",
+"przygotowane": "prepared",
+"Notatka": "Note",
+"np. kontakt: p. Anna, HR": "e.g. contact: Anna, HR",
+"Dopasuj CV do tej oferty": "Tailor my CV to this offer",
+"Pobierz CSV": "Download CSV",
+"+7 dni": "+7 days",
+"Przypomnij o follow-up": "Follow-up reminder",
+"Przypomnienie o follow-up": "Follow-up reminder",
+"Follow-up (przypomnienie wysłane)": "Follow-up (reminder sent)",
+"Wysyłaj przypomnienia o follow-up": "Send follow-up reminders",
+"{0} z {1} pozycji": "{0} of {1} entries",
+"Zapisaliśmy tę ofertę w Twoich aplikacjach na koncie.": "We saved this offer in the applications list in your account.",
+"Zapisuj, gdzie wysyłasz CV. CV z zamówień dodają się same jako „przygotowane”. Przypomnienie o follow-up przyjdzie e-mailem w wybranym dniu, a przypomnienie o rozmowie – dzień przed terminem. Wpisy znikają razem z kontem.": "Keep track of where you send your CV. CVs from your orders are added automatically as “prepared”. A follow-up reminder arrives by email on the day you choose, and an interview reminder the day before. Entries are deleted together with your account.",
+"przygotowano {0}": "prepared {0}"
 }

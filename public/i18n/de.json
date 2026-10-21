@@ -1503,5 +1503,19 @@
 "{0}/{1} znaków": "{0}/{1} Zeichen",
 "Wersja angielska (English)": "Englische Version (English)",
 "Nagłówek (do 220 znaków), sekcja „Informacje” (do 2600 znaków), do 15 umiejętności, opisy do 3 stanowisk i wskazówki do profilu, w języku CV, do skopiowania": "Überschrift (bis 220 Zeichen), Abschnitt „Info“ (bis 2.600 Zeichen), bis zu 15 Kenntnisse, Beschreibungen von bis zu 3 Stellen und Tipps zum Profil, in der Sprache des Lebenslaufs, zum Kopieren",
-"LinkedIn jest znakiem towarowym LinkedIn Corp.; serwis nie jest z nim powiązany.": "LinkedIn ist eine Marke der LinkedIn Corp.; dieser Dienst steht in keiner Verbindung zu ihr."
+"LinkedIn jest znakiem towarowym LinkedIn Corp.; serwis nie jest z nim powiązany.": "LinkedIn ist eine Marke der LinkedIn Corp.; dieser Dienst steht in keiner Verbindung zu ihr.",
+"przygotowane": "vorbereitet",
+"Notatka": "Notiz",
+"np. kontakt: p. Anna, HR": "z. B. Kontakt: Frau Anna, HR",
+"Dopasuj CV do tej oferty": "Lebenslauf an dieses Angebot anpassen",
+"Pobierz CSV": "CSV herunterladen",
+"+7 dni": "+7 Tage",
+"Przypomnij o follow-up": "Follow-up-Erinnerung",
+"Przypomnienie o follow-up": "Follow-up-Erinnerung",
+"Follow-up (przypomnienie wysłane)": "Follow-up (Erinnerung gesendet)",
+"Wysyłaj przypomnienia o follow-up": "Follow-up-Erinnerungen senden",
+"{0} z {1} pozycji": "{0} von {1} Einträgen",
+"Zapisaliśmy tę ofertę w Twoich aplikacjach na koncie.": "Wir haben dieses Angebot in der Bewerbungsliste Ihres Kontos gespeichert.",
+"Zapisuj, gdzie wysyłasz CV. CV z zamówień dodają się same jako „przygotowane”. Przypomnienie o follow-up przyjdzie e-mailem w wybranym dniu, a przypomnienie o rozmowie – dzień przed terminem. Wpisy znikają razem z kontem.": "Behalten Sie den Überblick, wohin Sie Ihren Lebenslauf senden. Lebensläufe aus Bestellungen werden automatisch als „vorbereitet“ eingetragen. Die Follow-up-Erinnerung kommt am gewählten Tag per E-Mail, die Erinnerung an das Gespräch einen Tag vorher. Einträge werden zusammen mit dem Konto gelöscht.",
+"przygotowano {0}": "vorbereitet {0}"
 }

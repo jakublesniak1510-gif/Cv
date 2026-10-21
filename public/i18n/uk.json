@@ -1503,5 +1503,19 @@
 "{0}/{1} znaków": "{0}/{1} знаків",
 "Wersja angielska (English)": "Англійська версія (English)",
 "Nagłówek (do 220 znaków), sekcja „Informacje” (do 2600 znaków), do 15 umiejętności, opisy do 3 stanowisk i wskazówki do profilu, w języku CV, do skopiowania": "Заголовок (до 220 знаків), розділ «Інформація» (до 2600 знаків), до 15 навичок, описи до 3 посад і поради щодо профілю мовою резюме, готові до копіювання",
-"LinkedIn jest znakiem towarowym LinkedIn Corp.; serwis nie jest z nim powiązany.": "LinkedIn є торговельною маркою LinkedIn Corp.; сервіс не пов’язаний із нею."
+"LinkedIn jest znakiem towarowym LinkedIn Corp.; serwis nie jest z nim powiązany.": "LinkedIn є торговельною маркою LinkedIn Corp.; сервіс не пов’язаний із нею.",
+"przygotowane": "підготовлено",
+"Notatka": "Нотатка",
+"np. kontakt: p. Anna, HR": "напр. контакт: пані Анна, HR",
+"Dopasuj CV do tej oferty": "Підготувати резюме під цю вакансію",
+"Pobierz CSV": "Завантажити CSV",
+"+7 dni": "+7 днів",
+"Przypomnij o follow-up": "Нагадати про follow-up",
+"Przypomnienie o follow-up": "Нагадування про follow-up",
+"Follow-up (przypomnienie wysłane)": "Follow-up (нагадування надіслано)",
+"Wysyłaj przypomnienia o follow-up": "Надсилати нагадування про follow-up",
+"{0} z {1} pozycji": "{0} з {1} записів",
+"Zapisaliśmy tę ofertę w Twoich aplikacjach na koncie.": "Ми зберегли цю вакансію у списку заявок у вашому обліковому записі.",
+"Zapisuj, gdzie wysyłasz CV. CV z zamówień dodają się same jako „przygotowane”. Przypomnienie o follow-up przyjdzie e-mailem w wybranym dniu, a przypomnienie o rozmowie – dzień przed terminem. Wpisy znikają razem z kontem.": "Відстежуйте, куди ви надсилаєте резюме. Резюме із замовлень додаються автоматично як «підготовлено». Нагадування про follow-up прийде e-mailом у вибраний день, а нагадування про співбесіду – за день до неї. Записи видаляються разом з обліковим записом.",
+"przygotowano {0}": "підготовлено {0}"
 }
