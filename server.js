@@ -7,7 +7,7 @@ import { activePromo, ensurePromoCode } from './lib/promos.js';
 import { checkPhoto, recruiterAnswer, ToolError } from './lib/freeTools.js';
 import { alertRoutes, alertsHourly, addAlertFromOrder } from './lib/alerts.js';
 import { passRoutes, passesHourly, reservePass, passOrderPaid, releasePassOrder, passRefunded, confirmPassPayment, PassError } from './lib/passes.js';
-import { accountIdOf } from './lib/account.js';
+import { accountIdOf, accountEmail } from './lib/account.js';
 import { wizardDraftRoutes, wizardDraftsHourly, draftOrdered, draftPaid } from './lib/wizard-drafts.js';
 import { offerRoutes, feedSources } from './lib/jobfeed.js';
 import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUNDLE_OFF, withLetter as hasLetter, upsellOffers, upsellPlan } from './lib/pricing.js';
@@ -34,7 +34,7 @@ import { cleanDesign } from './lib/designs.js';
 import { usefulExtraLangs } from './lib/lang.js';
 import { seoRoutes, sendNotFound } from './lib/seo.js';
 import { p24Enabled, p24Register, p24NotificationOk, p24Verify, p24BySession } from './lib/p24.js';
-import { stripeEnabled, stripeCheckout, stripeSession, stripeEvent } from './lib/stripe.js';
+import { stripeEnabled, stripeCheckout, stripeSession, stripeEvent, stripeExpire } from './lib/stripe.js';
 import { recordSale, notifyNewOrder, setRefunded, commissionBack, ownerDaily, getSettings, DATA_DIR, addDailySection, dayKey } from './lib/ops.js';
 import { invoices, issueInvoice, renderInvoice, invoiceFile, cleanupInvoices } from './lib/invoice.js';
 import { renderDocx } from './lib/docx.js';
@@ -50,7 +50,7 @@ import { seoReportRoutes, seoWeekly } from './lib/seo-report.js';
 import { logEvent, cleanupEvents } from './lib/events.js';
 import { recordStatsSafe } from './lib/stats-agg.js';
 import { leadRoutes, cleanupLeads } from './lib/leads.js';
-import { emailHash, codeDiscount, applyPaidCode, isOwner, CODE_TTL } from './lib/referral.js';
+import { emailHash, codeDiscount, applyPaidCode, isOwner, CODE_TTL, reserveCode, releaseCode, staleReservations, CodeError } from './lib/referral.js';
 
 const PORT = process.env.PORT || 3000;
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
@@ -68,7 +68,9 @@ const SALES_CLOSED = STRIPE_BAD || ((DEMO || STRIPE_TEST) && process.env.NODE_EN
 const salesClosedFor = (req) => SALES_CLOSED && !isAdmin(req);
 const CLOSED_MSG = 'Zamówienia ruszą za kilka dni. Zapisz się do newslettera na dole strony, a damy znać o starcie.';
 const RETENTION_MS = 30 * 24 * 3600 * 1000;
-const MAX_REVISIONS = 10;
+const MAX_REVISIONS = 5;
+// Limit z chwili zakupu (zamówienia sprzed zmiany regulaminu: 10).
+const revLimit = (o) => o.maxRevisions ?? 10;
 
 const app = express();
 const AD_HOSTS = 'https://*.google.com https://*.google.pl https://*.googleadservices.com https://*.doubleclick.net https://*.googletagmanager.com https://*.google-analytics.com https://*.facebook.com https://*.facebook.net';
@@ -229,6 +231,39 @@ async function checkCode(raw, email) {
   if (d.error) return d;
   return { code, discount: d.base + d.credit, base: d.base, credit: d.credit, owner: isOwner(c, email), percent: c.percent || 0, voucher: c.voucher || null };
 }
+// Rezerwacja kodu przed zapisem zamówienia, w jednej blokadzie zapisu kodów (lib/referral.js: reserveCode).
+// Zamówienie za 0 zł (kod od instytucji, saldo) od razu zajmuje kod na stałe; płatne – do opłacenia albo 24 h.
+// Rezerwację przejętą od wcześniejszego zamówienia tej osoby zamykamy razem z jego sesją płatności (Stripe),
+// a checkout() po utworzeniu płatności sprawdza, czy rezerwacja wciąż należy do zamówienia – rabat nie przejdzie dwa razy.
+async function reserveOrderCode(order, base = 0) {
+  if (!order.code) return;
+  let moved = [];
+  const r = await codes.update(order.code, (c) => {
+    const h = emailHash(order.profile.email);
+    moved = (c.reserved || []).filter((x) => !x.final && x.hash === h && x.order !== order.id).map((x) => x.order);
+    return reserveCode(c, { email: order.profile.email, order: order.id, expect: { base, creditUsed: order.creditUsed || 0 }, final: order.total === 0 });
+  });
+  if (!r) throw new CodeError('Ten kod nie istnieje albo wygasł.');
+  for (const id of moved) {
+    const o = await getOrder(id).catch(() => null);
+    if (o?.status === 'pending' && o.stripe?.sessionId && stripeEnabled()) await stripeExpire(o.stripe.sessionId).catch((e) => logEvent('płatność', `Zamknięcie sesji po przejęciu kodu: ${e.message}`, { orderId: id }));
+  }
+}
+const holdsCode = async (order) => !order.code || order.upsellOf || !!(await codes.get(order.code))?.reserved?.some((x) => x.order === order.id);
+// Ślad do wykrycia samopolecenia (lib/referral.js): skrót IP (z solą, bez samego adresu) i konto; usuwany po 48 h (hourly).
+const refCtx = (req) => ({ ip: crypto.createHash('sha256').update(`${process.env.CODE_SALT || 'cvpo'}:ip:${req.ip || ''}`).digest('hex').slice(0, 16), acc: accountIdOf(req) || null });
+// Zamówienie z kodem polecającym złożone przez właściciela kodu pod innym e-mailem: to samo konto, ten sam e-mail płatnika
+// albo to samo konto/IP co zamówienie właściciela w ciągu 24 h → bez nagrody dla właściciela.
+async function selfReferral(o) {
+  const c = await codes.get(o.code);
+  if (!c?.ownerHash || isOwner(c, o.profile.email) || c.commission > 0) return false;
+  if (o.payment?.payerHash && o.payment.payerHash === c.ownerHash) return true;
+  const ctx = o.refCtx; if (!ctx) return false;
+  const acc = await accountEmail(ctx.acc).catch(() => null);
+  if (acc && emailHash(acc) === c.ownerHash) return true;
+  return Object.values(await allOrders()).some((x) => x.id !== o.id && x.refCtx && emailHash(x.profile?.email) === c.ownerHash && Math.abs((x.created || 0) - (o.created || 0)) < 864e5
+    && ((ctx.ip && x.refCtx.ip === ctx.ip) || (ctx.acc && x.refCtx.acc === ctx.acc)));
+}
 // Ile z salda poleceń faktycznie zeszło w tym zamówieniu (rabat jest przycinany do ceny pakietu).
 const creditUsedFor = (c, full, total) => (c.credit ? Math.max(0, Math.min(c.credit, full - total - c.base)) : 0);
 // Rabat w groszach: kwotowy albo procentowy (kody akcji promocyjnych z panelu).
@@ -384,6 +419,7 @@ async function checkout(order, lang) {
       returnUrl: `${BASE_URL}/${['en', 'uk', 'de'].includes(l) ? l : ''}?id=${order.upsellOf || order.id}`, // dodatek: powrót na stronę dokumentów zamówienia
     });
     await updateOrder(order.id, { payAttempts: (order.payAttempts || 0) + 1, stripe: { sessionId: sess.id } });
+    if (!(await holdsCode(order))) { await stripeExpire(sess.id).catch(() => {}); throw new CodeError('Rabat z tego kodu jest już w innym Twoim zamówieniu. Złóż zamówienie ponownie.'); }
     return { id: order.id, url: sess.url };
   }
   const attempt = (order.payAttempts || 0) + 1, sessionId = `${order.id}.${attempt}`;
@@ -393,6 +429,7 @@ async function checkout(order, lang) {
     urlReturn: `${BASE_URL}/?id=${order.upsellOf || order.id}`, urlStatus: `${BASE_URL}/api/p24/status`,
   });
   await updateOrder(order.id, { payAttempts: attempt, p24: { sessionId, token } });
+  if (!(await holdsCode(order))) throw new CodeError('Rabat z tego kodu jest już w innym Twoim zamówieniu. Złóż zamówienie ponownie.');
   return { id: order.id, url };
 }
 // Stripe: płatność potwierdzona tylko, gdy sesja jest opłacona, dotyczy tego zamówienia i kwota się zgadza.
@@ -408,7 +445,7 @@ async function confirmB2b(b, sess) {
 async function confirmStripe(o, sess) {
   if (o.status !== 'pending' || sess.payment_status !== 'paid' || sess.client_reference_id !== o.id) return false;
   if (sess.amount_total !== o.total || sess.currency !== 'pln') { logEvent('płatność', `Stripe: kwota ${sess.amount_total} ${sess.currency} nie zgadza się z zamówieniem`, { orderId: o.id }); return false; }
-  await updateOrder(o.id, { payment: { provider: 'stripe', sessionId: sess.id, paymentIntent: sess.payment_intent, at: Date.now() } });
+  await updateOrder(o.id, { payment: { provider: 'stripe', sessionId: sess.id, paymentIntent: sess.payment_intent, at: Date.now(), ...(sess.customer_details?.email ? { payerHash: emailHash(sess.customer_details.email) } : {}) } });
   markPaidAndGenerate(o.id).catch(console.error);
   return true;
 }
@@ -432,6 +469,8 @@ app.post('/api/p24/status', async (req, res) => {
 app.post('/api/orders/:id/pay', async (req, res) => {
   const o = await getOrder(req.params.id);
   if (!o || o.status !== 'pending') return res.status(409).json({ error: 'To zamówienie jest już opłacone.' });
+  // Rezerwacja kodu mogła wygasnąć (24 h) albo przejść na nowsze zamówienie tej osoby: zajmujemy kod ponownie.
+  if (!o.upsellOf) try { await reserveOrderCode(o, o.codeBase || 0); } catch (e) { if (e instanceof CodeError) return res.status(409).json({ error: `${e.message} Złóż zamówienie ponownie.` }); throw e; }
   try { res.json(await checkout(o)); } catch (e) { logEvent('płatność', e.message, { orderId: o.id }); res.status(502).json({ error: 'Nie udało się otworzyć płatności. Spróbuj za chwilę.' }); }
 });
 
@@ -474,7 +513,11 @@ app.post('/api/orders', async (req, res) => {
     if (inv?.error) { if (passUse) releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {}); return res.status(400).json({ error: inv.error }); }
     const disc = passUse ? 0 : discountFor(c, pkg, a.length, ad, false, langs), total = passUse ? passUse.total : calcTotal(pkg, a.length, ad, false, langs, disc);
     const shown = await previewFor(p, a[0]).catch(() => null); // podgląd z ostatniego kroku kreatora, jeśli był
-    const order = { preview: shown, visit: visitInfo(req), invoice: total > 0 ? inv : null, id: orderId, ...(passUse ? { pass: { id: passUse.passId, use: passUse.use, items: passUse.items } } : {}), pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
+    const order = { preview: shown, visit: visitInfo(req), refCtx: refCtx(req), invoice: total > 0 ? inv : null, id: orderId, ...(passUse ? { pass: { id: passUse.passId, use: passUse.use, items: passUse.items } } : {}), pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, maxRevisions: MAX_REVISIONS, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
+    try { await reserveOrderCode(order, c.base); } catch (e) {
+      if (passUse) releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {});
+      if (e instanceof CodeError) return res.status(409).json({ error: e.message }); throw e;
+    }
     if (draftToken) { const ref = await draftOrdered(String(draftToken)).catch(() => null); if (ref) order.draftRef = ref; } // bez przypomnienia o szkicu po złożeniu zamówienia
     await saveOrder(order);
     res.json(await checkout(order));
@@ -494,7 +537,8 @@ app.post('/api/orders/:id/followup', async (req, res) => {
     if (c.error) return res.status(400).json({ error: c.error });
     const pkg = ['cv', 'cv_letter', 'pack3'].includes(req.body?.pkg) ? req.body.pkg : parent.pkg;
     const disc = discountFor(c, pkg, a.length, ad, true, langs), total = calcTotal(pkg, a.length, ad, true, langs, disc);
-    const order = { id: crypto.randomUUID(), uiLang: parent.uiLang, parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, true, langs, 0), total), total, profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const order = { id: crypto.randomUUID(), refCtx: refCtx(req), uiLang: parent.uiLang, parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, true, langs, 0), total), total, profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, maxRevisions: MAX_REVISIONS, created: Date.now() };
+    try { await reserveOrderCode(order, c.base); } catch (e) { if (e instanceof CodeError) return res.status(409).json({ error: e.message }); throw e; }
     await saveOrder(order);
     res.json(await checkout(order));
   } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
@@ -503,7 +547,7 @@ app.post('/api/orders/:id/followup', async (req, res) => {
 const view = (o, extra = {}) => ({
   ...extra, id: o.id, pkg: o.pkg, addons: o.addons || {}, extraLangs: o.extraLangs || [], total: o.total, status: o.status, results: (o.results || []).map(({ qa, ...r }) => r), error: o.error, mail: o.mail,
   design: cleanDesign(o.design), photo: o.profile.photo || '', email: o.profile.email, parentId: o.parentId || null,
-  paidAt: o.paidAt || null, createAccount: !!o.createAccount, canPay: o.status === 'pending' && !DEMO, revisionsLeft: MAX_REVISIONS - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
+  paidAt: o.paidAt || null, createAccount: !!o.createAccount, canPay: o.status === 'pending' && !DEMO, revisionsLeft: revLimit(o) - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
   invoice: o.invoice?.pdf ? { number: o.invoice.number } : null,
 });
 
@@ -627,7 +671,16 @@ async function trySend(order) {
 // Po opłaceniu: zapisujemy użycie kodu i dajemy klientowi jego kod (jeden na klienta, także przy kolejnych zamówieniach).
 async function afterPaid(o) {
   try {
-    if (o.code) await codes.update(o.code, (c) => applyPaidCode(c, { email: o.profile.email, creditUsed: o.creditUsed || 0, total: o.total || 0 }));
+    if (o.code) {
+      // Zamówienie z kodem opłacone bez rezerwacji (np. stary link Przelewy24 po przejęciu kodu przez nowsze zamówienie).
+      if (!o.upsellOf && !(await holdsCode(o).catch(() => true)) && o.maxRevisions != null) { // starsze zamówienia (bez maxRevisions) nie miały rezerwacji
+        logEvent('kody', `Opłacone bez rezerwacji kodu ${o.code}`, { orderId: o.id });
+        alertOwner(`Zamówienie ${o.id} z kodem ${o.code} zostało opłacone bez rezerwacji kodu (np. stary link do płatności po złożeniu nowszego zamówienia). Rabat mógł zostać użyty dwa razy – sprawdź w panelu → Zamówienia.`);
+      }
+      const selfRef = await selfReferral(o).catch(() => false);
+      if (selfRef) logEvent('kody', `Samopolecenie: kod ${o.code} bez nagrody`, { orderId: o.id });
+      await codes.update(o.code, (c) => applyPaidCode(c, { email: o.profile.email, creditUsed: o.creditUsed || 0, total: o.total || 0, order: o.id, selfRef }));
+    }
     const root = o.rootId || o.parentId || o.id;
     const existing = Object.values(await codes.all()).find((c) => c.ownerOrderId === root);
     if (existing) {
@@ -804,14 +857,15 @@ app.put('/api/orders/:id/results/:i', async (req, res) => {
 app.post('/api/orders/:id/revise', async (req, res) => {
   const d = await doneOrder(req, res); if (!d) return;
   const { o, i } = d;
-  if ((o.revisions || 0) >= MAX_REVISIONS) return res.status(429).json({ error: 'Wykorzystano limit poprawek. Napisz do nas, jeśli dokument nadal wymaga zmian.' });
+  if ((o.revisions || 0) >= revLimit(o)) return res.status(429).json({ error: 'Wykorzystano limit poprawek. Napisz do nas, jeśli dokument nadal wymaga zmian.' });
   const doc = req.body?.doc === 'letter' && hasLetter(o.pkg) ? 'letter' : 'cv';
   const instruction = str(req.body?.instruction, 500);
   if (instruction.length < 3) return res.status(400).json({ error: 'Opisz, co zmienić.' });
   try {
     const lang = str(req.body?.lang, 5), base = o.results[i], target = base.variants?.[lang] || base;
     const out = await reviseDoc({ profile: o.profile, ad: o.ads[i], result: target, doc, instruction });
-    const r = { ...target, ...(doc === 'letter' ? { letter: str(out.letter, 8000) } : { cv: cleanCv(out.cv) }) };
+    // Tożsamość zostaje z oryginału (imię i nazwisko, kontakt; zdjęcie jest w profilu): poprawka nie zrobi CV dla innej osoby.
+    const r = { ...target, ...(doc === 'letter' ? { letter: str(out.letter, 8000) } : { cv: { ...cleanCv(out.cv), name: target.cv?.name || '', contact: target.cv?.contact || [] } }) };
     // Klient dopisał brakujące wymaganie: przenosimy je w raporcie do spełnionych.
     const resolves = str(req.body?.resolves, 120);
     if (resolves && r.match?.missing?.some((m) => m.keyword === resolves)) {
@@ -821,7 +875,7 @@ app.post('/api/orders/:id/revise', async (req, res) => {
     const merged = base.variants?.[lang] ? { ...base, variants: { ...base.variants, [lang]: r } } : { ...r, variants: base.variants };
     const results = o.results.map((x, k) => (k === i ? merged : x));
     await updateOrder(o.id, { results, revisions: (o.revisions || 0) + 1 });
-    res.json({ result: merged, note: str(out.note, 300), revisionsLeft: MAX_REVISIONS - (o.revisions || 0) - 1 });
+    res.json({ result: merged, note: str(out.note, 300), revisionsLeft: revLimit(o) - (o.revisions || 0) - 1 });
   } catch (e) {
     console.error('Poprawka', o.id, e.message);
     res.status(502).json({ error: e instanceof AiRefusal ? 'Nie możemy wprowadzić tej zmiany. Spróbuj opisać ją inaczej.' : 'Poprawka się nie udała. Spróbuj ponownie za chwilę.' });
@@ -870,11 +924,21 @@ adminRoutes(app, { DEMO, BASE_URL, markPaidAndGenerate, trySend, retentionMs: RE
 // Dane zamówień (w tym zdjęcia) kasujemy po 30 dniach.
 // Co godzinę: kasowanie starych zamówień i kodów oraz jednorazowe przypomnienie po 7 dniach (tylko za zgodą klienta).
 const PAY_REMINDER_AFTER = 3 * 3600_000;
+// Rezerwacje kodów z zamówień nieopłaconych przez 24 h (albo usuniętych) wracają do puli.
+async function releaseStaleCodes() {
+  for (const c of Object.values(await codes.all())) {
+    const free = [];
+    for (const id of staleReservations(c)) { const o = await getOrder(id); if (!o || o.status === 'pending') free.push(id); }
+    if (free.length) await codes.update(c.id, (x) => releaseCode(x, free));
+  }
+}
 async function hourly() {
   try {
     const n = await deleteOlderThan(RETENTION_MS);
     if (n) console.log(`Usunięto ${n} zamówień starszych niż 30 dni`);
     await codes.deleteWhere((c) => Date.now() > c.expires && !(c.due > 0)); // kod partnera z niewypłaconą prowizją zostaje do rozliczenia
+    await releaseStaleCodes();
+    for (const x of Object.values(await allOrders())) if (x.refCtx && Date.now() - (x.created || 0) > 48 * 3600e3) await updateOrder(x.id, (y) => { const { refCtx: _r, ...rest } = y; return rest; });
     // Starsze kody klientów nie miały skrótu e-maila właściciela: uzupełniamy go, póki zamówienie jeszcze istnieje.
     for (const c of Object.values(await codes.all())) {
       const o = !c.ownerHash && c.ownerOrderId && (await getOrder(c.ownerOrderId));
