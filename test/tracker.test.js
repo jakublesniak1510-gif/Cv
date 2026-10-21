@@ -111,6 +111,9 @@ test('Dwa przypomnienia jednego konta w tym samym przebiegu: ten sam token, wypi
     const t = new URL(links[0]).searchParams.get('t');
     await fetch(`${U}/konto/przypomnienia/wypisz?t=${t}`, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'List-Unsubscribe=One-Click' });
     assert.equal((await call('')).j.followOff, true, 'wypis z pierwszego e-maila ustawia followOff');
+    // token z wielobajtowymi znakami tej samej długości w znakach: strona „link nieaktualny”, nie błąd 500
+    const multi = 'ą'.repeat(t.length);
+    for (const m of ['GET', 'POST']) { const r = await fetch(`${U}/konto/przypomnienia/wypisz?t=${encodeURIComponent(multi)}`, { method: m }); assert.equal(r.status, 200, m); if (m === 'GET') assert.match(await r.text(), /Link nieaktualny/); }
   });
 });
 

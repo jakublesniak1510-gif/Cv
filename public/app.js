@@ -733,6 +733,8 @@ const rows = (box) => $$('#' + box + ' .entry').map((e) => Object.fromEntries($$
 const pkg = () => $('input[name=pkg]:checked').value;
 const nAds = () => Math.max(1, $('#ads').children.length);
 const addons = () => Object.fromEntries(Object.entries(ADDON_KEYS).map(([k, [sel]]) => [k, $(sel).checked]));
+// Wersja angielska profilu LinkedIn: opcja widoczna tylko przy zaznaczonym dodatku.
+$('#adLinkedin')?.addEventListener('change', () => { $('#liEnBox').hidden = !$('#adLinkedin').checked; });
 const extraLangs = () => $$('#langPick input:checked').map((i) => i.value);
 // Pakiet „Pewna rozmowa”: list + przygotowanie do rozmowy + symulator razem taniej (tak samo liczy serwer, lib/pricing.js).
 const bundleOn = () => pkg() !== 'cv' && addons().interview && addons().sim;
@@ -763,7 +765,7 @@ $('#usePass').onchange = () => refresh();
 
 const DKEY = 'cvpo-draft-v1', FIELDS = ['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'];
 let saveT, restoring = false;
-const draftData = () => ({ design, photo, addons: addons(), langs: extraLangs(), pkg: pkg(), f: Object.fromEntries(FIELDS.map((k) => [k, $('#' + k).value])), exp: rows('exp'), edu: rows('edu'), ads: rows('ads') });
+const draftData = () => ({ design, photo, addons: { ...addons(), linkedinEn: $('#adLinkedinEn').checked }, langs: extraLangs(), pkg: pkg(), f: Object.fromEntries(FIELDS.map((k) => [k, $('#' + k).value])), exp: rows('exp'), edu: rows('edu'), ads: rows('ads') });
 // Szkic na serwerze („Wyślij mi link do dokończenia”, lib/wizard-drafts.js): po wysłaniu linku formularz synchronizuje się z nim (bez zdjęcia).
 const SKEY = 'cvpo-srv-draft';
 const srvToken = () => { try { return localStorage.getItem(SKEY) || ''; } catch { return ''; } };
@@ -788,7 +790,7 @@ function restoreDraft(from) {
   if (d.design && LEGACY[d.design.tpl]) d.design.tpl = LEGACY[d.design.tpl];
   if (d.design && COLORS[d.design.color] && TPLS.some((t) => t[0] === d.design.tpl)) design = { ...d.design };
   FIELDS.forEach((k) => ($('#' + k).value = d.f[k] || ''));
-  if (d.addons) Object.entries(ADDON_KEYS).forEach(([k, [sel]]) => ($(sel).checked = !!d.addons[k]));
+  if (d.addons) { Object.entries(ADDON_KEYS).forEach(([k, [sel]]) => ($(sel).checked = !!d.addons[k])); $('#adLinkedinEn').checked = !!d.addons.linkedinEn; $('#liEnBox').hidden = !$('#adLinkedin').checked; }
   (d.langs || []).forEach((l) => { const i = $(`#langPick input[value="${l}"]`); if (i) i.checked = true; });
   setPhoto(d.photo || '');
   ['exp', 'edu', 'ads'].forEach((b) => { $('#' + b).replaceChildren(); (d[b]?.length ? d[b] : [{}]).forEach((v) => addRow(b, v)); });
@@ -1026,7 +1028,7 @@ $('#wizForm').onsubmit = async (e) => {
   const v = (id) => $('#' + id).value;
   const body = {
     draftToken: srvToken() || undefined,
-    usePass: passOn(), design, addons: addons(), extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   // Zgoda na cookies reklamowe (baner): tylko wtedy serwer zgłosi zakup do Meta (Conversions API) z identyfikatorami piksela.
@@ -1382,12 +1384,16 @@ function copyBtn(text) {
   } });
 }
 function linkedinNode(r, d) {
-  const l = r.linkedin, p = paperEl('extra', { tpl: 'klasyczny', color: d.color });
-  const block = (title, text) => [el('h3', { textContent: title }), copyBtn(text), el('div', { className: 'msgbox', textContent: text })];
+  const p = paperEl('extra', { tpl: 'klasyczny', color: d.color });
+  // Liczniki znaków pod limity LinkedIna (nagłówek 220, „Informacje” 2600).
+  const block = (title, text, max) => [el('h3', { textContent: title }, max ? (() => { const s = el('small', { className: 'li-count', textContent: ` ${String(text || '').length}/${max} znaków` }); s.setAttribute('data-i18n', ''); return s; })() : null), copyBtn(text), el('div', { className: 'msgbox', textContent: text })];
+  const prof = (l, en) => [
+    ...(en ? [el('h2', { className: 'li-en-h', textContent: 'Wersja angielska (English)' })] : []),
+    ...block(en ? 'Headline' : 'Nagłówek', l.headline, 220), ...block(en ? 'About' : 'Informacje', l.about, 2600), ...block(en ? 'Skills (in this order)' : 'Umiejętności (w tej kolejności)', (l.skills || []).join(', ')),
+    ...(l.experience || []).flatMap((e) => block(`${en ? 'Experience' : 'Doświadczenie'}: ${e.title}${e.company ? ', ' + e.company : ''}`, e.text)),
+    ...(l.tips?.length ? [el('h3', { textContent: en ? 'Profile settings' : 'Ustawienia profilu' }), el('ul', { className: 'iv-list' }, ...l.tips.map((t) => el('li', { textContent: t })))] : [])];
   p.append(el('div', { className: 'pg' }, el('header', { className: 'top lhead' }, el('h1', { textContent: 'Profil LinkedIn' }), el('div', { className: 'ct', textContent: r.position }), el('div', { className: 'rule' })),
-    ...block('Nagłówek', l.headline), ...block('Informacje', l.about), ...block('Umiejętności (w tej kolejności)', (l.skills || []).join(', ')),
-    ...(l.experience || []).flatMap((e) => block(`Doświadczenie: ${e.title}${e.company ? ', ' + e.company : ''}`, e.text)),
-    ...(l.tips?.length ? [el('h3', { textContent: 'Ustawienia profilu' }), el('ul', { className: 'iv-list' }, ...l.tips.map((t) => el('li', { textContent: t })))] : [])));
+    ...prof(r.linkedin, false), ...(r.linkedinEn ? prof(r.linkedinEn, true) : [])));
   return p;
 }
 function messagesNode(r, d) {
@@ -1523,20 +1529,25 @@ function drawFollowup() {
 // Dodatki po zakupie: osobna płatność tylko za dodatek, potem dodatek pojawia się w tym zamówieniu.
 let upsellTimer = null;
 const UPSELL_PART = { letter: 'list motywacyjny', interview: 'przygotowanie do rozmowy', sim: 'symulator rozmowy' };
-const UPSELL_HINT = { letter: 'List motywacyjny do każdego CV z tego zamówienia, pod to samo ogłoszenie.', interview: 'Pytania z tego ogłoszenia z przykładowymi odpowiedziami, autoprezentacja i lista rzeczy do przygotowania.', sim: 'Rozmowa z AI w roli rekrutera pod to stanowisko, z oceną odpowiedzi.', bundle: 'Wszystko, czego brakuje do rozmowy: list, przygotowanie i symulator razem taniej.' };
+const UPSELL_HINT = { linkedin: 'Nagłówek, sekcja „Informacje”, do 15 umiejętności i opisy stanowisk spójne z Twoim CV, do skopiowania na LinkedIn.', letter: 'List motywacyjny do każdego CV z tego zamówienia, pod to samo ogłoszenie.', interview: 'Pytania z tego ogłoszenia z przykładowymi odpowiedziami, autoprezentacja i lista rzeczy do przygotowania.', sim: 'Rozmowa z AI w roli rekrutera pod to stanowisko, z oceną odpowiedzi.', bundle: 'Wszystko, czego brakuje do rozmowy: list, przygotowanie i symulator razem taniej.' };
 function drawUpsell() {
   const box = $('#upsell'), offers = data.upsells || [];
   clearTimeout(upsellTimer);
   if (data.upsellBusy) { box.hidden = false; box.replaceChildren(el('h3', { textContent: 'Przygotowujemy dokupiony dodatek…' }), el('p', { className: 'hint', textContent: 'To zwykle trwa do 2 minut. Strona odświeży się sama, a dokumenty wyślemy też e-mailem.' })); upsellTimer = setTimeout(() => startResult(orderId), 8000); return; }
   box.hidden = !offers.length || data.status !== 'done';
   if (box.hidden) return;
+  // Zgoda z art. 38 pkt 13 (jak w kreatorze): bez niej przycisk płatności za dodatek nie działa.
+  const waive = el('input', { type: 'checkbox', id: 'upWaiver' });
   box.replaceChildren(el('h3', { textContent: 'Dodaj do zamówienia' }), el('p', { className: 'hint', textContent: 'Płacisz tylko za dodatek. Przygotujemy go do tych samych ogłoszeń i dodamy na tej stronie.' }),
+    el('label', { className: 'check' }, waive, ' ', el('span', { textContent: 'Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.' })),
     el('div', { className: 'upsell-list' }, ...offers.map((o) => el('div', { className: 'upsell-item' },
       el('div', {}, el('b', { textContent: o.name }), el('p', { className: 'hint', textContent: o.key === 'bundle' ? `Razem taniej: ${(o.includes || []).map((k) => UPSELL_PART[k]).join(', ')}.` : UPSELL_HINT[o.key] || '' })),
       el('button', { type: 'button', className: 'btn sm', textContent: `Dodaj za ${o.price} zł`, onclick: async (e) => {
-        const b = e.currentTarget; if (b.disabled) return; b.disabled = true; b.textContent = 'Przechodzę do płatności…';
+        const b = e.currentTarget; if (b.disabled) return;
+        if (!waive.checked) { flash('Zaznacz zgodę na wykonanie usługi od razu po płatności.', true); waive.focus(); return; }
+        b.disabled = true; b.textContent = 'Przechodzę do płatności…';
         try {
-          const r = await fetch(`/api/orders/${orderId}/upsell`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: o.key }) }); const j = await r.json();
+          const r = await fetch(`/api/orders/${orderId}/upsell`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: o.key, waiver: true }) }); const j = await r.json();
           if (!r.ok) throw new Error(j.error || 'Nie udało się otworzyć płatności.');
           if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); return startResult(orderId); }
           location.href = j.url;

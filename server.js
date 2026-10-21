@@ -12,7 +12,7 @@ import { wizardDraftRoutes, wizardDraftsHourly, draftOrdered, draftPaid } from '
 import { offerRoutes, feedSources } from './lib/jobfeed.js';
 import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUNDLE_OFF, withLetter as hasLetter, upsellOffers, upsellPlan } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads } from './lib/store.js';
-import { generateForAd, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
+import { generateForAd, linkedinChecked, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
 import { checkResult, hasCritical, recordQa, QA_LABELS } from './lib/qa.js';
 import { renderCv } from './lib/pdf.js';
@@ -274,7 +274,10 @@ const creditUsedFor = (c, full, total) => (c.credit ? Math.max(0, Math.min(c.cre
 const discountFor = (c, pkg, n, ad, returning, langs) => c.voucher ? (PRICES[pkg] <= PRICES[c.voucher] ? 'voucher' : PRICES[c.voucher]) : (c.percent ? Math.round((calcTotal(pkg, n, ad, returning, langs, 0) * c.percent) / 100) : c.discount || 0);
 const discountGr = (disc, pkg) => (disc === 'voucher' ? PRICES[pkg] : disc); // do zapisu w zamówieniu (grosze)
 const newCode = (prefix) => `${prefix}-${crypto.randomBytes(4).toString('hex').toUpperCase().slice(0, 6)}`;
-const cleanAddons = (a = {}) => Object.fromEntries(Object.keys(ADDONS).map((k) => [k, !!a[k]]));
+// Zgoda z art. 38 pkt 13 ustawy o prawach konsumenta (ta sama treść w kreatorze i przy dokupieniu dodatku).
+const WAIVER = 'Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.';
+// linkedinEn: bezpłatna opcja dodatku „Profil LinkedIn” (profil także po angielsku), tylko razem z nim.
+const cleanAddons = (a = {}) => ({ ...Object.fromEntries(Object.keys(ADDONS).map((k) => [k, !!a[k]])), ...(a.linkedin && a.linkedinEn ? { linkedinEn: true } : {}) });
 // Edytowane przez klienta CV: ten sam kształt co z generatora, przycięte długości.
 const cleanCv = (c = {}) => ({
   name: str(c.name, 100), headline: str(c.headline, 140), contact: arr(c.contact, 6).map((x) => str(x, 200)).filter(Boolean),
@@ -497,7 +500,7 @@ previewRoutes(app, { cleanProfile, cleanAds });
 app.post('/api/orders', async (req, res) => {
   if (salesClosedFor(req)) return res.status(503).json({ error: CLOSED_MSG });
   try {
-    const { profile, ads, consent, design, addons, extraLangs, code, reminder, followUp, jobAlerts, reviewAsk, outcomeAsk, payReminder, uiLang, createAccount, invoice, adConsent, usePass, draftToken } = req.body || {};
+    const { profile, ads, consent, design, addons, extraLangs, code, reminder, followUp, jobAlerts, reviewAsk, outcomeAsk, payReminder, uiLang, createAccount, invoice, adConsent, usePass, draftToken, waiver } = req.body || {};
     let { pkg } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
     const a = cleanAds(ads);
@@ -521,7 +524,7 @@ app.post('/api/orders', async (req, res) => {
     if (inv?.error) { if (passUse) releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {}); return res.status(400).json({ error: inv.error }); }
     const disc = passUse ? 0 : discountFor(c, pkg, a.length, ad, false, langs), total = passUse ? passUse.total : calcTotal(pkg, a.length, ad, false, langs, disc);
     const shown = await previewFor(p, a[0]).catch(() => null); // podgląd z ostatniego kroku kreatora, jeśli był
-    const order = { preview: shown, visit: visitInfo(req), refCtx: refCtx(req), invoice: total > 0 ? inv : null, id: orderId, ...(passUse ? { pass: { id: passUse.passId, use: passUse.use, items: passUse.items } } : {}), pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, outcomeAsk: outcomeAsk === true ? { consent: true, text: OUTCOME_CONSENT, at: Date.now(), sent: false } : { consent: false, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, maxRevisions: MAX_REVISIONS, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
+    const order = { preview: shown, visit: visitInfo(req), refCtx: refCtx(req), invoice: total > 0 ? inv : null, id: orderId, ...(passUse ? { pass: { id: passUse.passId, use: passUse.use, items: passUse.items } } : {}), pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, outcomeAsk: outcomeAsk === true ? { consent: true, text: OUTCOME_CONSENT, at: Date.now(), sent: false } : { consent: false, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, ...(waiver === true ? { waiver: { text: WAIVER, at: Date.now() } } : {}), status: 'pending', results: [], revisions: 0, maxRevisions: MAX_REVISIONS, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
     try { await reserveOrderCode(order, c.base); } catch (e) {
       if (passUse) releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {});
       if (e instanceof CodeError) return res.status(409).json({ error: e.message }); throw e;
@@ -614,12 +617,14 @@ app.post('/api/orders/:id/upsell', async (req, res) => {
     if (!p || p.status !== 'done' || p.upsellOf) return res.status(409).json({ error: 'Dodatki można dokupić do gotowego zamówienia.' });
     const plan = upsellOffers(p).find((x) => x.key === req.body?.key);
     if (!plan) return res.status(400).json({ error: 'Ten dodatek nie jest już dostępny dla tego zamówienia.' });
+    // Art. 38 pkt 13 ustawy o prawach konsumenta: zgoda na wykonanie od razu po płatności, jak przy zamówieniu (zapis treści i czasu).
+    if (req.body?.waiver !== true) return res.status(400).json({ error: 'Zaznacz zgodę na wykonanie usługi od razu po płatności.' });
     // Niezapłacona wcześniejsza próba tego samego dodatku: używamy jej ponownie (bez mnożenia zamówień).
     let u = null;
     for (const uid of p.upsellIds || []) { const x = await getOrder(uid); if (x?.status === 'pending' && x.upsell?.key === plan.key) u = x; }
     if (u && !(u.upsell.pkg === plan.pkg && u.total === plan.price)) u = null;
     if (!u) {
-      u = { id: crypto.randomUUID(), upsellOf: p.id, upsell: { key: plan.key, name: plan.name, pkg: plan.pkg, addons: plan.addons }, pkg: p.pkg, addons: {}, extraLangs: [], ads: [], total: plan.price, discount: 0,
+      u = { id: crypto.randomUUID(), upsellOf: p.id, waiver: { text: WAIVER, at: Date.now() }, upsell: { key: plan.key, name: plan.name, pkg: plan.pkg, addons: plan.addons }, pkg: p.pkg, addons: {}, extraLangs: [], ads: [], total: plan.price, discount: 0,
         profile: { name: p.profile.name, email: p.profile.email }, invoice: p.invoice ? { name: p.invoice.name, address: p.invoice.address, nip: p.invoice.nip || '' } : null, uiLang: p.uiLang, status: 'pending', results: [], created: Date.now() };
       await saveOrder(u);
       await updateOrder(p.id, (x) => ({ ...x, upsellIds: [...(x.upsellIds || []), u.id].slice(-20) }));
@@ -768,7 +773,7 @@ async function applyUpsell(o) {
     if (paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: o.id }));
     countEvent('upsell_paid').catch(() => {});
   }
-  const u = o.upsell, letter = hasLetter(u.pkg) && !hasLetter(p.pkg), interview = !!u.addons.interview && !p.addons?.interview;
+  const u = o.upsell, letter = hasLetter(u.pkg) && !hasLetter(p.pkg), interview = !!u.addons.interview && !p.addons?.interview, linkedin = !!u.addons.linkedin && !p.addons?.linkedin;
   // Generujemy tylko nowe części; tłumaczymy też tylko je (CV w innych językach zostaje bez zmian).
   const parts = (letter || interview) ? await Promise.all(p.ads.map(async (ad, i) => {
     const r = await generateForAd({ profile: p.profile, ad, withLetter: hasLetter(u.pkg), addons: u.addons });
@@ -777,11 +782,26 @@ async function applyUpsell(o) {
     for (const l of langs) { const t = await translateResult({ lang: r.lang, cv: { name: p.results[i].cv?.name || '' }, ...add }, l); tr[l] = Object.fromEntries(Object.keys(add).map((k) => [k, t[k]])); }
     return { add, tr };
   })) : [];
+  // Profil LinkedIn dokupiony po zakupie: tylko profil, na podstawie gotowego CV (bez generowania CV od nowa).
+  // Kontrola jakości jak przy zamówieniu: przy krytycznej fladze li_* jedna ponowna generacja, potem alert do właściciela.
+  // Profil trafia też do każdej wersji językowej CV (tłumaczony jak list), żeby zakładka nie znikała po zmianie języka.
+  if (linkedin) {
+    const bad = [];
+    await Promise.all(p.ads.map(async (ad, i) => {
+      const r = p.results?.[i]; if (!r) return;
+      const { li, qa, bad: failed } = await linkedinChecked({ profile: p.profile, ad, result: r });
+      if (failed) bad.push({ ...r, qa });
+      const tr = { ...(parts[i]?.tr || {}) };
+      for (const l of Object.keys(r.variants || {})) { const t = await translateResult({ lang: r.lang, cv: { name: r.cv?.name || '' }, linkedin: li }, l); tr[l] = { ...(tr[l] || {}), linkedin: t.linkedin }; }
+      parts[i] = { add: { ...(parts[i]?.add || {}), linkedin: li }, tr };
+    }));
+    if (bad.length) qaAlert(p.id, bad);
+  }
   // Scalanie na aktualnym stanie zamówienia (poprawki klienta i równoległy drugi dodatek zostają); pakietu nigdy nie obniżamy.
   const next = await updateOrder(p.id, (x) => ({ ...x, pkg: hasLetter(x.pkg) ? x.pkg : u.pkg, addons: { ...x.addons, ...u.addons },
-    results: parts.length ? (x.results || []).map((r, i) => (parts[i] ? { ...r, ...parts[i].add, ...(r.variants ? { variants: Object.fromEntries(Object.entries(r.variants).map(([l, v]) => [l, { ...v, ...(parts[i].tr[l] || {}) }])) } : {}) } : r)) : x.results }));
+    results: parts.some(Boolean) ? (x.results || []).map((r, i) => (parts[i] ? { ...r, ...parts[i].add, ...(r.variants ? { variants: Object.fromEntries(Object.entries(r.variants).map(([l, v]) => [l, { ...v, ...(parts[i].tr[l] || {}) }])) } : {}) } : r)) : x.results }));
   await updateOrder(o.id, { status: 'done' });
-  if (letter || interview) trySend({ ...next, myCode: next.myCode }).then((mail) => updateOrder(p.id, { mail })).catch((e) => logEvent('e-mail', `Dodatek: ${e.message}`, { orderId: p.id }));
+  if (letter || interview || linkedin) trySend({ ...next, myCode: next.myCode }).then((mail) => updateOrder(p.id, { mail })).catch((e) => logEvent('e-mail', `Dodatek: ${e.message}`, { orderId: p.id }));
 }
 
 // Faktura bez VAT na życzenie klienta: numer, PDF w e-mailu i na stronie dokumentów (wyłączane w panelu → Ustawienia).
@@ -798,7 +818,7 @@ async function autoInvoice(o, { force = false } = {}) {
 const crit = (qa) => qa.flags.filter((f) => f.level === 'critical').length;
 async function qaOf(r, o, ad, withLetter) {
   let pages = null; try { pages = (await renderCv(r, o.design, o.profile?.photo)).pages; } catch {}
-  try { return checkResult(r, { profile: o.profile, ad, withLetter, pages }); } catch (e) { logEvent('generowanie', `Kontrola jakości: ${e.message}`); return { score: null, flags: [] }; }
+  try { return checkResult(r, { profile: o.profile, ad, withLetter, pages, linkedin: !!o.addons?.linkedin, linkedinEn: !!o.addons?.linkedinEn }); } catch (e) { logEvent('generowanie', `Kontrola jakości: ${e.message}`); return { score: null, flags: [] }; }
 }
 // Dalej źle po ponownej generacji: alert do właściciela bez treści CV – tylko id zamówienia i kody flag (osobny limit: raz na godzinę).
 let lastQaAlert = 0;
