@@ -540,10 +540,12 @@ textarea{min-height:88px;resize:vertical}
 .app-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 12px;align-items:end}
 .app-form input{width:100%;margin-top:6px}
 @media(max-width:800px){.app-form{grid-template-columns:1fr 1fr}}
-.app-row{display:grid;grid-template-columns:1.4fr 150px 210px 1fr auto;gap:12px;align-items:center;border-top:1px solid var(--line);padding:12px 0}
+.app-row{display:grid;grid-template-columns:1.6fr repeat(3,minmax(150px,1fr));gap:10px 12px;align-items:center;border-top:1px solid var(--line);padding:12px 0}
+.app-note{grid-column:span 2}.app-note input,.app-row input[type=date]{width:100%;margin-top:4px}.app-fol{display:flex;gap:8px;align-items:center}.app-fol .link{white-space:nowrap}.app-act{display:flex;gap:12px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.app-tools{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:4px 0 8px}.st-prep{color:var(--brand)}
 .app-row label.f{margin:0;font-size:12px;color:var(--mute)}.app-row select,.app-row input[type=datetime-local]{width:100%;margin-top:4px}
 .app-main{display:grid;gap:2px}.app-main span,.app-main small{color:var(--mute);font-size:14px}.app-main a{font-size:14px}
-@media(max-width:900px){.app-row{grid-template-columns:1fr 1fr}.app-main{grid-column:1/-1}}
+@media(max-width:900px){.app-row{grid-template-columns:1fr 1fr}.app-main,.app-note,.app-act{grid-column:1/-1}.app-act{justify-content:flex-start}}
 .app-stats{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px}
 .app-stats span{border-radius:99px;padding:3px 10px;font-size:13px;background:var(--alt)}
 .st-int{color:var(--brand)}.st-ok{color:var(--ok)}.st-no{color:var(--err)}.st-none,.st-sent{color:var(--mute)}
