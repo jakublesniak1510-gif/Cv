@@ -1517,5 +1517,11 @@
 "{0} z {1} pozycji": "{0} of {1} entries",
 "Zapisaliśmy tę ofertę w Twoich aplikacjach na koncie.": "We saved this offer in the applications list in your account.",
 "Zapisuj, gdzie wysyłasz CV. CV z zamówień dodają się same jako „przygotowane”. Przypomnienie o follow-up przyjdzie e-mailem w wybranym dniu, a przypomnienie o rozmowie – dzień przed terminem. Wpisy znikają razem z kontem.": "Keep track of where you send your CV. CVs from your orders are added automatically as “prepared”. A follow-up reminder arrives by email on the day you choose, and an interview reminder the day before. Entries are deleted together with your account.",
-"przygotowano {0}": "prepared {0}"
+"przygotowano {0}": "prepared {0}",
+"Dane firmy": "Company details",
+"E-mail": "Email",
+"REGON": "REGON (business register no.)",
+"NIP": "NIP (tax ID)",
+"{0} – jednoosobowa działalność gospodarcza, właściciel serwisu „CV Pod Ogłoszenie”": "{0} – sole proprietorship, owner of the “CV Pod Ogłoszenie” service",
+"{0}, Polska": "{0}, Poland"
 }

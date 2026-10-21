@@ -1517,5 +1517,11 @@
 "{0} z {1} pozycji": "{0} von {1} Einträgen",
 "Zapisaliśmy tę ofertę w Twoich aplikacjach na koncie.": "Wir haben dieses Angebot in der Bewerbungsliste Ihres Kontos gespeichert.",
 "Zapisuj, gdzie wysyłasz CV. CV z zamówień dodają się same jako „przygotowane”. Przypomnienie o follow-up przyjdzie e-mailem w wybranym dniu, a przypomnienie o rozmowie – dzień przed terminem. Wpisy znikają razem z kontem.": "Behalten Sie den Überblick, wohin Sie Ihren Lebenslauf senden. Lebensläufe aus Bestellungen werden automatisch als „vorbereitet“ eingetragen. Die Follow-up-Erinnerung kommt am gewählten Tag per E-Mail, die Erinnerung an das Gespräch einen Tag vorher. Einträge werden zusammen mit dem Konto gelöscht.",
-"przygotowano {0}": "vorbereitet {0}"
+"przygotowano {0}": "vorbereitet {0}",
+"Dane firmy": "Firmendaten",
+"E-mail": "E-Mail",
+"REGON": "REGON (Registernummer)",
+"NIP": "NIP (Steuernummer)",
+"{0} – jednoosobowa działalność gospodarcza, właściciel serwisu „CV Pod Ogłoszenie”": "{0} – Einzelunternehmen, Betreiber des Dienstes „CV Pod Ogłoszenie“",
+"{0}, Polska": "{0}, Polen"
 }
