@@ -112,7 +112,8 @@ test('Serwer (demo): /karnety, zakup, logowanie po płatności, zamówienie z ka
     assert.equal(mine.active.left.matches, 20);
     const ad = 'Szukamy magazyniera. Wymagania: obsługa wózka widłowego, doświadczenie w magazynie, sumienność i dokładność. '.repeat(2);
     const prof = { name: 'Kasia Test', email: 'k@example.test', experience: [{ title: 'Magazynier', company: 'Firma', period: '2020 – 2024' }] };
-    assert.equal((await call('POST', '/api/orders', { usePass: true, code: 'KOD-1', pkg: 'cv', consent: true, profile: prof, ads: [{ title: 'Magazynier', text: ad }] })).status, 400, 'kod rabatowy nie z karnetem');
+    assert.equal((await call('POST', '/api/orders', { usePass: true, code: 'KOD-1', pkg: 'cv', consent: true, waiver: true, profile: prof, ads: [{ title: 'Magazynier', text: ad }] })).status, 400, 'kod rabatowy nie z karnetem');
+    // karnet pokrywający całość (0 zł): bez zgody z art. 38 nie blokujemy
     const o1 = await call('POST', '/api/orders', { usePass: true, pkg: 'cv', consent: true, profile: prof, addons: { sim: true }, ads: [{ title: 'Magazynier', text: ad }, { title: 'Kierowca', text: ad }] });
     assert.equal(o1.j.free, true, 'karnet pokrywa całość');
     let o; for (let i = 0; i < 60; i++) { o = (await call('GET', `/api/orders/${o1.j.id}`)).j; if (o.status === 'done') break; await wait(150); }
@@ -122,7 +123,10 @@ test('Serwer (demo): /karnety, zakup, logowanie po płatności, zamówienie z ka
     assert.ok(!JSON.parse(fs.readFileSync(path.join(dir, 'sales.json'), 'utf8'))[o1.j.id], 'zamówienie za 0 zł z karnetu nie jest sprzedażą'); assert.ok(o.results.every((r) => r.letter), 'list w cenie dopasowania');
     let m = (await call('GET', '/api/passes/mine')).j.active;
     assert.deepEqual(m.left, { matches: 18, sim: 2, interview: 1 }); assert.equal(m.used[0].state, 'used');
-    const o2 = await call('POST', '/api/orders', { usePass: true, consent: true, profile: prof, addons: { docx: true }, ads: [{ title: 'Magazynier', text: ad }] });
+    const nw = await call('POST', '/api/orders', { usePass: true, consent: true, profile: prof, addons: { docx: true }, ads: [{ title: 'Magazynier', text: ad }] });
+    assert.equal(nw.status, 400, 'dopłata do karnetu bez zgody z art. 38 – 400');
+    assert.equal((await call('GET', '/api/passes/mine')).j.active.left.matches, 18, 'odrzucone zamówienie zwalnia rezerwację karnetu');
+    const o2 = await call('POST', '/api/orders', { usePass: true, consent: true, waiver: true, profile: prof, addons: { docx: true }, ads: [{ title: 'Magazynier', text: ad }] });
     assert.equal(o2.j.demo, true, 'dopłata za Word → płatność');
     m = (await call('GET', '/api/passes/mine')).j.active; assert.equal(m.left.matches, 17); assert.equal(m.used.at(-1).state, 'reserved');
     await call('POST', `/api/orders/${o2.j.id}/demo-pay`);
@@ -130,6 +134,6 @@ test('Serwer (demo): /karnety, zakup, logowanie po płatności, zamówienie z ka
     assert.equal(o.total, PRICES.docx);
     m = (await call('GET', '/api/passes/mine')).j.active; assert.equal(m.used.at(-1).state, 'used');
     cookie = '';
-    assert.equal((await call('POST', '/api/orders', { usePass: true, consent: true, profile: prof, ads: [{ title: 'Magazynier', text: ad }] })).status, 400, 'bez logowania nie ma karnetu');
+    assert.equal((await call('POST', '/api/orders', { usePass: true, consent: true, waiver: true, profile: prof, ads: [{ title: 'Magazynier', text: ad }] })).status, 400, 'bez logowania nie ma karnetu');
   } finally { srv.kill(); }
 });

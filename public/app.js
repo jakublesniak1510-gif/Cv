@@ -1492,14 +1492,16 @@ function drawFollowup() {
     pick, el('p', { className: 'hint', id: 'fuInfo' }), el('div', { id: 'fuAds' }),
     el('button', { type: 'button', className: 'btn ghost sm', id: 'fuAdd', textContent: '+ Dodaj ogłoszenie (w pakiecie do 3)', onclick: () => { addRow('fuAds'); drawPick(); } }),
     el('label', { className: 'f fucode' }, 'Kod rabatowy ', el('input', { type: 'text', id: 'fuCode', placeholder: 'opcjonalnie', autocomplete: 'off', value: data.myCode && !data.myCode.usedByMe ? data.myCode.code : '' })),
+    el('label', { className: 'check' }, el('input', { type: 'checkbox', id: 'fuWaiver' }), ' ', el('span', { textContent: 'Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.' })),
     el('p', {}, el('button', { type: 'button', className: 'btn', id: 'fuPay', textContent: '', onclick: async (e) => {
       const ads = rows('fuAds'), err = $('#fuErr'), code = $('#fuCode').value.trim();
       if (ads.length > FU_ADS(fpkg)) { err.textContent = 'Ten pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe albo wybierz Pakiet 3.'; return; }
       const bad = ads.find((a) => !a.title || a.text.length < 80);
       if (bad) { err.textContent = 'Podaj nazwę stanowiska i pełną treść ogłoszenia (min. 80 znaków).'; return; }
+      if (!$('#fuWaiver').checked) { err.textContent = 'Zaznacz zgodę na wykonanie usługi od razu po płatności.'; return; }
       e.target.disabled = true; err.textContent = '';
       try {
-        const r = await fetch(`/api/orders/${orderId}/followup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pkg: fpkg === 'bundle' ? 'cv_letter' : fpkg, addons: fpkg === 'bundle' ? { interview: true, sim: true } : {}, ads, code }) });
+        const r = await fetch(`/api/orders/${orderId}/followup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pkg: fpkg === 'bundle' ? 'cv_letter' : fpkg, addons: fpkg === 'bundle' ? { interview: true, sim: true } : {}, ads, code, waiver: true }) });
         const j = await r.json(); if (!r.ok) throw new Error(j.error);
         if (j.free) { delete box.dataset.ready; startResult(j.id); } else if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); delete box.dataset.ready; startResult(j.id); } else location.href = j.url;
       } catch (x) { err.textContent = x.message; e.target.disabled = false; }
