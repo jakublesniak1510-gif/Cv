@@ -11,7 +11,9 @@ const day = (t) => new Date(t * 1000).toISOString().slice(0, 10);
 const today = day(Math.floor(Date.now() / 1000));
 // Czas commita każdej linii (linie niezatwierdzone → dziś).
 function lineTimes(file) {
-  const out = execFileSync('git', ['blame', '--line-porcelain', '--', file], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 28 });
+  let out;
+  try { out = execFileSync('git', ['blame', '--line-porcelain', '--', file], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 28, stdio: ['ignore', 'pipe', 'ignore'] }); }
+  catch { return fs.readFileSync(path.join(ROOT, file), 'utf8').split('\n').map(() => null); } // plik jeszcze nie w gicie
   const times = []; let t = 0, uncommitted = false;
   for (const l of out.split('\n')) {
     if (/^[0-9a-f]{40} /.test(l)) uncommitted = l.startsWith('0000000000000000000000000000000000000000');
@@ -55,6 +57,8 @@ const pl = merge(...plFiles.map((f) => itemDates(f, SLUG, more.includes(f) ? 'pl
 const pick = (keys) => Object.fromEntries(keys.filter((k) => pl[k]).sort().map((k) => [k, pl[k]]));
 const tpl = merge(...ls('lib/templates-content').filter((f) => !f.endsWith('index.js')).map((f) => itemDates(f, SLUG)));
 const emp = merge(itemDates('lib/employers-content.js', KEY, null, EMP), itemDates('seo-data/pracodawcy.json', SLUG, null, EMP));
+// Rozbudowa stron zawodów (lib/prof-extra) to też treść strony zawodu PL.
+for (const [k, d] of Object.entries(merge(...ls('lib/prof-extra').filter((f) => !f.endsWith('index.js')).map((f) => itemDates(f, KEY, null, PROF))))) if (!pl[k] || d > pl[k]) pl[k] = d;
 const out = { prof: pick(PROFESSIONS.map((p) => p.slug)), art: pick(ARTICLES.map((a) => a.slug)), tpl, emp };
 for (const l of ['en', 'uk', 'de']) {
   out[`prof-${l}`] = merge(itemDates(`lib/professions-${l}.js`, KEY, null, PROF), ...ls('lib/prof-more').map((f) => itemDates(f, KEY, l, PROF)));
