@@ -41,7 +41,7 @@
     document.getElementById('consentBar')?.remove(); space(null);
     const bar = document.createElement('div');
     bar.id = 'consentBar'; bar.className = 'consent'; bar.setAttribute('role', 'dialog'); bar.setAttribute('aria-label', 'Pliki cookie');
-    bar.innerHTML = '<p><b>Pliki cookie reklam</b> <span>Za Twoją zgodą używamy plików cookie Google i Meta, żeby mierzyć skuteczność naszych reklam. Bez zgody strona działa tak samo.</span> <a href="#prywatnosc">Polityka prywatności</a></p>'
+    bar.innerHTML = '<p><b>Pliki cookie reklam</b> <span>Google i Meta do pomiaru reklam – tylko za Twoją zgodą.</span> <a href="#prywatnosc">Polityka prywatności</a></p>'
       + '<div class="consent-btns"><button type="button" class="btn ghost sm" data-c="denied">Tylko niezbędne</button><button type="button" class="btn sm" data-c="granted" data-i18n-key="Akceptuję (pliki cookie)">Akceptuję</button></div>';
     bar.addEventListener('click', (e) => {
       const v = e.target.closest('button')?.dataset.c; if (!v) return;

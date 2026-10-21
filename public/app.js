@@ -5,6 +5,8 @@ const el = (t, p = {}, ...k) => { const e = Object.assign(document.createElement
 let PRICE = { cv: 39, cv_letter: 49, pack3: 79, interview: 50, messages: 9, linkedin: 19, sim: 29, docx: 9, extraLang: 5, bundleOff: 19 };
 const ADDON_KEYS = { interview: ['#adInterview', 'Przygotowanie do rozmowy'], messages: ['#adMessages', 'Wiadomość do rekrutera i e-mail z aplikacją'], linkedin: ['#adLinkedin', 'Profil LinkedIn'], sim: ['#adSim', 'Symulator rozmowy kwalifikacyjnej'], docx: ['#adDocx', 'Wersja Word (.docx)'] };
 const PKG_ADS = { cv: 1, cv_letter: 1, pack3: 3 };
+// Odmiana po liczebniku (jak lib/plural.js): 1 dopasowanie, 2 dopasowania, 5 dopasowań.
+const plural = (n, one, few, many) => (n === 1 ? one : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? few : many);
 const PKG_NAME = { cv: 'CV', cv_letter: 'CV + list motywacyjny', pack3: 'Pakiet 3 CV + listy motywacyjne' };
 let promo = null; // zastosowany kod rabatowy: { code, discount, label }
 let data; // bieżące zamówienie na stronie wyniku
@@ -623,7 +625,8 @@ function addRow(box, v = {}) {
   $('.rm', e).onclick = () => { e.remove(); renum(box); refresh(); };
   $('#' + box).append(e);
   Object.entries(v).forEach(([k, val]) => { const i = $(`[data-k="${k}"]`, e); if (i) i.value = val; });
-  if (box === 'ads' || box === 'fuAds') initAd(e, v.text ? 'paste' : 'link');
+  // Na telefonie domyślnie „Wklej treść” (kopiowanie z aplikacji z ogłoszeniami jest tam łatwiejsze niż link).
+  if (box === 'ads' || box === 'fuAds') initAd(e, v.text || matchMedia('(max-width: 640px)').matches ? 'paste' : 'link');
   renum(box); refresh();
 }
 // Zmniejszenie zdjęcia przed wysłaniem (telefony robią zdjęcia po kilka MB).
@@ -721,7 +724,7 @@ function quotePass() {
 const loadMyPass = () => fetch('/api/passes/mine', { credentials: 'same-origin' }).then((r) => r.json()).then(({ active }) => {
   myPass = active && active.left.matches > 0 ? active : null;
   $('#passUse').hidden = !myPass;
-  if (myPass) $('#passUseTxt').textContent = `Użyj karnetu „${myPass.name}” (zostało ${myPass.left.matches} dopasowań, ważny do ${new Date(myPass.expires).toLocaleDateString('pl-PL')})`;
+  if (myPass) $('#passUseTxt').textContent = `Użyj karnetu „${myPass.name}” (${plural(myPass.left.matches, 'zostało', 'zostały', 'zostało')} ${myPass.left.matches} ${plural(myPass.left.matches, 'dopasowanie', 'dopasowania', 'dopasowań')}, ważny do ${new Date(myPass.expires).toLocaleDateString('pl-PL')})`;
   refresh();
 }).catch(() => {});
 loadMyPass();
@@ -764,7 +767,7 @@ function restoreDraft(from) {
 function refresh() {
   if ($('#langPick').children.length) syncLangPick();
   saveDraft();
-  $('#total').textContent = total() + ' zł';
+  $('#total').textContent = total() + ' zł'; if (step === 6) payTrust(6);
   $('#bundleTip').textContent = pkg() === 'cv' ? '' : bundleOn() ? `Masz pakiet „Pewna rozmowa”: ${PRICE.bundleOff} zł taniej.` : `Pakiet „Pewna rozmowa”: zaznacz przygotowanie do rozmowy i symulator, a zapłacisz ${PRICE.bundleOff} zł mniej.`;
   $('#bundleTip').hidden = pkg() === 'cv';
   $('#brk').textContent = [addonsTotal() ? `dodatki ${addonsTotal()} zł` : '', discount() ? `rabat −${discount()} zł` : ''].filter(Boolean).join(' · ');
@@ -856,6 +859,15 @@ $('#addExp').onclick = () => addRow('exp');
 $('#addEdu').onclick = () => addRow('edu');
 $('#addAd').onclick = () => addRow('ads');
 
+// Pod przyciskiem płatności: metody faktycznie włączone u operatora (/api/config → pay), bezpieczeństwo, czas i e-mail.
+function payTrust(n) {
+  const box = $('#payTrust'), on = n === 6 && total() > 0;
+  $('.wiz-foot').classList.toggle('pay', n === 6);
+  box.hidden = !on; if (!on) return;
+  const parts = [...(cfg.pay?.methods || []).map((m, i, a) => [el('span', { textContent: m }), i < a.length - 1 ? ', ' : '']).flat()];
+  const items = [parts.length ? parts : null, cfg.pay ? [el('span', { textContent: `bezpieczna płatność przez ${cfg.pay.provider}` })] : null, [el('span', { textContent: 'dokumenty zwykle gotowe w kilka minut' })], [el('span', { textContent: 'PDF także na e-mail' })]].filter(Boolean);
+  box.replaceChildren(...items.flatMap((x, i) => (i ? [' · ', ...x] : x)));
+}
 const nextLabel = () => ($('#next').textContent = step === 6 ? (total() === 0 ? 'Zamów bez opłaty' : cfg.demo ? `Przejdź do płatności · ${total()} zł` : `Zapłać ${total()} zł`) : 'Dalej');
 function go(n) {
   refresh();
@@ -866,7 +878,7 @@ function go(n) {
   $('#wizTitle').textContent = n <= 6 ? STEPS[n - 1] : 'Zapłać za zamówienie';
   $('#back').hidden = n === 1 || n === 7;
   $('#next').hidden = n === 7;
-  nextLabel();
+  nextLabel(); payTrust(n);
   if (n === 6) { if ($('#codeInput').value && !promo) applyCode($('#codeInput').value, true); drawSummary(); }
   $('#werr').textContent = '';
   $('.wiz-body').scrollTop = 0;
@@ -904,7 +916,7 @@ function drawSummary() {
   if (passOn()) {
     const q = passQuote, u = q?.use || { matches: nAds(), sim: 0, interview: 0 };
     $('#sum').replaceChildren(
-      el('div', { className: 'sumrow' }, el('span', { textContent: `Karnet „${myPass.name}”: ${u.matches} ${u.matches === 1 ? 'dopasowanie' : 'dopasowania'} (CV + list)${u.sim ? ', symulator' : ''}${u.interview ? ', przygotowanie do rozmowy' : ''}` }), el('span', { textContent: 'z karnetu' })),
+      el('div', { className: 'sumrow' }, el('span', { textContent: `Karnet „${myPass.name}”: ${u.matches} ${plural(u.matches, 'dopasowanie', 'dopasowania', 'dopasowań')} (CV + list)${u.sim ? ', symulator' : ''}${u.interview ? ', przygotowanie do rozmowy' : ''}` }), el('span', { textContent: 'z karnetu' })),
       el('div', { className: 'sumrow' }, el('span', { textContent: `Wygląd: ${tplName(design.tpl)}, kolor ${COLOR_NAMES[design.color]}` }), el('span', { textContent: 'w cenie' })),
       ...ads.map((a, i) => el('div', { className: 'sumrow' }, el('span', { textContent: `Ogłoszenie ${i + 1}: ${a.title}` }), el('span', { textContent: 'z karnetu' }))),
       ...(q?.items || []).map((it) => el('div', { className: 'sumrow' }, el('span', { textContent: it.name }), el('span', { textContent: '+' + it.amount / 100 + ' zł' }))),
@@ -914,6 +926,7 @@ function drawSummary() {
   $('#sum').replaceChildren(
     el('div', { className: 'sumrow' }, el('span', { textContent: PKG_NAME[pkg()] }), el('span', { textContent: PRICE[pkg()] + ' zł' })),
     el('div', { className: 'sumrow' }, el('span', { textContent: `Wygląd: ${tplName(design.tpl)}, kolor ${COLOR_NAMES[design.color]}` }), el('span', { textContent: 'w cenie' })),
+    el('div', { className: 'sumrow' }, el('span', { textContent: addons().docx ? 'Format: PDF i Word (.docx)' : 'W cenie: PDF. Wersja Word (.docx) to dodatek' }), el('span', { textContent: addons().docx ? 'PDF w cenie' : `+${PRICE.docx} zł` })),
     ...ads.map((a, i) => el('div', { className: 'sumrow' }, el('span', { textContent: `Ogłoszenie ${i + 1}: ${a.title}${a.lang === 'en' ? ' (po angielsku)' : ''}` }), el('span', { textContent: 'w cenie' }))),
     ...Object.entries(addons()).filter(([, on]) => on).map(([k]) => el('div', { className: 'sumrow' }, el('span', { textContent: ADDON_KEYS[k][1] }), el('span', { textContent: '+' + PRICE[k] + ' zł' }))),
     ...extraLangs().map((l) => el('div', { className: 'sumrow' }, el('span', { textContent: `Tłumaczenie: ${LANGS[l]}` }), el('span', { textContent: '+' + PRICE.extraLang + ' zł' }))),
@@ -934,7 +947,7 @@ function validate(n) {
   const v = (id) => $('#' + id).value.trim();
   if (n === 2) { if (!v('name')) return 'Podaj imię i nazwisko.'; if (!/^\S+@\S+\.\S+$/.test(v('email'))) return 'Podaj poprawny adres e-mail.'; }
   if (n === 4 && !rows('exp').some((e) => e.title || e.company) && !rows('edu').some((e) => e.school)) return 'Dodaj co najmniej jedno stanowisko (krok 3) lub szkołę.';
-  if (n === 5 && passOn() && nAds() > Math.min(3, myPass.left.matches)) return `W karnecie zostało ${myPass.left.matches} dopasowań. Usuń dodatkowe ogłoszenia albo odznacz „Użyj karnetu”.`;
+  if (n === 5 && passOn() && nAds() > Math.min(3, myPass.left.matches)) return `W karnecie ${plural(myPass.left.matches, 'zostało', 'zostały', 'zostało')} ${myPass.left.matches} ${plural(myPass.left.matches, 'dopasowanie', 'dopasowania', 'dopasowań')}. Usuń dodatkowe ogłoszenia albo odznacz „Użyj karnetu”.`;
   if (n === 5 && !passOn() && nAds() > PKG_ADS[pkg()]) return 'Wybrany pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe ogłoszenia albo wybierz Pakiet 3 za 79 zł.';
   if (n === 5) for (const [i, a] of rows('ads').entries()) {
     if (!a.text) return `Ogłoszenie ${i + 1}: kliknij „Pobierz” przy linku albo wklej treść oferty.`;
@@ -1050,16 +1063,30 @@ async function importData(b64) {
 
 /* darmowy skaner CV (na stronie głównej i na podstronie /narzedzia/skaner-cv) */
 let scanData = null;
+// Tekst CV wklejony zamiast pliku: wysyłamy go jak plik TXT (ten sam import i skaner po stronie serwera).
+const textB64 = (t) => { const b = new TextEncoder().encode(t); let s = ''; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode(...b.subarray(i, i + 0x8000)); return btoa(s); };
 function bindScan(ui) {
   ui.file.onchange = () => (ui.fileName.textContent = ui.file.files[0]?.name || 'nie wybrano pliku');
+  // Zakładki „Wybierz plik” / „Wklej tekst CV”.
+  const row = ui.file.closest('.filerow'), cvText = el('textarea', { rows: 5, placeholder: 'Wklej tekst swojego CV', hidden: true });
+  cvText.setAttribute('aria-label', 'Tekst CV');
+  let mode = 'file';
+  const tabs = [['file', 'Wybierz plik'], ['text', 'Wklej tekst CV']].map(([m, t]) => el('button', { type: 'button', textContent: t, onclick: () => {
+    mode = m; row.hidden = m !== 'file'; cvText.hidden = m !== 'text';
+    tabs.forEach((b, i) => b.setAttribute('aria-selected', String((i === 0) === (m === 'file'))));
+  } }));
+  tabs.forEach((b, i) => { b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(i === 0)); });
+  const seg = el('div', { className: 'seg scan-mode' }, ...tabs); seg.setAttribute('role', 'tablist'); seg.setAttribute('aria-label', 'Jak dodać CV');
+  row.before(seg); row.after(cvText);
   ui.form.onsubmit = async (e) => {
     e.preventDefault();
-    const msg = ui.msg, file = ui.file.files[0];
+    const msg = ui.msg, file = mode === 'file' ? ui.file.files[0] : null, pasted = mode === 'text' ? cvText.value.trim() : '';
     let ad = ui.ad.value.trim(), title = '';
     msg.className = 'fstatus';
     const fail = (t) => { msg.className = 'fstatus bad'; msg.textContent = t; };
-    if (!file) return fail('Wybierz plik ze swoim CV.');
-    if (file.size > 5 * 1024 * 1024) return fail('Plik musi mieć do 5 MB.');
+    if (mode === 'file' && !file) return fail('Wybierz plik ze swoim CV albo wklej jego tekst.');
+    if (mode === 'text' && pasted.length < 60) return fail('Wklej cały tekst swojego CV.');
+    if (file && file.size > 5 * 1024 * 1024) return fail('Plik musi mieć do 5 MB.');
     if (!ad) return fail('Wklej link do ogłoszenia albo jego treść.');
     ui.btn.disabled = true;
     try {
@@ -1071,7 +1098,7 @@ function bindScan(ui) {
       }
       if (ad.length < 80) throw new Error('Wklej pełną treść ogłoszenia (min. 80 znaków).');
       msg.textContent = 'Porównujemy Twoje CV z ogłoszeniem…';
-      const b64 = await fileB64(file);
+      const b64 = file ? await fileB64(file) : textB64(pasted);
       const r = await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: b64, adText: ad }) });
       const j = await r.json(); if (!r.ok) throw new Error(j.error);
       // Nazwa stanowiska: z linku, z oceny AI albo z pierwszego zdania ogłoszenia.
@@ -1099,7 +1126,8 @@ function toolScan(box) {
 function renderScan(j, box = $('#scanResult')) {
   const total = j.found.length + j.missing.length, pct = j.score ?? 0;
   box.replaceChildren(
-    el('div', { className: 'ring', style: `--p:${pct}` }, el('b', { textContent: `${pct}%` })),
+    el('div', { className: 'ring-col' }, el('div', { className: 'ring', style: `--p:${pct}` }, el('b', { textContent: `${pct}%` })),
+      el('button', { type: 'button', className: 'btn sm scan-cta', onclick: fromScan }, el('span', { textContent: 'Zrób CV dopasowane do tego ogłoszenia – od' }), ` ${PRICE.cv} zł`)),
     el('div', { className: 'mcol ok' }, el('h3', { textContent: `Spełniasz ${j.found.length} z ${total} wymagań${j.position ? ': ' + j.position : ''}` }), el('ul', {}, ...j.found.map((x) => el('li', { textContent: x })))),
     el('div', { className: 'mcol miss' }, el('h3', { textContent: j.missing.length ? 'Czego nie widać w Twoim CV' : 'Niczego nie brakuje' }), el('ul', {}, ...j.missing.map((m) => el('li', {}, el('b', { textContent: m.keyword }), el('small', { textContent: m.hint }))))),
     j.tips?.length ? el('div', { className: 'tips' }, el('h3', { textContent: 'Co poprawić' }), el('ol', {}, ...j.tips.map((t) => el('li', { textContent: t })))) : null,
@@ -2365,6 +2393,9 @@ if ((q.get('zamow') || LANGS[q.get('jezyk')]) && !q.get('id') && !q.get('draft')
   (q.get('dodatki') || '').split(',').filter((a) => /^\w+$/.test(a)).forEach((a) => { const c = $('#ad' + a); if (c) c.checked = true; });
   const s = LANGS[q.get('jezyk')] && $('#ads .entry [data-k=lang]'); if (s) { s.value = q.get('jezyk'); refresh(); }
   openWiz(['cv', 'cv_letter', 'pack3'].includes(q.get('pkg')) ? q.get('pkg') : undefined);
+  // ?zawod=<slug> (przycisk na stronie zawodu): nazwa zawodu jako ogólne stanowisko, jeśli pole jest puste.
+  const zaw = q.get('zawod') || '';
+  if (/^[a-z0-9-]{2,60}$/.test(zaw)) loadContent().then((C) => { const p = C.INDEX?.find((x) => x.slug === zaw); if (p && !$('#headline').value.trim()) { $('#headline').value = p.name; saveDraft(); } }).catch(() => {});
 }
 // „Wyślij mi link do dokończenia” (krok 1): jeden e-mail z linkiem; przypomnienie tylko z osobnym, niezaznaczonym polem.
 {
