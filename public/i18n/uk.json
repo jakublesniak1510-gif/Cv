@@ -1517,5 +1517,11 @@
 "{0} z {1} pozycji": "{0} з {1} записів",
 "Zapisaliśmy tę ofertę w Twoich aplikacjach na koncie.": "Ми зберегли цю вакансію у списку заявок у вашому обліковому записі.",
 "Zapisuj, gdzie wysyłasz CV. CV z zamówień dodają się same jako „przygotowane”. Przypomnienie o follow-up przyjdzie e-mailem w wybranym dniu, a przypomnienie o rozmowie – dzień przed terminem. Wpisy znikają razem z kontem.": "Відстежуйте, куди ви надсилаєте резюме. Резюме із замовлень додаються автоматично як «підготовлено». Нагадування про follow-up прийде e-mailом у вибраний день, а нагадування про співбесіду – за день до неї. Записи видаляються разом з обліковим записом.",
-"przygotowano {0}": "підготовлено {0}"
+"przygotowano {0}": "підготовлено {0}",
+"Dane firmy": "Дані компанії",
+"E-mail": "E-mail",
+"REGON": "REGON (реєстраційний номер)",
+"NIP": "NIP (податковий номер)",
+"{0} – jednoosobowa działalność gospodarcza, właściciel serwisu „CV Pod Ogłoszenie”": "{0} – фізична особа-підприємець, власник сервісу «CV Pod Ogłoszenie»",
+"{0}, Polska": "{0}, Польща"
 }
