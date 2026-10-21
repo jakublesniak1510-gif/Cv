@@ -521,14 +521,14 @@ app.post('/api/orders', async (req, res) => {
     const c = passUse ? {} : await checkCode(code, p.email);
     if (c.error) return res.status(400).json({ error: c.error });
     const inv = cleanInvoice(invoice);
-    if (inv?.error) { if (passUse) releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {}); return res.status(400).json({ error: inv.error }); }
+    if (inv?.error) { if (passUse) await releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {}); return res.status(400).json({ error: inv.error }); }
     const disc = passUse ? 0 : discountFor(c, pkg, a.length, ad, false, langs), total = passUse ? passUse.total : calcTotal(pkg, a.length, ad, false, langs, disc);
     // Art. 38 pkt 13 ustawy o prawach konsumenta: płatne zamówienie tylko ze zgodą na wykonanie od razu (karnet i 0 zł bez blokady).
-    if (total > 0 && waiver !== true) { if (passUse) releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {}); return res.status(400).json({ error: 'Zaznacz zgodę na wykonanie usługi od razu po płatności.' }); }
+    if (total > 0 && waiver !== true) { if (passUse) await releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {}); return res.status(400).json({ error: 'Zaznacz zgodę na wykonanie usługi od razu po płatności.' }); }
     const shown = await previewFor(p, a[0]).catch(() => null); // podgląd z ostatniego kroku kreatora, jeśli był
     const order = { preview: shown, visit: visitInfo(req), refCtx: refCtx(req), invoice: total > 0 ? inv : null, id: orderId, ...(passUse ? { pass: { id: passUse.passId, use: passUse.use, items: passUse.items } } : {}), pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, outcomeAsk: outcomeAsk === true ? { consent: true, text: OUTCOME_CONSENT, at: Date.now(), sent: false } : { consent: false, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, ...(waiver === true ? { waiver: { text: WAIVER, at: Date.now() } } : {}), status: 'pending', results: [], revisions: 0, maxRevisions: MAX_REVISIONS, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
     try { await reserveOrderCode(order, c.base); } catch (e) {
-      if (passUse) releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {});
+      if (passUse) await releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {});
       if (e instanceof CodeError) return res.status(409).json({ error: e.message }); throw e;
     }
     if (draftToken) { const ref = await draftOrdered(String(draftToken)).catch(() => null); if (ref) order.draftRef = ref; } // bez przypomnienia o szkicu po złożeniu zamówienia
