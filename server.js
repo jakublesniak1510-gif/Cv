@@ -69,6 +69,8 @@ const salesClosedFor = (req) => SALES_CLOSED && !isAdmin(req);
 const CLOSED_MSG = 'Zamówienia ruszą za kilka dni. Zapisz się do newslettera na dole strony, a damy znać o starcie.';
 const RETENTION_MS = 30 * 24 * 3600 * 1000;
 const MAX_REVISIONS = 5;
+// Limit z chwili zakupu (zamówienia sprzed zmiany regulaminu: 10).
+const revLimit = (o) => o.maxRevisions ?? 10;
 
 const app = express();
 const AD_HOSTS = 'https://*.google.com https://*.google.pl https://*.googleadservices.com https://*.doubleclick.net https://*.googletagmanager.com https://*.google-analytics.com https://*.facebook.com https://*.facebook.net';
@@ -511,7 +513,7 @@ app.post('/api/orders', async (req, res) => {
     if (inv?.error) { if (passUse) releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {}); return res.status(400).json({ error: inv.error }); }
     const disc = passUse ? 0 : discountFor(c, pkg, a.length, ad, false, langs), total = passUse ? passUse.total : calcTotal(pkg, a.length, ad, false, langs, disc);
     const shown = await previewFor(p, a[0]).catch(() => null); // podgląd z ostatniego kroku kreatora, jeśli był
-    const order = { preview: shown, visit: visitInfo(req), refCtx: refCtx(req), invoice: total > 0 ? inv : null, id: orderId, ...(passUse ? { pass: { id: passUse.passId, use: passUse.use, items: passUse.items } } : {}), pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
+    const order = { preview: shown, visit: visitInfo(req), refCtx: refCtx(req), invoice: total > 0 ? inv : null, id: orderId, ...(passUse ? { pass: { id: passUse.passId, use: passUse.use, items: passUse.items } } : {}), pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, status: 'pending', results: [], revisions: 0, maxRevisions: MAX_REVISIONS, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
     try { await reserveOrderCode(order, c.base); } catch (e) {
       if (passUse) releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {});
       if (e instanceof CodeError) return res.status(409).json({ error: e.message }); throw e;
@@ -535,7 +537,7 @@ app.post('/api/orders/:id/followup', async (req, res) => {
     if (c.error) return res.status(400).json({ error: c.error });
     const pkg = ['cv', 'cv_letter', 'pack3'].includes(req.body?.pkg) ? req.body.pkg : parent.pkg;
     const disc = discountFor(c, pkg, a.length, ad, true, langs), total = calcTotal(pkg, a.length, ad, true, langs, disc);
-    const order = { id: crypto.randomUUID(), refCtx: refCtx(req), uiLang: parent.uiLang, parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, true, langs, 0), total), total, profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, created: Date.now() };
+    const order = { id: crypto.randomUUID(), refCtx: refCtx(req), uiLang: parent.uiLang, parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, true, langs, 0), total), total, profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, maxRevisions: MAX_REVISIONS, created: Date.now() };
     try { await reserveOrderCode(order, c.base); } catch (e) { if (e instanceof CodeError) return res.status(409).json({ error: e.message }); throw e; }
     await saveOrder(order);
     res.json(await checkout(order));
@@ -545,7 +547,7 @@ app.post('/api/orders/:id/followup', async (req, res) => {
 const view = (o, extra = {}) => ({
   ...extra, id: o.id, pkg: o.pkg, addons: o.addons || {}, extraLangs: o.extraLangs || [], total: o.total, status: o.status, results: (o.results || []).map(({ qa, ...r }) => r), error: o.error, mail: o.mail,
   design: cleanDesign(o.design), photo: o.profile.photo || '', email: o.profile.email, parentId: o.parentId || null,
-  paidAt: o.paidAt || null, createAccount: !!o.createAccount, canPay: o.status === 'pending' && !DEMO, revisionsLeft: MAX_REVISIONS - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
+  paidAt: o.paidAt || null, createAccount: !!o.createAccount, canPay: o.status === 'pending' && !DEMO, revisionsLeft: revLimit(o) - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
   invoice: o.invoice?.pdf ? { number: o.invoice.number } : null,
 });
 
@@ -670,6 +672,11 @@ async function trySend(order) {
 async function afterPaid(o) {
   try {
     if (o.code) {
+      // Zamówienie z kodem opłacone bez rezerwacji (np. stary link Przelewy24 po przejęciu kodu przez nowsze zamówienie).
+      if (!o.upsellOf && !(await holdsCode(o).catch(() => true)) && o.maxRevisions != null) { // starsze zamówienia (bez maxRevisions) nie miały rezerwacji
+        logEvent('kody', `Opłacone bez rezerwacji kodu ${o.code}`, { orderId: o.id });
+        alertOwner(`Zamówienie ${o.id} z kodem ${o.code} zostało opłacone bez rezerwacji kodu (np. stary link do płatności po złożeniu nowszego zamówienia). Rabat mógł zostać użyty dwa razy – sprawdź w panelu → Zamówienia.`);
+      }
       const selfRef = await selfReferral(o).catch(() => false);
       if (selfRef) logEvent('kody', `Samopolecenie: kod ${o.code} bez nagrody`, { orderId: o.id });
       await codes.update(o.code, (c) => applyPaidCode(c, { email: o.profile.email, creditUsed: o.creditUsed || 0, total: o.total || 0, order: o.id, selfRef }));
@@ -850,7 +857,7 @@ app.put('/api/orders/:id/results/:i', async (req, res) => {
 app.post('/api/orders/:id/revise', async (req, res) => {
   const d = await doneOrder(req, res); if (!d) return;
   const { o, i } = d;
-  if ((o.revisions || 0) >= MAX_REVISIONS) return res.status(429).json({ error: 'Wykorzystano limit poprawek. Napisz do nas, jeśli dokument nadal wymaga zmian.' });
+  if ((o.revisions || 0) >= revLimit(o)) return res.status(429).json({ error: 'Wykorzystano limit poprawek. Napisz do nas, jeśli dokument nadal wymaga zmian.' });
   const doc = req.body?.doc === 'letter' && hasLetter(o.pkg) ? 'letter' : 'cv';
   const instruction = str(req.body?.instruction, 500);
   if (instruction.length < 3) return res.status(400).json({ error: 'Opisz, co zmienić.' });
@@ -868,7 +875,7 @@ app.post('/api/orders/:id/revise', async (req, res) => {
     const merged = base.variants?.[lang] ? { ...base, variants: { ...base.variants, [lang]: r } } : { ...r, variants: base.variants };
     const results = o.results.map((x, k) => (k === i ? merged : x));
     await updateOrder(o.id, { results, revisions: (o.revisions || 0) + 1 });
-    res.json({ result: merged, note: str(out.note, 300), revisionsLeft: MAX_REVISIONS - (o.revisions || 0) - 1 });
+    res.json({ result: merged, note: str(out.note, 300), revisionsLeft: revLimit(o) - (o.revisions || 0) - 1 });
   } catch (e) {
     console.error('Poprawka', o.id, e.message);
     res.status(502).json({ error: e instanceof AiRefusal ? 'Nie możemy wprowadzić tej zmiany. Spróbuj opisać ją inaczej.' : 'Poprawka się nie udała. Spróbuj ponownie za chwilę.' });

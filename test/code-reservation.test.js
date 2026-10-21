@@ -110,9 +110,17 @@ test('Poprawka tylko pod to ogłoszenie, tożsamość z oryginału; asystent bez
   assert.match(srv, /cv: \{ \.\.\.cleanCv\(out\.cv\), name: target\.cv\?\.name \|\| '', contact: target\.cv\?\.contact \|\| \[\] \}/);
   assert.match(srv, /const MAX_REVISIONS = 5;/);
   assert.match(gen, /Nie piszesz całych CV, listów motywacyjnych ani ich dużych fragmentów/);
-  assert.match(gen, /maxTokens: 600 \}\);\n  return clipAnswer/);
+  assert.match(gen, /maxTokens: 900 \}\);\n  return clipAnswer/);
   const { clipAnswer, ASSIST_MAX } = await import('../lib/generate.js');
   const long = clipAnswer('Pierwsze zdanie listu motywacyjnego. '.repeat(60));
   assert.ok(long.length <= ASSIST_MAX && /\.$/.test(long), 'ucięte na końcu zdania');
   assert.equal(clipAnswer('Krótko.'), 'Krótko.');
+});
+
+test('Limit poprawek z chwili zakupu (stare zamówienia: 10) i polityka prywatności o skrócie IP (4 języki)', () => {
+  const s = fs.readFileSync('server.js', 'utf8'), pp = fs.readFileSync('public/legal/prywatnosc.html', 'utf8');
+  assert.match(s, /const revLimit = \(o\) => o\.maxRevisions \?\? 10;/);
+  assert.equal((s.match(/maxRevisions: MAX_REVISIONS, created/g) || []).length, 2, 'nowe zamówienia i kolejne zamówienia zapisują limit');
+  assert.ok(!/MAX_REVISIONS - \(o\.revisions/.test(s), 'licznik z zamówienia, nie globalny');
+  for (const t of ['skrót adresu IP', 'Hashwert der IP-Adresse', 'hash of the IP address', 'хеш IP-адреси']) assert.ok(pp.includes(t), t);
 });
