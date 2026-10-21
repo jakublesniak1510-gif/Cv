@@ -23,11 +23,17 @@ test('Pliki podglądów: 25 wzorów CV, 25 listów (800 px, < 80 KB) i 150 przyk
   const check = (name, width, maxKb) => {
     const b = fs.readFileSync(`public/podglad/${name}.webp`);
     assert.ok(b.length < maxKb * 1000, `${name}: ${b.length} B`);
-    assert.deepEqual(webpSize(b), SIZES[name], `${name}: wymiary`); assert.equal(SIZES[name][0], width);
+    assert.deepEqual(webpSize(b), SIZES[name].slice(0, 2), `${name}: wymiary`); assert.equal(SIZES[name][0], width);
   };
   const ts = Object.values(TEMPLATES); assert.equal(ts.length, 25);
   for (const t of ts) { check(`wzor-cv-${t.slug}`, 800, 80); check(`list-motywacyjny-${t.slug}`, 800, 80); }
   for (const p of PROFESSIONS) check(`cv-${p.slug}`, 480, 40);
+});
+
+test('Podglądy zgodne z treścią: skrót danych wzoru/przykładu = skrót zapisany przy generowaniu obrazka', async () => {
+  const { previewSources, contentHash } = await import('../lib/preview-sources.js');
+  const stale = previewSources().filter(([name, , data]) => SIZES[name]?.[2] !== contentHash(data)).map(([name, slug]) => `${name} → node scripts/previews.mjs ${slug}`);
+  assert.deepEqual(stale, [], `Treść zmieniła się po wygenerowaniu podglądu – uruchom node scripts/previews.mjs <slug> (albo --zmienione):\n${stale.join('\n')}`);
 });
 
 test('Podglądy na stronach (lazy, width/height, alt) i w mapie strony (image:image)', async () => {
