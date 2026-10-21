@@ -37,7 +37,7 @@ test('Dodatki po zakupie: osobna płatność, po opłaceniu dodatek dopisany i w
     const get = async (id) => (await fetch(`${U}/api/orders/${id}`)).json();
     const until = async (id, ok) => { let o; for (let i = 0; i < 60; i++) { o = await get(id); if (ok(o)) return o; await wait(150); } return o; };
     const ad = 'Szukamy magazyniera. Wymagania: obsługa wózka widłowego, doświadczenie w magazynie, sumienność i dokładność. '.repeat(2);
-    const r = await post('/api/orders', { pkg: 'cv', consent: true, profile: { name: 'Jan Test', email: 'jan@test.pl', experience: [{ title: 'Magazynier', company: 'Firma', period: '2020 – 2024' }] }, ads: [{ title: 'Magazynier', text: ad }] });
+    const r = await post('/api/orders', { pkg: 'cv', consent: true, waiver: true, profile: { name: 'Jan Test', email: 'jan@test.pl', experience: [{ title: 'Magazynier', company: 'Firma', period: '2020 – 2024' }] }, ads: [{ title: 'Magazynier', text: ad }] });
     assert.equal(r.j.demo, true);
     assert.equal((await post('/api/orders/x/upsell', { key: 'letter' })).status, 409, 'nieznane zamówienie');
     assert.equal((await post(`/api/orders/${r.j.id}/upsell`, { key: 'letter' })).status, 409, 'przed opłaceniem nic nie dokupisz');
@@ -90,9 +90,14 @@ test('Profil LinkedIn dokupiony do zamówienia z dodatkowym językiem: trafia te
     const get = async (id) => (await fetch(`${U}/api/orders/${id}`)).json();
     const until = async (id, ok) => { let o; for (let i = 0; i < 60; i++) { o = await get(id); if (ok(o)) return o; await wait(150); } return o; };
     const ad = 'Szukamy magazyniera. Wymagania: obsługa wózka widłowego, doświadczenie w magazynie, sumienność i dokładność. '.repeat(2);
+    const base = { pkg: 'cv', consent: true, profile: { name: 'Jan Test', email: 'jan@test.pl', experience: [{ title: 'Magazynier', company: 'Firma', period: '2020 – 2024' }] }, ads: [{ title: 'Magazynier', text: ad, lang: 'pl' }] };
+    const nw = await post('/api/orders', base); assert.equal(nw.status, 400, 'płatne zamówienie bez zgody z art. 38 – 400'); assert.match(nw.j.error, /od razu po płatności/);
     const r = await post('/api/orders', { pkg: 'cv', consent: true, waiver: true, extraLangs: ['en'], profile: { name: 'Jan Test', email: 'jan@test.pl', experience: [{ title: 'Magazynier', company: 'Firma', period: '2020 – 2024' }] }, ads: [{ title: 'Magazynier', text: ad, lang: 'pl' }] });
     await post(`/api/orders/${r.j.id}/demo-pay`);
     let o = await until(r.j.id, (x) => x.status === 'done');
+    const fuAd = [{ title: 'Kierowca', text: ad }];
+    assert.equal((await post(`/api/orders/${r.j.id}/followup`, { pkg: 'cv', ads: fuAd })).status, 400, 'kolejne zamówienie bez zgody – 400');
+    assert.equal((await post(`/api/orders/${r.j.id}/followup`, { pkg: 'cv', ads: fuAd, waiver: true })).status, 200);
     const li = await post(`/api/orders/${r.j.id}/upsell`, { key: 'linkedin', waiver: true });
     await post(`/api/orders/${li.j.id}/demo-pay`);
     o = await until(r.j.id, (x) => x.addons.linkedin && x.results[0].linkedin && !x.upsellBusy);

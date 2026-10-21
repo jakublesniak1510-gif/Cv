@@ -79,7 +79,7 @@ test('Zamówienie: kontrola jakości zapisana w zamówieniu i w statystykach, be
   try {
     const U = `http://localhost:${port}`, H = { 'Content-Type': 'application/json' };
     for (let i = 0; i < 50; i++) { try { await fetch(U + '/api/config'); break; } catch { await wait(150); } }
-    const r = await (await fetch(U + '/api/orders', { method: 'POST', headers: H, body: JSON.stringify({ pkg: 'cv_letter', consent: true, profile: PROFILE, ads: [{ title: AD.title, text: AD.text.repeat(2) }] }) })).json();
+    const r = await (await fetch(U + '/api/orders', { method: 'POST', headers: H, body: JSON.stringify({ pkg: 'cv_letter', consent: true, waiver: true, profile: PROFILE, ads: [{ title: AD.title, text: AD.text.repeat(2) }] }) })).json();
     await fetch(`${U}/api/orders/${r.id}/demo-pay`, { method: 'POST', headers: H, body: '{}' });
     let o; for (let i = 0; i < 60; i++) { o = await (await fetch(`${U}/api/orders/${r.id}`)).json(); if (o.status === 'done') break; await wait(150); }
     assert.equal(o.status, 'done'); assert.equal(o.results[0].qa, undefined, 'bez flag w odpowiedzi dla klienta');
