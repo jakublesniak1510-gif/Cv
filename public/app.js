@@ -11,6 +11,19 @@ const PKG_NAME = { cv: 'CV', cv_letter: 'CV + list motywacyjny', pack3: 'Pakiet 
 let promo = null; // zastosowany kod rabatowy: { code, discount, label }
 let data; // bieżące zamówienie na stronie wyniku
 const STEPS = ['Pakiet i wygląd CV', 'Twoje dane', 'Doświadczenie', 'Wykształcenie i umiejętności', 'Ogłoszenia', 'Podsumowanie'];
+// Test A/B „wizard_order” (lib/ab.js, data-order="b" od serwera): najpierw ogłoszenie, potem dane, doświadczenie, wykształcenie,
+// a pakiet, dodatki, języki i wygląd w podsumowaniu. Kroki zachowują numery sekcji (walidacja, analityka), zmienia się kolejność.
+const ORDER_B = document.getElementById('wiz')?.dataset.order === 'b';
+const ORDER = ORDER_B ? [5, 2, 3, 4, 6] : [1, 2, 3, 4, 5, 6];
+if (ORDER_B) {
+  const s1 = document.querySelector('#wiz section[data-step="1"]'), s5 = document.querySelector('#wiz section[data-step="5"]'), s6 = document.querySelector('#wiz section[data-step="6"]');
+  const keep = ['saveLater', 'draftNote', 'fill'].map((id) => document.getElementById(id)).filter(Boolean); // zostają w pierwszym kroku
+  s5.append(...keep);
+  const head = document.createElement('h3'); head.className = 'sh'; head.textContent = 'Twoje zamówienie';
+  s6.prepend(...[...s1.childNodes], head);
+  s1.remove();
+}
+const STEP_TITLE = (n) => (ORDER_B && n === 5 ? 'Od jakiego ogłoszenia zaczynamy?' : ORDER_B && n === 6 ? 'Pakiet, wygląd i podsumowanie' : STEPS[n - 1]);
 let pendingDraft = ''; // ogłoszenie z rozszerzenia Chrome czekające na formularz skanera
 let cfg = { demo: false, maxAds: 5, noPrint: false, maxRevisions: 5, loading: true };
 // Statystyki bez cookies: zbiorcze odsłony i kroki kreatora (serwer nie zapisuje IP ani identyfikatorów).
@@ -205,7 +218,7 @@ function designPicker(box, d, onChange, { thumbs = true } = {}) {
   };
   draw();
 }
-let step = 1, orderId = null;
+let step = ORDER[0], orderId = null;
 
 // Zwraca fragment, w którym wskazane słowa są owinięte w <mark> (bez innerHTML).
 function hl(text, kws) {
@@ -873,10 +886,11 @@ function go(n) {
   refresh();
   step = n; if (!$('#wiz').hidden) track('step', { s: n });
   $$('#wiz section[data-step]').forEach((s) => (s.hidden = +s.dataset.step !== n));
-  $('#stepper').replaceChildren(...STEPS.map((_, i) => el('li', { className: i + 1 < n ? 'done' : i + 1 === n ? 'cur' : '' })));
-  $('#wizKicker').textContent = n <= 6 ? `Krok ${n} z 6` : 'Płatność';
-  $('#wizTitle').textContent = n <= 6 ? STEPS[n - 1] : 'Zapłać za zamówienie';
-  $('#back').hidden = n === 1 || n === 7;
+  const idx = n === 7 ? ORDER.length : ORDER.indexOf(n);
+  $('#stepper').replaceChildren(...ORDER.map((_, i) => el('li', { className: i < idx ? 'done' : i === idx ? 'cur' : '' })));
+  $('#wizKicker').textContent = n <= 6 ? `Krok ${idx + 1} z ${ORDER.length}` : 'Płatność';
+  $('#wizTitle').textContent = n <= 6 ? STEP_TITLE(n) : 'Zapłać za zamówienie';
+  $('#back').hidden = idx === 0 || n === 7;
   $('#next').hidden = n === 7;
   nextLabel(); payTrust(n);
   if (n === 6) { if ($('#codeInput').value && !promo) applyCode($('#codeInput').value, true); drawSummary(); }
@@ -947,8 +961,10 @@ function validate(n) {
   const v = (id) => $('#' + id).value.trim();
   if (n === 2) { if (!v('name')) return 'Podaj imię i nazwisko.'; if (!/^\S+@\S+\.\S+$/.test(v('email'))) return 'Podaj poprawny adres e-mail.'; }
   if (n === 4 && !rows('exp').some((e) => e.title || e.company) && !rows('edu').some((e) => e.school)) return 'Dodaj co najmniej jedno stanowisko (krok 3) lub szkołę.';
-  if (n === 5 && passOn() && nAds() > Math.min(3, myPass.left.matches)) return `W karnecie ${plural(myPass.left.matches, 'zostało', 'zostały', 'zostało')} ${myPass.left.matches} ${plural(myPass.left.matches, 'dopasowanie', 'dopasowania', 'dopasowań')}. Usuń dodatkowe ogłoszenia albo odznacz „Użyj karnetu”.`;
-  if (n === 5 && !passOn() && nAds() > PKG_ADS[pkg()]) return 'Wybrany pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe ogłoszenia albo wybierz Pakiet 3 za 79 zł.';
+  if ((n === 5 || (ORDER_B && n === 6)) && passOn() && nAds() > Math.min(3, myPass.left.matches)) return `W karnecie ${plural(myPass.left.matches, 'zostało', 'zostały', 'zostało')} ${myPass.left.matches} ${plural(myPass.left.matches, 'dopasowanie', 'dopasowania', 'dopasowań')}. Usuń dodatkowe ogłoszenia albo odznacz „Użyj karnetu”.`;
+  // Wariant B: pakietu jeszcze nie wybrano – przy kilku ogłoszeniach zaznaczamy Pakiet 3 (można zmienić w podsumowaniu).
+  if (n === 5 && ORDER_B && !passOn() && nAds() > PKG_ADS[pkg()]) { $('input[name=pkg][value=pack3]').checked = true; refresh(); }
+  if ((n === 5 || (ORDER_B && n === 6)) && !passOn() && nAds() > PKG_ADS[pkg()]) return 'Wybrany pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe ogłoszenia albo wybierz Pakiet 3 za 79 zł.';
   if (n === 5) for (const [i, a] of rows('ads').entries()) {
     if (!a.text) return `Ogłoszenie ${i + 1}: kliknij „Pobierz” przy linku albo wklej treść oferty.`;
     if (!a.title) return `Ogłoszenie ${i + 1}: podaj nazwę stanowiska.`;
@@ -982,13 +998,13 @@ const closeWiz = () => { $('#wiz').hidden = true; modal(false); };
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (!b) return; e.preventDefault(); if (b.dataset.addon) { b.dataset.addon.split(',').forEach((a) => ($('#ad' + a).checked = true)); saveDraft(); } openWiz(b.dataset.pkg); });
 $('#wizClose').onclick = closeWiz;
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#wiz').hidden) closeWiz(); });
-$('#back').onclick = () => go(step - 1);
+$('#back').onclick = () => go(ORDER[ORDER.indexOf(step) - 1] ?? ORDER[0]);
 
 $('#wizForm').onsubmit = async (e) => {
   e.preventDefault();
   const err = validate(step);
   if (err) return ($('#werr').textContent = err);
-  if (step < 6) return go(step + 1);
+  if (ORDER.indexOf(step) < ORDER.length - 1) return go(ORDER[ORDER.indexOf(step) + 1]);
   const v = (id) => $('#' + id).value;
   const body = {
     draftToken: srvToken() || undefined,
@@ -1629,7 +1645,7 @@ $('#newOrder').onclick = () => {
   $('#result').hidden = true; landing(true); route();
   resetWizard(); window.scrollTo(0, 0);
 };
-function resetWizard() { design = { tpl: 'nowoczesny', color: 'niebieski' }; drawWizDesign(); setPhoto(''); restoring = true; $('#wizForm').reset(); ['exp', 'edu', 'ads'].forEach((b) => { $('#' + b).replaceChildren(); addRow(b); }); restoring = false; refresh(); go(1); }
+function resetWizard() { design = { tpl: 'nowoczesny', color: 'niebieski' }; drawWizDesign(); setPhoto(''); restoring = true; $('#wizForm').reset(); ['exp', 'edu', 'ads'].forEach((b) => { $('#' + b).replaceChildren(); addRow(b); }); restoring = false; refresh(); go(ORDER[0]); }
 
 /* ---------- Asystent na stronie ---------- */
 const chat = { history: [], started: false };
@@ -2364,7 +2380,7 @@ $('.skip').addEventListener('click', (e) => {
 
 addRow('exp'); addRow('edu'); addRow('ads');
 if (restoreDraft()) $('#draftNote').hidden = false;
-refresh(); go(1);
+refresh(); go(ORDER[0]);
 $('#clearDraft').onclick = () => { clearDraft(); resetWizard(); $('#draftNote').hidden = true; };
 const q = new URLSearchParams(location.search);
 if (window.__ROUTE?.startsWith('legal/')) $$('.langsw a').forEach((a) => a.setAttribute('href', legalUrl(window.__ROUTE.slice(6), a.dataset.lang)));
