@@ -31,6 +31,7 @@
       <button data-v="passes"><svg viewBox="0 0 24 24"><path d="M3 7h18v10H3z"/><path d="M8 7v10M12 11h5"/></svg>Karnety</button>
       <button data-v="codes"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/></svg>Kody rabatowe</button>
       <button data-v="reviews"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Opinie<span class="badge info" id="rvBadge" hidden></span></button>
+      <button data-v="outcomes"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16V9M12 16V5M17 16v-4"/><path d="m5 6 3-2 3 2"/></svg>Wyniki</button>
       <button data-v="messages"><svg viewBox="0 0 24 24"><path d="M3 5h18v12H8l-5 4z"/></svg>Wiadomości<span class="badge info" id="msgBadge" hidden></span></button>
       <button data-v="newsletter"><svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg>Newsletter</button>
       <button data-v="leads"><svg viewBox="0 0 24 24"><path d="M3 21V7l9-4 9 4v14"/><path d="M9 21v-6h6v6M8 10h.01M12 10h.01M16 10h.01"/></svg>Firmy<span class="badge" id="b2bBadge" hidden title="Faktury instytucji po terminie"></span></button>
@@ -145,6 +146,13 @@
       <p class="help" style="margin:-8px 0 14px">Na stronie głównej pokazują się tylko opinie zatwierdzone, z treścią i zgodą autora na publikację. Średnia na stronie liczy wszystkie oceny oprócz oznaczonych jako spam, także negatywne.</p>
       <div class="filters"><div class="seg" id="rvKind"><button type="button" data-k="new" aria-pressed="true">Do sprawdzenia</button><button type="button" data-k="approved" aria-pressed="false">Opublikowane</button><button type="button" data-k="" aria-pressed="false">Wszystkie</button></div></div>
       <div id="rvList" class="rv-admin"></div>
+    </section>
+
+    <section data-view="outcomes" hidden>
+      <div class="head"><h1>Wyniki klientów</h1></div>
+      <p class="help" style="margin:-8px 0 14px">Ankieta po 14 dniach (osobna, domyślnie odznaczona zgoda w zamówieniu). „Tak” liczymy wśród osób, które wysłały CV (tak + jeszcze nie). Wynik pojawia się na stronie głównej i na <a href="/jak-liczymy" target="_blank" rel="noopener">/jak-liczymy</a> automatycznie od progu OUTCOMES_MIN. Wpisy są anonimizowane po 30 dniach od wysłania pytania.</p>
+      <div class="grid2" style="grid-template-columns:1fr 1fr;margin-bottom:12px"><div class="card"><h2>Podsumowanie</h2><dl class="facts" id="ocFacts"></dl></div><div class="card"><h2>Na stronie</h2><p id="ocPub"></p></div></div>
+      <div class="grid2" style="grid-template-columns:1fr 1fr"><div class="card"><h2>Według pakietu</h2><div class="tbl-wrap" id="ocPkg"></div></div><div class="card"><h2>Według języka</h2><div class="tbl-wrap" id="ocLang"></div></div></div>
     </section>
 
     <!-- Wiadomości -->

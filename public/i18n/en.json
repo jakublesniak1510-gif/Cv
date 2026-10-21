@@ -1489,5 +1489,8 @@
 "Format: PDF i Word (.docx)": "Format: PDF and Word (.docx)",
 "W cenie: PDF. Wersja Word (.docx) to dodatek": "Included: PDF. The Word version (.docx) is an add-on",
 "PDF w cenie": "PDF included",
-"W cenie: PDF. Wersja Word (.docx): +9 zł.": "Included: PDF. Word version (.docx): +9 PLN."
+"W cenie: PDF. Wersja Word (.docx): +9 zł.": "Included: PDF. Word version (.docx): +9 PLN.",
+"Zapytajcie mnie za 14 dni, czy dostałem(-am) zaproszenie na rozmowę (1 wiadomość).": "Ask me in 14 days whether I got invited to an interview (1 message).",
+"{0}% klientów, którzy odpowiedzieli na naszą ankietę i wysłali CV, dostało co najmniej jedno zaproszenie na rozmowę (n={1}, okres {2}–{3}).": "{0}% of customers who answered our survey and sent their CV got at least one interview invitation (n={1}, period {2}–{3}).",
+"Jak liczymy": "How we count"
 }
