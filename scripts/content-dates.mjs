@@ -1,6 +1,7 @@
-// Daty ostatniej zmiany treści (seo-data/content-dates.json) dla „Zaktualizowano” i dateModified/lastmod:
-// dla każdej strony (poradnik, zawód, wzór, pracodawca; także wersje EN/UK/DE) data ostatniego commita, który zmienił
-// linie tego elementu w plikach z treścią (git blame). Uruchom po zmianie treści: node scripts/content-dates.mjs
+// Daty ostatniej zmiany treści (seo-data/content-dates.json: { adres: { hash, date } }) dla „Zaktualizowano”, dateModified i lastmod.
+// Strona ze zmienionym skrótem treści (lib/content-keys.js) dostaje dzisiejszą datę; nowa strona – datę z historii gita
+// (ostatni commit, który zmienił linie tego elementu w plikach z treścią, git blame). Test (test/eeat.test.js) nie przechodzi,
+// gdy skrót strony różni się od zapisanego – wtedy: node scripts/content-dates.mjs
 // Plik jest w repozytorium, bo na serwerze (obraz Dockera) nie ma historii gita.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -59,10 +60,19 @@ const tpl = merge(...ls('lib/templates-content').filter((f) => !f.endsWith('inde
 const emp = merge(itemDates('lib/employers-content.js', KEY, null, EMP), itemDates('seo-data/pracodawcy.json', SLUG, null, EMP));
 // Rozbudowa stron zawodów (lib/prof-extra) to też treść strony zawodu PL.
 for (const [k, d] of Object.entries(merge(...ls('lib/prof-extra').filter((f) => !f.endsWith('index.js')).map((f) => itemDates(f, KEY, null, PROF))))) if (!pl[k] || d > pl[k]) pl[k] = d;
-const out = { prof: pick(PROFESSIONS.map((p) => p.slug)), art: pick(ARTICLES.map((a) => a.slug)), tpl, emp };
+const blame = { prof: pick(PROFESSIONS.map((p) => p.slug)), art: pick(ARTICLES.map((a) => a.slug)), tpl, emp };
 for (const l of ['en', 'uk', 'de']) {
-  out[`prof-${l}`] = merge(itemDates(`lib/professions-${l}.js`, KEY, null, PROF), ...ls('lib/prof-more').map((f) => itemDates(f, KEY, l, PROF)));
-  out[`art-${l}`] = merge(itemDates(`lib/articles-${l}.js`, KEY, null, ART), ...ls('lib/articles-more').map((f) => itemDates(f, KEY, l, ART)));
+  blame[`prof-${l}`] = merge(itemDates(`lib/professions-${l}.js`, KEY, null, PROF), ...ls('lib/prof-more').map((f) => itemDates(f, KEY, l, PROF)));
+  blame[`art-${l}`] = merge(itemDates(`lib/articles-${l}.js`, KEY, null, ART), ...ls('lib/articles-more').map((f) => itemDates(f, KEY, l, ART)));
 }
-fs.writeFileSync(path.join(ROOT, 'seo-data/content-dates.json'), JSON.stringify(out, null, 1) + '\n');
-console.log(Object.entries(out).map(([k, v]) => `${k}: ${Object.keys(v).length}`).join(', '));
+const { contentPages, contentHash } = await import(path.join(ROOT, 'lib/content-keys.js'));
+const FILE = path.join(ROOT, 'seo-data/content-dates.json'), old = fs.existsSync(FILE) ? JSON.parse(fs.readFileSync(FILE, 'utf8')) : {};
+const out = {}; let changed = 0, added = 0;
+for (const [url, kind, slug, l, data] of contentPages()) {
+  const hash = contentHash(data), prev = old[url];
+  if (prev?.hash === hash) out[url] = prev;
+  else if (prev?.hash) { out[url] = { hash, date: today }; changed++; }
+  else { out[url] = { hash, date: blame[l === 'pl' ? kind : `${kind}-${l}`]?.[slug] || today }; added++; }
+}
+fs.writeFileSync(FILE, JSON.stringify(Object.fromEntries(Object.entries(out).sort()), null, 0).replace(/\},"/g, '},\n"') + '\n');
+console.log(`stron: ${Object.keys(out).length}, zmienionych (data = dziś): ${changed}, nowych: ${added}`);
