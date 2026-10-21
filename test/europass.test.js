@@ -36,13 +36,16 @@ test('Podgląd w przeglądarce używa tych samych wyrażeń i dopisków co PDF',
   const app = read('public/app.js');
   assert.ok(app.includes(`const EU_DIGITAL = ${DIGITAL};`) && app.includes(`const EU_DRIVING = ${DRIVING};`), 'te same wyrażenia');
   for (const l of Object.values(EU_LBL)) assert.ok(app.includes(l.note) && app.includes(l.digital), l.note);
+  // Dopisek w każdym języku szablonu: „wzorowany na”, nie „zgodny z” (bez sugerowania certyfikacji), i że to nie jest oficjalny dokument.
+  const NOT = { pl: 'To nie jest oficjalny dokument Europass.', en: 'This is not an official Europass document.', de: 'Dies ist kein offizielles Europass-Dokument.', uk: 'Це не офіційний документ Europass.', es: 'No es un documento oficial de Europass.', fr: 'Ce n’est pas un document officiel Europass.' };
+  for (const [l, t] of Object.entries(NOT)) { assert.ok(EU_LBL[l].note.endsWith(t), l); assert.doesNotMatch(EU_LBL[l].note, /zgodn|conforme|compliant|entspricht|відповідає|conforme/i, l); }
   assert.match(app, /\['europass', 'W układzie Europass', '[^']*To nie jest oficjalny dokument Europass\.'\]/);
   assert.match(app, /k\.eLangs\(\), \.\.\.k\.eRest\(\), k\.intr\(\), k\.clause\(\), k\.euNote\(\)/);
   assert.match(app, /q\.get\('szablon'\)/, 'kreator przyjmuje ?szablon=');
 });
 
 test('PDF „W układzie Europass”: kolejność sekcji jak w Europass, tabela CEFR, dopisek; bez logo UE', async () => {
-  for (const [lang, digital, note] of [['pl', 'UMIEJĘTNOŚCI CYFROWE', 'To nie jest oficjalny dokument Europass.'], ['en', 'DIGITAL SKILLS', 'This is not an official Europass document.']]) {
+  for (const [lang, digital, note] of [['pl', 'UMIEJĘTNOŚCI CYFROWE', 'Układ wzorowany na Europass, przygotowany w cvpodogloszenie.pl. To nie jest oficjalny dokument Europass.'], ['en', 'DIGITAL SKILLS', 'This is not an official Europass document.']]) {
     const pdf = await renderCv({ lang, cv }, { tpl: 'europass', color: 'niebieski' }, null);
     const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'eu-')), 'cv.pdf'); fs.writeFileSync(f, pdf);
     const t = execFileSync('pdftotext', ['-layout', f, '-'], { encoding: 'utf8' }).replace(/\s+/g, ' ');
@@ -65,10 +68,18 @@ test('Strony /cv-europass i /cv-do-urzedu: źródła, autor, FAQ, CTA z szablone
     assert.ok(h.includes(`href="/?zamow=1&szablon=${x.tpl}"`), 'CTA z wybranym szablonem');
     for (const [, u] of x.sources) assert.ok(h.includes(`href="${u}"`), u);
     assert.ok(sm.includes(`${base}/${x.slug}</loc>`), `${x.slug} w mapie strony`);
-    assert.doesNotMatch(JSON.stringify(x), /gwarant|na pewno dostaniesz|\d+\s?%/i);
+    // procenty tylko jako ustawowy próg z ogłoszeń (6% osób z niepełnosprawnościami), bez statystyk bez źródła
+    assert.doesNotMatch(JSON.stringify(x).replace('niższy niż 6%', ''), /gwarant|na pewno dostaniesz|\d+\s?%/i);
+  }
+  for (const x of OFFICIAL) {
+    const h = await (await fetch(`${U}/${x.slug}`)).text();
+    assert.doesNotMatch(h, /oficjalny szablon|zgodny z Europass|gwarant/i, `${x.slug}: bez sugerowania oficjalności i obietnic`);
+    assert.ok(h.includes('https://europass.europa.eu/pl') && h.includes('https://nabory.kprm.gov.pl'), `${x.slug}: oba oficjalne linki`);
+    assert.match(h, /Stan na: październik 2026/); assert.match(h, /href="\/zasady-redakcyjne"/);
   }
   const eu = await (await fetch(`${U}/cv-europass`)).text();
-  assert.ok(eu.includes('https://europass.europa.eu/pl')); assert.match(eu, /To nie jest oficjalny dokument Europass i nie ma logo Unii Europejskiej/);
+  assert.ok(eu.includes('https://europass.europa.eu/pl')); assert.match(eu, /To nie jest oficjalny dokument Europass i nie ma logo ani flagi Unii Europejskiej/); assert.match(eu, /interakcja ustna, produkcja ustna/);
   const ur = await (await fetch(`${U}/cv-do-urzedu`)).text();
   assert.ok(ur.includes('https://nabory.kprm.gov.pl')); assert.match(ur, /Biuletynie Informacji Publicznej/);
+  for (const t of ['część ogłoszeń dopuszcza obywateli UE lub innych państw', 'na stanowiskach urzędniczych', 'pełnej zdolności do czynności prawnych', 'niższy niż 6%', 'art. 22¹ Kodeksu pracy', 'art. 22¹a Kodeksu pracy', 'EZD RP', 'tylko w odniesieniu do tego, co faktycznie znasz']) assert.ok(ur.includes(t), t);
 });

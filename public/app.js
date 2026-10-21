@@ -72,12 +72,12 @@ const LBL = {
 const EU_DIGITAL = /(^|[^\p{L}])(excel|word|powerpoint|outlook|ms office|microsoft office|office 365|pakiet office|google (docs|sheets|workspace)|sap|wms|erp|crm|photoshop|canva|autocad|python|javascript|sql|html|css|jira|power bi|tableau|wordpress|figma|salesforce|subiekt|optima|symfonia|płatnik|enova|comarch|windows|linux|komputer\p{L}*|computer|programowani\p{L}*|programming)(?![\p{L}])/iu;
 const EU_DRIVING = /prawo jazdy|prawa jazdy|driving licen[cs]e|führerschein|fahrerlaubnis|водійськ|посвідчення водія|permis de conduire|permiso de conducir|carnet de conducir|(^|[^\p{L}])kat\.?\s?[ABCDET](\+E)?(?![\p{L}])/iu;
 const EU_LBL = {
-  pl: { digital: 'Umiejętności cyfrowe', driving: 'Prawo jazdy', note: 'Układ zgodny z Europass, przygotowany w cvpodogloszenie.pl. To nie jest oficjalny dokument Europass.' },
-  en: { digital: 'Digital skills', driving: 'Driving licence', note: 'Layout based on the Europass CV, prepared at cvpodogloszenie.pl. This is not an official Europass document.' },
-  de: { digital: 'Digitale Kompetenzen', driving: 'Führerschein', note: 'Aufbau nach dem Europass-Lebenslauf, erstellt auf cvpodogloszenie.pl. Dies ist kein offizielles Europass-Dokument.' },
-  uk: { digital: 'Цифрові навички', driving: 'Посвідчення водія', note: 'Структура відповідає Europass, підготовлено на cvpodogloszenie.pl. Це не офіційний документ Europass.' },
-  es: { digital: 'Competencias digitales', driving: 'Permiso de conducir', note: 'Formato basado en el CV Europass, preparado en cvpodogloszenie.pl. No es un documento oficial de Europass.' },
-  fr: { digital: 'Compétences numériques', driving: 'Permis de conduire', note: 'Mise en page conforme à Europass, préparée sur cvpodogloszenie.pl. Ce n’est pas un document officiel Europass.' },
+  pl: { digital: 'Umiejętności cyfrowe', driving: 'Prawo jazdy', note: 'Układ wzorowany na Europass, przygotowany w cvpodogloszenie.pl. To nie jest oficjalny dokument Europass.' },
+  en: { digital: 'Digital skills', driving: 'Driving licence', note: 'Layout modelled on the Europass CV, prepared at cvpodogloszenie.pl. This is not an official Europass document.' },
+  de: { digital: 'Digitale Kompetenzen', driving: 'Führerschein', note: 'Aufbau in Anlehnung an den Europass-Lebenslauf, erstellt auf cvpodogloszenie.pl. Dies ist kein offizielles Europass-Dokument.' },
+  uk: { digital: 'Цифрові навички', driving: 'Посвідчення водія', note: 'Структура за зразком Europass, підготовлено на cvpodogloszenie.pl. Це не офіційний документ Europass.' },
+  es: { digital: 'Competencias digitales', driving: 'Permiso de conducir', note: 'Formato inspirado en el CV Europass, preparado en cvpodogloszenie.pl. No es un documento oficial de Europass.' },
+  fr: { digital: 'Compétences numériques', driving: 'Permis de conduire', note: 'Mise en page inspirée d’Europass, préparée sur cvpodogloszenie.pl. Ce n’est pas un document officiel Europass.' },
 };
 const LBL2 = {
   pl: { cvTitle: 'Życiorys', personal: 'Dane osobowe', phone: 'Telefon', email: 'E-mail', city: 'Miejsce zamieszkania', web: 'Profil', more: 'Umiejętności i języki', native: 'ojczysty', placeDate: 'Miejscowość, data', sign: 'Podpis', level: 'Poziom' },
