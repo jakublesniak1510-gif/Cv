@@ -407,6 +407,21 @@ loaders.reviews = async () => {
   }));
 };
 
+// --- wyniki klientów (ankieta po 14 dniach) ---
+loaders.outcomes = async () => {
+  const s = await api('/outcomes'), pct = (a, b) => (b ? `${Math.round((100 * a) / b)}%` : '–'), day = (d) => (d ? d.split('-').reverse().join('.') : '–');
+  $('#ocFacts').replaceChildren(...[
+    ['Czeka na wysyłkę (zgoda, przed 14. dniem)', String(s.consents)], ['Wysłane pytania', String(s.sent)], ['Odpowiedzi', `${s.answered} (${pct(s.answered, s.sent)})`],
+    ['Tak, zaproszenie', String(s.yes)], ['Jeszcze nie', String(s.notYet)], ['Nie aplikowali', String(s.notApplied)],
+    ['„Tak” wśród tych, którzy aplikowali', s.applied ? `${s.pctYes}% (n=${s.applied})` : '–'], ['Średnio zaproszeń (przy „tak”)', s.avgInvites == null ? '–' : String(s.avgInvites).replace('.', ',')],
+    ['Okres odpowiedzi', s.from ? `${day(s.from)}–${day(s.to)}` : '–'],
+  ].map(([k, v]) => el('div', {}, el('dt', { textContent: k }), el('dd', { textContent: v }))));
+  $('#ocPub').replaceChildren(s.published ? el('span', { textContent: s.published }) : el('span', { className: 'mute', textContent: `Jeszcze niewidoczne: ${s.applied} z ${s.min} wymaganych odpowiedzi osób, które wysłały CV.` }));
+  const tbl = (rows, name) => (rows.length ? el('table', {}, el('thead', {}, el('tr', {}, [name, 'Wysłane', 'Odpowiedzi', 'Aplikowali', '„Tak”'].map((t) => el('th', { textContent: t })))),
+    el('tbody', {}, rows.map((r) => el('tr', {}, [r.key, r.sent, r.answered, r.applied, r.applied ? `${r.yes} (${pct(r.yes, r.applied)})` : '–'].map((v) => el('td', { textContent: String(v) })))))) : el('p', { className: 'mute', textContent: 'Brak danych.' }));
+  $('#ocPkg').replaceChildren(tbl(s.byPkg, 'Pakiet')); $('#ocLang').replaceChildren(tbl(s.byLang, 'Język'));
+};
+
 // --- wiadomości (kontakt i zapytania firm) ---
 let msgFilter = 'new';
 $('#msgKind').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; msgFilter = b.dataset.k; $$('#msgKind button').forEach((x) => x.setAttribute('aria-pressed', x === b)); loaders.messages(); });
