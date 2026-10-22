@@ -258,12 +258,11 @@ async function openOrder(id) {
   ].filter(Boolean));
   x.focus();
 }
-// Zwrot przez Stripe: całość albo podana kwota, z potwierdzeniem. Pieniądze wracają na kartę/BLIK klienta w kilka dni.
+// Zwrot przez Stripe albo Przelewy24: całość albo podana kwota, z potwierdzeniem. Pieniądze wracają do klienta w kilka dni.
 function refundBox(o, reload) {
   if (!['stripe', 'przelewy24'].includes(o.provider) && !o.refunds.length) return null;
-  const hist = o.refunds.length ? el('ul', { className: 'list' }, o.refunds.map((r) => el('li', { textContent: `${zl(r.amount)} · ${dt(r.at)} · ${r.source === 'stripe' ? 'w panelu Stripe' : 'z tego panelu'}` }))) : null;
-  if (o.provider === 'przelewy24') return el('div', {}, el('h3', { textContent: 'Zwrot' }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: 'Płatność przez Przelewy24: zwrot zrób w panelu Przelewy24.' }), hist);
-  if (!o.refundable) return el('div', {}, el('h3', { textContent: 'Zwrot' }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: o.refunded ? 'Zamówienie zwrócone w całości.' : 'Zwrot niedostępny (brak klucza Stripe).' }), hist);
+  const hist = o.refunds.length ? el('ul', { className: 'list' }, o.refunds.map((r) => el('li', { textContent: `${zl(r.amount)} · ${dt(r.at)} · ${r.source === 'stripe' ? 'w panelu Stripe' : r.source === 'panel-p24' ? 'z tego panelu (Przelewy24)' : 'z tego panelu'}` }))) : null;
+  if (!o.refundable) return el('div', {}, el('h3', { textContent: 'Zwrot' }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: o.refunded >= o.total ? 'Zamówienie zwrócone w całości.' : o.provider === 'przelewy24' ? 'Zwrot niedostępny (brak konfiguracji Przelewy24 albo numeru transakcji) – zrób go w panelu Przelewy24.' : 'Zwrot niedostępny (brak klucza Stripe).' }), hist);
   const amt = el('input', { type: 'text', inputMode: 'decimal', value: String(o.refundable).replace('.', ','), ariaLabel: 'Kwota zwrotu w zł' });
   const box = el('div', { className: 'confirm', hidden: true });
   const b = el('button', { className: 'btn danger sm', textContent: 'Zwróć pieniądze' });
@@ -271,7 +270,7 @@ function refundBox(o, reload) {
     const v = amt.value.trim();
     const ok = el('button', { className: 'btn danger solid sm', textContent: `Tak, zwróć ${v} zł` }), no = el('button', { className: 'btn ghost sm', textContent: 'Anuluj' });
     no.onclick = () => { box.hidden = true; };
-    ok.onclick = async () => { ok.disabled = no.disabled = true; try { const r = await post(`/orders/${o.id}/refund`, { amount: v }); toast(`Zwrot ${zl(r.amount)} zlecony w Stripe.`); reload(); } catch (x) { toast(x.message); ok.disabled = no.disabled = false; } };
+    ok.onclick = async () => { ok.disabled = no.disabled = true; try { const r = await post(`/orders/${o.id}/refund`, { amount: v }); toast(o.provider === 'przelewy24' ? `Zlecono zwrot ${zl(r.amount)} w Przelewy24 (status potwierdza panel P24).` : `Zwrot ${zl(r.amount)} zlecony w Stripe.`); reload(); } catch (x) { toast(x.message); ok.disabled = no.disabled = false; } };
     box.replaceChildren(el('strong', { textContent: `Zwrócić klientowi ${v} zł?` }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: 'Stripe odda pieniądze tą samą metodą, którą klient zapłacił (zwykle 5–10 dni). Opłaty Stripe za transakcję nie wracają. Tego nie da się cofnąć.' }), el('div', { className: 'actions' }, ok, no));
     box.hidden = false; ok.focus();
   };
@@ -582,7 +581,7 @@ loaders.export = () => { if (!$('#eFrom').value) setRange('this'); };
 async function start() {
   me = await api('/me').catch(() => ({}));
   if (!me.loggedIn) return showLogin();
-  $('#loginView').hidden = true; $('#appView').hidden = false; $('#demoNote').hidden = !me.demo;
+  $('#loginView').hidden = true; $('#appView').hidden = false; $('#demoNote').hidden = !me.demo; $('#p24SandboxNote').hidden = !me.p24Sandbox;
   const v = location.hash.slice(1);
   go(loaders[v] ? v : 'dash');
 }

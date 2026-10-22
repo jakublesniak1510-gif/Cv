@@ -581,6 +581,7 @@
       <p class="perk small">Po opłaceniu dostaniesz <b>swój kod −10 zł</b> (ważny 90 dni): na kolejne zamówienie dla Ciebie i dla Twoich znajomych.</p>
       <p class="hint trust-mini">W cenie: raport dopasowania, darmowa poprawka i edycja tekstu. Dane usuwamy automatycznie po 30 dniach.</p>
       <label class="check"><input type="checkbox" id="consent"> <span>Akceptuję <a href="/regulamin" target="_blank" rel="noopener">Regulamin</a> i <a href="/polityka-prywatnosci" target="_blank" rel="noopener">Politykę prywatności</a>. Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów.</span></label>
+      <div id="gwBox" class="gw-box" hidden></div>
       <label class="check"><input type="checkbox" id="waiver"> <span>Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.</span></label>
     </section>
     <section data-step="7" hidden>
@@ -611,7 +612,7 @@
 </div>
 
 <!-- Generowanie -->
-<div id="gen" class="gen" hidden><div class="gen-box"><div class="spinner" aria-hidden="true"></div><h2 id="genTitle">Piszemy Twoje dokumenty</h2><p id="genMsg">To zajmie około minuty. Nie zamykaj tej strony.</p><button class="btn" id="retry" hidden>Spróbuj ponownie</button><button class="btn" id="payAgain" hidden>Dokończ płatność</button></div></div>
+<div id="gen" class="gen" hidden><div class="gen-box"><div class="spinner" aria-hidden="true"></div><h2 id="genTitle">Piszemy Twoje dokumenty</h2><p id="genMsg">To zajmie około minuty. Nie zamykaj tej strony.</p><button class="btn" id="retry" hidden>Spróbuj ponownie</button><div id="payAgainGw" class="gw-box" hidden></div><button class="btn" id="payAgain" hidden>Dokończ płatność</button></div></div>
 
 <!-- Wynik -->
 <section id="result" class="result" hidden><div class="inner">

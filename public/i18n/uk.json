@@ -1523,5 +1523,9 @@
 "REGON": "REGON (реєстраційний номер)",
 "NIP": "NIP (податковий номер)",
 "{0} – jednoosobowa działalność gospodarcza, właściciel serwisu „CV Pod Ogłoszenie”": "{0} – фізична особа-підприємець, власник сервісу «CV Pod Ogłoszenie»",
-"{0}, Polska": "{0}, Польща"
+"{0}, Polska": "{0}, Польща",
+"Metoda płatności": "Спосіб оплати",
+"Przelewy24 (przelew online, BLIK)": "Przelewy24 (онлайн-переказ, BLIK)",
+"Nie udało się otworzyć płatności. Spróbuj ponownie albo wybierz inną metodę płatności.": "Не вдалося відкрити оплату. Спробуйте ще раз або виберіть інший спосіб оплати.",
+"Nieznana metoda płatności. Odśwież stronę i wybierz ją ponownie.": "Невідомий спосіб оплати. Оновіть сторінку й виберіть його ще раз."
 }

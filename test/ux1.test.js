@@ -33,7 +33,7 @@ test('Płatność: linia zaufania z metodami włączonymi w Stripe, „Zapłać�
   assert.deepEqual(methodNames({ card: ON, blik: { available: true, display_preference: { value: 'off' } } }), ['karta'], 'wyłączona w panelu pominięta');
   assert.deepEqual(methodNames(null), []);
   assert.match(html, /<button type="submit" class="btn" id="next">Dalej<\/button><p class="paytrust" id="payTrust" hidden><\/p>/);
-  assert.match(app, /bezpieczna płatność przez \$\{cfg\.pay\.provider\}/); assert.match(app, /dokumenty zwykle gotowe w kilka minut/); assert.match(app, /PDF także na e-mail/);
+  assert.match(app, /bezpieczna płatność przez \$\{g\.provider\}/); assert.match(app, /dokumenty zwykle gotowe w kilka minut/); assert.match(app, /PDF także na e-mail/);
   assert.match(css, /#next\{white-space:nowrap\}/); assert.match(css, /\.wiz-foot\.pay #back\{font-size:0/);
 });
 

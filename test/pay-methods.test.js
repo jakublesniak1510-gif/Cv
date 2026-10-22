@@ -24,7 +24,7 @@ test('/api/config odpowiada od razu, gdy API Stripe wisi; metody uzupełniają s
     for (let i = 0; i < 50; i++) { try { await fetch(U + '/health'); break; } catch { await wait(150); } }
     const t = Date.now(), c = await (await fetch(U + '/api/config')).json();
     assert.ok(Date.now() - t < 1000, `odpowiedź w ${Date.now() - t} ms`);
-    assert.deepEqual(c.pay, { provider: 'Stripe', methods: [] });
+    assert.deepEqual(c.pay, { id: 'stripe', provider: 'Stripe', methods: [], gateways: [{ id: 'stripe', provider: 'Stripe', methods: [] }], p24Sandbox: false });
   } finally { srv.kill(); mock.close(); mock.closeAllConnections?.(); }
 
   // W procesie: odświeżenie (z limitem 3 s) wypełnia listę, a stripeMethods() zwraca ją bez czekania.
