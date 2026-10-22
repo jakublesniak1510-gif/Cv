@@ -11,7 +11,7 @@ import { accountIdOf, accountEmail } from './lib/account.js';
 import { wizardDraftRoutes, wizardDraftsHourly, draftOrdered, draftPaid } from './lib/wizard-drafts.js';
 import { offerRoutes, feedSources } from './lib/jobfeed.js';
 import { calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUNDLE_OFF, withLetter as hasLetter, upsellOffers, upsellPlan } from './lib/pricing.js';
-import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads } from './lib/store.js';
+import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads, removeOrder } from './lib/store.js';
 import { generateForAd, linkedinChecked, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
 import { checkResult, hasCritical, recordQa, QA_LABELS } from './lib/qa.js';
@@ -56,15 +56,21 @@ import { emailHash, codeDiscount, applyPaidCode, isOwner, CODE_TTL, reserveCode,
 
 const PORT = process.env.PORT || 3000;
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
-// Operator płatności: Stripe (gdy jest STRIPE_SECRET_KEY), Przelewy24 albo tryb DEMO. PAY_PROVIDER=p24 wymusza Przelewy24.
-const PROVIDER = process.env.PAY_PROVIDER === 'p24' && p24Enabled() ? 'p24' : stripeEnabled() ? 'stripe' : p24Enabled() ? 'p24' : 'demo';
+// Operator płatności: Stripe (gdy jest STRIPE_SECRET_KEY), Przelewy24 albo tryb DEMO. PAY_PROVIDER=p24 wymusza Przelewy24,
+// PAY_PROVIDER=both (gdy skonfigurowane są obie bramki) – klient wybiera w kasie: Stripe (domyślnie) albo Przelewy24.
+const PROVIDER = process.env.PAY_PROVIDER === 'both' && stripeEnabled() && p24Enabled() ? 'both'
+  : process.env.PAY_PROVIDER === 'p24' && p24Enabled() ? 'p24' : stripeEnabled() ? 'stripe' : p24Enabled() ? 'p24' : 'demo';
 const DEMO = PROVIDER === 'demo';
+const GATEWAYS = PROVIDER === 'both' ? ['stripe', 'p24'] : DEMO ? [] : [PROVIDER];
+// Bramka wybrana przez klienta: brak pola → domyślna (pierwsza); nieznana albo niewłączona → błąd (null).
+const pickGateway = (g) => (g == null || g === '' ? GATEWAYS[0] || null : GATEWAYS.includes(g) ? g : null);
+const BAD_GATEWAY = 'Nieznana metoda płatności. Odśwież stronę i wybierz ją ponownie.';
 // Na produkcji bez Przelewy24 sprzedaż jest zamknięta: zamawiać (w trybie demo) może tylko zalogowany administrator,
 // żeby nikt nie dostał dokumentów z AI za darmo. DEMO_OPEN=1 otwiera tryb demo dla wszystkich (np. do prezentacji).
 // Klucz testowy Stripe (sk_test_…) na produkcji: płatności próbne tylko dla admina, sprzedaż dla klientów zamknięta.
-const STRIPE_TEST = PROVIDER === 'stripe' && /^sk_test_/.test(process.env.STRIPE_SECRET_KEY || '');
+const STRIPE_TEST = GATEWAYS.includes('stripe') && /^sk_test_/.test(process.env.STRIPE_SECRET_KEY || '');
 // Zły rodzaj klucza (np. publiczny pk_…): Stripe odrzuci każdą płatność, więc sprzedaż zostaje zamknięta, a w logach jest ostrzeżenie.
-const STRIPE_BAD = PROVIDER === 'stripe' && !/^(sk|rk)_(live|test)_/.test(process.env.STRIPE_SECRET_KEY || '');
+const STRIPE_BAD = GATEWAYS.includes('stripe') && !/^(sk|rk)_(live|test)_/.test(process.env.STRIPE_SECRET_KEY || '');
 if (STRIPE_BAD) console.error('STRIPE_SECRET_KEY nie jest kluczem tajnym (sk_live_…): sprzedaż zamknięta.');
 const SALES_CLOSED = STRIPE_BAD || ((DEMO || STRIPE_TEST) && process.env.NODE_ENV === 'production' && process.env.DEMO_OPEN !== '1');
 const salesClosedFor = (req) => SALES_CLOSED && !isAdmin(req);
@@ -179,7 +185,8 @@ shareRoutes(app, { BASE_URL }); // karta wyniku skanera do udostępnienia (/wyni
 b2bRoutes(app, {
   BASE_URL, demo: DEMO && !SALES_CLOSED, closedFor: (req) => salesClosedFor(req),
   confirm: (b) => confirmB2b(b),
-  checkout: PROVIDER === 'stripe' ? async (b, returnUrl) => {
+  // Paczki kodów: tylko Stripe (z fakturą przelewową jako alternatywą w formularzu B2B).
+  checkout: GATEWAYS.includes('stripe') ? async (b, returnUrl) => {
     const sess = await stripeCheckout({ orderId: b.id, amount: b.total, email: b.email, lang: 'pl', name: `CV Pod Ogłoszenie: paczka ${b.qty} kodów (${PACKAGES[b.pkg]?.name})`, description: `${b.org}: ${b.qty} × ${b.unit / 100} zł`.slice(0, 300), returnUrl });
     await b2bOrders.update(b.id, { stripe: { sessionId: sess.id } });
     return sess.url;
@@ -314,8 +321,10 @@ app.get('/health', async (_req, res) => {
 });
 // Metody płatności do linii zaufania w kreatorze: Stripe – włączone w panelu (lib/stripe.js), Przelewy24 – stała lista.
 // /api/config to też health check Rendera: lista metod zawsze z pamięci, odświeżana w tle (lib/stripe.js).
-const payInfo = () => (DEMO ? null : PROVIDER === 'stripe' ? { provider: 'Stripe', methods: stripeMethods() } : { provider: 'Przelewy24', methods: ['BLIK', 'przelew online', 'karta'] });
-if (PROVIDER === 'stripe') refreshStripeMethods().catch(() => {}); // raz przy starcie
+// Tryb „both”: gateways = obie bramki (do wyboru w kasie); provider/methods = domyślna (zgodność ze starszym frontem).
+const GW_INFO = { stripe: () => ({ id: 'stripe', provider: 'Stripe', methods: stripeMethods() }), p24: () => ({ id: 'p24', provider: 'Przelewy24', methods: ['BLIK', 'przelew online', 'karta'] }) };
+const payInfo = () => (DEMO ? null : { ...GW_INFO[GATEWAYS[0]](), gateways: GATEWAYS.map((g) => GW_INFO[g]()), p24Sandbox: GATEWAYS.includes('p24') && process.env.P24_SANDBOX === '1' });
+if (GATEWAYS.includes('stripe')) refreshStripeMethods().catch(() => {}); // raz przy starcie
 app.get('/api/config', (req, res) => res.json({
   pay: payInfo(),
   aiPreview: aiEnabled(), ads: ADS, googleReview: GOOGLE_REVIEW, chromeExt: CHROME_EXT, demo: DEMO, salesClosed: salesClosedFor(req), ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
@@ -416,12 +425,34 @@ app.post('/api/fetch-ad', async (req, res) => {
   }
 });
 
-// Płatność przez Przelewy24. sessionId = numer zamówienia + numer próby, więc wpłatę zawsze da się przypisać do zamówienia.
-async function checkout(order, lang) {
+// Nowe zamówienie → płatność w wybranej bramce. Gdy bramki nie da się otworzyć (np. błąd rejestracji P24 albo Stripe),
+// zwalniamy rezerwację kodu i karnetu i usuwamy nieopłacone zamówienie (klient składa je ponownie) – tak samo dla obu bramek.
+// keep: zamówienie zostaje (dokupienie dodatku – kolejna próba używa tej samej pozycji).
+class PayOpenError extends Error {}
+async function openPayment(order, gateway, { keep = false } = {}) {
+  try { return await checkout(order, undefined, gateway); }
+  catch (e) {
+    if (e instanceof CodeError) throw e;
+    logEvent('płatność', `Otwarcie płatności (${pickGateway(gateway) || '?'}): ${e.message}`, { orderId: order.id });
+    if (!keep && order.total > 0) {
+      if (order.pass) await releasePassOrder(order).catch(() => {});
+      if (order.code) await codes.update(order.code, (c) => releaseCode(c, [order.id])).catch(() => {});
+      await removeOrder(order.id).catch(() => {});
+    }
+    throw new PayOpenError('Nie udało się otworzyć płatności. Spróbuj ponownie albo wybierz inną metodę płatności.');
+  }
+}
+// Płatność: Stripe Checkout albo Przelewy24 (gateway: wybór klienta; brak → ostatnio użyta albo domyślna).
+// P24: sessionId = numer zamówienia + numer próby, więc wpłatę zawsze da się przypisać do zamówienia; wszystkie sesje
+// zamówienia zapamiętujemy (p24Sessions), żeby wpłata ze starszej próby też została rozpoznana.
+// Zmiana bramki przy ponownej płatności: otwarta sesja Stripe jest zamykana (bez podwójnej zapłaty), rezerwacje zostają te same.
+async function checkout(order, lang, gateway) {
   // Zamówienie za 0 zł (kod od instytucji): bez płatności, dokumenty powstają od razu.
   if (order.total === 0) { await updateOrder(order.id, { payment: order.pass ? { provider: 'karnet', pass: order.pass.id, at: Date.now() } : { provider: 'kod', code: order.code, at: Date.now() } }); markPaidAndGenerate(order.id).catch(console.error); return { id: order.id, free: true }; }
   if (DEMO) return { id: order.id, demo: true };
-  if (PROVIDER === 'stripe') {
+  const gw = pickGateway(gateway) || pickGateway(order.gateway) || GATEWAYS[0];
+  if (gw === 'p24' && order.stripe?.sessionId && stripeEnabled()) await stripeExpire(order.stripe.sessionId).catch(() => {});
+  if (gw === 'stripe') {
     const l = lang || order.uiLang, n = order.ads?.length || 1;
     const sess = await stripeCheckout({
       orderId: order.id, amount: order.total, email: order.profile.email, lang: l,
@@ -429,7 +460,7 @@ async function checkout(order, lang) {
       description: order.upsell ? `Dodatek do zamówienia ${order.upsellOf.slice(0, 8)}` : [`${n} ${n === 1 ? 'ogłoszenie' : 'ogłoszenia'}`, ...Object.keys(ADDONS).filter((k) => order.addons?.[k]).map((k) => ADDONS[k])].join(', ').slice(0, 300),
       returnUrl: `${BASE_URL}/${['en', 'uk', 'de'].includes(l) ? l : ''}?id=${order.upsellOf || order.id}`, // dodatek: powrót na stronę dokumentów zamówienia
     });
-    await updateOrder(order.id, { payAttempts: (order.payAttempts || 0) + 1, stripe: { sessionId: sess.id } });
+    await updateOrder(order.id, { gateway: 'stripe', payAttempts: (order.payAttempts || 0) + 1, stripe: { sessionId: sess.id } });
     if (!(await holdsCode(order))) { await stripeExpire(sess.id).catch(() => {}); throw new CodeError('Rabat z tego kodu jest już w innym Twoim zamówieniu. Złóż zamówienie ponownie.'); }
     return { id: order.id, url: sess.url };
   }
@@ -439,7 +470,7 @@ async function checkout(order, lang) {
     description: `CV Pod Ogłoszenie, zamówienie ${order.id}`,
     urlReturn: `${BASE_URL}/?id=${order.upsellOf || order.id}`, urlStatus: `${BASE_URL}/api/p24/status`,
   });
-  await updateOrder(order.id, { payAttempts: attempt, p24: { sessionId, token } });
+  await updateOrder(order.id, (x) => ({ ...x, gateway: 'p24', payAttempts: attempt, p24: { sessionId, token }, p24Sessions: [...(x.p24Sessions || (x.p24?.sessionId ? [x.p24.sessionId] : [])), sessionId].slice(-20) }));
   if (!(await holdsCode(order))) throw new CodeError('Rabat z tego kodu jest już w innym Twoim zamówieniu. Złóż zamówienie ponownie.');
   return { id: order.id, url };
 }
@@ -461,10 +492,10 @@ async function confirmStripe(o, sess) {
   return true;
 }
 // Potwierdzenie wpłaty (z powiadomienia albo po powrocie klienta): verify w Przelewy24, potem generowanie.
-async function confirmP24(o, p24OrderId, amount, verified = false) {
+async function confirmP24(o, p24OrderId, amount, verified = false, sessionId = o.p24?.sessionId) {
   if (amount !== o.total) { logEvent('płatność', `Kwota ${amount} nie zgadza się z zamówieniem`, { orderId: o.id }); return false; }
-  if (!verified && !(await p24Verify({ sessionId: o.p24.sessionId, orderId: p24OrderId, amount }))) return false;
-  await updateOrder(o.id, { payment: { provider: 'przelewy24', orderId: p24OrderId, sessionId: o.p24.sessionId, at: Date.now() } });
+  if (!verified && !(await p24Verify({ sessionId, orderId: p24OrderId, amount }))) return false;
+  await updateOrder(o.id, { payment: { provider: 'przelewy24', orderId: p24OrderId, sessionId, at: Date.now() } });
   markPaidAndGenerate(o.id).catch(console.error);
   return true;
 }
@@ -473,16 +504,23 @@ app.post('/api/p24/status', async (req, res) => {
   if (!p24Enabled() || !p24NotificationOk(n)) return res.sendStatus(400);
   res.sendStatus(200);
   const o = await getOrder(String(n.sessionId).split('.')[0]);
-  if (!o || o.status !== 'pending' || o.p24?.sessionId !== n.sessionId) return;
-  confirmP24(o, n.orderId, n.amount).catch((e) => logEvent('płatność', e.message, { orderId: o.id }));
+  const ours = o && (o.p24Sessions || [o.p24?.sessionId]).includes(n.sessionId);
+  if (!ours) return;
+  // Wpłata P24 do zamówienia już opłaconego inną drogą (np. Stripe po zmianie bramki): bez verify, log i alert do zwrotu.
+  if (o.status !== 'pending') {
+    if (o.payment?.sessionId !== n.sessionId) { logEvent('płatność', `Przelewy24: wpłata ${n.amount / 100} zł (P24 ${n.orderId}) do zamówienia już opłaconego (${o.payment?.provider || '?'}) – niepotwierdzona, do zwrotu`, { orderId: o.id }); alertOwner(`Przelewy24: druga wpłata do opłaconego zamówienia ${o.id} (transakcja ${n.orderId}, ${n.amount / 100} zł). Nie została potwierdzona – sprawdź w panelu P24 i zwróć klientowi.`); }
+    return;
+  }
+  confirmP24(o, n.orderId, n.amount, false, n.sessionId).catch((e) => logEvent('płatność', e.message, { orderId: o.id }));
 });
 // Klient wrócił bez zapłaty: nowa próba płatności dla tego samego zamówienia.
 app.post('/api/orders/:id/pay', async (req, res) => {
   const o = await getOrder(req.params.id);
   if (!o || o.status !== 'pending') return res.status(409).json({ error: 'To zamówienie jest już opłacone.' });
   // Rezerwacja kodu mogła wygasnąć (24 h) albo przejść na nowsze zamówienie tej osoby: zajmujemy kod ponownie.
+  const gw = pickGateway(req.body?.gateway); if (!gw && !DEMO) return res.status(400).json({ error: BAD_GATEWAY });
   if (!o.upsellOf) try { await reserveOrderCode(o, o.codeBase || 0); } catch (e) { if (e instanceof CodeError) return res.status(409).json({ error: `${e.message} Złóż zamówienie ponownie.` }); throw e; }
-  try { res.json(await checkout(o)); } catch (e) { logEvent('płatność', e.message, { orderId: o.id }); res.status(502).json({ error: 'Nie udało się otworzyć płatności. Spróbuj za chwilę.' }); }
+  try { res.json(await checkout(o, undefined, req.body?.gateway ? gw : undefined)); } catch (e) { logEvent('płatność', e.message, { orderId: o.id }); res.status(502).json({ error: 'Nie udało się otworzyć płatności. Spróbuj za chwilę.' }); }
 });
 
 // Dane do faktury (na życzenie klienta, faktura bez VAT). NIP jest opcjonalny (osoba prywatna), ale jeśli jest, musi być poprawny.
@@ -503,6 +541,7 @@ app.post('/api/orders', async (req, res) => {
     const { profile, ads, consent, design, addons, extraLangs, code, reminder, followUp, jobAlerts, reviewAsk, outcomeAsk, payReminder, uiLang, createAccount, invoice, adConsent, usePass, draftToken, waiver } = req.body || {};
     let { pkg } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
+    if (!DEMO && !pickGateway(req.body?.gateway)) return res.status(400).json({ error: BAD_GATEWAY });
     const a = cleanAds(ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
     const p = cleanProfile(profile);
@@ -533,8 +572,8 @@ app.post('/api/orders', async (req, res) => {
     }
     if (draftToken) { const ref = await draftOrdered(String(draftToken)).catch(() => null); if (ref) order.draftRef = ref; } // bez przypomnienia o szkicu po złożeniu zamówienia
     await saveOrder(order);
-    res.json(await checkout(order));
-  } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
+    res.json(await openPayment(order, req.body?.gateway));
+  } catch (e) { if (!(e instanceof PayOpenError)) console.error(e); res.status(e instanceof PayOpenError ? 502 : 400).json({ error: e.message || 'Błąd' }); }
 });
 
 // Kolejne zamówienie klienta, który już kupował: dane są zapisane, wybiera pakiet (1 ogłoszenie albo Pakiet 3).
@@ -543,6 +582,7 @@ app.post('/api/orders/:id/followup', async (req, res) => {
   try {
     const parent = await getOrder(req.params.id);
     if (!parent || parent.status !== 'done') return res.status(409).json({ error: 'Najpierw dokończ poprzednie zamówienie.' });
+    if (!DEMO && !pickGateway(req.body?.gateway)) return res.status(400).json({ error: BAD_GATEWAY });
     const a = cleanAds(req.body?.ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
     const ad = cleanAddons(req.body?.addons), langs = usefulExtraLangs(cleanLangs(req.body?.extraLangs), a);
@@ -554,14 +594,14 @@ app.post('/api/orders/:id/followup', async (req, res) => {
     const order = { id: crypto.randomUUID(), ...(req.body?.waiver === true ? { waiver: { text: WAIVER, at: Date.now() } } : {}), refCtx: refCtx(req), uiLang: parent.uiLang, parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, true, langs, 0), total), total, profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, maxRevisions: MAX_REVISIONS, created: Date.now() };
     try { await reserveOrderCode(order, c.base); } catch (e) { if (e instanceof CodeError) return res.status(409).json({ error: e.message }); throw e; }
     await saveOrder(order);
-    res.json(await checkout(order));
-  } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
+    res.json(await openPayment(order, req.body?.gateway));
+  } catch (e) { if (!(e instanceof PayOpenError)) console.error(e); res.status(e instanceof PayOpenError ? 502 : 400).json({ error: e.message || 'Błąd' }); }
 });
 
 const view = (o, extra = {}) => ({
   ...extra, id: o.id, pkg: o.pkg, addons: o.addons || {}, extraLangs: o.extraLangs || [], total: o.total, status: o.status, results: (o.results || []).map(({ qa, ...r }) => r), error: o.error, mail: o.mail,
   design: cleanDesign(o.design), photo: o.profile.photo || '', email: o.profile.email, parentId: o.parentId || null,
-  paidAt: o.paidAt || null, createAccount: !!o.createAccount, canPay: o.status === 'pending' && !DEMO, revisionsLeft: revLimit(o) - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
+  paidAt: o.paidAt || null, gateway: o.gateway || null, createAccount: !!o.createAccount, canPay: o.status === 'pending' && !DEMO, revisionsLeft: revLimit(o) - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
   invoice: o.invoice?.pdf ? { number: o.invoice.number } : null,
 });
 
@@ -622,6 +662,7 @@ app.post('/api/orders/:id/upsell', async (req, res) => {
     if (!plan) return res.status(400).json({ error: 'Ten dodatek nie jest już dostępny dla tego zamówienia.' });
     // Art. 38 pkt 13 ustawy o prawach konsumenta: zgoda na wykonanie od razu po płatności, jak przy zamówieniu (zapis treści i czasu).
     if (req.body?.waiver !== true) return res.status(400).json({ error: 'Zaznacz zgodę na wykonanie usługi od razu po płatności.' });
+    if (!DEMO && !pickGateway(req.body?.gateway)) return res.status(400).json({ error: BAD_GATEWAY });
     // Niezapłacona wcześniejsza próba tego samego dodatku: używamy jej ponownie (bez mnożenia zamówień).
     let u = null;
     for (const uid of p.upsellIds || []) { const x = await getOrder(uid); if (x?.status === 'pending' && x.upsell?.key === plan.key) u = x; }
@@ -632,8 +673,8 @@ app.post('/api/orders/:id/upsell', async (req, res) => {
       await saveOrder(u);
       await updateOrder(p.id, (x) => ({ ...x, upsellIds: [...(x.upsellIds || []), u.id].slice(-20) }));
     }
-    res.json(await checkout(u));
-  } catch (e) { console.error(e); res.status(400).json({ error: e.message || 'Błąd' }); }
+    res.json(await openPayment(u, req.body?.gateway, { keep: true }));
+  } catch (e) { if (!(e instanceof PayOpenError)) console.error(e); res.status(e instanceof PayOpenError ? 502 : 400).json({ error: e.message || 'Błąd' }); }
 });
 
 // Opinia klienta: tylko po gotowym zamówieniu, jedna na zamówienie (można ją zmienić).

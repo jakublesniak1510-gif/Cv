@@ -888,17 +888,33 @@ $('#toPack').onclick = () => { $('input[name=pkg][value=pack3]').checked = true;
   if (saved) { $('#codeInput').value = saved; $('#refBanner').hidden = false; if (/^WITAJ-/i.test(saved)) $('#refBanner').textContent = 'Masz kod powitalny −10 zł. Wpiszemy go automatycznie w podsumowaniu zamówienia.'; }
 }
 $('#wizForm').addEventListener('input', saveDraft);
+$('#gwBox').addEventListener('change', () => payTrust(step));
 $('#addExp').onclick = () => addRow('exp');
 $('#addEdu').onclick = () => addRow('edu');
 $('#addAd').onclick = () => addRow('ads');
 
+// Wybór bramki płatności (tryb „both”: Stripe i Przelewy24, /api/config → pay.gateways). Jedna bramka → bez wyboru.
+// Etykiety neutralne: metody, nie nazwa operatora Stripe; Przelewy24 – nazwą (bez logo).
+const payGateways = () => cfg.pay?.gateways || [];
+const gwLabel = (g) => (g.id === 'p24' ? 'Przelewy24 (przelew online, BLIK)' : (g.methods || []).filter((m) => m !== 'Przelewy24').join(' / ') || 'BLIK / karta / Apple Pay / Google Pay');
+function gwPicker(box, name, pick = payGateways()[0]?.id) {
+  const gs = payGateways();
+  box.hidden = gs.length < 2; if (box.hidden) return box.replaceChildren();
+  box.replaceChildren(el('fieldset', { className: 'gw-pick' }, el('legend', { textContent: 'Metoda płatności' }),
+    ...gs.map((g) => el('label', { className: 'check' }, el('input', { type: 'radio', name, value: g.id, checked: g.id === pick }), ' ', el('span', { textContent: gwLabel(g) })))));
+  return box;
+}
+const gwValue = (root) => root?.querySelector('input[type=radio]:checked')?.value || undefined;
 // Pod przyciskiem płatności: metody faktycznie włączone u operatora (/api/config → pay), bezpieczeństwo, czas i e-mail.
 function payTrust(n) {
   const box = $('#payTrust'), on = n === 6 && total() > 0;
   $('.wiz-foot').classList.toggle('pay', n === 6);
-  box.hidden = !on; if (!on) return;
-  const parts = [...(cfg.pay?.methods || []).map((m, i, a) => [el('span', { textContent: m }), i < a.length - 1 ? ', ' : '']).flat()];
-  const items = [parts.length ? parts : null, cfg.pay ? [el('span', { textContent: `bezpieczna płatność przez ${cfg.pay.provider}` })] : null, [el('span', { textContent: 'dokumenty zwykle gotowe w kilka minut' })], [el('span', { textContent: 'PDF także na e-mail' })]].filter(Boolean);
+  box.hidden = !on;
+  if (n === 6 && total() > 0) { if (!$('#gwBox').childElementCount) gwPicker($('#gwBox'), 'gw'); } else $('#gwBox').hidden = true;
+  if (!on) return;
+  const g = payGateways().find((x) => x.id === gwValue($('#gwBox'))) || cfg.pay;
+  const parts = [...(g?.methods || []).map((m, i, a) => [el('span', { textContent: m }), i < a.length - 1 ? ', ' : '']).flat()];
+  const items = [parts.length ? parts : null, g ? [el('span', { textContent: `bezpieczna płatność przez ${g.provider}` })] : null, [el('span', { textContent: 'dokumenty zwykle gotowe w kilka minut' })], [el('span', { textContent: 'PDF także na e-mail' })]].filter(Boolean);
   box.replaceChildren(...items.flatMap((x, i) => (i ? [' · ', ...x] : x)));
 }
 const nextLabel = () => ($('#next').textContent = step === 6 ? (total() === 0 ? 'Zamów bez opłaty' : cfg.demo ? `Przejdź do płatności · ${total()} zł` : `Zapłać ${total()} zł`) : 'Dalej');
@@ -1028,7 +1044,7 @@ $('#wizForm').onsubmit = async (e) => {
   const v = (id) => $('#' + id).value;
   const body = {
     draftToken: srvToken() || undefined,
-    usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, gateway: gwValue($('#gwBox')), outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   // Zgoda na cookies reklamowe (baner): tylko wtedy serwer zgłosi zakup do Meta (Conversions API) z identyfikatorami piksela.
@@ -1266,11 +1282,11 @@ async function poll() {
   if (data.status !== 'pending' && data.total > 0 && data.paidAt && Date.now() - data.paidAt < 864e5) window.CONSENT?.purchase(data.id, data.total / 100);
   if (data.status === 'done') { $('#gen').hidden = true; return showResult(); }
   if (data.status === 'paid') { $('#genTitle').textContent = 'Dokumenty są w przygotowaniu'; $('#genMsg').textContent = 'Mamy chwilowe opóźnienie. Płatność jest zachowana, a gotowe dokumenty wyślemy na Twój e-mail, zwykle w ciągu kilku godzin. Możesz zamknąć tę stronę albo spróbować ponownie.'; $('#retry').hidden = false; timer = setTimeout(poll, 60000); return; }
-  if (data.status === 'pending' && data.canPay && ++pendingPolls >= 4) { $('#genTitle').textContent = 'Płatność nie jest jeszcze potwierdzona'; $('#genMsg').textContent = 'Jeśli przerwałeś płatność albo zamknąłeś okno banku, możesz ją dokończyć. Jeśli zapłaciłeś, poczekaj chwilę: potwierdzenie może przyjść z opóźnieniem.'; $('#payAgain').hidden = false; timer = setTimeout(poll, 5000); return; }
+  if (data.status === 'pending' && data.canPay && ++pendingPolls >= 4) { $('#genTitle').textContent = 'Płatność nie jest jeszcze potwierdzona'; $('#genMsg').textContent = 'Jeśli przerwałeś płatność albo zamknąłeś okno banku, możesz ją dokończyć. Jeśli zapłaciłeś, poczekaj chwilę: potwierdzenie może przyjść z opóźnieniem.'; $('#payAgain').hidden = false; if (!$('#payAgainGw').childElementCount) gwPicker($('#payAgainGw'), 'gwa', data.gateway || undefined); timer = setTimeout(poll, 5000); return; }
   $('#genMsg').textContent = data.status === 'pending' ? 'Czekamy na potwierdzenie płatności…' : 'To zajmie około minuty. Nie zamykaj tej strony. Gotowe dokumenty wyślemy też na Twój e-mail.';
   timer = setTimeout(poll, cfg.demo ? 800 : 2500);
 }
-$('#payAgain').onclick = async () => { $('#payAgain').disabled = true; try { const r = await fetch(`/api/orders/${orderId}/pay`, { method: 'POST' }); const j = await r.json(); if (!r.ok) throw new Error(j.error); location.href = j.url; } catch (x) { $('#genMsg').textContent = x.message || 'Nie udało się otworzyć płatności.'; $('#payAgain').disabled = false; } };
+$('#payAgain').onclick = async () => { $('#payAgain').disabled = true; try { const gw = gwValue($('#payAgainGw')); const r = await fetch(`/api/orders/${orderId}/pay`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(gw ? { gateway: gw } : {}) }); const j = await r.json(); if (!r.ok) throw new Error(j.error); location.href = j.url; } catch (x) { $('#genMsg').textContent = x.message || 'Nie udało się otworzyć płatności.'; $('#payAgain').disabled = false; } };
 $('#retry').onclick = async () => { await fetch(`/api/orders/${orderId}/retry`, { method: 'POST' }); startResult(orderId); };
 
 function drawInvoice() {
@@ -1510,6 +1526,7 @@ function drawFollowup() {
     pick, el('p', { className: 'hint', id: 'fuInfo' }), el('div', { id: 'fuAds' }),
     el('button', { type: 'button', className: 'btn ghost sm', id: 'fuAdd', textContent: '+ Dodaj ogłoszenie (w pakiecie do 3)', onclick: () => { addRow('fuAds'); drawPick(); } }),
     el('label', { className: 'f fucode' }, 'Kod rabatowy ', el('input', { type: 'text', id: 'fuCode', placeholder: 'opcjonalnie', autocomplete: 'off', value: data.myCode && !data.myCode.usedByMe ? data.myCode.code : '' })),
+    gwPicker(el('div', { className: 'gw-box', id: 'fuGw' }), 'fugw'),
     el('label', { className: 'check' }, el('input', { type: 'checkbox', id: 'fuWaiver' }), ' ', el('span', { textContent: 'Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.' })),
     el('p', {}, el('button', { type: 'button', className: 'btn', id: 'fuPay', textContent: '', onclick: async (e) => {
       const ads = rows('fuAds'), err = $('#fuErr'), code = $('#fuCode').value.trim();
@@ -1519,7 +1536,7 @@ function drawFollowup() {
       if (!$('#fuWaiver').checked) { err.textContent = 'Zaznacz zgodę na wykonanie usługi od razu po płatności.'; return; }
       e.target.disabled = true; err.textContent = '';
       try {
-        const r = await fetch(`/api/orders/${orderId}/followup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pkg: fpkg === 'bundle' ? 'cv_letter' : fpkg, addons: fpkg === 'bundle' ? { interview: true, sim: true } : {}, ads, code, waiver: true }) });
+        const r = await fetch(`/api/orders/${orderId}/followup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pkg: fpkg === 'bundle' ? 'cv_letter' : fpkg, addons: fpkg === 'bundle' ? { interview: true, sim: true } : {}, ads, code, waiver: true, gateway: gwValue($('#fuGw')) }) });
         const j = await r.json(); if (!r.ok) throw new Error(j.error);
         if (j.free) { delete box.dataset.ready; startResult(j.id); } else if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); delete box.dataset.ready; startResult(j.id); } else location.href = j.url;
       } catch (x) { err.textContent = x.message; e.target.disabled = false; }
@@ -1541,6 +1558,7 @@ function drawUpsell() {
   // Zgoda z art. 38 pkt 13 (jak w kreatorze): bez niej przycisk płatności za dodatek nie działa.
   const waive = el('input', { type: 'checkbox', id: 'upWaiver' });
   box.replaceChildren(el('h3', { textContent: 'Dodaj do zamówienia' }), el('p', { className: 'hint', textContent: 'Płacisz tylko za dodatek. Przygotujemy go do tych samych ogłoszeń i dodamy na tej stronie.' }),
+    gwPicker(el('div', { className: 'gw-box', id: 'upGw' }), 'upgw'),
     el('label', { className: 'check' }, waive, ' ', el('span', { textContent: 'Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.' })),
     el('div', { className: 'upsell-list' }, ...offers.map((o) => el('div', { className: 'upsell-item' },
       el('div', {}, el('b', { textContent: o.name }), el('p', { className: 'hint', textContent: o.key === 'bundle' ? `Razem taniej: ${(o.includes || []).map((k) => UPSELL_PART[k]).join(', ')}.` : UPSELL_HINT[o.key] || '' })),
@@ -1549,7 +1567,7 @@ function drawUpsell() {
         if (!waive.checked) { flash('Zaznacz zgodę na wykonanie usługi od razu po płatności.', true); waive.focus(); return; }
         b.disabled = true; b.textContent = 'Przechodzę do płatności…';
         try {
-          const r = await fetch(`/api/orders/${orderId}/upsell`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: o.key, waiver: true }) }); const j = await r.json();
+          const r = await fetch(`/api/orders/${orderId}/upsell`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: o.key, waiver: true, gateway: gwValue($('#upGw')) }) }); const j = await r.json();
           if (!r.ok) throw new Error(j.error || 'Nie udało się otworzyć płatności.');
           if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); return startResult(orderId); }
           location.href = j.url;

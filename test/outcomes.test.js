@@ -98,7 +98,7 @@ test('Zgoda w zamówieniu: osobna, odznaczona, z zapisem treści i czasu; wysył
   const pp = read('public/legal/prywatnosc.html');
   for (const t of ['ankieta „Wyniki klientów”', 'Umfrage „Ergebnisse unserer Kunden“', '“Customer results” survey', 'опитування «Результати клієнтів»']) assert.ok(pp.includes(t), t);
   // Każda zmiana polityki: nowa data obowiązywania i wpis w historii zmian, w każdym języku.
-  for (const t of ['<h2>13. Historia zmian</h2>', '<h2>13. Änderungshistorie</h2>', '<h2>13. Change history</h2>', '<h2>13. Історія змін</h2>', 'obowiązuje od 21 października 2026 r.', 'gilt ab dem 21. Oktober 2026', 'effective from 21 October 2026', 'діє з 21 жовтня 2026 р.']) assert.ok(pp.includes(t), t);
+  for (const t of ['<h2>13. Historia zmian</h2>', '<h2>13. Änderungshistorie</h2>', '<h2>13. Change history</h2>', '<h2>13. Історія змін</h2>', '21 października 2026 r. – dodano jednorazową ankietę', '21. Oktober 2026 – einmalige Umfrage', '21 October 2026 – added the one-time', '21 жовтня 2026 р. – додано одноразове']) assert.ok(pp.includes(t), t);
   for (const l of ['en', 'uk', 'de']) {
     const d = JSON.parse(read(`public/i18n/${l}.json`));
     for (const k of [oc.OUTCOME_CONSENT, 'Jak liczymy', '{0}% klientów, którzy odpowiedzieli na naszą ankietę i wysłali CV, dostało co najmniej jedno zaproszenie na rozmowę (n={1}, okres {2}–{3}).']) assert.ok(d[k], `${l}: ${k}`);

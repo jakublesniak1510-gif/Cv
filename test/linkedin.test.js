@@ -92,6 +92,6 @@ test('Dokupiony profil: krytyczna flaga → jedna ponowna generacja, potem bad (
 
 test('Regulamin PL/DE/EN/UK: wersja EN profilu bez dopłaty, dokupione dodatki osobno po opłaceniu, art. 38 pkt 13, historia zmian', () => {
   const r = read('public/legal/regulamin.html');
-  for (const t of ['wersję profilu w języku angielskim', 'englische Version des Profils', 'English version of the profile', 'версію профілю англійською', 'art. 38 pkt 13', 'Art. 38 Nr. 13', 'Article 38(13)', 'ст. 38 п. 13', 'Historia zmian: 21 października 2026', 'Änderungshistorie: 21. Oktober 2026', 'Change history: 21 October 2026', 'Історія змін: 21 жовтня 2026']) assert.ok(r.includes(t), t);
-  assert.match(read('public/app.js'), /body: JSON\.stringify\(\{ key: o\.key, waiver: true \}\)/);
+  for (const t of ['wersję profilu w języku angielskim', 'englische Version des Profils', 'English version of the profile', 'версію профілю англійською', 'art. 38 pkt 13', 'Art. 38 Nr. 13', 'Article 38(13)', 'ст. 38 п. 13', '21 października 2026 r. – dodatki dokupione', '21. Oktober 2026 – hinzugekaufte Zusatzleistungen', '21 October 2026 – add-ons purchased', '21 жовтня 2026 р. – додаткові послуги']) assert.ok(r.includes(t), t);
+  assert.match(read('public/app.js'), /body: JSON\.stringify\(\{ key: o\.key, waiver: true, gateway: gwValue\(\$\('#upGw'\)\) \}\)/);
 });

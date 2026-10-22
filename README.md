@@ -32,6 +32,13 @@ npm start              # http://localhost:3000
 2. Wpisz zmienne: `ANTHROPIC_API_KEY`, `P24_MERCHANT_ID`, `P24_POS_ID`, `P24_CRC`, `P24_API_KEY`, `BASE_URL` (adres z Render, potem własna domena).
 3. W panelu Przelewy24 włącz metody płatności (BLIK, karty, Google Pay, Apple Pay) i sprawdź, czy wypłaty idą na firmowy rachunek bankowy.
 4. Zrób płatność testową w środowisku sandbox (`P24_SANDBOX=1`), potem przełącz na produkcję.
+
+### Przelewy24 obok Stripe (`PAY_PROVIDER=both`)
+
+Gdy są klucze Stripe i Przelewy24 oraz `PAY_PROVIDER=both`, klient wybiera bramkę w kasie (domyślnie Stripe). Test w sandboxie:
+konto testowe P24 (osobne ID i klucze), `P24_SANDBOX=1`, zamówienie z wybraną bramką „Przelewy24” na kwotę ok. 1 zł (kod rabatowy),
+płatność na stronie testowej P24, potem zwrot z panelu admina. Przy `P24_SANDBOX=1` panel admina pokazuje baner „P24 sandbox”.
+Pełna instrukcja dla właściciela: [docs/P24.md](docs/P24.md).
 Dane zamówień trwają na dysku `/data` (zmienna `DATA_DIR`).
 
 ## Ogłoszenie z linku

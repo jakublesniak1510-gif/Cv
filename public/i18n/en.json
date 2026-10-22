@@ -1523,5 +1523,11 @@
 "REGON": "REGON (business register no.)",
 "NIP": "NIP (tax ID)",
 "{0} – jednoosobowa działalność gospodarcza, właściciel serwisu „CV Pod Ogłoszenie”": "{0} – sole proprietorship, owner of the “CV Pod Ogłoszenie” service",
-"{0}, Polska": "{0}, Poland"
+"{0}, Polska": "{0}, Poland",
+"Metoda płatności": "Payment method",
+"Przelewy24 (przelew online, BLIK)": "Przelewy24 (online bank transfer, BLIK)",
+"BLIK / karta / Apple Pay / Google Pay": "BLIK / card / Apple Pay / Google Pay",
+"BLIK / karta": "BLIK / card",
+"Nie udało się otworzyć płatności. Spróbuj ponownie albo wybierz inną metodę płatności.": "We could not open the payment. Please try again or choose another payment method.",
+"Nieznana metoda płatności. Odśwież stronę i wybierz ją ponownie.": "Unknown payment method. Refresh the page and choose it again."
 }
