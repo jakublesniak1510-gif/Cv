@@ -896,12 +896,14 @@ $('#addAd').onclick = () => addRow('ads');
 // Wybór bramki płatności (tryb „both”: Stripe i Przelewy24, /api/config → pay.gateways). Jedna bramka → bez wyboru.
 // Etykiety neutralne: metody, nie nazwa operatora Stripe; Przelewy24 – nazwą (bez logo).
 const payGateways = () => cfg.pay?.gateways || [];
-const gwLabel = (g) => (g.id === 'p24' ? 'Przelewy24 (przelew online, BLIK)' : (g.methods || []).filter((m) => m !== 'Przelewy24').join(' / ') || 'BLIK / karta / Apple Pay / Google Pay');
+// Etykieta Stripe: pojedyncze metody tłumaczone osobno (słownik i18n), składane dopiero po tłumaczeniu.
+const tr = (s) => window.I18N?.t?.(s) ?? s;
+const gwLabel = (g) => (g.id === 'p24' ? tr('Przelewy24 (przelew online, BLIK)') : ((g.methods || []).filter((m) => m !== 'Przelewy24').length ? g.methods.filter((m) => m !== 'Przelewy24') : ['BLIK', 'karta', 'Apple Pay / Google Pay']).map(tr).join(' / '));
 function gwPicker(box, name, pick = payGateways()[0]?.id) {
   const gs = payGateways();
   box.hidden = gs.length < 2; if (box.hidden) return box.replaceChildren();
   box.replaceChildren(el('fieldset', { className: 'gw-pick' }, el('legend', { textContent: 'Metoda płatności' }),
-    ...gs.map((g) => el('label', { className: 'check' }, el('input', { type: 'radio', name, value: g.id, checked: g.id === pick }), ' ', el('span', { textContent: gwLabel(g) })))));
+    ...gs.map((g) => el('label', { className: 'check' }, el('input', { type: 'radio', name, value: g.id, checked: g.id === pick }), ' ', (() => { const s = el('span', { textContent: gwLabel(g) }); s.setAttribute('data-noi18n', ''); return s; })()))));
   return box;
 }
 const gwValue = (root) => root?.querySelector('input[type=radio]:checked')?.value || undefined;

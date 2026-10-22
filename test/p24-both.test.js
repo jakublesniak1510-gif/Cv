@@ -143,3 +143,60 @@ test('Panel admina: zwrot dla P24 i baner sandboxa; karnety i paczki kodów z in
   for (const t of ['P24_MERCHANT_ID', 'P24_POS_ID', 'P24_CRC', 'P24_API_KEY', '/api/p24/status', 'P24_SANDBOX=1', 'PAY_PROVIDER=both']) assert.ok(doc.includes(t), t);
   assert.match(read('public/app.js'), /gateway: gwValue\(\$\('#gwBox'\)\)/);
 });
+
+test('Tryb both: błąd rejestracji P24 zwalnia kod i karnet; zwrot P24 z panelu admina; po pełnym zwrocie bez poprawek i dokupień; „Dokończ płatność” = ostatnia bramka', { timeout: 90_000 }, async () => {
+  const m = mocks(), port = 4900 + Math.floor(Math.random() * 90), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-both2-'));
+  fs.writeFileSync(path.join(dir, 'codes.json'), JSON.stringify({ AKCJA10: { id: 'AKCJA10', amount: 1000, usedBy: [], expires: Date.now() + 1e9, kind: 'akcja' } }));
+  const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', SALES_OPEN: '1', PAY_PROVIDER: 'both', ADMIN_PASSWORD: 'tajne-haslo-testowe',
+    P24_MERCHANT_ID: String(MERCHANT), P24_CRC: CRC, P24_API_KEY: KEY, P24_BASE_URL: `http://localhost:${m.p24.address().port}`,
+    STRIPE_SECRET_KEY: 'sk_test_x', STRIPE_WEBHOOK_SECRET: 'whsec_x', STRIPE_API_BASE: `http://localhost:${m.stripe.address().port}` };
+  const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
+  const U = `http://localhost:${port}`; let cookie = '', admin = '';
+  const call = async (meth, p, b, extra = {}) => { const r = await fetch(U + p, { method: meth, headers: { 'Content-Type': 'application/json', cookie, ...extra }, body: b && JSON.stringify(b) }); const sc = r.headers.get('set-cookie'); if (sc && !extra.cookie) cookie = sc.split(';')[0]; return { status: r.status, j: await r.json().catch(() => ({})), sc }; };
+  const read = (f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+  const notify = (sessionId, amount, orderId) => { const n = { merchantId: MERCHANT, posId: MERCHANT, sessionId, amount, originAmount: amount, currency: 'PLN', orderId, methodId: 154, statement: 'p24' }; return fetch(U + '/api/p24/status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...n, sign: sha({ ...n, crc: CRC }) }) }); };
+  const ad = 'Szukamy magazyniera. Wymagania: obsługa wózka widłowego, doświadczenie w magazynie, sumienność i dokładność. '.repeat(2);
+  const prof = (email) => ({ name: 'Jan Test', email, experience: [{ title: 'Magazynier', company: 'X', period: '2020 – 2024' }] });
+  try {
+    for (let i = 0; i < 60; i++) { try { await fetch(U + '/api/config'); break; } catch { await wait(150); } }
+    // kod rabatowy: błąd rejestracji P24 → rezerwacja kodu zwolniona
+    const bad = await call('POST', '/api/orders', { pkg: 'cv', consent: true, waiver: true, gateway: 'p24', code: 'AKCJA10', profile: prof('blad@test.pl'), ads: [{ title: 'Magazynier', text: ad }] });
+    assert.equal(bad.status, 502);
+    assert.deepEqual(read('codes.json').AKCJA10.reserved || [], [], 'rezerwacja kodu zwolniona');
+    // karnet (kupiony przez Stripe): dopłata przez P24 z błędem rejestracji → dopasowanie wraca do puli
+    const p = await call('POST', '/api/passes', { kind: 'aktywny30', email: 'k@example.test', terms: true, start: true });
+    const cs = /stripe\.test\/(cs_\d+)/.exec(p.j.url)?.[1]; assert.ok(cs, 'karnet przez Stripe'); m.stripeSessions[cs].payment_status = 'paid';
+    assert.equal((await call('POST', `/api/passes/${p.j.id}/login`)).status, 200);
+    const left0 = (await call('GET', '/api/passes/mine')).j.active.left.matches;
+    const pb = await call('POST', '/api/orders', { usePass: true, consent: true, waiver: true, gateway: 'p24', profile: prof('blad@test.pl'), addons: { docx: true }, ads: [{ title: 'Magazynier', text: ad }] });
+    assert.equal(pb.status, 502);
+    assert.equal((await call('GET', '/api/passes/mine')).j.active.left.matches, left0, 'rezerwacja karnetu zwolniona');
+
+    // „Dokończ płatność” bez pola gateway → ostatnio użyta bramka (P24), nie domyślny Stripe
+    cookie = '';
+    const o = await call('POST', '/api/orders', { pkg: 'cv', consent: true, waiver: true, gateway: 'p24', profile: prof('jan@test.pl'), ads: [{ title: 'Magazynier', text: ad }] });
+    const again = await call('POST', `/api/orders/${o.j.id}/pay`, {});
+    assert.match(again.j.url, /trnRequest/, 'ponowna płatność w tej samej bramce');
+    await notify(`${o.j.id}.2`, 3900, 4242);
+    let x; for (let i = 0; i < 80; i++) { x = (await call('GET', `/api/orders/${o.j.id}`)).j; if (x.status === 'done') break; await wait(150); }
+    assert.equal(x.status, 'done');
+
+    // zwrot P24 z panelu admina: częściowy, potem reszta, potem 409
+    const login = await fetch(U + '/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin': '1' }, body: JSON.stringify({ password: 'tajne-haslo-testowe' }) });
+    admin = login.headers.get('set-cookie').split(';')[0];
+    const A = (meth, pth, b) => call(meth, `/api/admin${pth}`, b, { cookie: admin, 'X-Admin': '1' });
+    assert.equal((await A('GET', `/orders/${o.j.id}`)).j.refundable, 39);
+    const r1 = await A('POST', `/orders/${o.j.id}/refund`, { amount: '10' }); assert.equal(r1.status, 200, JSON.stringify(r1.j));
+    const r2 = await A('POST', `/orders/${o.j.id}/refund`, {}); assert.equal(r2.status, 200); assert.equal(r2.j.amount, 29);
+    assert.equal((await A('POST', `/orders/${o.j.id}/refund`, {})).status, 409, 'drugi pełny zwrot → 409');
+    const ord = read('orders.json')[o.j.id];
+    assert.equal(ord.refunded, 3900); assert.deepEqual(ord.refunds.map((q) => q.source), ['panel-p24', 'panel-p24']);
+    const refunds = m.calls.filter((c) => c.url === '/api/v1/transaction/refund');
+    assert.deepEqual(refunds.map((c) => [c.b.refunds[0].orderId, c.b.refunds[0].amount]), [[4242, 1000], [4242, 2900]]);
+    // po pełnym zwrocie: bez poprawek i dokupień
+    cookie = '';
+    assert.equal((await call('POST', `/api/orders/${o.j.id}/revise`, { i: 0, doc: 'cv', instruction: 'Dodaj prawo jazdy kat. B.' })).status, 409);
+    const up = await call('POST', `/api/orders/${o.j.id}/upsell`, { key: 'letter', waiver: true });
+    assert.equal(up.status, 409); assert.match(up.j.error, /zwrócone/);
+  } finally { srv.kill(); m.p24.close(); m.stripe.close(); }
+});

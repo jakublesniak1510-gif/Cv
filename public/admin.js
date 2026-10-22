@@ -270,7 +270,7 @@ function refundBox(o, reload) {
     const v = amt.value.trim();
     const ok = el('button', { className: 'btn danger solid sm', textContent: `Tak, zwróć ${v} zł` }), no = el('button', { className: 'btn ghost sm', textContent: 'Anuluj' });
     no.onclick = () => { box.hidden = true; };
-    ok.onclick = async () => { ok.disabled = no.disabled = true; try { const r = await post(`/orders/${o.id}/refund`, { amount: v }); toast(`Zwrot ${zl(r.amount)} zlecony w ${o.provider === 'przelewy24' ? 'Przelewy24' : 'Stripe'}.`); reload(); } catch (x) { toast(x.message); ok.disabled = no.disabled = false; } };
+    ok.onclick = async () => { ok.disabled = no.disabled = true; try { const r = await post(`/orders/${o.id}/refund`, { amount: v }); toast(o.provider === 'przelewy24' ? `Zlecono zwrot ${zl(r.amount)} w Przelewy24 (status potwierdza panel P24).` : `Zwrot ${zl(r.amount)} zlecony w Stripe.`); reload(); } catch (x) { toast(x.message); ok.disabled = no.disabled = false; } };
     box.replaceChildren(el('strong', { textContent: `Zwrócić klientowi ${v} zł?` }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: 'Stripe odda pieniądze tą samą metodą, którą klient zapłacił (zwykle 5–10 dni). Opłaty Stripe za transakcję nie wracają. Tego nie da się cofnąć.' }), el('div', { className: 'actions' }, ok, no));
     box.hidden = false; ok.focus();
   };

@@ -64,6 +64,9 @@ const DEMO = PROVIDER === 'demo';
 const GATEWAYS = PROVIDER === 'both' ? ['stripe', 'p24'] : DEMO ? [] : [PROVIDER];
 // Bramka wybrana przez klienta: brak pola → domyślna (pierwsza); nieznana albo niewłączona → błąd (null).
 const pickGateway = (g) => (g == null || g === '' ? GATEWAYS[0] || null : GATEWAYS.includes(g) ? g : null);
+// Zamówienie zwrócone w całości (Stripe albo Przelewy24): bez kolejnych poprawek i dokupień.
+const fullyRefunded = (o) => o.total > 0 && (o.refunded || 0) >= o.total;
+const REFUNDED_MSG = 'To zamówienie zostało zwrócone, więc nie można go już poprawiać ani dokupić do niego dodatków.';
 const BAD_GATEWAY = 'Nieznana metoda płatności. Odśwież stronę i wybierz ją ponownie.';
 // Na produkcji bez Przelewy24 sprzedaż jest zamknięta: zamawiać (w trybie demo) może tylko zalogowany administrator,
 // żeby nikt nie dostał dokumentów z AI za darmo. DEMO_OPEN=1 otwiera tryb demo dla wszystkich (np. do prezentacji).
@@ -450,7 +453,8 @@ async function checkout(order, lang, gateway) {
   // Zamówienie za 0 zł (kod od instytucji): bez płatności, dokumenty powstają od razu.
   if (order.total === 0) { await updateOrder(order.id, { payment: order.pass ? { provider: 'karnet', pass: order.pass.id, at: Date.now() } : { provider: 'kod', code: order.code, at: Date.now() } }); markPaidAndGenerate(order.id).catch(console.error); return { id: order.id, free: true }; }
   if (DEMO) return { id: order.id, demo: true };
-  const gw = pickGateway(gateway) || pickGateway(order.gateway) || GATEWAYS[0];
+  // Bez wyboru klienta: ostatnio użyta bramka zamówienia (np. „Dokończ płatność” po porzuconym P24), inaczej domyślna.
+  const gw = gateway ? pickGateway(gateway) : (GATEWAYS.includes(order.gateway) ? order.gateway : GATEWAYS[0]);
   if (gw === 'p24' && order.stripe?.sessionId && stripeEnabled()) await stripeExpire(order.stripe.sessionId).catch(() => {});
   if (gw === 'stripe') {
     const l = lang || order.uiLang, n = order.ads?.length || 1;
@@ -487,15 +491,25 @@ async function confirmB2b(b, sess) {
 async function confirmStripe(o, sess) {
   if (o.status !== 'pending' || sess.payment_status !== 'paid' || sess.client_reference_id !== o.id) return false;
   if (sess.amount_total !== o.total || sess.currency !== 'pln') { logEvent('płatność', `Stripe: kwota ${sess.amount_total} ${sess.currency} nie zgadza się z zamówieniem`, { orderId: o.id }); return false; }
-  await updateOrder(o.id, { payment: { provider: 'stripe', sessionId: sess.id, paymentIntent: sess.payment_intent, at: Date.now(), ...(sess.customer_details?.email ? { payerHash: emailHash(sess.customer_details.email) } : {}) } });
+  const payment = { provider: 'stripe', sessionId: sess.id, paymentIntent: sess.payment_intent, at: Date.now(), ...(sess.customer_details?.email ? { payerHash: emailHash(sess.customer_details.email) } : {}) };
+  if (!(await recordPayment(o, payment))) return false;
   markPaidAndGenerate(o.id).catch(console.error);
   return true;
+}
+// Zapis płatności tylko do nieopłaconego zamówienia bez zapisanej płatności (w blokadzie zapisu magazynu). Gdy dwa potwierdzenia
+// się ścigają (np. Stripe i P24 po zmianie bramki), drugie nie nadpisuje pierwszego: log + alert do zwrotu.
+async function recordPayment(o, payment) {
+  const x = await updateOrder(o.id, (y) => (y.status === 'pending' && !y.payment ? { ...y, payment } : y));
+  if (x?.payment?.provider === payment.provider && x.payment.sessionId === payment.sessionId) return true;
+  logEvent('płatność', `Druga płatność (${payment.provider}, ${payment.sessionId}) do zamówienia już opłaconego przez ${x?.payment?.provider || '?'} – niepotwierdzona w serwisie, do zwrotu`, { orderId: o.id });
+  alertOwner(`Druga płatność do zamówienia ${o.id}: ${payment.provider} (${payment.sessionId}); zamówienie opłacono już przez ${x?.payment?.provider || '?'}. Zwróć drugą wpłatę w panelu operatora.`);
+  return false;
 }
 // Potwierdzenie wpłaty (z powiadomienia albo po powrocie klienta): verify w Przelewy24, potem generowanie.
 async function confirmP24(o, p24OrderId, amount, verified = false, sessionId = o.p24?.sessionId) {
   if (amount !== o.total) { logEvent('płatność', `Kwota ${amount} nie zgadza się z zamówieniem`, { orderId: o.id }); return false; }
   if (!verified && !(await p24Verify({ sessionId, orderId: p24OrderId, amount }))) return false;
-  await updateOrder(o.id, { payment: { provider: 'przelewy24', orderId: p24OrderId, sessionId, at: Date.now() } });
+  if (!(await recordPayment(o, { provider: 'przelewy24', orderId: p24OrderId, sessionId, at: Date.now() }))) return false;
   markPaidAndGenerate(o.id).catch(console.error);
   return true;
 }
@@ -520,6 +534,7 @@ app.post('/api/orders/:id/pay', async (req, res) => {
   // Rezerwacja kodu mogła wygasnąć (24 h) albo przejść na nowsze zamówienie tej osoby: zajmujemy kod ponownie.
   const gw = pickGateway(req.body?.gateway); if (!gw && !DEMO) return res.status(400).json({ error: BAD_GATEWAY });
   if (!o.upsellOf) try { await reserveOrderCode(o, o.codeBase || 0); } catch (e) { if (e instanceof CodeError) return res.status(409).json({ error: `${e.message} Złóż zamówienie ponownie.` }); throw e; }
+  // Bez pola gateway checkout bierze ostatnio użytą bramkę zamówienia.
   try { res.json(await checkout(o, undefined, req.body?.gateway ? gw : undefined)); } catch (e) { logEvent('płatność', e.message, { orderId: o.id }); res.status(502).json({ error: 'Nie udało się otworzyć płatności. Spróbuj za chwilę.' }); }
 });
 
@@ -658,6 +673,7 @@ app.post('/api/orders/:id/upsell', async (req, res) => {
   try {
     const p = await getOrder(req.params.id);
     if (!p || p.status !== 'done' || p.upsellOf) return res.status(409).json({ error: 'Dodatki można dokupić do gotowego zamówienia.' });
+    if (fullyRefunded(p)) return res.status(409).json({ error: REFUNDED_MSG });
     const plan = upsellOffers(p).find((x) => x.key === req.body?.key);
     if (!plan) return res.status(400).json({ error: 'Ten dodatek nie jest już dostępny dla tego zamówienia.' });
     // Art. 38 pkt 13 ustawy o prawach konsumenta: zgoda na wykonanie od razu po płatności, jak przy zamówieniu (zapis treści i czasu).
@@ -929,6 +945,7 @@ app.put('/api/orders/:id/results/:i', async (req, res) => {
 app.post('/api/orders/:id/revise', async (req, res) => {
   const d = await doneOrder(req, res); if (!d) return;
   const { o, i } = d;
+  if (fullyRefunded(o)) return res.status(409).json({ error: REFUNDED_MSG });
   if ((o.revisions || 0) >= revLimit(o)) return res.status(429).json({ error: 'Wykorzystano limit poprawek. Napisz do nas, jeśli dokument nadal wymaga zmian.' });
   const doc = req.body?.doc === 'letter' && hasLetter(o.pkg) ? 'letter' : 'cv';
   const instruction = str(req.body?.instruction, 500);
