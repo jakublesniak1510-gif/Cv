@@ -21,6 +21,8 @@ import { adFromImage, AdImageError } from './lib/adImage.js';
 import { simTurn, SimError } from './lib/sim.js';
 import { samplePdf } from './lib/sample.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
+import { checkCv } from './lib/cv-check.js';
+import { landingRoutes } from './lib/landing.js';
 import { outcomes, outcomeRoutes, startOutcome, outcomeLinks, anonymizeOutcomes, publicOutcome, OUTCOME_CONSENT, OUTCOME_AFTER, OT } from './lib/outcomes.js';
 import { mailEnabled, sendOrderMail, sendReminder, sendFollowUp, sendReviewAsk, sendOutcomeAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail, sendOwnerMail } from './lib/mail.js';
 import { socialRoutes, cleanupChats, botStatus } from './lib/social.js';
@@ -177,6 +179,15 @@ app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
   } catch (e) { console.error('Skaner', e.message); logEvent('skaner', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się ocenić CV. Spróbuj ponownie.' }); }
 });
 
+// --- „Sprawdź CV” i „Test CV pod ATS”: samo CV (bez ogłoszenia) -> tekst odczytany z pliku i sprawdzenie budowy (bez zapisywania) ---
+app.post('/api/cv-check', express.json({ limit: '8mb' }), async (req, res) => {
+  if (!scanLimit(req)) return res.status(429).json({ error: 'Wykorzystano limit darmowych sprawdzeń na godzinę. Spróbuj później.' });
+  const buf = Buffer.from(typeof req.body?.data === 'string' ? req.body.data : '', 'base64');
+  if (!buf.length || buf.length > 5 * 1024 * 1024) return res.status(400).json({ error: 'Wgraj CV (PDF, Word lub TXT do 5 MB).' });
+  try { res.set('Cache-Control', 'no-store').json(checkCv(await extractText(buf), buf.length)); }
+  catch (e) { res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się odczytać pliku.' }); }
+});
+
 // Import kontaktów CSV w panelu może przekraczać ogólny limit 700 KB (parser przed globalnym).
 app.use('/api/admin/contacts/import', express.json({ limit: '3mb' }));
 // Szkic ogłoszenia z rozszerzenia Chrome (własny limit 20 KB i CORS, więc przed globalnym parserem).
@@ -196,6 +207,7 @@ b2bRoutes(app, {
   } : null,
 });
 seoRoutes(app, BASE_URL);
+landingRoutes(app, BASE_URL); // /kreator-cv i case study „Jedno CV, dwa ogłoszenia”
 templateRoutes(app, BASE_URL);
 abroadRoutes(app, BASE_URL);
 officialRoutes(app, BASE_URL);

@@ -32,6 +32,12 @@
     try { sessionStorage.setItem('cvpo-scan-ad', v.slice(0, 20000)); } catch {}
     location.href = pf.dataset.scan;
   });
+  // /kreator-cv: ogłoszenie przechodzi do kreatora na stronie głównej przez pamięć tej karty przeglądarki (nie na serwer).
+  for (const wf of document.querySelectorAll('form.wiz-ad')) wf.addEventListener('submit', (e) => {
+    e.preventDefault(); const v = wf.querySelector('textarea').value.trim();
+    try { if (v) sessionStorage.setItem('cvpo-wiz-ad', v.slice(0, 20000)); } catch {}
+    location.href = `${home}?zamow=1${ref() ? `&ref=${encodeURIComponent(ref())}` : ''}`;
+  });
   // Formularz „Dla firm i uczelni”.
   const f = $('#b2bForm');
   f?.addEventListener('submit', async (e) => {

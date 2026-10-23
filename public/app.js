@@ -1179,6 +1179,62 @@ function toolScan(box) {
   box.classList.remove('tool-box'); box.append(form, result);
   if (cfg.chromeExt) box.append(el('p', { className: 'chrome-ext' }, el('a', { className: 'btn ghost sm', href: cfg.chromeExt, target: '_blank', rel: 'noopener', textContent: 'Dodaj do Chrome' }), ' ', el('span', { className: 'hint', textContent: 'Skaner jednym kliknięciem na stronie ogłoszenia.' })));
 }
+// „Sprawdź CV” (ats = false) i „Test CV pod ATS” (ats = true): /api/cv-check odczytuje tekst z pliku i sprawdza budowę CV
+// bez ogłoszenia; w teście ATS opcjonalne ogłoszenie idzie dodatkowo do skanera (/api/scan). Nic nie jest zapisywane.
+const CHECK_SEC = { summary: 'Podsumowanie / profil', experience: 'Doświadczenie', education: 'Wykształcenie', skills: 'Umiejętności', languages: 'Języki' };
+const CHECK_ISSUE = {
+  little_text: 'Mało tekstu jak na rozmiar pliku. To może być skan albo CV z obrazków – program może go nie odczytać.',
+  columns: 'Tekst jest rozbity na wiele krótkich linii. To zwykle kolumny albo tabele – sprawdź w podglądzie, czy kolejność ma sens.',
+  no_email: 'W odczytanym tekście nie ma adresu e-mail. Jeśli jest w CV, to pewnie w grafice albo w nagłówku pliku.',
+  no_phone: 'W odczytanym tekście nie ma numeru telefonu.',
+  icons: 'W tekście są ikony lub symbole (np. gwiazdki ocen). Program odczyta je jako znaki bez znaczenia – lepiej napisać to słowami.',
+  no_experience: 'Nie rozpoznaliśmy sekcji z doświadczeniem. Użyj zwykłego nagłówka, np. „Doświadczenie zawodowe”.',
+  few_dates: 'Mało dat. Przy każdym stanowisku i szkole podaj miesiąc i rok, np. 03.2021 – obecnie.',
+  too_short: 'CV jest bardzo krótkie. Opisz obowiązki i efekty przy każdym stanowisku.',
+  too_long: 'CV jest długie. Skróć starsze i mniej związane z ofertą doświadczenie.',
+};
+function toolCheck(box, ats) {
+  const file = el('input', { type: 'file', accept: '.pdf,.docx,.txt', hidden: true }), fileName = el('span', { className: 'hint', textContent: 'nie wybrano pliku' });
+  const ad = ats ? el('textarea', { rows: 4, placeholder: 'Opcjonalnie: wklej treść ogłoszenia' }) : null;
+  const btn = el('button', { className: 'btn', type: 'submit', textContent: ats ? 'Pokaż CV oczami ATS' : 'Sprawdź CV za darmo' });
+  const msg = el('p', { className: 'fstatus', role: 'status' }), result = el('div', { className: 'scan-result check-result', hidden: true }), scanBox = el('div', { className: 'scan-result', hidden: true });
+  file.onchange = () => (fileName.textContent = file.files[0]?.name || 'nie wybrano pliku');
+  const form = el('form', { className: 'scan-card', noValidate: true },
+    el('div', { className: 'f' }, '1. Twoje CV ', el('span', { className: 'h', textContent: 'PDF, Word lub TXT, do 5 MB' }), el('div', { className: 'filerow' }, el('label', { className: 'btn ghost sm filebtn' }, 'Wybierz plik', file), fileName)),
+    ...(ats ? [el('label', { className: 'f' }, '2. Ogłoszenie (opcjonalnie)', ad)] : []), btn, msg, el('p', { className: 'hint small', textContent: 'Nie zapisujemy ani pliku, ani wyniku.' }));
+  form.onsubmit = async (e) => {
+    e.preventDefault(); msg.className = 'fstatus';
+    const f = file.files[0], fail = (t) => { msg.className = 'fstatus bad'; msg.textContent = t; };
+    if (!f) return fail('Wybierz plik ze swoim CV.');
+    if (f.size > 5 * 1024 * 1024) return fail('Plik musi mieć do 5 MB.');
+    btn.disabled = true; msg.textContent = 'Odczytujemy tekst z pliku…';
+    try {
+      const b64 = await fileB64(f), r = await fetch('/api/cv-check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: b64 }) });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      const ok = (v) => el('span', { className: v ? 'ok' : 'no', textContent: v ? '✓' : '–' });
+      result.replaceChildren(
+        el('h3', { textContent: 'Wynik sprawdzenia' }), el('p', { textContent: `Odczytaliśmy ${j.words} słów.` }),
+        el('h4', { textContent: 'Rozpoznane sekcje' }), el('ul', { className: 'reqs-list' }, ...j.sections.map((x) => el('li', {}, ok(x.found), ' ', CHECK_SEC[x.key]))),
+        el('h4', { textContent: 'Dane i daty' }), el('ul', { className: 'reqs-list' }, el('li', {}, ok(j.email), ' ', 'Adres e-mail w tekście'), el('li', {}, ok(j.phone), ' ', 'Numer telefonu w tekście'), el('li', {}, ok(j.dates >= 2), ' ', 'Daty przy stanowiskach i szkołach'),
+          el('li', {}, ok(j.rodo), ' ', j.rodo ? 'Klauzula RODO' : 'Brak klauzuli RODO – w Polsce wiele firm jej oczekuje. ', ...(j.rodo ? [] : [pageLink('narzedzia/klauzula-rodo', { textContent: 'Generator klauzuli RODO' })]))),
+        ...(j.issues.filter((k) => CHECK_ISSUE[k] && !['no_email', 'no_phone'].includes(k)).length ? [el('h4', { textContent: 'Do poprawienia' }), el('ul', {}, ...j.issues.filter((k) => CHECK_ISSUE[k] && !['no_email', 'no_phone'].includes(k)).map((k) => el('li', { textContent: CHECK_ISSUE[k] })))] : []),
+        el('h4', { textContent: ats ? 'Tak widzi Twoje CV program do rekrutacji' : 'Test kopiowania: tekst odczytany z pliku' }),
+        (() => { const pre = el('pre', { className: 'ats-text', textContent: j.text }); pre.setAttribute('data-noi18n', ''); return pre; })(),
+        el('p', { className: 'hint', textContent: 'Jeśli czegoś tu brakuje albo kolejność jest pomieszana, program do rekrutacji zobaczy to tak samo.' }),
+        el('p', { className: 'prof-cta' }, pageLink('narzedzia/skaner-cv', { className: 'btn ghost', textContent: 'Sprawdź dopasowanie do ogłoszenia' }), ' ', el('a', { className: 'btn', href: '/?zamow=1', textContent: 'Zrób CV pod ogłoszenie' })));
+      result.hidden = false; msg.textContent = '';
+      const adText = ad?.value.trim() || '';
+      if (ats && adText.length >= 80) {
+        msg.textContent = 'Porównujemy CV z ogłoszeniem…';
+        const s = await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: b64, adText }) });
+        const k = await s.json(); if (!s.ok) throw new Error(k.error);
+        scanData = { b64, adText, title: k.position || '' }; renderScan(k, scanBox); scanBox.hidden = false; msg.textContent = '';
+      } else if (ats && adText) fail('Wklej pełną treść ogłoszenia (min. 80 znaków), żeby porównać słowa kluczowe.');
+    } catch (x) { fail(x.message); }
+    btn.disabled = false;
+  };
+  box.classList.remove('tool-box'); box.append(form, result, scanBox);
+}
 function renderScan(j, box = $('#scanResult')) {
   const total = j.found.length + j.missing.length, pct = j.score ?? 0;
   box.replaceChildren(
@@ -2112,6 +2168,8 @@ function toolPage(slug, C, item) {
       el('p', { className: 'hint', textContent: 'Wynik szacunkowy dla umowy o pracę, według zasad podatkowych obowiązujących od 2022 r. (skala 12% i 32%, kwota wolna 30 000 zł). Nie uwzględnia PPK, limitu składek ZUS przy bardzo wysokich zarobkach ani innych ulg. Przed decyzją sprawdź aktualne przepisy lub zapytaj pracodawcę.' }));
   } else if (slug === 'wypowiedzenie-umowy-o-prace') toolNotice(box, out, field);
   else if (slug === 'skaner-cv') toolScan(box);
+  else if (slug === 'sprawdz-cv') toolCheck(box, false);
+  else if (slug === 'test-cv-ats') toolCheck(box, true);
   else if (slug === 'zdjecie-do-cv') toolPhoto(box, out);
   else if (slug === 'odpowiedzi-na-pytania-rekrutera') toolAnswer(box, out, field, t.questions || []);
   else if (slug === 'jaki-zawod-dla-mnie') toolQuiz(box, out, C);
@@ -2495,6 +2553,11 @@ if ((q.get('zamow') || LANGS[q.get('jezyk')]) && !q.get('id') && !q.get('draft')
   // ?szablon=<id> (strony „CV Europass”, „CV do urzędu”): wybrany szablon w kreatorze.
   if (TPLS.some((t) => t[0] === q.get('szablon'))) { design = { ...design, tpl: q.get('szablon') }; drawWizDesign(); saveDraft(); }
   openWiz(['cv', 'cv_letter', 'pack3'].includes(q.get('pkg')) ? q.get('pkg') : undefined);
+  // Ogłoszenie wklejone na stronie /kreator-cv (lite.js → pamięć tej karty): trafia do pierwszego ogłoszenia w kreatorze.
+  try {
+    const ad = sessionStorage.getItem('cvpo-wiz-ad'), first = $('#ads .entry');
+    if (ad && first) { sessionStorage.removeItem('cvpo-wiz-ad'); const ta = $('[data-k=text]', first); if (ta && !ta.value.trim()) { ta.value = ad; setMode(first, 'paste'); saveDraft(); } }
+  } catch {}
   // ?zawod=<slug> (przycisk na stronie zawodu): nazwa zawodu jako ogólne stanowisko, jeśli pole jest puste.
   const zaw = q.get('zawod') || '';
   if (/^[a-z0-9-]{2,60}$/.test(zaw)) loadContent().then((C) => { const p = C.INDEX?.find((x) => x.slug === zaw); if (p && !$('#headline').value.trim()) { $('#headline').value = p.name; saveDraft(); } }).catch(() => {});

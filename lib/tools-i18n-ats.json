@@ -1,0 +1,188 @@
+{
+  "en": {
+    "sprawdz-cv": {
+      "slugLang": "cv-checker",
+      "title": "Check your CV online: free analysis, no sign-up",
+      "seoTitle": "Free CV Checker Online – Analysis Without Sign-up",
+      "metaDescription": "Upload your CV and check it for free: is the text readable, which sections it has, are contact details and the consent clause there. No job ad, no sign-up.",
+      "lead": "Upload your CV (PDF, Word or TXT). Without pasting a job ad, you can check whether the text can be read, which sections we recognise, and whether it has contact details, the data-processing consent clause and dates. We do not store the file or the result.",
+      "about": [
+        "This check does not assess whether your CV fits a specific job, only whether it is complete and readable for the software that screens applications. We show how many words your CV has, which typical sections we could recognise (summary, experience, education, skills, languages), whether the text contains an email and phone number, whether job entries have dates and whether there is a consent clause at the end: the data-processing consent clause expected by many employers in Poland.",
+        "An important part is the copy test: we show the plain text we could extract from the file, in the order in which software will read it. If it is missing your email, company names or whole sections, they are probably in a graphic, in the file header or in a table the software could not read.",
+        "Once you have a specific job ad, go to the match scanner: it compares your CV with the requirements in the ad and shows what is not visible in it. If you want a CV written for that ad, we will prepare it from 39 PLN, no subscription."
+      ],
+      "faq": [
+        {
+          "q": "Do I have to paste a job ad?",
+          "a": "No. This check works without a job ad and covers the CV itself: readability, sections, contact details and the data-processing consent clause expected by many employers in Poland. You can check the match with a specific ad in the CV scanner."
+        },
+        {
+          "q": "Is my CV stored anywhere?",
+          "a": "No. The file is only used to read the text and prepare the result. We store neither the file, nor the text, nor the result."
+        },
+        {
+          "q": "Why can I not see part of my CV in the text preview?",
+          "a": "Most often that information is in a graphic, in icons or in the file header and footer. Recruitment software may not read it either, so it is worth moving it into plain text."
+        },
+        {
+          "q": "Does this check assess the content of my CV?",
+          "a": "It assesses structure and completeness, not the quality of your descriptions. Whether your descriptions fit the job will be shown by the match scanner once you paste the ad."
+        }
+      ]
+    },
+    "test-cv-ats": {
+      "slugLang": "ats-cv-checker",
+      "title": "ATS CV test: check whether the system can read your CV",
+      "seoTitle": "Free ATS CV Checker – See Your CV as an ATS Does",
+      "metaDescription": "See your CV as an ATS does: plain text from the file, recognised sections, warnings about columns and graphics, and with a job ad – keywords found.",
+      "lead": "Upload your CV and we will show it the way recruitment software sees it: text only, without layout or graphics. You can also paste a job ad to see which words from the ad the software will find in your CV.",
+      "about": [
+        "ATS systems (software in which companies collect and review applications) first extract the text from the file, then split it into sections and search it for words from the job ad. This test shows the first step: the text read from your file and the sections that can be recognised in it. If something gets lost already at this stage, neither the software nor the recruiter browsing the search results will see it.",
+        "You will get warnings about typical problems: text broken into many short lines (usually columns or tables), no email in the extracted text, little text compared with the file size (often a scan or a CV made of images) and characters that replace words, such as phone icons or rating stars.",
+        "There is no single \"ATS score\". Every company uses a different system with different settings, and the decision is usually made by a person. That is why we do not give a score, only concrete things to fix. Once you paste a job ad, we compare your CV with the requirements just like the match scanner."
+      ],
+      "faq": [
+        {
+          "q": "Does an ATS reject CVs automatically?",
+          "a": "It depends on the company and the system settings. An ATS is often used to search and sort applications, and the decision is made by a recruiter. That is why it matters that the text can be read and that the words from the ad are in your CV."
+        },
+        {
+          "q": "Is PDF good for an ATS?",
+          "a": "A PDF with real text (saved from an editor, not scanned) is usually read well. The test will show whether the text can be extracted from your file and in what order."
+        },
+        {
+          "q": "Do a photo and tables get in the way of an ATS?",
+          "a": "A photo on its own usually does not, but text in graphics, icons and complex tables is sometimes skipped or read in the wrong order. The copy test shows whether this applies to your CV."
+        },
+        {
+          "q": "Does hidden text with keywords help?",
+          "a": "It is not worth it. White text or hidden instructions appear in the extracted text and the recruiter will see them. It is better to describe your real experience using the words from the ad."
+        }
+      ]
+    }
+  },
+  "uk": {
+    "sprawdz-cv": {
+      "slugLang": "pereviryty-rezyume",
+      "title": "Перевірте резюме онлайн: безкоштовний аналіз без реєстрації",
+      "seoTitle": "Перевірка резюме онлайн безкоштовно – без реєстрації",
+      "metaDescription": "Завантажте резюме й перевірте безкоштовно: чи читається текст, які є розділи, чи є контакти й клаузула згоди на обробку даних. Без оголошення й реєстрації.",
+      "lead": "Завантажте резюме (PDF, Word або TXT). Без оголошення перевірите, чи можна прочитати текст, які розділи ми розпізнаємо, чи є контактні дані, клаузула RODO (згода на обробку даних) і дати. Файл і результат не зберігаємо.",
+      "about": [
+        "Ця перевірка не оцінює, чи підходить резюме до конкретної роботи, а лише чи воно повне й зрозуміле для програм, які переглядають заявки. Ми показуємо, скільки слів у резюме, які типові розділи вдалося розпізнати (підсумок, досвід, освіта, навички, мови), чи є в тексті e-mail і телефон, чи є дати біля посад і чи є наприкінці клаузула RODO — згода на обробку даних, якої очікує багато роботодавців у Польщі.",
+        "Важлива частина — тест копіювання: ми показуємо чистий текст, який вдалося витягти з файлу, у тому порядку, в якому його прочитає програма. Якщо в ньому бракує e-mail, назв компаній або цілих розділів, імовірно, вони в графіці, у заголовку файлу або в таблиці, яку програма не прочитала.",
+        "Коли маєте конкретне оголошення, перейдіть до сканера відповідності: він порівняє резюме з вимогами з вакансії і покаже, чого в ньому не видно. Якщо хочете резюме, написане під це оголошення, підготуємо його від 39 зл, без підписки."
+      ],
+      "faq": [
+        {
+          "q": "Чи потрібно вставляти оголошення?",
+          "a": "Ні. Ця перевірка працює без оголошення і стосується самого резюме: читабельності, розділів, контактних даних і клаузули RODO — згоди на обробку даних, якої очікує багато роботодавців у Польщі. Відповідність конкретній вакансії перевірите в сканері резюме."
+        },
+        {
+          "q": "Чи моє резюме десь зберігається?",
+          "a": "Ні. Файл використовується лише для зчитування тексту й підготовки результату. Ми не зберігаємо ні файл, ні текст, ні результат."
+        },
+        {
+          "q": "Чому в попередньому перегляді тексту не видно частини мого резюме?",
+          "a": "Найчастіше ця інформація знаходиться в графіці, в іконках або в колонтитулах файлу. Програма для рекрутингу теж може її не прочитати, тож варто перенести її у звичайний текст."
+        },
+        {
+          "q": "Чи ця перевірка оцінює зміст резюме?",
+          "a": "Вона оцінює структуру й повноту, а не якість описів. Чи підходять описи до вакансії, покаже сканер відповідності після вставлення оголошення."
+        }
+      ]
+    },
+    "test-cv-ats": {
+      "slugLang": "test-rezyume-ats",
+      "title": "Тест резюме для ATS: чи прочитає система ваше резюме",
+      "seoTitle": "Безкоштовний тест резюме ATS: чи прочитає його система?",
+      "metaDescription": "Подивіться на резюме очима ATS: чистий текст із файлу, розпізнані розділи, попередження про колонки й графіку, а з оголошенням — знайдені ключові слова.",
+      "lead": "Завантажте резюме, і ми покажемо його так, як його бачить програма для рекрутингу: лише текст, без макета й графіки. Можете також вставити оголошення, щоб побачити, які слова з вакансії програма знайде в резюме.",
+      "about": [
+        "Системи ATS (програми, у яких компанії збирають і переглядають заявки) спочатку витягують із файлу текст, потім ділять його на розділи й шукають у ньому слова з оголошення. Цей тест показує перший крок: текст, прочитаний із вашого файлу, і розділи, які в ньому можна розпізнати. Якщо щось губиться вже тут, цього не побачить ні програма, ні рекрутер, який переглядає результати пошуку.",
+        "Ви отримаєте попередження про типові проблеми: текст, розбитий на багато коротких рядків (зазвичай колонки або таблиці), відсутність e-mail у прочитаному тексті, мало тексту порівняно з розміром файлу (часто скан або резюме, зроблене з картинок) і символи, що замінюють слова, як-от іконки телефону чи зірочки оцінок.",
+        "Немає одного «результату ATS». Кожна компанія використовує іншу систему й інші налаштування, а рішення зазвичай ухвалює людина. Тому ми не даємо балів, а лише конкретні речі, які варто виправити. Після вставлення оголошення порівняємо резюме з вимогами так само, як сканер відповідності."
+      ],
+      "faq": [
+        {
+          "q": "Чи ATS відхиляє резюме автоматично?",
+          "a": "Це залежить від компанії та налаштувань системи. Часто ATS використовують для пошуку й сортування заявок, а рішення ухвалює рекрутер. Тому важливо, щоб текст можна було прочитати, а слова з оголошення були в резюме."
+        },
+        {
+          "q": "Чи PDF підходить для ATS?",
+          "a": "PDF зі справжнім текстом (збережений із редактора, а не відсканований) зазвичай читається добре. Тест покаже, чи можна витягти текст із вашого файлу і в якому порядку."
+        },
+        {
+          "q": "Чи заважають ATS фото й таблиці?",
+          "a": "Саме фото зазвичай ні, але текст у графіці, іконках і складних таблицях буває пропущений або прочитаний у неправильному порядку. Тест копіювання покаже, чи це стосується вашого резюме."
+        },
+        {
+          "q": "Чи допомагає прихований текст із ключовими словами?",
+          "a": "Не варто. Білий текст або приховані команди з’являються в прочитаному тексті, і рекрутер їх побачить. Краще описати справжній досвід словами з оголошення."
+        }
+      ]
+    }
+  },
+  "de": {
+    "sprawdz-cv": {
+      "slugLang": "lebenslauf-check",
+      "title": "Lebenslauf online prüfen: kostenlose Analyse ohne Konto",
+      "seoTitle": "Lebenslauf-Check kostenlos – ohne Registrierung",
+      "metaDescription": "Lebenslauf kostenlos prüfen: Ist der Text lesbar, welche Abschnitte gibt es, sind Kontaktdaten und Einwilligungsklausel da? Ohne Anzeige und Registrierung.",
+      "lead": "Laden Sie Ihren Lebenslauf hoch (PDF, Word oder TXT). Ohne eine Anzeige einzufügen, prüfen Sie, ob sich der Text lesen lässt, welche Abschnitte wir erkennen und ob Kontaktdaten, die RODO-Klausel (Einwilligung in die Datenverarbeitung) und Daten vorhanden sind. Datei und Ergebnis speichern wir nicht.",
+      "about": [
+        "Diese Prüfung bewertet nicht, ob Ihr Lebenslauf zu einer bestimmten Stelle passt, sondern ob er vollständig und für die Programme lesbar ist, die Bewerbungen sichten. Wir zeigen, wie viele Wörter Ihr Lebenslauf hat, welche typischen Abschnitte erkannt wurden (Profil, Berufserfahrung, Ausbildung, Kenntnisse, Sprachen), ob im Text E-Mail und Telefonnummer stehen, ob bei den Stationen Daten angegeben sind und ob am Ende die RODO-Klausel steht: die Einwilligungsklausel zur Datenverarbeitung, die viele Arbeitgeber in Polen erwarten.",
+        "Ein wichtiger Teil ist der Kopiertest: Wir zeigen den reinen Text, der sich aus der Datei extrahieren ließ, in der Reihenfolge, in der ein Programm ihn liest. Fehlen darin E-Mail, Firmennamen oder ganze Abschnitte, stehen sie wahrscheinlich in einer Grafik, in der Kopfzeile der Datei oder in einer Tabelle, die das Programm nicht gelesen hat.",
+        "Haben Sie bereits eine konkrete Anzeige, wechseln Sie zum Abgleich-Scanner: Er vergleicht den Lebenslauf mit den Anforderungen der Stelle und zeigt, was darin nicht sichtbar ist. Wenn Sie einen Lebenslauf für genau diese Anzeige möchten, erstellen wir ihn ab 39 PLN, ohne Abo."
+      ],
+      "faq": [
+        {
+          "q": "Muss ich eine Anzeige einfügen?",
+          "a": "Nein. Diese Prüfung funktioniert ohne Anzeige und betrifft nur den Lebenslauf: Lesbarkeit, Abschnitte, Kontaktdaten und die RODO-Klausel, also die Einwilligungsklausel zur Datenverarbeitung, die viele Arbeitgeber in Polen erwarten. Die Übereinstimmung mit einer konkreten Stelle prüfen Sie im Lebenslauf-Scanner."
+        },
+        {
+          "q": "Wird mein Lebenslauf irgendwo gespeichert?",
+          "a": "Nein. Die Datei dient nur dazu, den Text auszulesen und das Ergebnis zu erstellen. Wir speichern weder die Datei noch den Text noch das Ergebnis."
+        },
+        {
+          "q": "Warum sehe ich einen Teil meines Lebenslaufs nicht in der Textvorschau?",
+          "a": "Meist stehen diese Angaben in einer Grafik, in Icons oder in Kopf- und Fußzeile der Datei. Auch ein Recruiting-Programm liest sie möglicherweise nicht, daher lohnt es sich, sie in normalen Text zu übertragen."
+        },
+        {
+          "q": "Bewertet diese Prüfung den Inhalt meines Lebenslaufs?",
+          "a": "Sie bewertet Aufbau und Vollständigkeit, nicht die Qualität der Beschreibungen. Ob die Beschreibungen zur Stelle passen, zeigt der Abgleich-Scanner, nachdem Sie die Anzeige eingefügt haben."
+        }
+      ]
+    },
+    "test-cv-ats": {
+      "slugLang": "ats-lebenslauf-test",
+      "title": "ATS-Test für den Lebenslauf: Kann das System ihn lesen?",
+      "seoTitle": "Kostenloser ATS-Lebenslauf-Test: Liest das System Ihr CV?",
+      "metaDescription": "Ihr Lebenslauf aus Sicht eines ATS: reiner Text aus der Datei, erkannte Abschnitte, Warnungen zu Spalten und Grafiken, mit Anzeige auch Schlüsselwörter.",
+      "lead": "Laden Sie Ihren Lebenslauf hoch, und wir zeigen ihn so, wie ein Recruiting-Programm ihn sieht: nur Text, ohne Layout und Grafik. Sie können auch eine Anzeige einfügen, um zu sehen, welche Wörter aus der Stelle das Programm im Lebenslauf findet.",
+      "about": [
+        "ATS-Systeme (Programme, in denen Firmen Bewerbungen sammeln und sichten) extrahieren zuerst den Text aus der Datei, teilen ihn dann in Abschnitte und suchen darin nach Wörtern aus der Anzeige. Dieser Test zeigt den ersten Schritt: den aus Ihrer Datei gelesenen Text und die Abschnitte, die sich darin erkennen lassen. Geht hier schon etwas verloren, sieht es weder das Programm noch der Recruiter, der die Suchergebnisse durchgeht.",
+        "Sie erhalten Warnungen zu typischen Problemen: Text, der in viele kurze Zeilen zerfällt (meist Spalten oder Tabellen), keine E-Mail im gelesenen Text, wenig Text im Verhältnis zur Dateigröße (oft ein Scan oder ein Lebenslauf aus Bildern) und Zeichen, die Wörter ersetzen, etwa Telefon-Icons oder Bewertungssterne.",
+        "Es gibt keinen einheitlichen „ATS-Score“. Jede Firma nutzt ein anderes System mit anderen Einstellungen, und die Entscheidung trifft meist ein Mensch. Deshalb geben wir keine Punktzahl an, sondern konkrete Punkte zum Verbessern. Nach dem Einfügen einer Anzeige vergleichen wir den Lebenslauf mit den Anforderungen wie der Abgleich-Scanner."
+      ],
+      "faq": [
+        {
+          "q": "Lehnt ein ATS Lebensläufe automatisch ab?",
+          "a": "Das hängt von der Firma und den Systemeinstellungen ab. Oft dient ein ATS zum Durchsuchen und Sortieren von Bewerbungen, und die Entscheidung trifft ein Recruiter. Deshalb ist wichtig, dass sich der Text lesen lässt und die Wörter aus der Anzeige im Lebenslauf stehen."
+        },
+        {
+          "q": "Ist PDF für ein ATS geeignet?",
+          "a": "Ein PDF mit echtem Text (aus einem Editor gespeichert, nicht eingescannt) lässt sich meist gut lesen. Der Test zeigt, ob sich der Text aus Ihrer Datei extrahieren lässt und in welcher Reihenfolge."
+        },
+        {
+          "q": "Stören Foto und Tabellen ein ATS?",
+          "a": "Das Foto allein meist nicht, aber Text in Grafiken, Icons und komplexen Tabellen wird manchmal übersprungen oder in falscher Reihenfolge gelesen. Der Kopiertest zeigt, ob das Ihren Lebenslauf betrifft."
+        },
+        {
+          "q": "Hilft versteckter Text mit Schlüsselwörtern?",
+          "a": "Das lohnt sich nicht. Weißer Text oder versteckte Anweisungen erscheinen im gelesenen Text, und der Recruiter sieht sie. Besser ist es, Ihre echte Erfahrung mit den Wörtern aus der Anzeige zu beschreiben."
+        }
+      ]
+    }
+  }
+}
