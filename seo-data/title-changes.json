@@ -1,7 +1,13 @@
 [
   {
     "date": "2026-10-23",
-    "note": "Nowe tytuły i opisy: strona główna (PL/EN/UK/DE), skaner CV, karnety, dla firm, kontakt; skrócone tytuły ponad 60 znaków",
-    "pages": ["/", "/en", "/uk", "/de", "/narzedzia/skaner-cv", "/karnety", "/dla-firm", "/kontakt"]
+    "note": "Nowe tytuły i opisy: strona główna (PL/EN/UK/DE), strony zawodów (PL/EN/DE, szablon), poradniki z GSC poz. 3–20, skaner CV, karnety, dla firm, kontakt; skrócone tytuły ponad 60 znaków",
+    "pages": ["/", "/en", "/uk", "/de", "/cv/*", "/en/cv/*", "/de/lebenslauf/*", "/poradnik/jak-dopasowac-cv-do-ogloszenia", "/poradnik/cv-po-urlopie-macierzynskim", "/poradnik/przerwa-w-zatrudnieniu-w-cv", "/poradnik/cv-po-angielsku", "/poradnik/email-z-aplikacja-i-podziekowanie-po-rozmowie", "/poradnik/klauzula-rodo-w-cv", "/de/ratgeber/lebenslauf-fuer-die-arbeit-in-polen", "/de/ratgeber/dsgvo-klausel-im-lebenslauf", "/en/guides/gdpr-clause-on-a-cv", "/en/guides/cv-in-english", "/narzedzia/skaner-cv", "/narzedzia/podziekowanie-po-rozmowie", "/karnety", "/dla-firm", "/kontakt"],
+    "variantB": {
+      "page": "/",
+      "title": "Dopasuj CV do ogłoszenia w 5 minut – darmowy skaner CV i list motywacyjny",
+      "consider": "2026-11-20",
+      "status": "do rozważenia – nie wdrożone; decyzja po 4 tygodniach danych z sekcji „CTR po zmianie tytułów”"
+    }
   }
 ]
