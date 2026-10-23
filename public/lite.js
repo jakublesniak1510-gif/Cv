@@ -25,6 +25,43 @@
   // Pasek „Zacznij” na telefonie (jak na stronie głównej): po przewinięciu, schowany przy otwartym menu.
   const mcta = $('#mcta');
   if (mcta) addEventListener('scroll', () => { const show = scrollY > 500 && (nav?.hidden ?? true); mcta.hidden = !show; document.body.classList.toggle('mcta-on', show); }, { passive: true });
+  // Widżety poradników (lib/widgets.js): słowa kluczowe z ogłoszenia, szkic podsumowania i kalkulator czasu.
+  const adWords = async (f) => {
+    const out = f.querySelector('.fstatus'); let ad = f.querySelector('textarea').value.trim();
+    out.className = 'fstatus'; out.textContent = '';
+    if (/^https?:\/\/\S+$/i.test(ad)) { const r = await fetch('/api/fetch-ad', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: ad }) }); const j = await r.json(); if (!r.ok) throw new Error(`${j.error} Wklej treść ogłoszenia zamiast linku.`); ad = j.text; }
+    const r = await fetch('/api/ad-keywords', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adText: ad }) });
+    const j = await r.json(); if (!r.ok) throw new Error(j.error); return j.keywords;
+  };
+  for (const b of document.querySelectorAll('form.kw-extract button[hidden], form.sum-gen button[hidden]')) b.hidden = false;
+  const mk = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; };
+  for (const f of document.querySelectorAll('form.kw-extract')) f.addEventListener('submit', async (e) => {
+    e.preventDefault(); const box = f.querySelector('.w-out'), btn = f.querySelector('button');
+    btn.disabled = true;
+    try { const k = await adWords(f); box.replaceChildren(k.length ? mk('div', { className: 'kw' }, ...k.map((x) => mk('span', { textContent: x }))) : mk('p', { textContent: 'Nie znaleźliśmy wymagań w tym tekście. Wklej pełną treść ogłoszenia.' })); }
+    catch (x) { const o = f.querySelector('.fstatus'); o.className = 'fstatus bad'; o.textContent = x.message; }
+    btn.disabled = false;
+  });
+  for (const f of document.querySelectorAll('form.sum-gen')) f.addEventListener('submit', async (e) => {
+    e.preventDefault(); const box = f.querySelector('.w-out'), btn = f.querySelector('button');
+    btn.disabled = true;
+    try {
+      const k = await adWords(f), text = mk('p', { className: 'sum-draft' });
+      const boxes = k.map((x) => { const c = mk('input', { type: 'checkbox', value: x }); c.addEventListener('change', draw); return c; });
+      function draw() {
+        const on = boxes.filter((c) => c.checked).map((c) => c.value);
+        text.textContent = on.length ? `[Stanowisko] z doświadczeniem w: ${on.slice(0, 3).join(', ')}.${on.length > 3 ? ` Na co dzień: ${on.slice(3, 6).join(', ')}.` : ''} Szukam pracy jako [stanowisko z ogłoszenia], gdzie wykorzystam [Twoja mocna strona].` : 'Zaznacz słowa, które naprawdę Cię opisują.';
+      }
+      box.replaceChildren(mk('p', { textContent: 'Zaznacz tylko to, co jest prawdą o Tobie:' }), mk('div', { className: 'kw-pick' }, ...boxes.map((c) => mk('label', { className: 'check' }, c, ' ', c.value))), text);
+      draw();
+    } catch (x) { const o = f.querySelector('.fstatus'); o.className = 'fstatus bad'; o.textContent = x.message; }
+    btn.disabled = false;
+  });
+  for (const f of document.querySelectorAll('form.time-calc')) {
+    const v = (n) => Math.max(0, Number(f.elements[n].value) || 0), out = f.querySelector('.calc-out');
+    const draw = () => { const h = (m) => (Math.round((m / 60) * 10) / 10).toLocaleString('pl-PL'); const a = v('n') * v('a'), b = v('n') * v('b'); out.textContent = `Ręcznie: ok. ${h(a)} godz. tygodniowo. Ze skanerem: ok. ${h(b)} godz. Różnica: ok. ${h(Math.max(0, a - b))} godz. tygodniowo.`; };
+    f.addEventListener('input', draw); f.addEventListener('submit', (e) => e.preventDefault()); draw();
+  }
   // „Masz ogłoszenie?” na stronach zawodów: treść idzie do skanera przez pamięć tej karty przeglądarki (nie na serwer).
   for (const pf of document.querySelectorAll('form.paste-ad[data-scan]')) pf.addEventListener('submit', (e) => {
     e.preventDefault(); const ta = pf.querySelector('textarea'), v = ta.value.trim();

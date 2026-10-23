@@ -21,6 +21,8 @@ import { adFromImage, AdImageError } from './lib/adImage.js';
 import { simTurn, SimError } from './lib/sim.js';
 import { samplePdf } from './lib/sample.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
+import { scanFallback } from './lib/tailor.js';
+import { letterRoutes } from './lib/letter-landing.js';
 import { checkCv } from './lib/cv-check.js';
 import { landingRoutes } from './lib/landing.js';
 import { outcomes, outcomeRoutes, startOutcome, outcomeLinks, anonymizeOutcomes, publicOutcome, OUTCOME_CONSENT, OUTCOME_AFTER, OT } from './lib/outcomes.js';
@@ -121,7 +123,7 @@ app.use((req, res, next) => (ALIAS_HOSTS.has(req.hostname) && BASE_URL.startsWit
 
 // Prosty limit zapytań na adres IP.
 const limiter = (max, windowMs) => { const hits = new Map(); return (req) => { const now = Date.now(), h = (hits.get(req.ip) || []).filter((t) => now - t < windowMs); if (h.length >= max) return false; hits.set(req.ip, [...h, now]); return true; }; };
-const photoLimit = limiter(5, 3600_000), answerLimit = limiter(8, 3600_000), importLimit = limiter(10, 600_000), fetchLimit = limiter(20, 600_000), scanLimit = limiter(6, 3600_000), cvCheckLimit = limiter(12, 3600_000), chatLimit = limiter(30, 3600_000);
+const photoLimit = limiter(5, 3600_000), answerLimit = limiter(8, 3600_000), importLimit = limiter(10, 600_000), fetchLimit = limiter(20, 600_000), scanLimit = limiter(6, 3600_000), cvCheckLimit = limiter(12, 3600_000), chatLimit = limiter(30, 3600_000), adKwLimit = limiter(20, 3600_000);
 const FOLLOWUP_AFTER = 29 * 24 * 3600 * 1000, REMINDER_AFTER = 7 * 24 * 3600 * 1000, REVIEW_AFTER = 4 * 24 * 3600 * 1000;
 
 // Bot AI na Messengerze i Instagramie (podpis Meta wymaga surowej treści, więc przed globalnym parserem JSON).
@@ -179,6 +181,15 @@ app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
   } catch (e) { console.error('Skaner', e.message); logEvent('skaner', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się ocenić CV. Spróbuj ponownie.' }); }
 });
 
+// --- Wyciągacz słów kluczowych z ogłoszenia (poradnik „Słowa kluczowe ATS”, generator podsumowania): bez CV, bez zapisywania ---
+app.post('/api/ad-keywords', express.json({ limit: '40kb' }), (req, res) => {
+  if (!adKwLimit(req)) return res.status(429).json({ error: 'Wykorzystano limit na godzinę. Spróbuj później.' });
+  const adText = typeof req.body?.adText === 'string' ? req.body.adText.trim().slice(0, 10000) : '';
+  if (adText.length < 80) return res.status(400).json({ error: 'Wklej pełną treść ogłoszenia (min. 80 znaków).' });
+  const r = scanFallback({ cvText: '-', adText });
+  res.set('Cache-Control', 'no-store').json({ keywords: [...r.found, ...r.missing.map((m) => m.keyword)].slice(0, 20) });
+});
+
 // --- „Sprawdź CV” i „Test CV pod ATS”: samo CV (bez ogłoszenia) -> tekst odczytany z pliku i sprawdzenie budowy (bez zapisywania) ---
 app.post('/api/cv-check', express.json({ limit: '8mb' }), async (req, res) => {
   if (!cvCheckLimit(req)) return res.status(429).json({ error: 'Wykorzystano limit darmowych sprawdzeń na godzinę. Spróbuj później.' });
@@ -211,6 +222,7 @@ b2bRoutes(app, {
   } : null,
 });
 seoRoutes(app, BASE_URL);
+letterRoutes(app, BASE_URL); // /narzedzia/list-motywacyjny-pod-ogloszenie
 landingRoutes(app, BASE_URL); // /kreator-cv i case study „Jedno CV, dwa ogłoszenia”
 templateRoutes(app, BASE_URL);
 abroadRoutes(app, BASE_URL);
