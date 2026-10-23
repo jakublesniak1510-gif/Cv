@@ -17,16 +17,16 @@
   "wymagania": {
    "niezbedne": [
     "aktualne orzeczenie do celów sanitarno-epidemiologicznych (w sklepach z żywnością)",
-    "gotowość do pracy zmianowej, także w weekendy i święta",
+    "gotowość do pracy zmianowej, także w weekendy (na stacjach paliw również w święta)",
     "dokładność przy liczeniu pieniędzy",
     "uprzejmość w kontakcie z klientem",
     "gotowość do przyjęcia odpowiedzialności materialnej"
    ],
    "mile_widziane": [
-    "doświadczenie w obsłudze kasy fiskalnej lub kasy online",
+    "doświadczenie w obsłudze kasy fiskalnej, także kasy online",
     "doświadczenie w handlu detalicznym",
     "status ucznia lub studenta przy umowie zlecenie",
-    "podstawowa znajomość języka obcego w sklepach w miejscach turystycznych"
+    "podstawowa znajomość języka obcego (w sklepach w miejscowościach turystycznych)"
    ]
   },
   "warunki": [
@@ -129,10 +129,10 @@
   "jak_w_cv": [
    "Podaj orientacyjną wielkość zespołu i typ sklepu; pomijaj liczby, których nie da się potwierdzić.",
    "Opisz konkretne działania: grafiki, inwentaryzacje, ograniczanie strat, wdrażanie nowych osób.",
-   "Warto wymienić usprawnienia, które da się omówić na rozmowie.",
+   "Warto wymienić wprowadzone usprawnienia, np. w grafikach, ekspozycji lub ograniczaniu strat.",
    "Wpisz systemy i narzędzia używane do raportowania i zamówień."
   ],
-  "dla_firm": "Na stanowisku kierowniczym liczy się zakres odpowiedzialności: orientacyjna wielkość zespołu, samodzielność w zamówieniach i grafikach oraz to, komu kierownik raportuje. Taki opis przyciąga osoby o właściwym poziomie doświadczenia."
+  "dla_firm": "Na stanowisku kierowniczym liczy się zakres odpowiedzialności: orientacyjna wielkość zespołu, samodzielność w zamówieniach i grafikach oraz to, komu kierownik raportuje. Taki opis pomaga dotrzeć do osób o właściwym poziomie doświadczenia."
  },
  "merchandiser": {
   "nazwaD": "merchandisera",
@@ -224,7 +224,7 @@
  },
  "konsultant-call-center": {
   "nazwaD": "konsultanta call center",
-  "intro": "Konsultant call center prowadzi rozmowy telefoniczne z klientami: odbiera połączenia przychodzące albo dzwoni z ofertą lub w sprawach serwisowych. Pracuje w centrach kontaktu działających dla banków, operatorów, ubezpieczycieli, sklepów i firm energetycznych. Praca opiera się na skryptach, systemie CRM i celach jakościowych lub sprzedażowych.",
+  "intro": "Konsultant call center prowadzi rozmowy telefoniczne z klientami: odbiera połączenia przychodzące albo dzwoni z ofertą lub w sprawach serwisowych. Pracuje w centrach kontaktu działających dla banków, operatorów telekomunikacyjnych, ubezpieczycieli, sklepów i firm energetycznych. Praca opiera się na skryptach, systemie CRM i celach jakościowych lub sprzedażowych.",
   "obowiazki": [
    "obsługa połączeń przychodzących od klientów",
    "realizacja połączeń wychodzących w ramach kampanii",
@@ -261,10 +261,10 @@
   "jak_w_cv": [
    "Opisz rodzaj rozmów (przychodzące, wychodzące, sprzedaż, obsługa) i branżę projektu.",
    "Wpisz systemy, w których pracujesz, oraz pracę ze skryptem.",
-   "Wyróżnienia za jakość rozmów podaj tylko wtedy, gdy umiesz o nich opowiedzieć.",
+   "Wyróżnienia za jakość rozmów opisz krótko: za co je przyznano i w jakim okresie.",
    "Podaj dyspozycyjność w widocznym miejscu CV."
   ],
-  "dla_firm": "Rozmowy przychodzące i wychodzące to dwie różne prace, dlatego warto to napisać w pierwszym zdaniu ogłoszenia. Do tego temat rozmów, grafik i sposób rozliczania celów."
+  "dla_firm": "Rozmowy przychodzące i wychodzące to dwie różne prace, dlatego warto to napisać w pierwszym zdaniu ogłoszenia. Warto też podać temat rozmów, grafik i sposób rozliczania celów."
  },
  "przedstawiciel-handlowy": {
   "nazwaD": "przedstawiciela handlowego",
@@ -356,7 +356,7 @@
  },
  "operator-wozka-widlowego": {
   "nazwaD": "operatora wózka widłowego",
-  "intro": "Operator wózka widłowego przemieszcza, załadowuje i składuje towar przy użyciu wózków jezdniowych podnośnikowych. Pracuje w magazynach, centrach logistycznych, zakładach produkcyjnych, składach budowlanych i portach. Bezpieczeństwo pracy jest w tym zawodzie jednym z głównych kryteriów oceny kandydata.",
+  "intro": "Operator wózka widłowego przemieszcza, ładuje, rozładowuje i składuje towar przy użyciu wózków jezdniowych podnośnikowych. Pracuje w magazynach, centrach logistycznych, zakładach produkcyjnych, składach budowlanych i portach. Bezpieczeństwo pracy jest w tym zawodzie jednym z głównych kryteriów oceny kandydata.",
   "obowiazki": [
    "obsługa wózka czołowego, bocznego lub wysokiego składowania",
    "załadunek i wyładunek samochodów ciężarowych",
@@ -377,7 +377,7 @@
     "gotowość do pracy zmianowej"
    ],
    "mile_widziane": [
-    "uprawnienia UDT kategorii I WJO obejmujące wózki specjalizowane",
+    "uprawnienia UDT kategorii I WJO (obejmujące też wózki z wysięgnikiem i z podnoszonym stanowiskiem operatora)",
     "doświadczenie na wózku wysokiego składowania lub w wąskich korytarzach",
     "przeszkolenie w zakresie wymiany butli gazowej w wózkach",
     "znajomość systemu WMS i obsługi skanera"
@@ -429,7 +429,7 @@
   },
   "warunki": [
    "umowa o pracę",
-   "praca w systemie dziennym z gotowością do reagowania na potrzeby zmian",
+   "praca głównie w dzień, z gotowością do wsparcia pozostałych zmian",
    "samochód lub telefon służbowy, w części ofert",
    "premia zależna od realizacji celów (często spotykana)"
   ],
@@ -450,7 +450,7 @@
    "doręczanie przesyłek do klientów indywidualnych i firm",
    "odbiór przesyłek od nadawców",
    "skanowanie przesyłek i potwierdzanie doręczeń w aplikacji",
-   "pobieranie płatności za pobraniem i ich rozliczanie",
+   "pobieranie i rozliczanie należności za przesyłki za pobraniem",
    "kontakt z odbiorcami w sprawie terminu doręczenia",
    "dbałość o stan powierzonego pojazdu",
    "rozliczanie dokumentów i zwrotów po zakończeniu trasy"
@@ -509,7 +509,7 @@
    ],
    "mile_widziane": [
     "doświadczenie w pracy na produkcji w podobnej branży",
-    "uprawnienia UDT kategorii II WJO na wózki jezdniowe",
+    "uprawnienia UDT kategorii II WJO na wózki jezdniowe podnośnikowe",
     "znajomość standardu 5S",
     "wykształcenie zawodowe lub techniczne"
    ]
@@ -591,13 +591,12 @@
   "wymagania": {
    "niezbedne": [
     "aktualne świadectwo egzaminu kwalifikacyjnego spawacza wg PN-EN ISO 9606-1 w wymaganej metodzie i pozycji",
-    "aktualne uprawnienia spawalnicze w wymaganej metodzie",
     "doświadczenie w spawaniu",
     "umiejętność czytania rysunku technicznego",
     "przestrzeganie zasad BHP"
    ],
    "mile_widziane": [
-    "uprawnienia w kilku metodach lub pozycjach albo do spawania aluminium (PN-EN ISO 9606-2)",
+    "uprawnienia do spawania aluminium (PN-EN ISO 9606-2)",
     "uprawnienia w kilku metodach spawania lub pozycjach",
     "doświadczenie w spawaniu stali nierdzewnej lub aluminium",
     "gotowość do wyjazdów i pracy na montażach"
@@ -612,7 +611,7 @@
   ],
   "jak_w_cv": [
    "Wpisz metody spawania i ważność uprawnień na początku CV.",
-   "Podaj materiały i pozycje spawania, które potrafisz wykonać na próbie spawalniczej.",
+   "Podaj materiały i pozycje, w których spawasz i które możesz pokazać na próbie spawalniczej.",
    "Opisz rodzaj konstrukcji, przy których pracujesz.",
    "Warto zaznaczyć samodzielną pracę z rysunkiem technicznym."
   ],
@@ -631,7 +630,7 @@
    "diagnozowanie i usuwanie awarii",
    "konserwacja maszyn i urządzeń w ramach utrzymania ruchu",
    "prowadzenie dokumentacji z wykonanych prac",
-   "przestrzeganie zasad BHP przy pracach pod napięciem i w jego pobliżu"
+   "przestrzeganie zasad BHP przy pracy z urządzeniami elektrycznymi, także w pobliżu napięcia"
   ],
   "wymagania": {
    "niezbedne": [
@@ -777,7 +776,7 @@
     "doświadczenie w obsłudze gości",
     "komunikatywna znajomość języka angielskiego lub innego języka obcego",
     "znajomość systemu POS",
-    "znajomość podstaw win i serwisu napojów"
+    "podstawowa wiedza o winach i serwisie napojów"
    ]
   },
   "warunki": [
@@ -837,11 +836,11 @@
    "Podaj kursy baristyczne i zainteresowanie kawą specialty.",
    "Warto dodać pracę przy kasie i obsługę gości przy dużym ruchu."
   ],
-  "dla_firm": "Rodzaj kawiarni, sprzęt i godziny pracy pokazują, czego się spodziewać. Jeśli firma szkoli z latte art czy metod alternatywnych, warto to napisać – zachęci to także osoby początkujące."
+  "dla_firm": "Rodzaj kawiarni, sprzęt i godziny pracy pokazują, czego się spodziewać. Jeśli firma szkoli z latte art czy metod alternatywnych, warto to napisać – może to zachęcić także osoby początkujące."
  },
  "pokojowka": {
   "nazwaD": "pokojówki",
-  "intro": "Pokojówka sprząta i przygotowuje pokoje hotelowe dla gości zgodnie ze standardami obiektu. Pracuje w dziale housekeeping hoteli, pensjonatów, aparthoteli i ośrodków wypoczynkowych. Praca wymaga dokładności, dobrego tempa i dyskrecji.",
+  "intro": "Pokojówka sprząta i przygotowuje pokoje hotelowe dla gości zgodnie ze standardami obiektu. Pracuje w dziale housekeepingu (służbie pięter) hoteli, pensjonatów, aparthoteli i ośrodków wypoczynkowych. Praca wymaga dokładności, dobrego tempa i dyskrecji.",
   "obowiazki": [
    "sprzątanie pokoi hotelowych po wyjeździe gości",
    "codzienne sprzątanie pokoi zajętych",
@@ -928,11 +927,11 @@
  },
  "pielegniarka": {
   "nazwaD": "pielęgniarki",
-  "intro": "Pielęgniarka sprawuje opiekę nad pacjentami, wykonuje zabiegi i procedury pielęgniarskie oraz współpracuje z lekarzami w zespole terapeutycznym. Pracuje w szpitalach, przychodniach podstawowej opieki zdrowotnej, placówkach prywatnych, zakładach opiekuńczych i w opiece długoterminowej. Do pracy w zawodzie potrzebne jest prawo wykonywania zawodu.",
+  "intro": "Pielęgniarka sprawuje opiekę nad pacjentami, wykonuje zabiegi i procedury pielęgniarskie oraz współpracuje z lekarzami w zespole terapeutycznym. Pracuje w szpitalach, przychodniach podstawowej opieki zdrowotnej, placówkach prywatnych, zakładach opiekuńczo-leczniczych i w opiece długoterminowej. Do pracy w zawodzie potrzebne jest prawo wykonywania zawodu.",
   "obowiazki": [
    "rozpoznawanie potrzeb pacjenta i planowanie opieki pielęgniarskiej",
    "podawanie leków zgodnie ze zleceniem lekarskim",
-   "wykonywanie iniekcji, wlewów i pobieranie materiału do badań",
+   "wykonywanie iniekcji i wlewów oraz pobieranie materiału do badań",
    "pomiar i monitorowanie parametrów życiowych",
    "wykonywanie opatrunków i pielęgnacja ran",
    "przygotowanie pacjenta do badań i zabiegów",
@@ -979,8 +978,8 @@
    "przygotowywanie posiłków dla dziecka",
    "organizowanie zabaw rozwojowych i zajęć dostosowanych do wieku",
    "spacery i aktywność na świeżym powietrzu",
-   "odprowadzanie i odbieranie dziecka z przedszkola lub szkoły",
-   "pomoc w odrabianiu lekcji u starszych dzieci",
+   "odprowadzanie dziecka do przedszkola lub szkoły i odbieranie go",
+   "pomoc starszym dzieciom w odrabianiu lekcji",
    "dbanie o porządek w pokoju i rzeczach dziecka",
    "przekazywanie rodzicom informacji o przebiegu dnia"
   ],
@@ -989,7 +988,7 @@
     "w żłobku lub klubie dziecięcym: kwalifikacje opiekuna wymagane ustawą o opiece nad dziećmi w wieku do lat 3 (art. 16), np. kurs opiekuna dziecięcego albo wykształcenie pedagogiczne",
     "doświadczenie w opiece nad dziećmi w podobnym wieku",
     "odpowiedzialność i cierpliwość",
-    "zaświadczenie o niekaralności (często wymagane)",
+    "zaświadczenie o niekaralności (w żłobku i klubie dziecięcym obowiązkowe, u rodzin często wymagane)",
     "dyspozycyjność w ustalonych godzinach"
    ],
    "mile_widziane": [
@@ -1095,7 +1094,7 @@
    "Wpisz kategorie prawa jazdy, kod 95, kartę kierowcy i badania na samym początku CV.",
    "Podaj rodzaj tras i typ zestawów, którymi jeździsz.",
    "Opisz rodzaje ładunków i dodatkowe uprawnienia, np. ADR.",
-   "Bezszkodową jazdę warto zaznaczyć tylko wtedy, gdy jest to zgodne z prawdą."
+   "Bezszkodową jazdę warto zaznaczyć, jeśli możesz ją potwierdzić, np. referencjami."
   ],
   "dla_firm": "Rodzaj tras, system wyjazdów, typ zestawu i ładunków przesądzają o tym, czy praca odpowiada kierowcy. Kod 95 to wymóg, a ADR zwykle atut – warto to rozdzielić."
  },
@@ -1105,7 +1104,7 @@
   "obowiazki": [
    "prowadzenie pełnej księgowości lub księgi przychodów i rozchodów",
    "dekretowanie i księgowanie dokumentów",
-   "sporządzanie deklaracji VAT i plików JPK",
+   "sporządzanie plików JPK_V7 (ewidencja i deklaracja VAT)",
    "rozliczanie podatku dochodowego",
    "rozrachunki z kontrahentami",
    "uzgadnianie sald i kont oraz zamknięcie miesiąca",
@@ -1145,7 +1144,7 @@
  },
  "asystentka-biura": {
   "nazwaD": "asystentki biura",
-  "intro": "Asystentka biura dba o sprawne działanie biura: obsługuje sekretariat, korespondencję i kalendarze oraz wspiera pracowników w sprawach organizacyjnych. Pracuje w firmach różnych branż, kancelariach, biurach projektowych i instytucjach. Często jest pierwszą osobą kontaktu dla gości i klientów.",
+  "intro": "Asystentka biura dba o sprawne działanie biura: obsługuje sekretariat, korespondencję i kalendarze oraz wspiera pracowników w sprawach organizacyjnych. Pracuje w firmach różnych branż, kancelariach, biurach projektowych i instytucjach. Często to z nią w pierwszej kolejności kontaktują się goście i klienci.",
   "obowiazki": [
    "obsługa sekretariatu i recepcji biura",
    "obsługa korespondencji przychodzącej i wychodzącej",
@@ -1199,7 +1198,7 @@
    "obsługa centrali telefonicznej",
    "udzielanie informacji o usługach obiektu i okolicy",
    "obsługa korespondencji i przesyłek",
-   "współpraca z działem housekeeping i obsługą techniczną",
+   "współpraca z działem housekeepingu i obsługą techniczną",
    "przyjmowanie i przekazywanie uwag gości"
   ],
   "wymagania": {
@@ -1318,6 +1317,6 @@
    "Podaj przykład usprawnienia lub rozwiązanego problemu z dostawami.",
    "Warto zaznaczyć poziom języka angielskiego i kontakt z partnerami zagranicznymi."
   ],
-  "dla_firm": "Warto napisać, za które procesy odpowiada stanowisko – zamówienia, transport, stany – i z jakich systemów korzysta. Znajomość konkretnego systemu, np. SAP, lepiej oznaczyć jako atut, jeśli firma wdraża."
+  "dla_firm": "Warto napisać, za które procesy odpowiada stanowisko – zamówienia, transport, stany – i z jakich systemów korzysta. Znajomość konkretnego systemu, np. SAP, lepiej oznaczyć jako atut, jeśli firma wdraża nowe osoby w jego obsługę."
  }
 }
