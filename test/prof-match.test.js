@@ -52,7 +52,7 @@ test('Wszystkie strony zawodów w 4 językach: „Masz ogłoszenie?” do skaner
 
 test('Ogłoszenie trafia do skanera przez pamięć karty przeglądarki (bez wysyłki), tłumaczenia bloków', () => {
   const lite = read('public/lite.js'), app = read('public/app.js');
-  assert.match(lite, /form\.paste-ad/); assert.match(lite, /sessionStorage\.setItem\('cvpo-scan-ad'/); assert.doesNotMatch(lite.slice(lite.indexOf('form.paste-ad'), lite.indexOf('Formularz „Dla firm')), /fetch\(/);
+  assert.match(lite, /form\.paste-ad\[data-scan\]/); assert.match(lite, /sessionStorage\.setItem\('cvpo-scan-ad'/); assert.doesNotMatch(lite.slice(lite.indexOf('form.paste-ad'), lite.indexOf('Formularz „Dla firm')), /fetch\(/);
   assert.match(app, /sessionStorage\.getItem\('cvpo-scan-ad'\)[\s\S]{0,80}sessionStorage\.removeItem\('cvpo-scan-ad'\)/);
   for (const l of ['en', 'uk', 'de']) {
     const d = JSON.parse(read(`public/i18n/${l}.json`));
