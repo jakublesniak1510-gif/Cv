@@ -28,23 +28,27 @@ test('Treść: 30 zawodów z rozbudowaną stroną CV, kompletne sekcje, bez licz
   }
 });
 
-test('Strony: 200, noindex,follow (meta i nagłówek), poza mapą strony, linki do CV pod ogłoszenie i oferty dla firm', async () => {
-  assert.equal(DUTIES_INDEX, false, 'do czasu przeglądu językowego');
+test('Strony: 200, indeksowane (bez noindex), w mapie strony, linki do CV pod ogłoszenie i oferty dla firm, wejście z /poradnik', async () => {
+  assert.equal(DUTIES_INDEX, true, 'po drugiej kontroli językowej (#75)');
   const app = express(); seoRoutes(app, 'https://example.test');
   const srv = app.listen(0), U = `http://127.0.0.1:${srv.address().port}`;
   try {
     for (const [s, d] of Object.entries(DUTIES)) {
       const r = await fetch(`${U}/${dutiesPath(s)}`), h = await r.text();
-      assert.equal(r.status, 200, s); assert.equal(r.headers.get('x-robots-tag'), 'noindex, follow');
-      assert.match(h, /<meta name="robots" content="noindex,follow">/);
+      assert.equal(r.status, 200, s); assert.equal(r.headers.get('x-robots-tag'), null, s);
+      assert.doesNotMatch(h, /<meta name="robots" content="noindex/, s);
       assert.ok(h.includes(`<h1>Zakres obowiązków ${d.nazwaD}</h1>`) && h.includes(`href="/cv/${s}"`) && h.includes('href="/dla-firm"') && h.includes(`zamow=1&amp;zawod=${s}`), s);
     }
     assert.equal((await fetch(`${U}/zawod/nie-ma/zakres-obowiazkow`)).status, 404);
     const hub = await fetch(`${U}/zawod/zakres-obowiazkow`), hh = await hub.text();
-    assert.equal(hub.headers.get('x-robots-tag'), 'noindex, follow'); assert.equal((hh.match(/href="\/zawod\/[\w-]+\/zakres-obowiazkow"/g) || []).length, 30, 'lista 30 stron');
+    assert.equal(hub.headers.get('x-robots-tag'), null); assert.doesNotMatch(hh, /<meta name="robots" content="noindex/); assert.equal((hh.match(/href="\/zawod\/[\w-]+\/zakres-obowiazkow"/g) || []).length, 30, 'lista 30 stron');
     const cv = await (await fetch(`${U}/cv/kasjer`)).text(); assert.ok(cv.includes('href="/zawod/kasjer/zakres-obowiazkow"'), 'link ze strony CV');
     assert.match(fs.readFileSync(new URL('../public/index.html', import.meta.url), 'utf8'), /<template id="pg-dla-firm"[\s\S]*href="\/zawod\/zakres-obowiazkow"[\s\S]*<\/template>/, 'link z /dla-firm');
     assert.match(await (await fetch(`${U}/${dutiesPath('kasjer')}`)).text(), /<title>Obowiązki i wymagania kasjera/);
-    assert.ok(!(await (await fetch(`${U}/sitemap.xml`)).text()).includes('zakres-obowiazkow'), 'poza mapą strony');
+    const map = await (await fetch(`${U}/sitemap.xml`)).text();
+    for (const s of Object.keys(DUTIES)) assert.ok(map.includes(`/${dutiesPath(s)}<`), `${s} w mapie strony`);
+    assert.ok(map.includes('/zawod/zakres-obowiazkow<'), 'lista w mapie strony');
+    assert.ok((await (await fetch(`${U}/poradnik`)).text()).includes('href="/zawod/zakres-obowiazkow"'), 'wejście z /poradnik');
+    assert.match(DUTIES.kierowca.jak_w_cv[0], /kod 95[\s\S]*ważny 5 lat i odnawia się go szkoleniem okresowym/);
   } finally { srv.close(); }
 });
