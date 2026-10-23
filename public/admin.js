@@ -535,8 +535,13 @@ loaders.seo = async () => {
   $('#seoFunnel').replaceChildren(f ? simpleTable(f.stages, [['label', 'Etap'], ['n', 'Liczba', 1], [(s) => (s.rate == null ? '–' : `${String(s.rate).replace('.', ',')}%`), '% z poprz.', 1], ...['pl', 'en', 'uk', 'de'].map((l) => [(s) => s.lang[l] || 0, l, 1])]) : el('div', { className: 'empty', textContent: 'Brak raportu.' }));
   $('#seoSrc').replaceChildren(f ? simpleTable(['google', 'youtube', 'facebook', 'instagram', 'tiktok', 'share', 'direct', 'inne'].map((k) => ({ k, v: f.stages.map((s) => s.src[k] || 0) })), [['k', 'Źródło'], ...f.stages.map((s, i) => [(x) => x.v[i], s.label, 1])]) : '');
   $('#seoQueries').replaceChildren(simpleTable(g?.queries, QC));
+  const tc = g?.titleCtr;
+  $('#seoCtrInfo').textContent = !tc ? 'Brak zmian tytułów w seo-data/title-changes.json przed końcem okresu raportu.' : tc.error ? tc.error : !tc.days ? `Zmiana ${tc.change}: za mało danych (Search Console ma kilkudniowe opóźnienie).` : `Zmiana ${tc.change}: ${tc.days} dni przed (${tc.before.start} – ${tc.before.end}) vs ${tc.days} dni po (${tc.after.start} – ${tc.after.end}).`;
+  if (tc?.variantB) $('#seoCtrInfo').textContent += ` Wariant B do rozważenia${tc.variantB.consider ? ` (od ${tc.variantB.consider})` : ''}: „${tc.variantB.title}” – ${tc.variantB.status || 'nie wdrożone'}.`;
+  $('#seoCtr').replaceChildren(simpleTable(tc?.groups?.map((x) => ({ label: x.label, b: x.before, a: x.after })), [['label', 'Zapytania'], [(x) => `${String(x.b.ctr).replace('.', ',')}% → ${String(x.a.ctr).replace('.', ',')}%`, 'CTR przed → po', 1], [(x) => `${num(x.b.clicks)} → ${num(x.a.clicks)}`, 'Kliknięcia', 1], [(x) => `${num(x.b.impressions)} → ${num(x.a.impressions)}`, 'Wyświetlenia', 1], [(x) => `${String(x.b.position).replace('.', ',')} → ${String(x.a.position).replace('.', ',')}`, 'Pozycja', 1]]));
   $('#seoNear').replaceChildren(simpleTable(g?.nearFirstPage, QC));
   $('#seoPages').replaceChildren(simpleTable(g?.pages, PC));
+  $('#seoFix').replaceChildren(simpleTable(g?.fixTitles, PC));
   $('#seoZero').replaceChildren(simpleTable(g?.zeroClickPages, PC));
   $('#seoLang').replaceChildren(simpleTable(g?.byLang, [['key', 'Język'], ['clicks', 'Klik.', 1], ['impressions', 'Wyśw.', 1], ['ctr', 'CTR %', 1]]));
   $('#seoType').replaceChildren(simpleTable(g?.byType, [['key', 'Typ'], ['clicks', 'Klik.', 1], ['impressions', 'Wyśw.', 1], ['ctr', 'CTR %', 1]]));
