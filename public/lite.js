@@ -25,13 +25,6 @@
   // Pasek „Zacznij” na telefonie (jak na stronie głównej): po przewinięciu, schowany przy otwartym menu.
   const mcta = $('#mcta');
   if (mcta) addEventListener('scroll', () => { const show = scrollY > 500 && (nav?.hidden ?? true); mcta.hidden = !show; document.body.classList.toggle('mcta-on', show); }, { passive: true });
-  // „Masz ogłoszenie?” na stronach zawodów: treść idzie do skanera przez pamięć tej karty przeglądarki (nie na serwer).
-  for (const pf of document.querySelectorAll('form.paste-ad')) pf.addEventListener('submit', (e) => {
-    e.preventDefault(); const ta = pf.querySelector('textarea'), v = ta.value.trim();
-    if (!v) { ta.focus(); return; }
-    try { sessionStorage.setItem('cvpo-scan-ad', v.slice(0, 20000)); } catch {}
-    location.href = pf.dataset.scan;
-  });
   // Widżety poradników (lib/widgets.js): słowa kluczowe z ogłoszenia, szkic podsumowania i kalkulator czasu.
   const adWords = async (f) => {
     const out = f.querySelector('.fstatus'); let ad = f.querySelector('textarea').value.trim();
@@ -56,7 +49,7 @@
       const boxes = k.map((x) => { const c = mk('input', { type: 'checkbox', value: x }); c.addEventListener('change', draw); return c; });
       function draw() {
         const on = boxes.filter((c) => c.checked).map((c) => c.value);
-        text.textContent = on.length ? `[Stanowisko] z [liczba] lat doświadczenia: ${on.slice(0, 3).join(', ')}.${on.length > 3 ? ` Na co dzień: ${on.slice(3, 6).join(', ')}.` : ''} Szukam pracy jako [stanowisko z ogłoszenia], gdzie wykorzystam [Twoja mocna strona].` : 'Zaznacz słowa, które naprawdę Cię opisują.';
+        text.textContent = on.length ? `[Stanowisko] z doświadczeniem: ${on.slice(0, 3).join(', ')}.${on.length > 3 ? ` Na co dzień: ${on.slice(3, 6).join(', ')}.` : ''} Szukam pracy jako [stanowisko z ogłoszenia], gdzie wykorzystam [Twoja mocna strona].` : 'Zaznacz słowa, które naprawdę Cię opisują.';
       }
       box.replaceChildren(mk('p', { textContent: 'Zaznacz tylko to, co jest prawdą o Tobie:' }), mk('div', { className: 'kw-pick' }, ...boxes.map((c) => mk('label', { className: 'check' }, c, ' ', c.value))), text);
       draw();
@@ -65,9 +58,16 @@
   });
   for (const f of document.querySelectorAll('form.time-calc')) {
     const v = (n) => Math.max(0, Number(f.elements[n].value) || 0), out = f.querySelector('.calc-out');
-    const draw = () => { const h = (m) => Math.round((m / 60) * 10) / 10; const a = v('n') * v('a'), b = v('n') * v('b'); out.textContent = `Ręcznie: ok. ${h(a)} godz. tygodniowo. Ze skanerem: ok. ${h(b)} godz. Różnica: ok. ${h(Math.max(0, a - b))} godz. tygodniowo.`; };
+    const draw = () => { const h = (m) => (Math.round((m / 60) * 10) / 10).toLocaleString('pl-PL'); const a = v('n') * v('a'), b = v('n') * v('b'); out.textContent = `Ręcznie: ok. ${h(a)} godz. tygodniowo. Ze skanerem: ok. ${h(b)} godz. Różnica: ok. ${h(Math.max(0, a - b))} godz. tygodniowo.`; };
     f.addEventListener('input', draw); f.addEventListener('submit', (e) => e.preventDefault()); draw();
   }
+  // „Masz ogłoszenie?” na stronach zawodów: treść idzie do skanera przez pamięć tej karty przeglądarki (nie na serwer).
+  for (const pf of document.querySelectorAll('form.paste-ad[data-scan]')) pf.addEventListener('submit', (e) => {
+    e.preventDefault(); const ta = pf.querySelector('textarea'), v = ta.value.trim();
+    if (!v) { ta.focus(); return; }
+    try { sessionStorage.setItem('cvpo-scan-ad', v.slice(0, 20000)); } catch {}
+    location.href = pf.dataset.scan;
+  });
   // Formularz „Dla firm i uczelni”.
   const f = $('#b2bForm');
   f?.addEventListener('submit', async (e) => {
