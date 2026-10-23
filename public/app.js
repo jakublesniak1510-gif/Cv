@@ -1180,7 +1180,7 @@ function toolScan(box) {
   const msg = el('p', { className: 'fstatus', role: 'status' }), result = el('div', { className: 'scan-result', hidden: true });
   const form = el('form', { className: 'scan-card', noValidate: true },
     el('div', { className: 'f' }, '1. Twoje CV ', el('span', { className: 'h', textContent: 'PDF, Word lub TXT, do 5 MB' }), el('div', { className: 'filerow' }, el('label', { className: 'btn ghost sm filebtn' }, 'Wybierz plik', file), fileName)),
-    el('label', { className: 'f' }, '2. Link do ogłoszenia albo jego treść', ad), btn, msg, el('p', { className: 'hint small', textContent: 'Nie zapisujemy ani pliku, ani wyniku.' }));
+    el('label', { className: 'f' }, '2. Link do ogłoszenia albo jego treść', ad), btn, msg, el('p', { className: 'hint small', textContent: 'Nie zapisujemy pliku ani treści CV. Sam wynik jest w pamięci serwera do godziny.' }));
   if (pendingDraft) ad.value = pendingDraft;
   bindScan({ form, file, fileName, ad, btn, msg, result });
   box.classList.remove('tool-box'); box.append(form, result);
