@@ -957,7 +957,14 @@ details>summary{min-height:44px;padding-block:11px;box-sizing:border-box}
 .firm{display:grid;gap:6px;margin:0}.firm div{display:grid;grid-template-columns:90px 1fr;gap:10px}.firm dt{color:var(--mute);font-size:14px}.firm dd{margin:0;overflow-wrap:anywhere}
 .gw-box{margin:10px 0}.gw-pick{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:0;display:grid;gap:6px}.gw-pick legend{font-weight:600;font-size:14px;padding:0 4px}
 .gen-box .gw-box{text-align:left;max-width:420px;margin:12px auto}
+<<<<<<< HEAD
+/* Test A/B „checkout” – wariant B ostatniego kroku */
+.sum-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:12px}.sum-top b{font-size:22px}.sum-top small{opacity:.7}
+.payico{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:1px 7px;margin:2px 4px 2px 0;font-size:12px;font-weight:600;background:#fff;color:#16233A}
+.check.compact{font-size:13px;line-height:1.35;margin:4px 0}
+=======
 /* Strony zawodów: „Masz ogłoszenie?” i „Jedno CV, dwa ogłoszenia” */
 .paste-ad{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin:18px 0}.paste-ad h2{margin-top:0}.paste-ad textarea{width:100%}
 .two-ads{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin:10px 0}.ad-col{border:1px solid var(--line);border-radius:14px;padding:14px}.ad-col h3{margin-top:0}
 .reqs-list,.ad-lines{padding-left:0;list-style:none}.reqs-list li,.ad-lines li{margin:6px 0}.reqs-list li.no{opacity:.8}.reqs-list small{opacity:.7}.ad-lines mark{background:#FFE45C;color:#16233A;border-radius:3px;padding:0 2px}
+>>>>>>> origin/master
