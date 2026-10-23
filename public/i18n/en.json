@@ -1527,6 +1527,8 @@
 "Przelewy24 (przelew online, BLIK)": "Przelewy24 (online bank transfer, BLIK)",
 "Nie udało się otworzyć płatności. Spróbuj ponownie albo wybierz inną metodę płatności.": "We could not open the payment. Please try again or choose another payment method.",
 "Nieznana metoda płatności. Odśwież stronę i wybierz ją ponownie.": "Unknown payment method. Refresh the page and choose it again.",
+"Do zapłaty": "To pay",
+"jednorazowo, bez abonamentu": "one-off, no subscription",
 "Masz ogłoszenie na to stanowisko?": "Have a job ad for this role?",
 "Wklej treść albo link. Darmowy skaner porówna ogłoszenie z Twoim CV i pokaże, których wymagań w nim nie widać.": "Paste the text or a link. The free scanner compares the ad with your CV and shows which requirements it does not show yet.",
 "Treść lub link do ogłoszenia": "Job ad text or link",
@@ -1564,5 +1566,6 @@
 "Co sprawdza darmowy skaner CV?": "What does the free CV scanner check?",
 "Porównuje Twoje obecne CV z ogłoszeniem i pokazuje dopasowanie w procentach, spełnione wymagania, wymagania, których w CV nie widać, oraz trzy rady. Skaner jest bezpłatny, nie wymaga konta i nie zapisuje pliku ani wyniku.": "It compares your current CV with the job ad and shows the match as a percentage, the requirements you meet, the requirements the CV does not show, and three tips. The scanner is free, needs no account and does not store the file or the result.",
 "Jak sprawdzić dopasowanie CV do oferty pracy?": "How do I check how well my CV matches a job offer?",
-"Wklej ogłoszenie i wgraj CV do skanera na tej stronie. W kilkanaście sekund zobaczysz, które wymagania z oferty Twoje CV pokazuje, a których brakuje. Potem możesz poprawić CV sam albo zamówić CV pod to ogłoszenie.": "Paste the job ad and upload your CV to the scanner on this page. Within seconds you will see which requirements of the offer your CV shows and which are missing. Then you can improve the CV yourself or order a CV for that ad."
+"Wklej ogłoszenie i wgraj CV do skanera na tej stronie. W kilkanaście sekund zobaczysz, które wymagania z oferty Twoje CV pokazuje, a których brakuje. Potem możesz poprawić CV sam albo zamówić CV pod to ogłoszenie.": "Paste the job ad and upload your CV to the scanner on this page. Within seconds you will see which requirements of the offer your CV shows and which are missing. Then you can improve the CV yourself or order a CV for that ad.",
+"Zakresy obowiązków i wymagania dla wybranych zawodów – pomoc przy pisaniu ogłoszeń": "Duties and requirements for selected occupations (in Polish) – help with writing job ads"
 }
