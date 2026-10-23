@@ -1091,7 +1091,7 @@
    "przypisany pojazd, w części ofert"
   ],
   "jak_w_cv": [
-   "Wpisz kategorie prawa jazdy, kod 95, kartę kierowcy i badania na samym początku CV.",
+   "Wpisz kategorie prawa jazdy, kod 95, kartę kierowcy i badania na samym początku CV. Przy kodzie 95 podaj datę ważności: jest ważny 5 lat i odnawia się go szkoleniem okresowym.",
    "Podaj rodzaj tras i typ zestawów, którymi jeździsz.",
    "Opisz rodzaje ładunków i dodatkowe uprawnienia, np. ADR.",
    "Bezszkodową jazdę warto zaznaczyć, jeśli możesz ją potwierdzić, np. referencjami."
