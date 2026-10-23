@@ -22,6 +22,7 @@ import { simTurn, SimError } from './lib/sim.js';
 import { samplePdf } from './lib/sample.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
 import { scanFallback } from './lib/tailor.js';
+import { adKeywords } from './lib/ad-keywords.js';
 import { letterRoutes } from './lib/letter-landing.js';
 import { checkCv } from './lib/cv-check.js';
 import { landingRoutes } from './lib/landing.js';
@@ -182,10 +183,17 @@ app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
 });
 
 // --- Wyciągacz słów kluczowych z ogłoszenia (poradnik „Słowa kluczowe ATS”, generator podsumowania): bez CV, bez zapisywania ---
+const AD_KW_ERR = {
+  pl: ['Wykorzystano limit na godzinę. Spróbuj później.', 'Wklej pełną treść ogłoszenia (min. 80 znaków).'],
+  en: ['You have reached the hourly limit. Please try again later.', 'Paste the full job ad (at least 80 characters).'],
+  de: ['Das Stundenlimit ist erreicht. Bitte versuchen Sie es später erneut.', 'Fügen Sie die vollständige Stellenanzeige ein (mindestens 80 Zeichen).'],
+};
 app.post('/api/ad-keywords', express.json({ limit: '40kb' }), (req, res) => {
-  if (!adKwLimit(req)) return res.status(429).json({ error: 'Wykorzystano limit na godzinę. Spróbuj później.' });
+  const lang = ['en', 'de'].includes(req.body?.lang) ? req.body.lang : 'pl', E = AD_KW_ERR[lang];
+  if (!adKwLimit(req)) return res.status(429).json({ error: E[0] });
   const adText = typeof req.body?.adText === 'string' ? req.body.adText.trim().slice(0, 10000) : '';
-  if (adText.length < 80) return res.status(400).json({ error: 'Wklej pełną treść ogłoszenia (min. 80 znaków).' });
+  if (adText.length < 80) return res.status(400).json({ error: E[1] });
+  if (lang !== 'pl') return res.set('Cache-Control', 'no-store').json({ keywords: adKeywords(adText, lang) });
   const r = scanFallback({ cvText: '-', adText });
   res.set('Cache-Control', 'no-store').json({ keywords: [...r.found, ...r.missing.map((m) => m.keyword)].slice(0, 20) });
 });
