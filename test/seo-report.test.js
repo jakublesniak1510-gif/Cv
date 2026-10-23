@@ -194,7 +194,7 @@ test('CTR po zmianie tytułów: tyle samo dni przed i po ostatniej zmianie, grup
   assert.equal(await rep.titleCtr('2026-08-30', q, changes), null, 'przed pierwszą zmianą: brak sekcji');
   const early = await rep.titleCtr('2026-10-23', q, changes);
   assert.equal(early.days, 0); assert.match(rep.ctrText(early), /za mało danych[\s\S]*\nWariant B do rozważenia \(od 2026-11-20\): „Wariant B” – do rozważenia – nie wdrożone\./);
-  assert.equal(rep.titleChanges().at(-1).variantB.title, 'Dopasuj CV do ogłoszenia w 5 minut – darmowy skaner CV i list motywacyjny');
+  assert.equal(rep.titleChanges().at(-1).variantB.title, 'Dopasuj CV do ogłoszenia – darmowy skaner CV i list motywacyjny');
   const t = await rep.titleCtr('2026-10-30', q, changes);
   assert.equal(t.change, '2026-10-23'); assert.equal(t.days, 7);
   assert.deepEqual([t.before, t.after], [{ start: '2026-10-16', end: '2026-10-22' }, { start: '2026-10-24', end: '2026-10-30' }]);

@@ -44,9 +44,9 @@ test('Wszystkie strony z mapy strony: tytuł ≤ 60 znaków (strony główne ≤
   assert.deepEqual(dup('desc'), [], 'powtórzone opisy');
 });
 
-test('Strona główna: nowy tytuł i opis, OG i Twitter spójne; EN/UK/DE bez „5 minut”, z ceną i skanerem', async () => {
+test('Strona główna: nowy tytuł i opis, OG i Twitter spójne; darmowy skaner przed ceną, bez „5 minut”', async () => {
   const by = Object.fromEntries(pages.filter((p) => HOMES.includes(p.u)).map((p) => [p.u, p]));
-  assert.equal(by['/'].title, 'Dopasuj CV do ogłoszenia w 5 minut – darmowy skaner, CV od 39 zł');
+  assert.equal(by['/'].title, 'Dopasuj CV do ogłoszenia – darmowy skaner CV, od 39 zł');
   assert.equal(by['/'].desc, 'Wklej ogłoszenie, dostajesz CV i list motywacyjny ze słowami kluczowymi, których szuka rekruter. PDF w kilka minut. Darmowy skaner sprawdzi Twoje CV.');
   assert.match(by['/'].title, new RegExp(`od ${Math.min(...Object.keys(PACKAGES).map((k) => PRICES[k])) / 100} zł`), 'cena „od” z cennika');
   for (const u of HOMES) {
@@ -55,7 +55,8 @@ test('Strona główna: nowy tytuł i opis, OG i Twitter spójne; EN/UK/DE bez �
     assert.equal(meta(h, /<meta name="twitter:title" content="([^"]*)"/), title, `${u}: twitter:title`);
     assert.equal(meta(h, /<meta property="og:description" content="([^"]*)"/), desc, `${u}: og:description`);
     assert.equal(meta(h, /<meta name="twitter:description" content="([^"]*)"/), desc, `${u}: twitter:description`);
-    if (u !== '/') { assert.doesNotMatch(title, /\b5\b/, `${u}: wersje obcojęzyczne bez konkretnej liczby minut`); assert.match(title, /39 (PLN|зл)/); assert.doesNotMatch(`${title} ${desc}`, /ogłosz|Dopasuj/, `${u}: przetłumaczone`); }
+    assert.doesNotMatch(title, /\b5\b/, `${u}: bez konkretnej liczby minut`); assert.match(title, /skaner|scanner|сканер|Scanner/, `${u}: darmowy skaner w tytule`);
+    if (u !== '/') { assert.match(title, /39 (PLN|зл)/); assert.doesNotMatch(`${title} ${desc}`, /ogłosz|Dopasuj/, `${u}: przetłumaczone`); }
   }
   // podstrona: Twitter = OG = treść strony
   const k = pages.find((p) => p.u === '/kontakt');
@@ -89,7 +90,8 @@ test('JSON-LD strony głównej: poprawna składnia, SoftwareApplication z Aggreg
 const NOT_PERSON = ['obsluga-klienta', 'specjalista-kadr-i-plac'];
 test('Strony zawodów: tytuł z szablonu z odmianą z danych, opis ze słowami kluczowymi i skanerem, bez błędów odmiany', () => {
   const t = (u) => pages.find((p) => p.u === u)?.title, d = (u) => pages.find((p) => p.u === u)?.desc;
-  assert.equal(t('/cv/hydraulik'), 'CV hydraulika pod ogłoszenie – wzór i generator w 5 minut');
+  assert.equal(t('/cv/hydraulik'), 'CV hydraulika pod ogłoszenie – wzór i generator');
+  assert.ok(pages.every((p) => !/\b5 minut/.test(p.title)), 'bez „5 minut” w tytułach');
   assert.match(d('/cv/hydraulik'), /^Wzór CV hydraulika ze słowami kluczowymi z ogłoszeń: .+\. Wygeneruj CV pod ogłoszenie lub sprawdź swoje darmowym skanerem\.$/);
   assert.equal(t('/en/cv/plumber'), 'Plumber CV for a job ad – template and generator');
   assert.match(t(`/de/lebenslauf/${PROF_LANGS.de.prof.hydraulik.slugLang}`), /^Lebenslauf Installateur zur Stellenanzeige/);
@@ -118,6 +120,8 @@ test('Poradniki z GSC: czasownik + korzyść, rok z daty treści przy klauzuli R
   assert.doesNotMatch(t('/poradnik/przerwa-w-zatrudnieniu-w-cv'), y, 'rok tylko przy treści rocznej');
   assert.equal(t('/narzedzia/podziekowanie-po-rozmowie'), 'Napisz podziękowanie po rozmowie kwalifikacyjnej – generator');
   const ch = JSON.parse(fs.readFileSync(new URL('../seo-data/title-changes.json', import.meta.url), 'utf8')).at(-1);
-  assert.equal(ch.variantB.title, 'Dopasuj CV do ogłoszenia w 5 minut – darmowy skaner CV i list motywacyjny');
+  assert.equal(ch.variantB.title, 'Dopasuj CV do ogłoszenia – darmowy skaner CV i list motywacyjny');
+  for (const u of ['/poradnik/cv-dla-studenta', '/poradnik/podsumowanie-zawodowe-w-cv', '/poradnik/zdjecie-w-cv', '/de/tools/dsgvo-klausel-lebenslauf']) assert.ok(ch.pages.includes(u) && t(u).length <= 60, u);
+  assert.equal(t('/de/tools/dsgvo-klausel-lebenslauf'), 'DSGVO-Klausel im Lebenslauf (Polen) kostenlos erstellen');
   assert.ok(pages.every((p) => p.title !== ch.variantB.title), 'wariant B nie jest wdrożony');
 });
