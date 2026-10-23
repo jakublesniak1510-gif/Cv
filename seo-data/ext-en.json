@@ -1,0 +1,325 @@
+{
+  "article:klauzula-rodo-w-cv": {
+    "sections": [
+      {
+        "h": "The legal basis in more detail",
+        "p": [
+          "The standard clause refers to Article 6(1)(a) of the GDPR (Regulation (EU) 2016/679). That provision allows personal data to be processed when the person concerned has given consent to the processing for one or more specific purposes. In a recruitment context, the specific purpose is the recruitment process named in the clause, which is why a vague wording such as “for any purpose” is not a good idea.",
+          "Article 7 of the GDPR sets the conditions for consent. Under Article 7(1), where processing is based on consent, the employer must be able to demonstrate that you consented. A clause written into your CV is a simple way of creating that record. Article 7(2) adds that when consent is given in a written declaration that also concerns other matters, the request for consent must be clearly distinguishable from the rest and written in clear and plain language. That is one reason the clause usually sits on its own at the bottom of the page.",
+          "Article 88 of the GDPR allows EU Member States to adopt more specific rules on the processing of employees' data, and it names recruitment among the purposes it covers. Poland used this option in the Labour Code, so the Polish rules on candidates' data sit in articles 22¹, 22¹a and 22¹b of that code rather than in the GDPR alone."
+        ]
+      },
+      {
+        "h": "What the Labour Code allows without your consent",
+        "p": [
+          "Article 22¹ § 1 of the Labour Code lists the data an employer requests from a job candidate: first name(s) and surname, date of birth, the contact details the candidate chooses to give, education, professional qualifications and employment history. Employment history in this list excludes information about pay in your current and previous jobs.",
+          "Under article 22¹ § 2, the employer requests education, qualifications and employment history when they are necessary for a particular type of work or position. For all the data in this list, the legal basis is the Labour Code itself, so no consent clause is needed.",
+          "Article 22¹a § 1 is where the clause comes in. It says that the candidate's consent may be the basis for processing other personal data, beyond the list in article 22¹. This covers the data you add on your own initiative, such as a photo, interests or links to social profiles. The same provision excludes data about criminal convictions and offences (Article 10 of the GDPR), so consent cannot be used as the basis for that kind of data.",
+          "Special categories of data, such as information about health, are covered by article 22¹b. Consent may be the basis for processing them only when the candidate passes them on at their own initiative. In practice, it is worth thinking carefully before putting anything of this kind on a CV."
+        ]
+      },
+      {
+        "h": "Refusing or withdrawing consent",
+        "p": [
+          "Article 22¹a § 2 of the Labour Code states that not giving consent, or withdrawing it, cannot be the basis for treating a candidate unfavourably and cannot lead to any negative consequences. In particular, it cannot be the reason for a refusal to employ someone.",
+          "Article 7(3) of the GDPR gives you the right to withdraw consent at any time. Withdrawal does not affect the lawfulness of processing carried out before it, and the GDPR requires that withdrawing consent should be as easy as giving it. You must be informed of this right before you consent, which is why employers' information notices usually describe it.",
+          "In practice, a short email to the contact address given in the employer's information notice or job ad is a common way to withdraw. Say which recruitment process and which consent you mean, for example consent for future recruitment, and keep a copy of your message. This article describes the rules; it is not legal advice, and in a specific dispute it is worth contacting a lawyer or the Polish data protection authority."
+        ]
+      },
+      {
+        "h": "Applying in the UK, Ireland or the US",
+        "p": [
+          "The consent clause is a Polish custom. In the UK, data protection is governed by the UK GDPR together with the Data Protection Act 2018, and CVs there do not carry a consent clause. The UK regulator, the ICO, says in its guidance that consent will not usually be appropriate where there is a clear imbalance of power, and it names employers as a particular case. Employers in the UK therefore usually rely on other legal bases for recruitment data and do not expect you to add a clause.",
+          "CVs for Ireland and résumés for the US do not include such a clause either. If you are adapting a Polish CV for a job abroad, remove the clause together with other Polish-specific elements. The UK National Careers Service, for example, advises not including your age, date of birth, marital status or nationality on a CV, while in Poland the Labour Code allows the employer to request your date of birth.",
+          "If you are applying in English to a company based in Poland, the Polish rules still apply. Check the job ad: if it asks for a clause, add the version it specifies, in English if the ad is in English."
+        ]
+      },
+      {
+        "h": "A quick check before you send",
+        "p": [
+          "Before sending, compare the clause with the job ad: is the company name correct, is the version for future recruitment included only if you want it, and is the clause separate from the rest of the text?",
+          "Then run your CV through the free CV scanner to see whether anything else needs improving, or have a CV prepared that is tailored to the job ad and includes the clause the employer asks for."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Does an employer need my consent to process my name and work history?",
+        "a": "No. Article 22¹ § 1 of the Polish Labour Code lists the data an employer requests from candidates, including name, date of birth, contact details, education, qualifications and employment history. For these, the basis is the law itself. Consent matters for additional data you choose to include."
+      },
+      {
+        "q": "Can an employer reject me because I did not add the clause?",
+        "a": "Article 22¹a § 2 of the Labour Code says that not giving consent, or withdrawing it, cannot be the basis for unfavourable treatment and cannot justify a refusal to employ. If the ad asks for a clause, adding it simply makes the situation clear for both sides."
+      },
+      {
+        "q": "How do I withdraw consent I gave in my CV?",
+        "a": "Under Article 7(3) of the GDPR you can withdraw consent at any time, and doing so should be as easy as giving it. A short email to the contact given in the employer's information notice, naming the recruitment process, is a common way to do it. Withdrawal does not affect processing carried out before it."
+      },
+      {
+        "q": "Do I need a GDPR clause on a CV for a job in the UK?",
+        "a": "No. The clause is a Polish custom and is not used on UK, Irish or US CVs. In the UK, data protection is governed by the UK GDPR and the Data Protection Act 2018, and the ICO says consent is usually not appropriate where there is a clear imbalance of power, such as between an employer and a candidate."
+      },
+      {
+        "q": "Should I mention health information or a disability certificate on my CV?",
+        "a": "It is your choice. Under article 22¹b of the Labour Code, consent can be the basis for processing special categories of data, such as health data, only when you pass them on at your own initiative. Think about whether the information is relevant to the role before including it."
+      }
+    ],
+    "sources": [
+      { "t": "Regulation (EU) 2016/679 (GDPR), Article 6, as adopted by the EU – legislation.gov.uk", "u": "https://www.legislation.gov.uk/eur/2016/679/article/6/adopted" },
+      { "t": "Regulation (EU) 2016/679 (GDPR), Article 7, as adopted by the EU – legislation.gov.uk", "u": "https://www.legislation.gov.uk/eur/2016/679/article/7/adopted" },
+      { "t": "Regulation (EU) 2016/679 (GDPR), Article 88, as adopted by the EU – legislation.gov.uk", "u": "https://www.legislation.gov.uk/eur/2016/679/article/88/adopted" },
+      { "t": "Kodeks pracy, consolidated text, Dz.U. 2026 poz. 1245 (art. 22¹, 22¹a, 22¹b) – Sejm legal acts database", "u": "https://api.sejm.gov.pl/eli/acts/DU/2026/1245/text.pdf" },
+      { "t": "ICO: When is consent appropriate?", "u": "https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/lawful-basis/consent/when-is-consent-appropriate/" },
+      { "t": "National Careers Service: How to write a CV", "u": "https://nationalcareers.service.gov.uk/careers-advice/cv-sections" }
+    ]
+  },
+  "article:cv-po-angielsku": {
+    "sections": [
+      {
+        "h": "CV or résumé: the UK, Ireland and the US",
+        "p": [
+          "In the UK and Ireland the document is called a CV. In the US, the usual term for job applications outside academia is résumé (often written resume). American universities' career services describe a US CV as a comprehensive academic record used for teaching, research and grant applications, while a résumé is a shorter document focused on what is relevant to a specific job.",
+          "This matters in two ways. First, use the word the ad uses: if a US employer asks for a résumé, send a résumé, not a long academic CV. Second, keep a résumé for a US employer brief and selective. The career services we checked describe industry résumés as typically one to two pages, so leave out older or unrelated roles rather than listing everything.",
+          "For jobs in Poland advertised in English, the word CV is the norm, and the structure described above works well. If the company is American and its ads say résumé, either term will be understood, but it costs nothing to follow the ad."
+        ]
+      },
+      {
+        "h": "Personal details and equality law",
+        "p": [
+          "UK, Irish and US employers do not expect the personal details that are common on Polish CVs. The UK National Careers Service advises not to include your age, date of birth, marital status or nationality. The background is equality law: the UK Equality Act 2010 protects nine characteristics, including age, marriage and civil partnership, pregnancy and maternity, race, religion or belief and sex.",
+          "In Ireland, the Employment Equality Acts 1998 to 2015 cover nine grounds, including gender, civil status, family status, age, race and religion, and they apply to recruitment as well as to employment itself. In the US, the Equal Employment Opportunity Commission (EEOC) says that employers should not ask for a photograph of an applicant, and that a photo needed for identification can be obtained after a job offer has been made and accepted.",
+          "The practical conclusion is the same in all three countries: no photo, no date of birth, no marital status and no information about children. Your name, phone number, email address, town or city and, if you like, a LinkedIn link are enough. Leaving these details out is the expected norm, not a gap."
+        ]
+      },
+      {
+        "h": "References",
+        "p": [
+          "On a Polish CV, references are rarely mentioned. UK guidance from the National Careers Service suggests a references section only if someone has agreed to give you one, and advises against putting another person's contact details on your CV. A simple line such as “References available on request” is enough.",
+          "It also helps to know that in the UK an employer does not have to give a reference by law, according to Acas, unless it has promised to do so in writing, the job is in certain roles regulated by the FCA or PRA, or it has agreed to in another way, for example in a settlement agreement. Ask a former manager in advance whether they are willing to act as a referee, and tell them what kind of role you are applying for."
+        ]
+      },
+      {
+        "h": "Cover letter conventions",
+        "p": [
+          "In the UK, a cover letter is usually sent with a CV. The National Careers Service describes it as a short letter, usually three to five paragraphs long, and recommends writing a new one for every job, tailored to the company and the specific role.",
+          "Try to address the letter to a named person. If you cannot find a name, British convention is to open with “Dear Sir or Madam” and close with “Yours faithfully”; if you know the name, close with “Yours sincerely”.",
+          "Use the letter to link two or three requirements from the ad with specific examples from your experience. Do not repeat your CV line by line."
+        ]
+      },
+      {
+        "h": "Spelling, phone numbers and small details",
+        "p": [
+          "British and American English differ in spelling: organise and organize, programme and program, colour and color, licence (noun) and license. For a UK or Irish employer, use British spelling; for a US employer, American spelling. For an international company in Poland, follow the spelling used in the job ad.",
+          "Write your phone number with the international code, for example +48 for Poland, so that a recruiter abroad can call you without guessing. If you are already living in the UK or Ireland and have a local number, give that one.",
+          "If you need to submit translated documents as part of a UK visa application, GOV.UK states that certified translations are required for documents not in English or Welsh. A CV itself is not such a document, but diplomas and certificates you attach to a visa application may be. Before sending, check your English CV with the free CV scanner, or order a CV tailored to the job ad in the language you need."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Should I put a photo on a CV for the UK, Ireland or the US?",
+        "a": "No. A photo is not expected in these countries. In the US, the EEOC says employers should not ask for an applicant's photograph, and UK guidance advises leaving out personal details such as age and marital status. Your contact details are enough."
+      },
+      {
+        "q": "What is the difference between a CV and a résumé?",
+        "a": "In the UK and Ireland, CV is the normal term for a job application document. In the US, a résumé is the usual document for non-academic jobs and is shorter and more selective, while a CV means a longer academic record. Follow the term used in the job ad."
+      },
+      {
+        "q": "Do I have to list referees on a UK CV?",
+        "a": "No. UK guidance suggests mentioning references only if someone has agreed to give you one, and not putting other people's contact details on your CV. “References available on request” is a common, acceptable line."
+      },
+      {
+        "q": "Should I use British or American English for a job in Poland?",
+        "a": "Either is acceptable as long as you are consistent. A simple rule is to follow the spelling used in the job ad or on the company's website."
+      }
+    ],
+    "sources": [
+      { "t": "National Careers Service: How to write a CV", "u": "https://nationalcareers.service.gov.uk/careers-advice/cv-sections" },
+      { "t": "National Careers Service: How to write a cover letter", "u": "https://nationalcareers.service.gov.uk/careers-advice/covering-letter" },
+      { "t": "Equality Act 2010, section 4: The protected characteristics – legislation.gov.uk", "u": "https://www.legislation.gov.uk/ukpga/2010/15/section/4" },
+      { "t": "EEOC: Prohibited Employment Policies/Practices", "u": "https://www.eeoc.gov/prohibited-practices" },
+      { "t": "Acas: When an employer must give a reference", "u": "https://www.acas.org.uk/providing-a-job-reference" },
+      { "t": "MIT Career Advising & Professional Development: Curricula vitae (CVs)", "u": "https://capd.mit.edu/resources/cvs/" }
+    ]
+  },
+  "article:jak-przejsc-przez-ats": {
+    "sections": [
+      {
+        "h": "File format and file name",
+        "p": [
+          "Send the file format the job ad or application form asks for. If it allows several, a PDF exported from a word processor or a DOCX file is a safe choice, because both contain real text that a system can read. A scanned CV or a PDF saved as an image looks fine to a person but may contain no readable text at all, so the system may store your application as empty.",
+          "Do not protect the file with a password and do not combine your CV and cover letter into one file unless the form has only one upload field. Name the file simply, for example Firstname-Surname-CV.pdf, without special characters. If you send an English CV, write the file name in English too."
+        ]
+      },
+      {
+        "h": "Headings and contact details the system can find",
+        "p": [
+          "Systems that read CVs work most reliably with conventional headings. In English, use Work Experience or Employment History, Education, Skills, Languages and Certifications. Creative headings such as “My journey” or “What I bring” make it harder to assign the content to the right fields.",
+          "Put your name, phone number and email address in the main body of the document, near the top. Some systems skip the page header and footer, and icons used instead of words, such as a small phone symbol, may disappear in the parsed text. Writing “Phone:” and “Email:” is plain but reliable.",
+          "Write the employer, job title and dates for each role on the same line or directly next to each other, in the same order for every entry. Avoid putting dates in a separate column or table, as this is where the order of information is most often lost."
+        ]
+      },
+      {
+        "h": "Matching the ad without keyword stuffing",
+        "p": [
+          "UK guidance from the National Careers Service advises matching the words you use to the keywords in the job advert, so that the reader can quickly see you meet the requirements. This applies whether the first reader is a system or a recruiter.",
+          "Use the ad's exact phrasing for skills and tools you genuinely have, and include both the abbreviation and the full form, for example “SEO (search engine optimisation)”. Mention key skills in your experience as well as in the skills list, in the context of what you did with them. Match the spelling variant too: if the ad says organisation or optimization, use the same form, because searches can be literal.",
+          "Do not paste the text of the ad into your CV in white or tiny text, and do not repeat the same keyword many times. The recruiter sees the parsed text, and hidden or repeated keywords can make the application look manipulative. List only skills you can talk about in an interview."
+        ]
+      },
+      {
+        "h": "Applying in the UK, Ireland or the US",
+        "p": [
+          "For jobs in the UK and Ireland, the document is a CV; in the US, the usual document for non-academic jobs is a shorter résumé. In all three countries leave out the photo, date of birth, marital status and the Polish GDPR (RODO) consent clause. The UK National Careers Service advises not including age, date of birth, marital status or nationality, and the US EEOC says employers should not ask for a photograph of an applicant before an offer.",
+          "These details are linked to equality law, such as the UK Equality Act 2010 and Ireland's Employment Equality Acts, which cover recruitment. Removing them also removes fields a system may fail to map correctly. Write your phone number with the international code and keep British or American spelling consistent with the country and the ad."
+        ]
+      },
+      {
+        "h": "Your rights when decisions are automated",
+        "p": [
+          "Article 22(1) of the GDPR gives you the right not to be subject to a decision based solely on automated processing, including profiling, which produces legal effects or similarly significantly affects you. In practice, this concerns situations where software rejects a candidate without any meaningful human involvement.",
+          "In the UK, the ICO has published guidance for jobseekers. It says employers need to tell you if automated decisions are being made about your application, and that you can contest the decision, explain your point of view and ask for a real person to take a second look. The UK rules in this area were changed by the Data (Use and Access) Act, and the ICO's recruitment guidance is still being developed, so check the current version on its website.",
+          "If you are rejected very quickly and suspect an automated decision, you can ask the employer how the decision was made. This describes your rights in general terms; it is not legal advice. To prepare a version that matches the ad before you apply, you can use a CV tailored to the job ad."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Is PDF or Word better for an ATS?",
+        "a": "Send whatever the ad or form asks for. If both are allowed, a text-based PDF or DOCX is a safe choice. Avoid scanned documents and PDFs saved as images, because they may contain no readable text."
+      },
+      {
+        "q": "Can I hide the job ad's keywords in white text in my CV?",
+        "a": "It is not a good idea. Recruiters see the extracted text, so hidden keywords become visible and can make your application look dishonest. Use the ad's wording naturally, and only for skills you actually have."
+      },
+      {
+        "q": "Should an English CV sent through an online system include a photo?",
+        "a": "For the UK, Ireland and the US, no. A photo is not expected there, and the US EEOC says employers should not ask for one before an offer. For English-language ads in Poland, follow the ad; a photo is not required."
+      },
+      {
+        "q": "Can I ask for a person to review an automated rejection?",
+        "a": "Under the GDPR you have the right not to be subject to a decision based solely on automated processing with significant effects. In the UK, the ICO says you can contest such a decision and ask for a real person to take a second look."
+      },
+      {
+        "q": "Should I write British or American spelling for an ATS?",
+        "a": "Follow the job ad. Searches can be literal, so if the ad uses organisation or organization, use the same form consistently throughout your CV."
+      }
+    ],
+    "sources": [
+      { "t": "National Careers Service: Application form advice", "u": "https://nationalcareers.service.gov.uk/careers-advice/application-forms" },
+      { "t": "National Careers Service: How to write a CV", "u": "https://nationalcareers.service.gov.uk/careers-advice/cv-sections" },
+      { "t": "ICO: Here's what jobseekers need to know about automated recruitment decisions", "u": "https://ico.org.uk/about-the-ico/media-centre/news-and-blogs/2026/03/here-s-what-jobseekers-need-to-know-about-automated-recruitment-decisions/" },
+      { "t": "Regulation (EU) 2016/679 (GDPR), Article 22, as adopted by the EU – legislation.gov.uk", "u": "https://www.legislation.gov.uk/eur/2016/679/article/22/adopted" },
+      { "t": "EEOC: Prohibited Employment Policies/Practices", "u": "https://www.eeoc.gov/prohibited-practices" },
+      { "t": "Equality Act 2010, section 4: The protected characteristics – legislation.gov.uk", "u": "https://www.legislation.gov.uk/ukpga/2010/15/section/4" }
+    ]
+  },
+  "article:cv-po-urlopie-macierzynskim": {
+    "sections": [
+      {
+        "h": "How long the leave can be: Poland, the UK and Ireland",
+        "p": [
+          "Knowing the typical length of leave helps you write your dates calmly. In Poland, the Labour Code gives 20 weeks of maternity leave for one child (article 180), and parents can then share parental leave of up to 41 weeks for one child (article 182¹a), with 9 weeks reserved for each parent. Fathers are also entitled to up to 2 weeks of paternity leave, and childcare leave (urlop wychowawczy) can last up to 36 months.",
+          "In the UK, statutory maternity leave is 52 weeks: 26 weeks of ordinary and 26 weeks of additional maternity leave. In Ireland, employees can take 26 weeks of maternity leave and up to 16 weeks of additional maternity leave. A break of a year or longer is therefore common, and recruiters in all three countries see it regularly."
+        ]
+      },
+      {
+        "h": "Naming Polish leave in an English CV",
+        "p": [
+          "If you apply in English, use plain equivalents: maternity leave for urlop macierzyński, parental leave for urlop rodzicielski, paternity leave for urlop ojcowski and childcare leave for urlop wychowawczy. You do not have to split the period into each type of leave; one line such as “Maternity and parental leave” with dates is enough.",
+          "UK guidance from the National Careers Service suggests stating why you took a career break and gives raising a family as an example. A short, neutral line does exactly that."
+        ]
+      },
+      {
+        "h": "Applying in the UK, Ireland or the US",
+        "p": [
+          "In the UK, pregnancy and maternity is one of the protected characteristics under the Equality Act 2010. In Ireland, family status is one of the nine grounds covered by the Employment Equality Acts, including in recruitment. In the US, the EEOC lists pre-employment questions about pregnancy, the number and ages of children, and childcare arrangements as ones that may be used as evidence of discriminatory intent.",
+          "So, as in Poland, you do not need to share family details in a CV or interview abroad. Before you apply, you can check your CV with the free CV scanner or prepare a version tailored to the job ad."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "How long is maternity leave in Poland?",
+        "a": "Under article 180 of the Labour Code, maternity leave is 20 weeks when one child is born, with longer periods for multiple births. Parental leave of up to 41 weeks for one child can follow (article 182¹a)."
+      },
+      {
+        "q": "How do I translate urlop wychowawczy for an English CV?",
+        "a": "“Childcare leave” is a clear, neutral equivalent. You can also combine periods into a single entry such as “Maternity and childcare leave” with dates."
+      },
+      {
+        "q": "Is a one-year maternity break unusual in the UK?",
+        "a": "No. Statutory maternity leave in the UK is 52 weeks, so a break of around a year is something UK recruiters see regularly."
+      }
+    ],
+    "sources": [
+      { "t": "Kodeks pracy, consolidated text, Dz.U. 2026 poz. 1245 (art. 180, 182¹a, 182³, 186) – Sejm legal acts database", "u": "https://api.sejm.gov.pl/eli/acts/DU/2026/1245/text.pdf" },
+      { "t": "GOV.UK: Maternity pay and leave – Leave", "u": "https://www.gov.uk/maternity-pay-leave/leave" },
+      { "t": "Citizens Information: Maternity leave", "u": "https://www.citizensinformation.ie/en/employment/employment-rights-and-conditions/leave-and-holidays/maternity-leave/" },
+      { "t": "National Careers Service: Explain a gap in employment", "u": "https://nationalcareers.service.gov.uk/careers-advice/explain-gaps-in-work-history" },
+      { "t": "EEOC: Pre-Employment Inquiries and Marital Status or Number of Children", "u": "https://www.eeoc.gov/pre-employment-inquiries-and-marital-status-or-number-children" }
+    ]
+  },
+  "prof:tlumacz": {
+    "sections": [
+      {
+        "h": "How to structure a translator CV",
+        "p": [
+          "Recruiters at translation agencies and localisation companies scan a CV for a few things first: language pairs and direction, specialist fields, tools and type of work. Put your language pairs in the headline or directly under your name, then use separate short sections for Specialisations, Tools and Selected projects, before your employment history.",
+          "In Selected projects, describe the domain, type of text and your role rather than naming confidential clients: for example, a set of user manuals for industrial equipment, a website localisation or a series of contracts reviewed against a client glossary. If you work in both translation and interpreting, separate the two so that the reader can see your experience in each.",
+          "List CAT tools with the features you actually use, such as translation memories, termbases and QA checks. Trados Studio, memoQ and Phrase are common examples in ads, but name only the tools you have worked with."
+        ]
+      },
+      {
+        "h": "Sworn translator in Poland: what the law says",
+        "p": [
+          "The profession is governed by the Act of 25 November 2004 on the profession of sworn translator. Under article 2, a sworn translator must, among other things, know Polish, have full legal capacity, have no conviction for an intentional offence, a fiscal offence or certain offences against economic transactions, have completed higher education and have passed the sworn translator exam. The Minister of Justice may exempt a candidate from the higher education requirement.",
+          "The exam has a written and an oral part, each covering translation from Polish into the foreign language and from the foreign language into Polish (article 4). After passing it, a person gains the right to practise by taking an oath and being entered on the list of sworn translators kept by the Minister of Justice (article 6). The Ministry makes the list available publicly, and it can be searched from the Ministry's pages on gov.pl, so an employer can check an entry.",
+          "Under article 13, a sworn translator may prepare and certify translations, check and certify translations made by others, prepare certified copies of documents in a foreign language and interpret orally. Article 14 adds duties of particular care and impartiality, confidentiality about facts learned during translation, and improving professional qualifications. On a CV, these are good reasons to keep client details general and to include a short section on training."
+        ]
+      },
+      {
+        "h": "Working with UK and Irish clients and employers",
+        "p": [
+          "If you apply to employers in the UK or Ireland, follow local CV conventions: no photo, date of birth or marital status, and no Polish GDPR (RODO) clause. The UK National Careers Service advises leaving out age, date of birth, marital status and nationality. Use British spelling, and if you translate into English, state which variety you work in.",
+          "Many Polish translators work on documents for UK visa applications. GOV.UK states that certified translations are required for documents not in English or Welsh. The Home Office guidance for the Skilled Worker route says such a translation must come from a professional translator or translation company that can be independently verified, and must include confirmation that it is accurate, the date, the translator's full name and signature and their contact details. If you have done this kind of work, describe it in those terms rather than calling it sworn translation, which is a Polish legal status."
+        ]
+      },
+      {
+        "h": "Example phrases for a translator CV",
+        "p": [
+          "“Sworn translator of English, entered on the list of sworn translators kept by the Polish Minister of Justice.”",
+          "“Translate legal and financial documents from English into Polish in Trados Studio, working with client translation memories and termbases.”",
+          "“Post-edit machine translation output for e-commerce content and report recurring terminology issues to project managers.”",
+          "“Provide consecutive interpreting at business meetings and training sessions.” Adapt each phrase to the job ad and your real experience, then check the result with the free CV scanner or order a CV tailored to the job ad."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Do I need a degree to become a sworn translator in Poland?",
+        "a": "As a rule, yes: the Act on the profession of sworn translator requires completed higher education. The Minister of Justice may exempt a candidate from this requirement, in particular when there are not enough sworn translators of a given language."
+      },
+      {
+        "q": "Can an employer check that I am a sworn translator?",
+        "a": "Yes. Sworn translators are entered on the list kept by the Minister of Justice, and the Ministry makes it publicly available, with a search tool linked from its gov.pl pages. Make sure the language and details on your CV match your entry."
+      },
+      {
+        "q": "What does a certified translation for a UK visa need to include?",
+        "a": "According to Home Office guidance for the Skilled Worker route, it must confirm that it is an accurate translation, include the date, the translator's full name and signature, and the contact details of the translator or translation company."
+      },
+      {
+        "q": "Should I list every CAT tool I have ever used?",
+        "a": "List the tools you can use confidently in a real project, and say what you do with them, such as working with translation memories or running QA checks. A short, accurate list is more useful than a long one."
+      }
+    ],
+    "sources": [
+      { "t": "Ustawa z dnia 25 listopada 2004 r. o zawodzie tłumacza przysięgłego, consolidated text Dz.U. 2019 poz. 1326 – Sejm legal acts database", "u": "https://api.sejm.gov.pl/eli/acts/DU/2019/1326/text.pdf" },
+      { "t": "Ministry of Justice (gov.pl): Tłumacze przysięgli", "u": "https://www.gov.pl/web/sprawiedliwosc/tlumacze-przysiegli" },
+      { "t": "biznes.gov.pl: Wpis na listę tłumaczy przysięgłych", "u": "https://www.biznes.gov.pl/pl/portal/ou1175" },
+      { "t": "GOV.UK: Skilled Worker caseworker guidance (section on translating documents)", "u": "https://www.gov.uk/government/publications/skilled-worker-visa-caseworker-guidance/skilled-worker-caseworker-guidance-accessible" },
+      { "t": "GOV.UK: Apply for a Standard Visitor visa", "u": "https://www.gov.uk/standard-visitor/apply-standard-visitor-visa" },
+      { "t": "National Careers Service: How to write a CV", "u": "https://nationalcareers.service.gov.uk/careers-advice/cv-sections" }
+    ]
+  }
+}
