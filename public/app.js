@@ -2199,7 +2199,10 @@ function toolPage(slug, C, item) {
     el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', el('a', { href: '#poradnik', textContent: 'Darmowe narzędzia' }), '›', el('span', { textContent: t.title })),
     el('h1', { textContent: t.title }), el('p', { className: 'lead', textContent: t.lead }), plNote(), box,
     ...(t.about || []).map((x) => el('p', { textContent: x })),
+    // rozszerzone wersje EN/DE (seo-data/ext-*.json): te same sekcje i źródła co w wersji z serwera
+    ...(t.sections || []).flatMap((s) => [el('h2', { textContent: s.h }), ...s.p.map((x) => el('p', { textContent: x }))]),
     ...(t.faq?.length ? [el('h2', { textContent: 'Pytania' }), ...t.faq.map((f) => el('details', {}, el('summary', { textContent: f.q }), el('p', { textContent: f.a })))] : []),
+    ...(t.sources?.length ? [el('h2', { textContent: 'Źródła' }), el('ul', { className: 'sources' }, ...t.sources.map((x) => el('li', {}, el('a', { href: x.u, rel: 'noopener', target: '_blank', textContent: x.t }))))] : []),
     el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Masz już ogłoszenie?' }), el('p', { className: 'hint', textContent: 'Przygotujemy CV i list pisane pod nie, z raportem dopasowania. Od 39 zł, bez abonamentu.' })), openBtn('Zamów CV')),
     el('h2', { textContent: 'Inne darmowe narzędzia' }), el('div', { className: 'more' }, ...Object.entries(C.TOOLS).filter(([k]) => k !== slug).map(([k, x]) => pageLink(`narzedzia/${k}`, { textContent: TOOLS_TR?.[k]?.title || x.title })), pageLink('narzedzia/skaner-cv', { textContent: 'Skaner CV' })));
   root.setAttribute('data-i18n', '');
