@@ -35,7 +35,25 @@ test('/api/cv-check: tekst z pliku i wynik bez zapisywania (no-store); błędne 
   assert.equal(r.status, 200); assert.equal(r.headers.get('cache-control'), 'no-store');
   assert.ok(j.text.includes('Doświadczenie zawodowe') && j.words > 150 && j.rodo);
   assert.equal((await post('')).status, 400);
-  assert.equal((await post(Buffer.from('za krótko').toString('base64'))).status, 422);
+  // skan / CV z obrazków (prawie brak tekstu): wynik testu z ostrzeżeniem, nie błąd pliku
+  const sc = await post(Buffer.from('za krótko').toString('base64')), sj = await sc.json();
+  assert.equal(sc.status, 200); assert.equal(sj.scan, true); assert.deepEqual(sj.issues, ['little_text']); assert.equal(sc.headers.get('cache-control'), 'no-store');
+  assert.equal((await post(Buffer.from('PK\x03\x04 uszkodzony').toString('base64'))).status, 422, 'uszkodzony Word nadal 422');
+});
+
+test('Recenzja #69: osobny limit sprawdzeń, tłumaczenia komunikatów, prywatność przy ogłoszeniu, linki do kreatora i case study', async () => {
+  const srv = read('server.js'), app = read('public/app.js');
+  assert.match(srv, /cvCheckLimit = limiter\(12, 3600_000\)/); assert.match(srv, /app\.post\('\/api\/cv-check'[^\n]*\n  if \(!cvCheckLimit\(req\)\)/);
+  const keys = ['Wykorzystano limit darmowych sprawdzeń na godzinę. Spróbuj później.', 'Plik Word jest uszkodzony albo za duży.', 'Zrób CV w kreatorze',
+    ...[...app.matchAll(/'(To wygląda na skan[^']+|Nie zapisujemy pliku ani tekstu CV[^']+)'/g)].map((m) => m[1])];
+  assert.equal(keys.length, 5);
+  for (const l of ['en', 'uk', 'de']) { const d = JSON.parse(read(`public/i18n/${l}.json`)); for (const k of keys) assert.ok(d[k], `${l}: ${k.slice(0, 40)}`); }
+  assert.ok(TOOLS['test-cv-ats'].faq.some((f) => /przez godzinę sam wynik porównania/.test(f.a) && /bez treści CV/.test(f.a)), 'FAQ o pamięci 1 h');
+  for (const l of ['en', 'uk', 'de']) assert.equal(TOOL_LANGS[l].data['test-cv-ats'].faq.length, TOOLS['test-cv-ats'].faq.length, `${l}: FAQ`);
+  for (const k of ['sprawdz-cv', 'test-cv-ats']) {
+    const h = await (await fetch(`${U}/narzedzia/${k}`)).text();
+    assert.ok(h.includes('href="/kreator-cv"') && h.includes('href="/poradnik/jedno-cv-dwa-ogloszenia"'), `${k}: linki zwrotne`);
+  }
 });
 
 test('Narzędzia w 4 językach: własne adresy, tytuły ≤ 60 i różne od skanera, FAQ; skrypt strony obsługuje oba tryby', async () => {

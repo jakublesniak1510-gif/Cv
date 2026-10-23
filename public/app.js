@@ -1208,7 +1208,7 @@ function toolCheck(box, ats) {
   file.onchange = () => (fileName.textContent = file.files[0]?.name || 'nie wybrano pliku');
   const form = el('form', { className: 'scan-card', noValidate: true },
     el('div', { className: 'f' }, '1. Twoje CV ', el('span', { className: 'h', textContent: 'PDF, Word lub TXT, do 5 MB' }), el('div', { className: 'filerow' }, el('label', { className: 'btn ghost sm filebtn' }, 'Wybierz plik', file), fileName)),
-    ...(ats ? [el('label', { className: 'f' }, '2. Ogłoszenie (opcjonalnie)', ad)] : []), btn, msg, el('p', { className: 'hint small', textContent: 'Nie zapisujemy ani pliku, ani wyniku.' }));
+    ...(ats ? [el('label', { className: 'f' }, '2. Ogłoszenie (opcjonalnie)', ad)] : []), btn, msg, el('p', { className: 'hint small', textContent: ats ? 'Nie zapisujemy pliku ani tekstu CV. Po wklejeniu ogłoszenia sam wynik porównania (bez treści CV) zostaje w pamięci serwera przez godzinę, żeby można było go udostępnić.' : 'Nie zapisujemy ani pliku, ani wyniku.' }));
   form.onsubmit = async (e) => {
     e.preventDefault(); msg.className = 'fstatus';
     const f = file.files[0], fail = (t) => { msg.className = 'fstatus bad'; msg.textContent = t; };
@@ -1218,6 +1218,11 @@ function toolCheck(box, ats) {
     try {
       const b64 = await fileB64(f), r = await fetch('/api/cv-check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: b64 }) });
       const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      if (j.scan) {
+        result.replaceChildren(el('h3', { textContent: 'Wynik sprawdzenia' }), el('p', { className: 'fstatus bad', textContent: 'To wygląda na skan albo CV ze zdjęć: w pliku prawie nie ma tekstu. Program do rekrutacji (ATS) nie odczyta z niego Twoich danych. Zapisz CV jako PDF z edytora tekstu albo jako plik Word.' }),
+          el('p', { className: 'prof-cta' }, el('a', { className: 'btn', href: '/kreator-cv', textContent: 'Zrób CV w kreatorze' })));
+        result.hidden = false; msg.textContent = ''; btn.disabled = false; return;
+      }
       const ok = (v) => el('span', { className: v ? 'ok' : 'no', textContent: v ? '✓' : '–' });
       result.replaceChildren(
         el('h3', { textContent: 'Wynik sprawdzenia' }), el('p', { textContent: `Odczytaliśmy ${j.words} słów.` }),

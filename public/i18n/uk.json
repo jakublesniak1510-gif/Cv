@@ -1598,5 +1598,10 @@
 "Zrób CV pod ogłoszenie": "Зробити резюме під вакансію",
 "Porównujemy CV z ogłoszeniem…": "Порівнюємо резюме з оголошенням…",
 "Wklej pełną treść ogłoszenia (min. 80 znaków), żeby porównać słowa kluczowe.": "Вставте повний текст оголошення (мін. 80 знаків), щоб порівняти ключові слова.",
-"Zakresy obowiązków i wymagania dla wybranych zawodów – pomoc przy pisaniu ogłoszeń": "Обов’язки та вимоги для вибраних професій (польською) – допомога в написанні оголошень"
+"Zakresy obowiązków i wymagania dla wybranych zawodów – pomoc przy pisaniu ogłoszeń": "Обов’язки та вимоги для вибраних професій (польською) – допомога в написанні оголошень",
+"Wykorzystano limit darmowych sprawdzeń na godzinę. Spróbuj później.": "Вичерпано погодинний ліміт безкоштовних перевірок. Спробуйте пізніше.",
+"To wygląda na skan albo CV ze zdjęć: w pliku prawie nie ma tekstu. Program do rekrutacji (ATS) nie odczyta z niego Twoich danych. Zapisz CV jako PDF z edytora tekstu albo jako plik Word.": "Схоже, це скан або резюме із зображень: у файлі майже немає тексту. Система відбору кандидатів (ATS) не зможе прочитати з нього ваші дані. Збережіть резюме як PDF із текстового редактора або як файл Word.",
+"Nie zapisujemy pliku ani tekstu CV. Po wklejeniu ogłoszenia sam wynik porównania (bez treści CV) zostaje w pamięci serwera przez godzinę, żeby można było go udostępnić.": "Ми не зберігаємо ні файл, ні текст резюме. Якщо ви вставите оголошення, лише результат порівняння (без змісту резюме) залишається в пам’яті сервера на годину, щоб ним можна було поділитися.",
+"Zrób CV w kreatorze": "Створити резюме в конструкторі",
+"Plik Word jest uszkodzony albo za duży.": "Файл Word пошкоджений або завеликий."
 }

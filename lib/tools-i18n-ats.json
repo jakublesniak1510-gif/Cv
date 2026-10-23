@@ -55,6 +55,10 @@
           "a": "A photo on its own usually does not, but text in graphics, icons and complex tables is sometimes skipped or read in the wrong order. The copy test shows whether this applies to your CV."
         },
         {
+          "q": "Is my CV stored anywhere?",
+          "a": "We store neither the file nor the CV text. If you paste a job ad, the scanner keeps only the comparison result in server memory for one hour: the percentage, keywords and tips, without the CV content. This lets you share the result card or send it by email. After that the result is deleted."
+        },
+        {
           "q": "Does hidden text with keywords help?",
           "a": "It is not worth it. White text or hidden instructions appear in the extracted text and the recruiter will see them. It is better to describe your real experience using the words from the ad."
         }
@@ -117,6 +121,10 @@
           "a": "Саме фото зазвичай ні, але текст у графіці, іконках і складних таблицях буває пропущений або прочитаний у неправильному порядку. Тест копіювання покаже, чи це стосується вашого резюме."
         },
         {
+          "q": "Чи зберігається десь моє резюме?",
+          "a": "Ми не зберігаємо ні файл, ні текст резюме. Якщо ви вставите оголошення, сканер тримає в пам’яті сервера протягом години лише результат порівняння: відсоток, ключові слова й поради, без змісту резюме. Так можна поділитися карткою результату або надіслати її на e-mail. Потім результат видаляється."
+        },
+        {
           "q": "Чи допомагає прихований текст із ключовими словами?",
           "a": "Не варто. Білий текст або приховані команди з’являються в прочитаному тексті, і рекрутер їх побачить. Краще описати справжній досвід словами з оголошення."
         }
@@ -177,6 +185,10 @@
         {
           "q": "Stören Foto und Tabellen ein ATS?",
           "a": "Das Foto allein meist nicht, aber Text in Grafiken, Icons und komplexen Tabellen wird manchmal übersprungen oder in falscher Reihenfolge gelesen. Der Kopiertest zeigt, ob das Ihren Lebenslauf betrifft."
+        },
+        {
+          "q": "Wird mein Lebenslauf irgendwo gespeichert?",
+          "a": "Wir speichern weder die Datei noch den Text des Lebenslaufs. Wenn Sie eine Stellenanzeige einfügen, hält der Scanner nur das Vergleichsergebnis eine Stunde im Serverspeicher: Prozentwert, Schlüsselwörter und Hinweise, ohne Inhalt des Lebenslaufs. So können Sie die Ergebniskarte teilen oder per E-Mail senden. Danach wird das Ergebnis gelöscht."
         },
         {
           "q": "Hilft versteckter Text mit Schlüsselwörtern?",

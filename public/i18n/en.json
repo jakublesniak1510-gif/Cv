@@ -1598,5 +1598,10 @@
 "Zrób CV pod ogłoszenie": "Get a CV for the job ad",
 "Porównujemy CV z ogłoszeniem…": "Comparing your CV with the ad…",
 "Wklej pełną treść ogłoszenia (min. 80 znaków), żeby porównać słowa kluczowe.": "Paste the full ad text (at least 80 characters) to compare keywords.",
-"Zakresy obowiązków i wymagania dla wybranych zawodów – pomoc przy pisaniu ogłoszeń": "Duties and requirements for selected occupations (in Polish) – help with writing job ads"
+"Zakresy obowiązków i wymagania dla wybranych zawodów – pomoc przy pisaniu ogłoszeń": "Duties and requirements for selected occupations (in Polish) – help with writing job ads",
+"Wykorzystano limit darmowych sprawdzeń na godzinę. Spróbuj później.": "You have used the hourly limit of free checks. Please try later.",
+"To wygląda na skan albo CV ze zdjęć: w pliku prawie nie ma tekstu. Program do rekrutacji (ATS) nie odczyta z niego Twoich danych. Zapisz CV jako PDF z edytora tekstu albo jako plik Word.": "This looks like a scan or a CV made of images: the file contains almost no text. An applicant tracking system (ATS) will not be able to read your details from it. Save your CV as a PDF from a text editor or as a Word file.",
+"Nie zapisujemy pliku ani tekstu CV. Po wklejeniu ogłoszenia sam wynik porównania (bez treści CV) zostaje w pamięci serwera przez godzinę, żeby można było go udostępnić.": "We do not store the file or the CV text. If you paste a job ad, only the comparison result (without the CV content) stays in server memory for one hour so that you can share it.",
+"Zrób CV w kreatorze": "Create a CV in the builder",
+"Plik Word jest uszkodzony albo za duży.": "The Word file is damaged or too large."
 }
