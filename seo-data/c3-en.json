@@ -177,7 +177,7 @@
         "p": [
           "The EU Artificial Intelligence Act (Regulation (EU) 2024/1689) lists, in Annex III, point 4, AI systems intended to be used for the recruitment or selection of people, in particular to place targeted job ads, to analyse and filter job applications and to evaluate candidates. These count as high-risk systems, which come with specific obligations, for example on human oversight and transparency. The obligations apply in stages.",
           "In the EU, the GDPR applies as well. Article 22 gives you the right not to be subject to a decision based solely on automated processing, including profiling, which produces legal effects concerning you or similarly significantly affects you. There are exceptions, but then the employer must put safeguards in place, at least the right to obtain human intervention, to express your point of view and to contest the decision.",
-          "In the UK, the Data (Use and Access) Act 2025 replaced Article 22 of the UK GDPR with Articles 22A–22D, in force since 5 February 2026. In March 2026 the ICO published information for jobseekers: employers need to tell you if automated decisions are being made about your application, and you can contest the decision, explain your point of view and ask for a real person to take a second look.",
+          "In the UK, the Data (Use and Access) Act 2025 (section 80) replaced Article 22 of the UK GDPR with Articles 22A–22D, in force since 5 February 2026. In March 2026 the ICO published information for jobseekers: employers need to tell you if automated decisions are being made about your application, and you can contest the decision, explain your point of view and ask for a real person to take a second look.",
           "This is general information, not legal advice. If you think a decision about you was made by a system alone, you can ask the employer how your data was processed in the recruitment."
         ]
       },
@@ -321,7 +321,7 @@
       "Since 2021: customer service at an online homeware shop, handling live chat and email, returns and complaints, and some inbound customer calls.",
       "Uses a CRM system and the shop’s order system every day.",
       "Before that (2018–2021): cashier and sales assistant in a supermarket, working shifts.",
-      "Trains new team members; English at C1 level (CEFR), native Polish."
+      "Trains new team members; written and spoken English at C1 (CEFR), native Polish."
     ],
     "generic": {
       "summary": "I have a background in customer service and sales. I am a good communicator, reliable and I enjoy helping people.",
@@ -365,10 +365,10 @@
           "experience selling mobile phone contracts"
         ],
         "cv": {
-          "summary": "Customer service adviser with experience of [[handling inbound customer calls]] and [[using a CRM system]]. Used to [[shift work]] from my previous job in a supermarket, and I help with [[training new team members]].",
+          "summary": "Customer service adviser with experience of [[handling inbound customer calls]] and [[using a CRM system]]. Familiar with [[shift work]] from my previous job in a supermarket, and I help with [[training new team members]].",
           "bullets": [
-            "[[Handling inbound customer calls]] for an online homeware shop: orders, returns and complaints",
-            "Recording contacts and case history in a [[CRM system]], alongside live chat and email",
+            "[[Handling inbound customer calls]] alongside live chat and email for an online homeware shop: orders, returns and complaints",
+            "Recording contacts and case history in a [[CRM system]]",
             "Cashier and sales assistant in a supermarket (2018–2021), [[shift work]]",
             "[[Training new team members]] in the customer service team"
           ]

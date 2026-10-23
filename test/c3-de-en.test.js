@@ -47,7 +47,7 @@ test('Słowa kluczowe DE (15 zawodów) i EN (20 zawodów): wyciągacz w języku 
   for (const [url, l, n] of [['/de/ratgeber/schluesselwoerter-im-lebenslauf', 'de', 15], ['/en/guides/cv-keywords', 'en', 20]]) {
     const r = await get(url), m = main(r.h);
     assert.equal(r.status, 200, url);
-    assert.match(m, new RegExp(`<form class="kw-extract paste-ad" data-lang="${l}"`));
+    assert.match(m, new RegExp(`<form class="kw-extract paste-ad" method="post" data-lang="${l}"`));
     const w = /<section class="widget" data-widget="keywords">([\s\S]*?)<\/section>/.exec(m)[1];
     assert.equal((w.match(/<h3><a href="\/[a-z]{2}\/[^"]+">/g) || []).length, n, `${url}: ${n} zawodów`);
     assert.doesNotMatch(w, /[ąćęłńśźż]/i, `${url}: bez polskich znaków w widżecie`);
@@ -91,4 +91,15 @@ test('Case study DE/EN: te same fakty, w obu ogłoszeniach CV pod ofertę pokazu
   const pl = await get('/poradnik/jedno-cv-dwa-ogloszenia');
   assert.match(pl.h, /hreflang="de" href="https:\/\/example\.test\/de\/ratgeber\/ein-lebenslauf-zwei-stellenanzeigen"/);
   assert.match(pl.h, /hreflang="en" href="https:\/\/example\.test\/en\/guides\/one-cv-two-job-ads"/);
+});
+
+test('Recenzja #74: formularz wyciągacza EN/DE bez wysyłki GET, stałe zwroty bez dzielenia, bez HTML, źródło BA', async () => {
+  for (const url of ['/de/ratgeber/schluesselwoerter-im-lebenslauf', '/en/guides/cv-keywords']) {
+    const f = /<form class="kw-extract paste-ad"[^>]*>[\s\S]*?<\/form>/.exec((await get(url)).h)[0];
+    assert.match(f, /method="post"/); assert.match(f, /<button class="btn" type="submit" hidden>/); assert.match(f, /<noscript><p class="hint small">[^<]*JavaScript/);
+  }
+  assert.deepEqual(adKeywords('Anforderungen: Deutsch in Wort und Schrift, Kundenservice per Chat und E-Mail, <b>Team</b>.', 'de'), ['Deutsch in Wort und Schrift', 'Kundenservice per Chat und E-Mail']);
+  assert.deepEqual(adKeywords('Requirements: live chat and email support, handling returns and complaints.', 'en'), ['live chat and email support', 'handling returns and complaints']);
+  assert.match(read('public/lite.js'), /throw new Error\(f\.dataset\.linkerr \|\| `\$\{j\.error\} Wklej/);
+  assert.ok(C3_ARTS.de['jak-przejsc-przez-ats'].sources.some((s) => s.u === 'https://www.arbeitsagentur.de/bildung/bewerbung/lebenslauf'));
 });

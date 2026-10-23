@@ -29,7 +29,7 @@
   const adWords = async (f) => {
     const out = f.querySelector('.fstatus'); let ad = f.querySelector('textarea').value.trim();
     out.className = 'fstatus'; out.textContent = '';
-    if (/^https?:\/\/\S+$/i.test(ad)) { const r = await fetch('/api/fetch-ad', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: ad }) }); const j = await r.json(); if (!r.ok) throw new Error(`${j.error} ${f.dataset.linkerr || 'Wklej treść ogłoszenia zamiast linku.'}`); ad = j.text; }
+    if (/^https?:\/\/\S+$/i.test(ad)) { const r = await fetch('/api/fetch-ad', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: ad }) }); const j = await r.json(); if (!r.ok) throw new Error(f.dataset.linkerr || `${j.error} Wklej treść ogłoszenia zamiast linku.`); ad = j.text; }
     const r = await fetch('/api/ad-keywords', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adText: ad, lang: f.dataset.lang || 'pl' }) });
     const j = await r.json(); if (!r.ok) throw new Error(j.error); return j.keywords;
   };

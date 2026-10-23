@@ -35,14 +35,42 @@
           "Zum Foto: Gesetzlich vorgeschrieben ist es nicht. Das Allgemeine Gleichbehandlungsgesetz (AGG) schützt Bewerberinnen und Bewerber vor Benachteiligung wegen ethnischer Herkunft, Geschlecht, Religion oder Weltanschauung, Behinderung, Alter und sexueller Identität. Ein Foto lässt einige dieser Merkmale erkennen. Auch deshalb erwarten viele Arbeitgeber heute kein Foto mehr. Ob Sie eines beifügen, entscheiden Sie selbst."
         ],
         "table": {
-          "head": ["Element", "Üblich in Deutschland", "Was das ATS daraus macht"],
+          "head": [
+            "Element",
+            "Üblich in Deutschland",
+            "Was das ATS daraus macht"
+          ],
           "rows": [
-            ["Foto", "Lange üblich, heute freiwillig. Wegen des AGG verlangen viele Arbeitgeber keines.", "Ignoriert das Bild. Text, der nur im Bild steht (z. B. Name auf einer Grafik), geht verloren."],
-            ["Tabellarischer Lebenslauf", "Standard: Stationen in umgekehrt chronologischer Reihenfolge, die neueste zuerst. Übliche Überschriften wie „Berufserfahrung“, „Ausbildung“, „Kenntnisse“, „Sprachen“.", "Gut lesbar, wenn die Überschriften üblich sind und Datum, Arbeitgeber und Position in einer Zeile oder direkt untereinander stehen."],
-            ["Unterschrift und Datum", "Traditionell am Ende des Lebenslaufs, bei Online-Bewerbungen meist verzichtbar.", "Ort und Datum als Text werden gelesen. Eine eingescannte Unterschrift ist ein Bild und wird nicht als Text erkannt."],
-            ["Tabellen und Spalten", "In vielen Vorlagen beliebt, z. B. eine Seitenleiste mit Kontaktdaten und Kenntnissen.", "Wird oft Zeile für Zeile quer über die Spalten gelesen. Daten und Kenntnisse können bei der falschen Station landen."],
-            ["Kopf- und Fußzeile", "Häufig für Name, Kontaktdaten oder Seitenzahlen genutzt.", "Manche Systeme lesen diesen Bereich nicht oder nicht vollständig. Kontaktdaten gehören in den Haupttext."],
-            ["Dateiformat PDF oder DOCX", "PDF ist verbreitet. Manche Formulare verlangen ausdrücklich DOCX.", "Beides funktioniert, wenn der Text markierbar ist. Ein eingescanntes PDF ist nur ein Bild und liefert keinen Text."]
+            [
+              "Foto",
+              "Lange üblich, heute freiwillig. Wegen des AGG verlangen viele Arbeitgeber keines.",
+              "Ignoriert das Bild. Text, der nur im Bild steht (z. B. Name auf einer Grafik), geht verloren."
+            ],
+            [
+              "Tabellarischer Lebenslauf",
+              "Standard: Stationen in umgekehrt chronologischer Reihenfolge, die neueste zuerst. Übliche Überschriften wie „Berufserfahrung“, „Ausbildung“, „Kenntnisse“, „Sprachen“.",
+              "Gut lesbar, wenn die Überschriften üblich sind und Datum, Arbeitgeber und Position in einer Zeile oder direkt untereinander stehen."
+            ],
+            [
+              "Unterschrift und Datum",
+              "Traditionell am Ende des Lebenslaufs, bei Online-Bewerbungen meist verzichtbar.",
+              "Ort und Datum als Text werden gelesen. Eine eingescannte Unterschrift ist ein Bild und wird nicht als Text erkannt."
+            ],
+            [
+              "Tabellen und Spalten",
+              "In vielen Vorlagen beliebt, z. B. eine Seitenleiste mit Kontaktdaten und Kenntnissen.",
+              "Wird oft Zeile für Zeile quer über die Spalten gelesen. Daten und Kenntnisse können bei der falschen Station landen."
+            ],
+            [
+              "Kopf- und Fußzeile",
+              "Häufig für Name, Kontaktdaten oder Seitenzahlen genutzt.",
+              "Manche Systeme lesen diesen Bereich nicht oder nicht vollständig. Kontaktdaten gehören in den Haupttext."
+            ],
+            [
+              "Dateiformat PDF oder DOCX",
+              "PDF ist verbreitet. Manche Formulare verlangen ausdrücklich DOCX.",
+              "Beides funktioniert, wenn der Text markierbar ist. Ein eingescanntes PDF ist nur ein Bild und liefert keinen Text."
+            ]
           ]
         }
       },
@@ -92,7 +120,7 @@
       },
       {
         "q": "Brauche ich Unterschrift und Datum im Lebenslauf?",
-        "a": "Bei Online-Bewerbungen ist das meist nicht nötig. Wenn Sie unterschreiben möchten, schreiben Sie Ort und Datum als Text darunter. Eine eingescannte Unterschrift ist ein Bild, das ATS liest sie nicht."
+        "a": "Bei Online-Bewerbungen ist das meist nicht nötig. Wenn Sie unterschreiben möchten, schreiben Sie Ort und Datum als Text darunter. Eine eingescannte Unterschrift ist ein Bild, das das ATS nicht als Text liest."
       },
       {
         "q": "Wie prüfe ich, ob mein Lebenslauf ATS-tauglich ist?",
@@ -100,6 +128,10 @@
       }
     ],
     "sources": [
+      {
+        "t": "Bundesagentur für Arbeit: Den perfekten Lebenslauf erstellen",
+        "u": "https://www.arbeitsagentur.de/bildung/bewerbung/lebenslauf"
+      },
       {
         "t": "Antidiskriminierungsstelle des Bundes: Allgemeines Gleichbehandlungsgesetz (AGG)",
         "u": "https://www.antidiskriminierungsstelle.gov.de/DE/ueber-diskriminierung/recht-und-gesetz/allgemeines-gleichbehandlungsgesetz/allgemeines-gleichbehandlungsgesetz-node.html"
@@ -126,7 +158,7 @@
         "p": [
           "Die Listen für die einzelnen Berufe zeigen Kenntnisse, Programme und Qualifikationen, die in Stellenanzeigen für diese Tätigkeiten oft vorkommen. Sie helfen Ihnen, an Dinge zu denken, die Sie im Alltag tun, aber noch nicht in den Lebenslauf geschrieben haben.",
           "Kopieren Sie jedoch nicht die ganze Liste. Wählen Sie nur, was Sie wirklich können und was zur Stelle passt. Jeden Begriff im Lebenslauf sollten Sie mit einem Beispiel aus Beruf, Ausbildung oder einem Projekt belegen können. Recruiter fragen im Gespräch oft genau danach.",
-          "Für Ihre konkrete Bewerbung nutzen Sie den Extraktor unter dem Artikel: Sie fügen den Text der Stellenanzeige ein und sehen die Begriffe, die darin vorkommen. Verwendet die Anzeige andere Wörter als unsere Liste, hat die Anzeige Vorrang. Ihre Begriffe geben Recruiter am ehesten in die Suche des Systems ein."
+          "Für Ihre konkrete Bewerbung nutzen Sie den Extraktor unter dem Artikel: Sie fügen den Text der Stellenanzeige ein und sehen die Begriffe, die darin vorkommen. Verwendet die Anzeige andere Wörter als unsere Liste, hat die Anzeige Vorrang. Diese Begriffe geben Recruiter am ehesten in die Suche des Systems ein."
         ]
       },
       {
@@ -166,7 +198,7 @@
         "h": "Was Sie vermeiden sollten",
         "p": [
           "Wiederholen Sie dasselbe Wort nicht in jedem Punkt, und schreiben Sie keine langen Wortlisten ohne Zusammenhang. Nach der Suche liest ein Mensch Ihren Lebenslauf, und eine Häufung von Schlüsselwörtern wirkt unnatürlich.",
-          "Verstecken Sie keine Schlüsselwörter in weißer Schrift oder unter einer Grafik. Beim Auslesen entfernt das ATS die Formatierung und liest nur den Text. Versteckter Text wird so für den Recruiter sichtbar. Recruiter berichten, dass sie solche Bewerbungen fast immer aussortieren. Schreiben Sie auch keine Kenntnisse in den Lebenslauf, die Sie nicht haben, selbst wenn sie auf der Liste für Ihren Beruf stehen.",
+          "Verstecken Sie keine Schlüsselwörter in weißer Schrift oder unter einer Grafik. Beim Auslesen entfernt das ATS die Formatierung und liest nur den Text. Versteckter Text wird so für den Recruiter sichtbar. Solche Bewerbungen werden meist aussortiert (nach Aussage von Recruitern). Schreiben Sie auch keine Kenntnisse in den Lebenslauf, die Sie nicht haben, selbst wenn sie auf der Liste für Ihren Beruf stehen.",
           "Achten Sie außerdem auf Begriffe, die nur in einer Grafik, einem Logo oder einem Symbol stehen. Ist ein Programmname nur als Bild zu sehen, kann das System ihn nicht lesen und die Suche findet ihn nicht."
         ]
       },
@@ -211,7 +243,7 @@
     "title": "Ein Lebenslauf, zwei Stellenanzeigen: Was sich ändert und warum",
     "seoTitle": "Ein Lebenslauf, zwei Stellenanzeigen: Beispiel",
     "metaDescription": "Dieselbe Person, dieselben Fakten, zwei Stellenanzeigen: zwei Versionen des Lebenslaufs nebeneinander, mit markierten Begriffen aus den Anzeigen.",
-    "lead": "Eine Person, dieselben Fakten und zwei Stellenanzeigen mit unterschiedlichen Anforderungen. Wir zeigen, wie sich der Lebenslauf für jede Anzeige ändert, welche Begriffe aus der Anzeige in den Text kommen und welche Anforderungen sichtbar werden. Person und Anzeigen sind ausgedacht.",
+    "lead": "Eine Person, dieselben Fakten und zwei Stellenanzeigen mit unterschiedlichen Anforderungen. Wir zeigen, wie sich der Lebenslauf für jede Anzeige ändert, welche Begriffe aus der Anzeige in den Text kommen und welche Anforderungen sichtbar werden. Person und Anzeigen sind fiktiv.",
     "name": "Anna Beispiel",
     "facts": [
       "Seit 2021 Kundenservice in einem Onlineshop für Haushaltswaren: E-Mails und Chat, Retouren und Reklamationen, ein Teil der Anfragen per Telefon.",
