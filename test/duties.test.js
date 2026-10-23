@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import express from 'express';
+import fs from 'node:fs';
 import { seoRoutes } from '../lib/seo.js';
 import { PROFESSIONS } from '../lib/content.js';
 import { PROF_EXTRA } from '../lib/prof-extra/index.js';
@@ -39,6 +40,11 @@ test('Strony: 200, noindex,follow (meta i nagłówek), poza mapą strony, linki 
       assert.ok(h.includes(`<h1>Zakres obowiązków ${d.nazwaD}</h1>`) && h.includes(`href="/cv/${s}"`) && h.includes('href="/dla-firm"') && h.includes(`zamow=1&amp;zawod=${s}`), s);
     }
     assert.equal((await fetch(`${U}/zawod/nie-ma/zakres-obowiazkow`)).status, 404);
+    const hub = await fetch(`${U}/zawod/zakres-obowiazkow`), hh = await hub.text();
+    assert.equal(hub.headers.get('x-robots-tag'), 'noindex, follow'); assert.equal((hh.match(/href="\/zawod\/[\w-]+\/zakres-obowiazkow"/g) || []).length, 30, 'lista 30 stron');
+    const cv = await (await fetch(`${U}/cv/kasjer`)).text(); assert.ok(cv.includes('href="/zawod/kasjer/zakres-obowiazkow"'), 'link ze strony CV');
+    assert.match(fs.readFileSync(new URL('../public/index.html', import.meta.url), 'utf8'), /<template id="pg-dla-firm"[\s\S]*href="\/zawod\/zakres-obowiazkow"[\s\S]*<\/template>/, 'link z /dla-firm');
+    assert.match(await (await fetch(`${U}/${dutiesPath('kasjer')}`)).text(), /<title>Obowiązki i wymagania kasjera/);
     assert.ok(!(await (await fetch(`${U}/sitemap.xml`)).text()).includes('zakres-obowiazkow'), 'poza mapą strony');
   } finally { srv.close(); }
 });

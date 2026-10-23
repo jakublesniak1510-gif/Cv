@@ -36,12 +36,12 @@
    "szkolenie stanowiskowe na początku pracy"
   ],
   "jak_w_cv": [
-   "Wpisz rodzaj sklepu i sprzęt, z którym była praca: kasa fiskalna, kasa samoobsługowa, terminal.",
+   "Wpisz rodzaj sklepu i obsługiwany sprzęt: kasa fiskalna, kasa samoobsługowa, terminal.",
    "Opisz rozliczanie utargu i odpowiedzialność materialną jednym konkretnym zdaniem.",
    "Podaj dyspozycyjność (zmiany, weekendy) w podsumowaniu, a nie na końcu CV.",
    "Warto dopisać aktualne orzeczenie sanitarno-epidemiologiczne, jeśli ogłoszenie go wymaga."
   ],
-  "dla_firm": "W ogłoszeniu dla kasjera warto wymienić także zadania poza kasą, np. wykładanie towaru czy kontrolę dat, i osobno wskazać wymagania niezbędne oraz mile widziane. Jasna informacja o systemie zmian pomaga kandydatom ocenić, czy grafik im odpowiada."
+  "dla_firm": "Kandydaci na kasę pytają najczęściej o grafik, więc warto podać system zmian i dni pracy. Dobrze też wymienić zadania poza kasą, np. wykładanie towaru czy kontrolę dat, żeby nikt nie był zaskoczony po pierwszym dniu."
  },
  "sprzedawca": {
   "nazwaD": "sprzedawcy",
@@ -76,17 +76,17 @@
   "warunki": [
    "praca zmianowa, także w weekendy",
    "umowa o pracę lub umowa zlecenie",
-   "premie uzależnione od wyników sprzedaży (często spotykane)",
+   "premie uzależnione od wyników sprzedaży",
    "rabat pracowniczy na zakupy",
    "szkolenia produktowe"
   ],
   "jak_w_cv": [
-   "Podaj branżę i rodzaj sklepu, bo skraca to ocenę dopasowania.",
-   "Opisz, jakim klientom i w jakich produktach doradzano, zamiast pisać ogólnie o obsłudze klienta.",
+   "Podaj branżę i rodzaj sklepu, bo ułatwia to ocenę dopasowania.",
+   "Opisz, jakim klientom i przy jakich produktach doradzasz, zamiast pisać ogólnie o obsłudze klienta.",
    "Wpisz zadania zaplecza: dostawy, ekspozycja, inwentaryzacje.",
-   "Jeśli były wyróżnienia lub zrealizowane cele, warto je wymienić tylko wtedy, gdy da się o nich opowiedzieć na rozmowie."
+   "Wyróżnienia i zrealizowane cele wymień tylko wtedy, gdy umiesz o nich opowiedzieć na rozmowie."
   ],
-  "dla_firm": "Ogłoszenie dla sprzedawcy jest czytelniejsze, gdy podaje branżę, główne zadania na sali i przy kasie oraz osobno wymagania konieczne i mile widziane, np. znajomość produktów. Warto też jasno opisać system pracy w weekendy."
+  "dla_firm": "Branża i rodzaj sklepu mówią kandydatowi więcej niż ogólne „praca w handlu”. Warto napisać, ile czasu zajmuje doradztwo na sali, a ile kasa, i jasno opisać pracę w weekendy."
  },
  "kierownik-sklepu": {
   "nazwaD": "kierownika sklepu",
@@ -127,12 +127,12 @@
    "szkolenia menedżerskie"
   ],
   "jak_w_cv": [
-   "Podaj wielkość zespołu i typ sklepu, którym kierowano, bez podawania niesprawdzalnych liczb.",
+   "Podaj orientacyjną wielkość zespołu i typ sklepu; pomijaj liczby, których nie da się potwierdzić.",
    "Opisz konkretne działania: grafiki, inwentaryzacje, ograniczanie strat, wdrażanie nowych osób.",
    "Warto wymienić usprawnienia, które da się omówić na rozmowie.",
    "Wpisz systemy i narzędzia używane do raportowania i zamówień."
   ],
-  "dla_firm": "W ogłoszeniu na kierownika sklepu warto opisać zakres odpowiedzialności, np. wielkość zespołu i samodzielność w zamówieniach, a wymagania podzielić na niezbędne i mile widziane. Ułatwia to kandydatom ocenę, czy ich doświadczenie odpowiada stanowisku."
+  "dla_firm": "Na stanowisku kierowniczym liczy się zakres odpowiedzialności: orientacyjna wielkość zespołu, samodzielność w zamówieniach i grafikach oraz to, komu kierownik raportuje. Taki opis przyciąga osoby o właściwym poziomie doświadczenia."
  },
  "merchandiser": {
   "nazwaD": "merchandisera",
@@ -171,12 +171,12 @@
    "elastyczne godziny pracy w ramach harmonogramu wizyt"
   ],
   "jak_w_cv": [
-   "Wpisz kategorie produktów i typy sklepów, w których była prowadzona ekspozycja.",
+   "Wpisz kategorie produktów i typy sklepów, w których układasz ekspozycję.",
    "Opisz pracę z planogramem i raportowanie w aplikacji, bo to częste słowa kluczowe w ogłoszeniach.",
    "Podaj obszar pracy w terenie i prawo jazdy w widocznym miejscu.",
    "Warto zaznaczyć samodzielne planowanie trasy wizyt."
   ],
-  "dla_firm": "Ogłoszenie dla merchandisera warto uzupełnić o opis trasy, kategorie produktów i sposób raportowania, a wymagania rozdzielić na niezbędne (np. prawo jazdy) i mile widziane. Pomaga to kandydatom ocenić zakres pracy w terenie."
+  "dla_firm": "Praca w terenie wymaga konkretów: obszar i długość trasy, kategorie produktów, sposób raportowania oraz to, czy firma zapewnia samochód. Prawo jazdy, jeśli jest konieczne, lepiej wpisać wprost do wymagań."
  },
  "obsluga-klienta": {
   "nazwaD": "specjalisty ds. obsługi klienta",
@@ -218,9 +218,9 @@
    "Wymień kanały kontaktu i rodzaj spraw, np. reklamacje, pytania o zamówienia, sprawy techniczne.",
    "Podaj nazwy systemów CRM lub narzędzi do zgłoszeń, jeśli są znane.",
    "Sprawdź CV pod kątem literówek, bo jest ono próbką pisemnej komunikacji.",
-   "Warto dodać języki obce z opisem, w jakich sprawach były używane."
+   "Warto dodać języki obce z opisem, w jakich sprawach ich używasz."
   ],
-  "dla_firm": "W ogłoszeniu warto podać kanały kontaktu, rodzaj obsługiwanych spraw i używane systemy oraz oddzielić wymagania niezbędne, np. poprawną polszczyznę, od mile widzianych, np. języka obcego. Kandydaci łatwiej wtedy ocenią charakter pracy."
+  "dla_firm": "Najważniejsze dla kandydata są kanały kontaktu – telefon, czat czy e-mail – i rodzaj spraw. Systemy, z których korzysta zespół, oraz godziny pracy pomagają ocenić, czy to praca dla niego."
  },
  "konsultant-call-center": {
   "nazwaD": "konsultanta call center",
@@ -241,7 +241,7 @@
     "wyraźna dykcja i poprawna polszczyzna",
     "swobodna obsługa komputera",
     "odporność na stres",
-    "gotowość do pracy na celach",
+    "gotowość do pracy z celami sprzedażowymi lub jakościowymi",
     "dyspozycyjność zgodna z grafikiem projektu"
    ],
    "mile_widziane": [
@@ -255,16 +255,16 @@
    "praca zmianowa w godzinach działania infolinii",
    "umowa zlecenie lub umowa o pracę",
    "praca stacjonarna lub zdalna",
-   "premie za realizację celów (często spotykane)",
+   "premie za realizację celów",
    "płatne szkolenie produktowe na start"
   ],
   "jak_w_cv": [
    "Opisz rodzaj rozmów (przychodzące, wychodzące, sprzedaż, obsługa) i branżę projektu.",
-   "Wpisz systemy, w których była prowadzona praca, oraz pracę ze skryptem.",
-   "Wyróżnienia za jakość rozmów warto podać tylko wtedy, gdy da się o nich opowiedzieć.",
+   "Wpisz systemy, w których pracujesz, oraz pracę ze skryptem.",
+   "Wyróżnienia za jakość rozmów podaj tylko wtedy, gdy umiesz o nich opowiedzieć.",
    "Podaj dyspozycyjność w widocznym miejscu CV."
   ],
-  "dla_firm": "W ogłoszeniu dla konsultanta warto napisać wprost, czy rozmowy są przychodzące czy wychodzące, czego dotyczą i jak wygląda grafik, a wymagania podzielić na niezbędne i mile widziane. To ułatwia kandydatom decyzję o aplikowaniu."
+  "dla_firm": "Rozmowy przychodzące i wychodzące to dwie różne prace, dlatego warto to napisać w pierwszym zdaniu ogłoszenia. Do tego temat rozmów, grafik i sposób rozliczania celów."
  },
  "przedstawiciel-handlowy": {
   "nazwaD": "przedstawiciela handlowego",
@@ -298,17 +298,17 @@
   },
   "warunki": [
    "umowa o pracę lub współpraca B2B",
-   "samochód służbowy do użytku służbowego i często prywatnego",
+   "samochód służbowy, często także do użytku prywatnego",
    "telefon i laptop służbowy",
-   "wynagrodzenie podstawowe z premią od wyników (często spotykane)"
+   "wynagrodzenie podstawowe z premią od wyników"
   ],
   "jak_w_cv": [
-   "Podaj branżę, typ klientów i obszar, na którym była prowadzona sprzedaż.",
+   "Podaj branżę, typ klientów i obszar, na którym sprzedajesz.",
    "Opisz sposób pozyskiwania klientów i rodzaj negocjacji.",
    "Wyniki sprzedażowe warto wpisać tylko wtedy, gdy są sprawdzalne i można je omówić na rozmowie.",
    "Prawo jazdy i znajomość regionu umieść w podsumowaniu."
   ],
-  "dla_firm": "W ogłoszeniu dla przedstawiciela warto opisać teren, typ klientów i zakres samodzielności w negocjacjach oraz rozdzielić wymagania niezbędne od mile widzianych. Jasny opis narzędzi pracy, np. samochodu służbowego, ułatwia kandydatom porównanie ofert."
+  "dla_firm": "Teren, typ klientów i zakres samodzielności w negocjacjach to podstawa opisu. Narzędzia pracy, np. samochód służbowy i telefon, oraz zasady premii ułatwiają porównanie ofert."
  },
  "magazynier": {
   "nazwaD": "magazyniera",
@@ -348,11 +348,11 @@
   ],
   "jak_w_cv": [
    "Wymień rodzaje zadań: kompletacja, przyjęcia, wydania, inwentaryzacje.",
-   "Podaj uprawnienia UDT na wózki z kategorią, np. II WJO, jeśli są posiadane.",
+   "Podaj uprawnienia UDT na wózki z kategorią, np. II WJO, jeśli je masz.",
    "Przy pracy przez agencję opisz magazyn i branżę, a nie tylko nazwę agencji.",
-   "Warto wpisać nazwę systemu WMS lub typ skanera, z którym była praca."
+   "Warto wpisać nazwę systemu WMS lub typ skanera, z których korzystasz."
   ],
-  "dla_firm": "W ogłoszeniu dla magazyniera warto opisać rodzaj towaru, system zmian i używany sprzęt oraz jasno wskazać, czy uprawnienia UDT kategorii II WJO są wymagane, czy mile widziane. Taki podział pomaga kandydatom bez uprawnień ocenić swoje szanse."
+  "dla_firm": "Rodzaj towaru, system zmian i używany sprzęt mówią najwięcej o pracy w magazynie. Warto jasno napisać, czy uprawnienia UDT kategorii II WJO są warunkiem, czy firma może je sfinansować."
  },
  "operator-wozka-widlowego": {
   "nazwaD": "operatora wózka widłowego",
@@ -395,7 +395,7 @@
    "Opisz typowe zadania: wyładunek, wysokie składowanie, zaopatrywanie produkcji.",
    "Warto dodać szkolenia stanowiskowe i pracę zgodną z zasadami BHP."
   ],
-  "dla_firm": "W ogłoszeniu dla operatora warto podać wymaganą kategorię uprawnień UDT (I WJO lub II WJO), rodzaje wózków i wysokość składowania opisowo, a wymagania rozdzielić na niezbędne i mile widziane. Kandydaci od razu zobaczą, czy ich uprawnienia są wystarczające."
+  "dla_firm": "Wymagana kategoria UDT (I WJO lub II WJO), rodzaje wózków i orientacyjna wysokość składowania pozwalają kandydatom od razu ocenić, czy ich uprawnienia wystarczą."
  },
  "kierownik-magazynu": {
   "nazwaD": "kierownika magazynu",
@@ -430,20 +430,20 @@
   "warunki": [
    "umowa o pracę",
    "praca w systemie dziennym z gotowością do reagowania na potrzeby zmian",
-   "samochód lub telefon służbowy (w części ofert)",
+   "samochód lub telefon służbowy, w części ofert",
    "premia zależna od realizacji celów (często spotykana)"
   ],
   "jak_w_cv": [
-   "Opisz charakter magazynu (branża, typ towaru) i wielkość zespołu słownie lub ogólnie.",
+   "Opisz charakter magazynu (branża, typ towaru) i orientacyjną wielkość zespołu.",
    "Wymień nadzorowane procesy i używane systemy.",
    "Podaj konkretne usprawnienia, które da się opisać krok po kroku na rozmowie.",
    "Warto zaznaczyć odpowiedzialność za BHP i inwentaryzacje."
   ],
-  "dla_firm": "W ogłoszeniu na kierownika magazynu warto opisać skalę i specyfikę magazynu, podległy zespół i używane systemy, a wymagania podzielić na niezbędne i mile widziane, np. znajomość Lean. Konkretny zakres odpowiedzialności ułatwia ocenę dopasowania."
+  "dla_firm": "Opis skali i specyfiki magazynu, podległego zespołu i używanych systemów pokazuje, z jakim zakresem odpowiedzialności wiąże się stanowisko. Metody pracy, np. Lean, lepiej oznaczyć jako mile widziane, jeśli nie są warunkiem."
  },
  "kurier": {
   "nazwaD": "kuriera",
-  "intro": "Kurier odbiera i doręcza przesyłki klientom indywidualnym i firmom na wyznaczonym rejonie. Pracuje dla firm kurierskich, często jako podwykonawca, a także dla sklepów i firm dostarczających zakupy. Większość dnia spędza w samochodzie dostawczym i w kontakcie z odbiorcami.",
+  "intro": "Kurier odbiera i doręcza przesyłki klientom indywidualnym i firmom w wyznaczonym rejonie. Pracuje dla firm kurierskich, często jako podwykonawca, a także dla sklepów i firm dostarczających zakupy. Większość dnia spędza w samochodzie dostawczym i w kontakcie z odbiorcami.",
   "obowiazki": [
    "załadunek przesyłek w oddziale lub sortowni",
    "planowanie kolejności doręczeń na trasie",
@@ -480,9 +480,9 @@
    "Podaj prawo jazdy i doświadczenie za kierownicą w pierwszych linijkach.",
    "Opisz rejon pracy i rodzaj doręczeń, np. paczki, palety, zakupy spożywcze.",
    "Wpisz obsługę skanera, aplikacji kurierskiej i płatności za pobraniem.",
-   "Warto dodać wcześniejszą pracę jako kierowca dostawczy, nawet w innej branży."
+   "Warto dodać wcześniejszą pracę jako kierowca samochodu dostawczego, nawet w innej branży."
   ],
-  "dla_firm": "W ogłoszeniu dla kuriera warto jasno opisać formę współpracy, rejon, rodzaj pojazdu i godziny pracy, a wymagania rozdzielić na niezbędne i mile widziane. Kandydaci łatwiej wtedy porównają oferty różnych zleceniodawców."
+  "dla_firm": "Forma współpracy (umowa czy działalność), rejon, rodzaj pojazdu i godziny pracy to informacje, o które kandydaci pytają najpierw. Podanie ich w ogłoszeniu skraca rozmowy wstępne."
  },
  "pracownik-produkcji": {
   "nazwaD": "pracownika produkcji",
@@ -519,15 +519,15 @@
    "umowa o pracę lub zatrudnienie przez agencję pracy tymczasowej",
    "praca stojąca przy linii lub maszynie",
    "odzież robocza i szkolenie stanowiskowe",
-   "dojazd zorganizowany przez pracodawcę (w części ofert)"
+   "dojazd zorganizowany przez pracodawcę, w części ofert"
   ],
   "jak_w_cv": [
-   "Wpisz branżę i rodzaj wyrobów, przy których była praca.",
+   "Wpisz branżę i rodzaj wyrobów, przy których pracujesz.",
    "Opisz typ stanowiska: linia, maszyna, montaż, pakowanie, kontrola jakości.",
    "Podaj uprawnienia i orzeczenia, jeśli ogłoszenie ich wymaga.",
    "Warto dodać znajomość standardu 5S lub pracę według instrukcji stanowiskowych."
   ],
-  "dla_firm": "W ogłoszeniu dla pracownika produkcji warto opisać branżę, typ stanowiska i system zmian oraz oddzielić wymagania niezbędne, np. orzeczenie sanitarno-epidemiologiczne, od mile widzianych, np. uprawnień UDT kategorii II WJO. Kandydaci bez doświadczenia łatwiej wtedy ocenią, czy mogą aplikować."
+  "dla_firm": "Kandydaci bez doświadczenia chętniej aplikują, gdy ogłoszenie mówi, czego firma nauczy na miejscu. Warto podać branżę, typ stanowiska, system zmian i to, czy orzeczenie sanitarno-epidemiologiczne jest wymagane."
  },
  "mechanik-samochodowy": {
   "nazwaD": "mechanika samochodowego",
@@ -554,7 +554,7 @@
    ],
    "mile_widziane": [
     "wykształcenie techniczne w zawodzie mechanika pojazdów samochodowych",
-    "certyfikat F-gazowy uprawniający do obsługi klimatyzacji samochodowej",
+    "zaświadczenie o odbytym szkoleniu w zakresie odzysku czynnika z klimatyzacji samochodowej (tzw. uprawnienia f-gazowe)",
     "doświadczenie z konkretnymi markami pojazdów",
     "doświadczenie z pojazdami hybrydowymi lub elektrycznymi"
    ]
@@ -567,11 +567,11 @@
   ],
   "jak_w_cv": [
    "Wymień konkretne rodzaje napraw zamiast ogólnego opisu „naprawa samochodów”.",
-   "Podaj marki pojazdów i testery diagnostyczne, z którymi była praca.",
-   "Wpisz uprawnienia do obsługi klimatyzacji, jeśli są posiadane.",
+   "Podaj marki pojazdów i testery diagnostyczne, które obsługujesz.",
+   "Wpisz zaświadczenie ze szkolenia f-gazowego, jeśli je masz.",
    "Warto dodać szkolenia producentów i kursy z nowych technologii."
   ],
-  "dla_firm": "W ogłoszeniu dla mechanika warto podać profil warsztatu, obsługiwane marki i dostępny sprzęt, a wymagania podzielić na niezbędne i mile widziane, np. uprawnienia do klimatyzacji. Kandydaci łatwiej wtedy ocenią, czy ich doświadczenie pasuje."
+  "dla_firm": "Profil warsztatu, obsługiwane marki i dostępny sprzęt diagnostyczny pomagają mechanikom ocenić, czy ich doświadczenie pasuje. Zaświadczenie ze szkolenia f-gazowego warto oznaczyć jako wymagane albo mile widziane."
  },
  "spawacz": {
   "nazwaD": "spawacza",
@@ -590,14 +590,14 @@
   ],
   "wymagania": {
    "niezbedne": [
+    "aktualne świadectwo egzaminu kwalifikacyjnego spawacza wg PN-EN ISO 9606-1 w wymaganej metodzie i pozycji",
     "aktualne uprawnienia spawalnicze w wymaganej metodzie",
     "doświadczenie w spawaniu",
     "umiejętność czytania rysunku technicznego",
-    "przestrzeganie zasad BHP",
-    "gotowość do wykonania próby spawalniczej"
+    "przestrzeganie zasad BHP"
    ],
    "mile_widziane": [
-    "certyfikat egzaminu spawacza zgodny z normą PN-EN ISO",
+    "uprawnienia w kilku metodach lub pozycjach albo do spawania aluminium (PN-EN ISO 9606-2)",
     "uprawnienia w kilku metodach spawania lub pozycjach",
     "doświadczenie w spawaniu stali nierdzewnej lub aluminium",
     "gotowość do wyjazdów i pracy na montażach"
@@ -608,15 +608,15 @@
    "praca w hali produkcyjnej lub na budowie",
    "praca zmianowa (w części zakładów)",
    "odzież ochronna i sprzęt spawalniczy zapewnione przez pracodawcę",
-   "zakwaterowanie przy pracy wyjazdowej (w części ofert)"
+   "zakwaterowanie przy pracy wyjazdowej, w części ofert"
   ],
   "jak_w_cv": [
    "Wpisz metody spawania i ważność uprawnień na początku CV.",
-   "Podaj materiały i pozycje spawania, które da się wykonać na próbie.",
-   "Opisz rodzaj konstrukcji, przy których była praca.",
+   "Podaj materiały i pozycje spawania, które potrafisz wykonać na próbie spawalniczej.",
+   "Opisz rodzaj konstrukcji, przy których pracujesz.",
    "Warto zaznaczyć samodzielną pracę z rysunkiem technicznym."
   ],
-  "dla_firm": "W ogłoszeniu dla spawacza warto podać metody, materiały i rodzaj konstrukcji oraz to, czy wymagany jest konkretny certyfikat, a wymagania rozdzielić na niezbędne i mile widziane. Informacja o próbie spawalniczej pomaga kandydatom przygotować się do rekrutacji."
+  "dla_firm": "Metoda, pozycja i materiał – te trzy informacje decydują o tym, czy spawacz ma odpowiednie świadectwo. Warto też napisać, czy rekrutacja obejmuje próbę spawalniczą i jak ona wygląda."
  },
  "elektryk": {
   "nazwaD": "elektryka",
@@ -653,15 +653,15 @@
    "umowa o pracę lub współpraca B2B",
    "praca na budowach, w zakładzie lub w trasie serwisowej",
    "praca zmianowa w utrzymaniu ruchu",
-   "narzędzia, odzież robocza i samochód służbowy (w części ofert)"
+   "narzędzia, odzież robocza i samochód służbowy, w części ofert"
   ],
   "jak_w_cv": [
-   "Wpisz świadectwo kwalifikacyjne z grupą i zakresem (E, D) oraz datą ważności opisowo, np. „ważne”.",
+   "Wpisz świadectwo kwalifikacyjne z grupą i zakresem (E, D) oraz datą ważności.",
    "Podaj rodzaj instalacji: mieszkaniowe, przemysłowe, budowy, utrzymanie ruchu.",
    "Opisz wykonywane pomiary i pracę z dokumentacją.",
-   "Warto zaznaczyć, które prace były wykonywane samodzielnie."
+   "Warto zaznaczyć, które prace wykonujesz samodzielnie."
   ],
-  "dla_firm": "W ogłoszeniu dla elektryka warto podać wymaganą grupę i zakres świadectwa kwalifikacyjnego oraz charakter prac, a wymagania podzielić na niezbędne i mile widziane, np. uprawnienia dozorowe. Precyzyjny opis pozwala kandydatom ocenić, czy ich uprawnienia są wystarczające."
+  "dla_firm": "Wymagana grupa i zakres świadectwa kwalifikacyjnego oraz charakter prac (budowa, utrzymanie ruchu, serwis) pozwalają kandydatom szybko ocenić, czy ich uprawnienia są wystarczające."
  },
  "pracownik-budowlany": {
   "nazwaD": "pracownika budowlanego",
@@ -698,15 +698,15 @@
    "umowa o pracę lub umowa zlecenie",
    "praca na budowie w różnych warunkach pogodowych",
    "praca w dzień, czasem także w soboty",
-   "zakwaterowanie przy budowach wyjazdowych (w części ofert)"
+   "zakwaterowanie przy budowach wyjazdowych, w części ofert"
   ],
   "jak_w_cv": [
    "Wypisz rodzaje prac w krótkiej liście, np. szalunki, zbrojenie, tynki.",
-   "Podaj typy budów, przy których była praca.",
+   "Podaj typy budów, na których pracujesz.",
    "Wpisz badania i uprawnienia w osobnej sekcji.",
    "Warto zaznaczyć prace wykonywane samodzielnie i gotowość do wyjazdów."
   ],
-  "dla_firm": "W ogłoszeniu dla pracownika budowlanego warto wymienić konkretne rodzaje prac, lokalizację budowy i wymagane badania, a wymagania rozdzielić na niezbędne i mile widziane. Krótka, rzeczowa lista ułatwia kandydatom ocenę dopasowania."
+  "dla_firm": "Krótka, rzeczowa lista konkretnych prac, lokalizacja budowy i wymagane badania wystarczą. Jeśli praca jest wyjazdowa, warto napisać, czy firma zapewnia zakwaterowanie."
  },
  "kucharz": {
   "nazwaD": "kucharza",
@@ -720,13 +720,13 @@
    "kontrola dat przydatności i rotacja surowców",
    "prowadzenie dokumentacji HACCP",
    "udział w planowaniu menu i zamówień",
-   "utrzymanie czystości na kuchni i stanowisku"
+   "utrzymanie czystości w kuchni i na stanowisku"
   ],
   "wymagania": {
    "niezbedne": [
     "aktualne orzeczenie do celów sanitarno-epidemiologicznych",
     "znajomość zasad HACCP",
-    "doświadczenie w pracy na kuchni",
+    "doświadczenie w pracy w kuchni",
     "umiejętność pracy pod presją czasu",
     "gotowość do pracy zmianowej i w weekendy"
    ],
@@ -744,12 +744,12 @@
    "praca w gorącym otoczeniu i w pozycji stojącej"
   ],
   "jak_w_cv": [
-   "Wpisz rodzaj kuchni i lokalu oraz zajmowane stanowisko, np. kucharz zmianowy, kucharz na zimnej kuchni.",
-   "Opisz specjalizację i typowe dania, które były przygotowywane.",
+   "Wpisz rodzaj kuchni i lokalu oraz zajmowane stanowisko, np. kucharz zmianowy, kucharz w kuchni zimnej.",
+   "Opisz specjalizację i typowe dania, które przygotowujesz.",
    "Podaj znajomość HACCP i aktualne orzeczenie sanitarno-epidemiologiczne.",
    "Warto zaznaczyć udział w tworzeniu menu lub zamówieniach."
   ],
-  "dla_firm": "W ogłoszeniu dla kucharza warto opisać rodzaj kuchni, stanowisko i grafik oraz oddzielić wymagania niezbędne, np. orzeczenie i znajomość HACCP, od mile widzianych, np. konkretnej specjalizacji. Pomaga to kandydatom ocenić, czy pasują do zespołu kuchni."
+  "dla_firm": "Rodzaj kuchni, stanowisko i grafik to podstawa. Orzeczenie i znajomość HACCP lepiej wpisać do wymagań, a konkretną specjalizację – do mile widzianych, jeśli nie jest warunkiem."
  },
  "kelner": {
   "nazwaD": "kelnerki",
@@ -789,11 +789,11 @@
   ],
   "jak_w_cv": [
    "Podaj rodzaj lokalu, np. kawiarnia, restauracja hotelowa, obsługa wesel.",
-   "Wpisz system do zamówień i rozliczania rachunków, jeśli jest znany.",
+   "Wpisz system do zamówień i rozliczania rachunków, jeśli go znasz.",
    "Opisz języki obce w kontekście obsługi gości.",
    "Warto zaznaczyć dyspozycyjność w weekendy i wieczorami."
   ],
-  "dla_firm": "W ogłoszeniu dla kelnera lub kelnerki warto opisać rodzaj lokalu, grafik i zasady podziału napiwków, a wymagania podzielić na niezbędne i mile widziane, np. języki obce. Jasne informacje ułatwiają kandydatom decyzję."
+  "dla_firm": "Kandydaci zwracają uwagę na rodzaj lokalu, grafik i zasady podziału napiwków. Języki obce warto oznaczyć jako wymagane tylko wtedy, gdy goście naprawdę z nich korzystają."
  },
  "barista": {
   "nazwaD": "baristy",
@@ -832,12 +832,12 @@
    "napiwki według zasad lokalu"
   ],
   "jak_w_cv": [
-   "Wpisz rodzaj ekspresu i młynka, z którymi była praca.",
+   "Wpisz rodzaj ekspresu i młynka, z których korzystasz.",
    "Opisz napoje i metody parzenia przygotowywane samodzielnie.",
    "Podaj kursy baristyczne i zainteresowanie kawą specialty.",
    "Warto dodać pracę przy kasie i obsługę gości przy dużym ruchu."
   ],
-  "dla_firm": "W ogłoszeniu dla baristy warto opisać rodzaj kawiarni, używany sprzęt i godziny pracy oraz oddzielić wymagania niezbędne od mile widzianych, np. latte art czy znajomości metod alternatywnych. Pomaga to zainteresować zarówno osoby doświadczone, jak i początkujące."
+  "dla_firm": "Rodzaj kawiarni, sprzęt i godziny pracy pokazują, czego się spodziewać. Jeśli firma szkoli z latte art czy metod alternatywnych, warto to napisać – zachęci to także osoby początkujące."
  },
  "pokojowka": {
   "nazwaD": "pokojówki",
@@ -880,7 +880,7 @@
    "Wpisz znajomość standardów i środków czystości.",
    "Warto zaznaczyć dyspozycyjność w sezonie i w weekendy."
   ],
-  "dla_firm": "W ogłoszeniu dla pokojówki warto opisać rodzaj obiektu, zakres sprzątania i grafik, a wymagania podzielić na niezbędne i mile widziane, np. doświadczenie w hotelu. Konkretny opis dnia pracy ułatwia kandydatom ocenę oferty."
+  "dla_firm": "Opis dnia pracy – zakres sprzątania pokoi i części wspólnych, grafik oraz to, czy praca obejmuje pranie i uzupełnianie minibarów – pomaga kandydatom ocenić ofertę. Doświadczenie hotelowe warto oznaczyć jako mile widziane, jeśli firma wdraża nowe osoby."
  },
  "opiekun-osob-starszych": {
   "nazwaD": "opiekunki osób starszych",
@@ -910,7 +910,7 @@
     "prawo jazdy kat. B",
     "doświadczenie w opiece nad osobą leżącą lub z demencją",
     "referencje od poprzednich rodzin lub agencji"
-  ]
+   ]
   },
   "warunki": [
    "praca z zamieszkaniem u podopiecznego w systemie wyjazdowym",
@@ -920,15 +920,15 @@
   ],
   "jak_w_cv": [
    "Opisz zakres opieki i stan podopiecznych, np. osoba leżąca, demencja, cukrzyca.",
-   "Podaj kraj i formę pracy, jeśli opieka była wyjazdowa.",
+   "Jeśli opiekujesz się kimś za granicą, podaj kraj i formę pracy.",
    "Wpisz kursy i poziom znajomości języka obcego.",
    "Warto dodać informację o referencjach i gotowości do pracy z zamieszkaniem."
   ],
-  "dla_firm": "W ogłoszeniu dla opiekunki warto opisać stan zdrowia podopiecznego, zakres pomocy i warunki zamieszkania oraz oddzielić wymagania niezbędne, np. znajomość języka, od mile widzianych, np. prawa jazdy. Rzetelny opis pomaga dobrać osobę z odpowiednim doświadczeniem."
+  "dla_firm": "Rzetelny opis stanu zdrowia podopiecznego, zakresu pomocy i warunków zamieszkania pozwala dobrać osobę z odpowiednim doświadczeniem. Wymagany poziom języka lepiej podać wprost."
  },
  "pielegniarka": {
   "nazwaD": "pielęgniarki",
-  "intro": "Pielęgniarka sprawuje opiekę nad pacjentami, wykonuje zabiegi i procedury pielęgniarskie oraz współpracuje z lekarzami w zespole terapeutycznym. Pracuje w szpitalach, przychodniach podstawowej opieki zdrowotnej, placówkach prywatnych, zakładach opiekuńczych i w opiece długoterminowej. Wykonywanie zawodu wymaga prawa wykonywania zawodu.",
+  "intro": "Pielęgniarka sprawuje opiekę nad pacjentami, wykonuje zabiegi i procedury pielęgniarskie oraz współpracuje z lekarzami w zespole terapeutycznym. Pracuje w szpitalach, przychodniach podstawowej opieki zdrowotnej, placówkach prywatnych, zakładach opiekuńczych i w opiece długoterminowej. Do pracy w zawodzie potrzebne jest prawo wykonywania zawodu.",
   "obowiazki": [
    "rozpoznawanie potrzeb pacjenta i planowanie opieki pielęgniarskiej",
    "podawanie leków zgodnie ze zleceniem lekarskim",
@@ -943,7 +943,7 @@
   ],
   "wymagania": {
    "niezbedne": [
-    "prawo wykonywania zawodu pielęgniarki wydane przez okręgową radę pielęgniarek i położnych",
+    "prawo wykonywania zawodu pielęgniarki stwierdzone przez okręgową radę pielęgniarek i położnych",
     "wykształcenie pielęgniarskie",
     "znajomość procedur pielęgniarskich",
     "umiejętność prowadzenia dokumentacji medycznej",
@@ -964,11 +964,11 @@
   ],
   "jak_w_cv": [
    "Wpisz prawo wykonywania zawodu i specjalizacje w widocznym miejscu CV.",
-   "Podaj oddziały lub rodzaje placówek, w których była praca.",
+   "Podaj oddziały lub rodzaje placówek, w których pracujesz.",
    "Opisz procedury wykonywane samodzielnie i znane systemy dokumentacji.",
    "Warto wymienić kursy kwalifikacyjne i specjalistyczne z nazwą dziedziny."
   ],
-  "dla_firm": "W ogłoszeniu dla pielęgniarki warto podać oddział lub rodzaj placówki, system pracy i formę zatrudnienia, a wymagania podzielić na niezbędne, np. prawo wykonywania zawodu, i mile widziane, np. konkretną specjalizację. Ułatwia to kandydatkom i kandydatom ocenę dopasowania."
+  "dla_firm": "Oddział lub rodzaj placówki, system pracy i forma zatrudnienia to informacje, od których zależy decyzja kandydatek i kandydatów. Wymagana specjalizacja powinna być oddzielona od tej, która jest tylko atutem."
  },
  "opiekunka-dziecieca": {
   "nazwaD": "opiekunki do dziecka",
@@ -986,6 +986,7 @@
   ],
   "wymagania": {
    "niezbedne": [
+    "w żłobku lub klubie dziecięcym: kwalifikacje opiekuna wymagane ustawą o opiece nad dziećmi w wieku do lat 3 (art. 16), np. kurs opiekuna dziecięcego albo wykształcenie pedagogiczne",
     "doświadczenie w opiece nad dziećmi w podobnym wieku",
     "odpowiedzialność i cierpliwość",
     "zaświadczenie o niekaralności (często wymagane)",
@@ -993,7 +994,6 @@
    ],
    "mile_widziane": [
     "kurs pierwszej pomocy przedmedycznej, także u dzieci",
-    "wykształcenie pedagogiczne lub kurs opiekuna dziecięcego (w żłobkach często wymagane)",
     "referencje od poprzednich rodzin",
     "prawo jazdy kat. B",
     "znajomość języka obcego"
@@ -1006,12 +1006,12 @@
    "praca na część etatu lub doraźnie"
   ],
   "jak_w_cv": [
-   "Podaj wiek dzieci, którymi była sprawowana opieka.",
+   "Podaj wiek dzieci, które były pod Twoją opieką.",
    "Opisz konkretne zajęcia i codzienne zadania, a nie tylko cechy charakteru.",
    "Wpisz kursy, wykształcenie i informację o referencjach.",
-   "Warto zaznaczyć posiadanie zaświadczenia o niekaralności."
+   "Warto zaznaczyć zaświadczenie o niekaralności, jeśli je masz."
   ],
-  "dla_firm": "W ogłoszeniu dla opiekunki warto podać wiek dziecka, godziny pracy i zakres obowiązków, a wymagania rozdzielić na niezbędne i mile widziane, np. kurs pierwszej pomocy. Jasne zasady od początku ułatwiają budowanie zaufania między rodziną a opiekunką."
+  "dla_firm": "Wiek dziecka, godziny pracy i zakres obowiązków ustalone na początku ułatwiają budowanie zaufania między rodziną a opiekunką. W żłobku lub klubie dziecięcym trzeba też podać wymagane kwalifikacje."
  },
  "pracownik-sprzatajacy": {
   "nazwaD": "pracownika sprzątającego",
@@ -1039,7 +1039,7 @@
     "doświadczenie w sprzątaniu podobnych obiektów",
     "obsługa maszyn czyszczących",
     "doświadczenie w sprzątaniu placówek medycznych",
-    "zaświadczenie o niekaralności przy obiektach wymagających zaufania"
+    "zaświadczenie o niekaralności (np. w bankach, szkołach, placówkach medycznych)"
    ]
   },
   "warunki": [
@@ -1049,12 +1049,12 @@
    "odzież robocza i środki czystości zapewnione przez pracodawcę"
   ],
   "jak_w_cv": [
-   "Wymień rodzaje obiektów, w których była praca, np. biura, szpitale, magazyny.",
-   "Wpisz maszyny czyszczące, które były obsługiwane.",
-   "Opisz stały obiekt pod własną opieką jako przykład rzetelności.",
+   "Wymień rodzaje obiektów, w których sprzątasz, np. biura, szpitale, magazyny.",
+   "Wpisz maszyny czyszczące, które obsługujesz.",
+   "Jeśli odpowiadasz za stały obiekt, opisz go jako przykład rzetelności.",
    "Warto podać dyspozycyjność w nietypowych godzinach."
   ],
-  "dla_firm": "W ogłoszeniu dla pracownika sprzątającego warto podać rodzaj obiektu, godziny pracy i sprzęt, a wymagania podzielić na niezbędne i mile widziane, np. obsługę szorowarki. Konkretny opis ułatwia kandydatom ocenę, czy godziny i zakres pracy im odpowiadają."
+  "dla_firm": "Rodzaj obiektu, godziny pracy i sprzęt to najważniejsze informacje. Jeśli wymagane jest zaświadczenie o niekaralności albo obsługa szorowarki, warto to napisać wprost."
  },
  "kierowca": {
   "nazwaD": "kierowcy kat. C i C+E",
@@ -1073,7 +1073,7 @@
   "wymagania": {
    "niezbedne": [
     "prawo jazdy kat. C lub C+E",
-    "kwalifikacja wstępna lub przyspieszona potwierdzona wpisem kodu 95 w prawie jazdy (wcześniej świadectwem kwalifikacji zawodowej)",
+    "kwalifikacja wstępna lub kwalifikacja wstępna przyspieszona – świadectwo kwalifikacji zawodowej i wpis kodu 95 w prawie jazdy",
     "karta kierowcy",
     "aktualne badania lekarskie i psychologiczne kierowcy",
     "znajomość przepisów o czasie pracy kierowców"
@@ -1087,17 +1087,17 @@
   },
   "warunki": [
    "umowa o pracę",
-   "praca w systemie tygodniowym lub dłuższych wyjazdów w transporcie międzynarodowym",
+   "praca w systemie tygodniowym albo w systemie dłuższych wyjazdów w transporcie międzynarodowym",
    "powroty codzienne w transporcie lokalnym lub dystrybucji",
-   "przypisany pojazd (w części ofert)"
+   "przypisany pojazd, w części ofert"
   ],
   "jak_w_cv": [
    "Wpisz kategorie prawa jazdy, kod 95, kartę kierowcy i badania na samym początku CV.",
-   "Podaj rodzaj tras i typ zestawów, którymi były wykonywane przewozy.",
+   "Podaj rodzaj tras i typ zestawów, którymi jeździsz.",
    "Opisz rodzaje ładunków i dodatkowe uprawnienia, np. ADR.",
-   "Warto zaznaczyć jazdę bez kolizji tylko wtedy, gdy jest to zgodne z prawdą."
+   "Bezszkodową jazdę warto zaznaczyć tylko wtedy, gdy jest to zgodne z prawdą."
   ],
-  "dla_firm": "W ogłoszeniu dla kierowcy warto podać rodzaj tras, system wyjazdów, typ zestawu i ładunków, a wymagania podzielić na niezbędne, np. kod 95, i mile widziane, np. ADR. Precyzyjny opis pozwala kandydatom ocenić, czy system pracy im odpowiada."
+  "dla_firm": "Rodzaj tras, system wyjazdów, typ zestawu i ładunków przesądzają o tym, czy praca odpowiada kierowcy. Kod 95 to wymóg, a ADR zwykle atut – warto to rozdzielić."
  },
  "ksiegowa": {
   "nazwaD": "księgowej",
@@ -1107,8 +1107,8 @@
    "dekretowanie i księgowanie dokumentów",
    "sporządzanie deklaracji VAT i plików JPK",
    "rozliczanie podatku dochodowego",
-   "rozrachunki z kontrahentami i uzgadnianie sald",
-   "uzgadnianie kont i zamknięcia miesiąca",
+   "rozrachunki z kontrahentami",
+   "uzgadnianie sald i kont oraz zamknięcie miesiąca",
    "ewidencja środków trwałych",
    "udział w przygotowaniu sprawozdań finansowych",
    "kontakt z urzędem skarbowym i ZUS",
@@ -1141,7 +1141,7 @@
    "Opisz poziom samodzielności, np. zamknięcia miesiąca czy rozliczenia roczne.",
    "Warto wymienić kursy z bieżących zmian przepisów."
   ],
-  "dla_firm": "W ogłoszeniu dla księgowej warto opisać rodzaj ksiąg, poziom samodzielności i używane programy, a wymagania podzielić na niezbędne i mile widziane, np. certyfikaty księgowe. Pomaga to kandydatom ocenić, na jakim poziomie mogą rozpocząć pracę."
+  "dla_firm": "Rodzaj ksiąg, poziom samodzielności i używane programy pokazują, na jakim poziomie można rozpocząć pracę. Certyfikaty księgowe dobrze oznaczyć jako atut, jeśli nie są warunkiem."
  },
  "asystentka-biura": {
   "nazwaD": "asystentki biura",
@@ -1181,11 +1181,11 @@
   ],
   "jak_w_cv": [
    "Opisz zadania prowadzone samodzielnie: obieg dokumentów, kalendarze, podróże.",
-   "Wpisz programy i systemy, z którymi była praca.",
-   "Podaj języki obce i to, w jakich sytuacjach były używane.",
+   "Wpisz programy i systemy, z których korzystasz.",
+   "Podaj języki obce i to, w jakich sytuacjach ich używasz.",
    "Sprawdź starannie język i formatowanie CV, bo świadczą o jakości pracy biurowej."
   ],
-  "dla_firm": "W ogłoszeniu dla asystentki biura warto opisać główne zadania i proporcje między pracą sekretariatu a wsparciem działów, a wymagania rozdzielić na niezbędne i mile widziane, np. język obcy. Ułatwia to kandydatom realną ocenę stanowiska."
+  "dla_firm": "Proporcje między pracą sekretariatu a wsparciem działów mówią więcej niż sama nazwa stanowiska. Wymagany język obcy warto podać z poziomem."
  },
  "recepcjonistka": {
   "nazwaD": "recepcjonistki",
@@ -1229,7 +1229,7 @@
    "Wymień systemy rezerwacyjne i języki obce z opisem użycia.",
    "Warto zaznaczyć dyspozycyjność do pracy zmianowej."
   ],
-  "dla_firm": "W ogłoszeniu dla recepcjonistki warto opisać rodzaj obiektu, system pracy i używane systemy, a wymagania podzielić na niezbędne, np. język angielski, i mile widziane, np. drugi język obcy. Jasny podział ułatwia aplikowanie osobom z różnym doświadczeniem."
+  "dla_firm": "Rodzaj obiektu, system pracy i używane systemy rezerwacji to podstawa ogłoszenia. Jasne rozdzielenie języka wymaganego od drugiego języka jako atutu ułatwia aplikowanie osobom z różnym doświadczeniem."
  },
  "specjalista-kadr-i-plac": {
   "nazwaD": "specjalisty ds. kadr i płac",
@@ -1241,7 +1241,7 @@
    "rozliczanie absencji, urlopów i zasiłków",
    "prowadzenie ewidencji czasu pracy",
    "rozliczenia z ZUS i urzędem skarbowym",
-   "sporządzanie deklaracji PIT dla pracowników",
+   "sporządzanie informacji PIT-11 dla pracowników",
    "obsługa pracowniczych planów kapitałowych (PPK)",
    "kontrola terminów badań lekarskich i szkoleń BHP",
    "przygotowywanie raportów kadrowo-płacowych"
@@ -1270,15 +1270,15 @@
   ],
   "jak_w_cv": [
    "Opisz sprawy prowadzone samodzielnie: akta, listy płac, rozliczenia z ZUS i urzędem skarbowym.",
-   "Wpisz programy kadrowo-płacowe, z którymi była praca.",
+   "Wpisz programy kadrowo-płacowe, w których pracujesz.",
    "Podaj skalę obsługi opisowo, np. jedna firma lub kilka firm klientów biura.",
    "Warto dodać kursy z prawa pracy i aktualizacji przepisów."
   ],
-  "dla_firm": "W ogłoszeniu dla specjalisty ds. kadr i płac warto opisać zakres samodzielności, rodzaje umów i używany program, a wymagania podzielić na niezbędne i mile widziane, np. doświadczenie z PFRON. Precyzyjny opis pomaga kandydatom ocenić, czy mogą od razu przejąć obsługę."
+  "dla_firm": "Zakres samodzielności, rodzaje umów i używany program kadrowo-płacowy pokazują, czy nowa osoba od razu przejmie obsługę. Doświadczenie z PFRON czy PPK warto oznaczyć jako wymagane albo mile widziane."
  },
  "logistyk": {
   "nazwaD": "logistyka",
-  "intro": "Logistyk planuje i koordynuje przepływ towarów: zamówienia, dostawy, stany magazynowe i transport. Pracuje w firmach produkcyjnych, handlowych, dystrybucyjnych oraz w operatorach logistycznych. Dużą część pracy stanowi analiza danych i współpraca z dostawcami oraz przewoźnikami.",
+  "intro": "Logistyk planuje i koordynuje przepływ towarów: zamówienia, dostawy, stany magazynowe i transport. Pracuje w firmach produkcyjnych, handlowych, dystrybucyjnych oraz u operatorów logistycznych. Dużą część pracy stanowi analiza danych i współpraca z dostawcami oraz przewoźnikami.",
   "obowiazki": [
    "planowanie dostaw i harmonogramów transportu",
    "zarządzanie zapasami i kontrola stanów magazynowych",
@@ -1314,10 +1314,10 @@
   ],
   "jak_w_cv": [
    "Opisz procesy prowadzone samodzielnie: planowanie, zamówienia, zapasy, transport.",
-   "Wpisz systemy i narzędzia analityczne, z którymi była praca.",
+   "Wpisz systemy i narzędzia analityczne, z których korzystasz.",
    "Podaj przykład usprawnienia lub rozwiązanego problemu z dostawami.",
    "Warto zaznaczyć poziom języka angielskiego i kontakt z partnerami zagranicznymi."
   ],
-  "dla_firm": "W ogłoszeniu dla logistyka warto opisać, za które procesy odpowiada stanowisko i z jakich systemów korzysta, a wymagania rozdzielić na niezbędne i mile widziane, np. znajomość SAP. Ułatwia to kandydatom ocenę dopasowania do zakresu pracy."
+  "dla_firm": "Warto napisać, za które procesy odpowiada stanowisko – zamówienia, transport, stany – i z jakich systemów korzysta. Znajomość konkretnego systemu, np. SAP, lepiej oznaczyć jako atut, jeśli firma wdraża."
  }
 }
