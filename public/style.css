@@ -965,3 +965,6 @@ details>summary{min-height:44px;padding-block:11px;box-sizing:border-box}
 .sum-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:12px}.sum-top b{font-size:22px}.sum-top small{opacity:.7}
 .payico{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:1px 7px;margin:2px 4px 2px 0;font-size:12px;font-weight:600;background:#fff;color:#16233A}
 .check.compact{font-size:13px;line-height:1.35;margin:4px 0}
+/* „Sprawdź CV” / „Test CV pod ATS”: podgląd tekstu odczytanego z pliku */
+.ats-text{white-space:pre-wrap;word-break:break-word;max-height:420px;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px;line-height:1.45}
+.check-result h4{margin:14px 0 6px}.reqs-list .ok{color:#127a3a;font-weight:700}.reqs-list .no{opacity:.6;font-weight:700}
