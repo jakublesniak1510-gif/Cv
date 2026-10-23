@@ -85,7 +85,7 @@
    },
    {
     "q": "Czy darmowe sprawdzanie CV jest bezpieczne (RODO)?",
-    "a": "Narzędzia w serwisie nie zapisują przesłanego pliku ani wyniku analizy. Plik jest używany tylko do przygotowania wyniku, który widzisz na ekranie."
+    "a": "Narzędzia w serwisie nie zapisują przesłanego pliku ani treści CV. Jeśli porównujesz CV z ogłoszeniem, sam wynik porównania (procent, słowa kluczowe i wskazówki, bez treści CV) zostaje w pamięci serwera przez godzinę, żeby można było go udostępnić, a potem jest usuwany."
    }
   ],
   "sources": [
@@ -205,7 +205,7 @@
    },
    {
     "q": "Gdzie sprawdzić CV za darmo i czy to bezpieczne (RODO)?",
-    "a": "Darmowy „Test CV pod ATS” na naszej stronie pokazuje, jak system odczytuje tekst z pliku. Narzędzia w serwisie nie zapisują przesłanego pliku ani wyniku analizy: plik służy wyłącznie do przygotowania wyniku, który widzisz na ekranie."
+    "a": "Darmowy „Test CV pod ATS” na naszej stronie pokazuje, jak system odczytuje tekst z pliku. Narzędzia w serwisie nie zapisują przesłanego pliku ani treści CV. Jeśli porównujesz CV z ogłoszeniem, sam wynik porównania (procent, słowa kluczowe i wskazówki, bez treści CV) zostaje w pamięci serwera przez godzinę, żeby można było go udostępnić, a potem jest usuwany."
    }
   ],
   "sources": [
@@ -367,7 +367,7 @@
    },
    {
     "q": "Czy darmowe sprawdzanie CV jest bezpieczne (RODO)?",
-    "a": "Narzędzia w serwisie nie zapisują przesłanego pliku ani wyniku analizy. Plik jest używany tylko do przygotowania wyniku widocznego na ekranie."
+    "a": "Narzędzia w serwisie nie zapisują przesłanego pliku ani treści CV. Jeśli porównujesz CV z ogłoszeniem, sam wynik porównania (procent, słowa kluczowe i wskazówki, bez treści CV) zostaje w pamięci serwera przez godzinę, żeby można było go udostępnić, a potem jest usuwany."
    }
   ],
   "sources": [
