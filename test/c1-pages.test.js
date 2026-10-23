@@ -61,8 +61,8 @@ test('/kreator-cv i case study: SSR, FAQPage, w mapie strony, klaster linków, l
   for (const u of ['/narzedzia/skaner-cv', '/narzedzia/sprawdz-cv', '/narzedzia/test-cv-ats', '/poradnik/jedno-cv-dwa-ogloszenia']) assert.ok(k.includes(`href="${u}"`), u);
   assert.doesNotMatch(k, /gwarant|najlepsz/i);
   const c = await (await fetch(`${U}/poradnik/jedno-cv-dwa-ogloszenia`)).text(), sc = caseScores();
-  for (const [i, s] of sc.entries()) { assert.ok(c.includes(`${CASE.ads[i].cv === undefined ? '' : `CV pod ogłoszenie ${s.key}`} <small>· ${s.tailored.score}% dopasowania</small>`), `wynik ${s.key}`); assert.ok(s.tailored.score > s.generic.score, `dopasowanie podnosi wynik ${s.key}`); }
-  assert.match(c, /dane fikcyjne/); assert.match(c, /"@type":"FAQPage"/);
+  for (const [i, s] of sc.entries()) { assert.ok(c.includes(`<h3>CV pod ogłoszenie ${s.key}</h3><p class="small">${s.tailored.score}% – wynik skanera słów kluczowych; prosty algorytm, przykład poglądowy</p>`), `wynik ${s.key}`); assert.ok(!c.includes(CASE.ads[i].key) || !/<h[1-3][^>]*>[^<]*\d+%/.test(c), 'bez procentów w nagłówkach'); assert.ok(s.tailored.score > s.generic.score, `dopasowanie podnosi wynik ${s.key}`); }
+  assert.match(c, /dane fikcyjne/); assert.doesNotMatch(c.match(/<meta property="og:[^>]+>/g).join(' '), /\d+%/, 'bez procentów w OG'); assert.match(c, /"@type":"FAQPage"/);
   const sm = await (await fetch(`${U}/sitemap.xml`)).text();
   for (const u of ['kreator-cv', 'poradnik/jedno-cv-dwa-ogloszenia', 'narzedzia/sprawdz-cv', 'narzedzia/test-cv-ats']) assert.ok(sm.includes(`${U}/${u}</loc>`), u);
   assert.match(read('public/lite.js'), /sessionStorage\.setItem\('cvpo-wiz-ad'/); assert.match(read('public/app.js'), /sessionStorage\.getItem\('cvpo-wiz-ad'\)/);

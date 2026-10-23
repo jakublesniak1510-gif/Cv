@@ -1527,6 +1527,8 @@
 "Przelewy24 (przelew online, BLIK)": "Przelewy24 (online bank transfer, BLIK)",
 "Nie udało się otworzyć płatności. Spróbuj ponownie albo wybierz inną metodę płatności.": "We could not open the payment. Please try again or choose another payment method.",
 "Nieznana metoda płatności. Odśwież stronę i wybierz ją ponownie.": "Unknown payment method. Refresh the page and choose it again.",
+"Do zapłaty": "To pay",
+"jednorazowo, bez abonamentu": "one-off, no subscription",
 "Masz ogłoszenie na to stanowisko?": "Have a job ad for this role?",
 "Wklej treść albo link. Darmowy skaner porówna ogłoszenie z Twoim CV i pokaże, których wymagań w nim nie widać.": "Paste the text or a link. The free scanner compares the ad with your CV and shows which requirements it does not show yet.",
 "Treść lub link do ogłoszenia": "Job ad text or link",
