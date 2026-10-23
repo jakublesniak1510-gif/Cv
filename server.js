@@ -21,6 +21,8 @@ import { adFromImage, AdImageError } from './lib/adImage.js';
 import { simTurn, SimError } from './lib/sim.js';
 import { samplePdf } from './lib/sample.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
+import { scanFallback } from './lib/tailor.js';
+import { letterRoutes } from './lib/letter-landing.js';
 import { outcomes, outcomeRoutes, startOutcome, outcomeLinks, anonymizeOutcomes, publicOutcome, OUTCOME_CONSENT, OUTCOME_AFTER, OT } from './lib/outcomes.js';
 import { mailEnabled, sendOrderMail, sendReminder, sendFollowUp, sendReviewAsk, sendOutcomeAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail, sendOwnerMail } from './lib/mail.js';
 import { socialRoutes, cleanupChats, botStatus } from './lib/social.js';
@@ -177,6 +179,15 @@ app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
   } catch (e) { console.error('Skaner', e.message); logEvent('skaner', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się ocenić CV. Spróbuj ponownie.' }); }
 });
 
+// --- Wyciągacz słów kluczowych z ogłoszenia (poradnik „Słowa kluczowe ATS”, generator podsumowania): bez CV, bez zapisywania ---
+app.post('/api/ad-keywords', express.json({ limit: '40kb' }), (req, res) => {
+  if (!scanLimit(req)) return res.status(429).json({ error: 'Wykorzystano limit na godzinę. Spróbuj później.' });
+  const adText = typeof req.body?.adText === 'string' ? req.body.adText.trim().slice(0, 10000) : '';
+  if (adText.length < 80) return res.status(400).json({ error: 'Wklej pełną treść ogłoszenia (min. 80 znaków).' });
+  const r = scanFallback({ cvText: '-', adText });
+  res.set('Cache-Control', 'no-store').json({ keywords: [...r.found, ...r.missing.map((m) => m.keyword)].slice(0, 20) });
+});
+
 // Import kontaktów CSV w panelu może przekraczać ogólny limit 700 KB (parser przed globalnym).
 app.use('/api/admin/contacts/import', express.json({ limit: '3mb' }));
 // Szkic ogłoszenia z rozszerzenia Chrome (własny limit 20 KB i CORS, więc przed globalnym parserem).
@@ -196,6 +207,7 @@ b2bRoutes(app, {
   } : null,
 });
 seoRoutes(app, BASE_URL);
+letterRoutes(app, BASE_URL); // /narzedzia/list-motywacyjny-pod-ogloszenie
 templateRoutes(app, BASE_URL);
 abroadRoutes(app, BASE_URL);
 officialRoutes(app, BASE_URL);
