@@ -39,6 +39,7 @@ function fakeGoogle(calls) {
       { keys: [`${BASE}/en/cv/cashier`], clicks: 2, impressions: 50, ctr: 0.04, position: 15 },
       { keys: [`${BASE}/poradnik/wzor-cv-2026`], clicks: 0, impressions: 80, ctr: 0, position: 30 },
       { keys: [`${BASE}/uk/instrumenty/skaner`], clicks: 1, impressions: 20, ctr: 0.05, position: 8 },
+      { keys: [`${BASE}/cv/fotograf`], clicks: 0, impressions: 70, ctr: 0, position: 7.4 },
     ] });
   };
 }
@@ -116,7 +117,8 @@ test('Raport tygodniowy: Search Console, próbka indeksowania, zapis, e-mail raz
   assert.deepEqual(g.queries.map((q) => q.key), ['wzór cv', 'cv kasjer', 'cv kucharz', 'list motywacyjny magazynier']);
   assert.deepEqual(g.nearFirstPage.map((q) => q.key), ['cv kasjer', 'cv kucharz'], 'poz. 8–20 i co najmniej 20 wyświetleń');
   assert.equal(g.queries.find((q) => q.key === 'cv kucharz').prevClicks, 2);
-  assert.deepEqual(g.zeroClickPages.map((p) => p.key.replace(BASE, '')), ['/cv/kasjer/warszawa', '/poradnik/wzor-cv-2026']);
+  assert.deepEqual(g.zeroClickPages.map((p) => p.key.replace(BASE, '')), ['/cv/kasjer/warszawa', '/poradnik/wzor-cv-2026', '/cv/fotograf']);
+  assert.deepEqual(g.fixTitles.map((p) => p.key.replace(BASE, '')), ['/cv/fotograf'], 'pozycja 3–20 i CTR 0% (poz. 25 i 30 – nie)');
   assert.deepEqual(g.byType.map((x) => x.key), ['strona główna', 'zawód', 'zawód + miasto', 'poradnik', 'narzędzia']);
   assert.deepEqual(Object.fromEntries(g.byLang.map((x) => [x.key, x.clicks])), { pl: 50, en: 2, uk: 1 });
   assert.equal(g.inspection.sample, 40); assert.equal(Object.values(g.inspection.states).reduce((a, b) => a + b, 0), 40);
@@ -132,7 +134,7 @@ test('Raport tygodniowy: Search Console, próbka indeksowania, zapis, e-mail raz
   assert.equal(await rep.seoWeekly(BASE, { now: MON + 864e5, fetchFn: fakeGoogle([]) }), null);
   assert.ok(await rep.seoReports.get('2025-10-20'));
   const txt = rep.reportText(r, BASE, 'L');
-  assert.match(txt, /kliknięcia 80 \(\+60%\)/);
+  assert.match(txt, /kliknięcia 80 \(\+60%\)/); assert.match(txt, /Pozycja 3–20, CTR 0% – do poprawy tytułu \(1\):\n- \/cv\/fotograf: poz\. 7\.4, 70 wyśw\./);
   if (sampled.includes(`${BASE}/p42`)) assert.match(txt, /Google wybrał inną stronę główną niż nasza:\n- https:\/\/example\.test\/p42 → https:\/\/example\.test\/p7/);
   assert.ok(r.gsc.inspection.rows.every((x) => 'googleCanonical' in x)); assert.match(txt, /Blisko pierwszej strony[\s\S]*cv kasjer: poz\. 11\.4/); assert.match(txt, /Indeksowanie \(próbka 40/);
   // przechowujemy 12 ostatnich tygodni
@@ -151,7 +153,7 @@ test('Raport tygodniowy: Search Console, próbka indeksowania, zapis, e-mail raz
     assert.equal((await fetch(`${U}/raport-seo/${T.slice(1)}`)).status, 404);
     const h = await fetch(`${U}/raport-seo/${T}`);
     assert.equal(h.status, 200); assert.equal(h.headers.get('x-robots-tag'), 'noindex, nofollow'); assert.equal(h.headers.get('cache-control'), 'no-store');
-    const html = await h.text(); assert.match(html, /<meta name="robots" content="noindex,nofollow">/); assert.match(html, /Blisko pierwszej strony/); assert.match(html, /Lejek sprzedaży/);
+    const html = await h.text(); assert.match(html, /<h2>Pozycja 3–20, CTR 0% – do poprawy tytułów<\/h2>/); assert.match(html, /<meta name="robots" content="noindex,nofollow">/); assert.match(html, /Blisko pierwszej strony/); assert.match(html, /Lejek sprzedaży/);
     const j = await (await fetch(`${U}/raport-seo/${T}?format=json`)).json();
     assert.equal(j.id, '2025-10-20'); assert.equal(j.gsc.totals.cur.clicks, 80);
     assert.equal(rep.reportLink(BASE), `${BASE}/raport-seo/${T}`);
@@ -172,4 +174,42 @@ test('Panel → SEO: ręczne generowanie w tle, raz na godzinę, błąd Search C
     t += 30 * 60e3; const r = await post(); assert.equal(r.status, 429); assert.match((await r.json()).error, /raz na godzinę.*30 min/);
     t += 31 * 60e3; assert.equal((await (await post()).json()).started, true, 'po godzinie znowu można');
   } finally { srv.close(); }
+});
+
+test('CTR po zmianie tytułów: tyle samo dni przed i po ostatniej zmianie, grupy zapytań, sekcja w e-mailu i raporcie', async () => {
+  const ch = rep.titleChanges();
+  assert.ok(ch.length && ch.every((x) => /^\d{4}-\d{2}-\d{2}$/.test(x.date) && x.pages.length), 'seo-data/title-changes.json');
+  const calls = [];
+  const q = async (dims, s, e) => {
+    calls.push([s, e]); const after = s >= '2026-10-24';
+    return [
+      { keys: ['cvpodogloszenie.pl'], clicks: after ? 9 : 5, impressions: 20, position: 1.2 },
+      { keys: ['CV pod ogłoszenie'], clicks: after ? 4 : 2, impressions: 100, position: 6 },
+      { keys: ['jak dopasować cv do ogłoszenia'], clicks: 1, impressions: 50, position: 9 },
+      { keys: ['skaner cv za darmo'], clicks: after ? 3 : 1, impressions: 60, position: 7 },
+      { keys: ['wzór cv'], clicks: 30, impressions: 900, position: 6 },
+    ];
+  };
+  const changes = [{ date: '2026-09-01', pages: ['/'] }, { date: '2026-10-23', note: 'tytuły', pages: ['/'], variantB: { title: 'Wariant B', consider: '2026-11-20', status: 'do rozważenia – nie wdrożone' } }];
+  assert.equal(await rep.titleCtr('2026-08-30', q, changes), null, 'przed pierwszą zmianą: brak sekcji');
+  const early = await rep.titleCtr('2026-10-23', q, changes);
+  assert.equal(early.days, 0); assert.match(rep.ctrText(early), /za mało danych[\s\S]*\nWariant B do rozważenia \(od 2026-11-20\): „Wariant B” – do rozważenia – nie wdrożone\./);
+  assert.equal(rep.titleChanges().at(-1).variantB.title, 'Dopasuj CV do ogłoszenia – darmowy skaner CV i list motywacyjny');
+  const t = await rep.titleCtr('2026-10-30', q, changes);
+  assert.equal(t.change, '2026-10-23'); assert.equal(t.days, 7);
+  assert.deepEqual([t.before, t.after], [{ start: '2026-10-16', end: '2026-10-22' }, { start: '2026-10-24', end: '2026-10-30' }]);
+  assert.deepEqual(calls.slice(-2), [['2026-10-16', '2026-10-22'], ['2026-10-24', '2026-10-30']]);
+  const g = Object.fromEntries(t.groups.map((x) => [x.key, x]));
+  assert.deepEqual(Object.keys(g), ['marka', 'cv-pod-ogloszenie', 'dopasuj-cv', 'skaner-cv']);
+  assert.deepEqual([g.marka.before.clicks, g.marka.after.clicks, g.marka.after.ctr], [5, 9, 45]);
+  assert.deepEqual([g['cv-pod-ogloszenie'].before.impressions, g['cv-pod-ogloszenie'].after.ctr], [100, 4], 'wielkość liter i polskie znaki bez znaczenia; sama domena tylko w „marce”');
+  assert.equal(g['dopasuj-cv'].after.impressions, 50); assert.equal(g['skaner-cv'].after.clicks, 3);
+  assert.equal((await rep.titleCtr('2027-03-01', q, changes)).days, 28, 'najwyżej 28 dni');
+  const txt = rep.ctrText(t);
+  assert.match(txt, /CTR po zmianie tytułów \(zmiana 2026-10-23; 7 dni przed vs 7 dni po\)/); assert.match(txt, /Marka \(cvpodogloszenie\): CTR 25% → 45%, kliknięcia 5 → 9/);
+  const html = rep.reportHtml({ id: '2026-11-02', created: Date.now(), funnel: { stages: [], from: '', to: '' }, gsc: { period: { start: 'a', end: 'b' }, totals: { cur: {}, prev: {} }, queries: [], nearFirstPage: [], pages: [], zeroClickPages: [], byLang: [], byType: [], inspection: { sample: 0, states: {}, rows: [] }, titleCtr: t } });
+  assert.match(html, /<h2>CTR po zmianie tytułów<\/h2><p>Zmiana 2026-10-23 \(tytuły\): 7 dni przed/); assert.match(html, /<td>„skaner cv”<\/td><td>1\.7<\/td><td>5<\/td>/);
+  assert.match(html, /<p>Wariant B do rozważenia \(od 2026-11-20\)/);
+  const adm = fs.readFileSync(new URL('../public/admin.js', import.meta.url), 'utf8');
+  assert.match(adm, /\$\('#seoCtr'\)\.replaceChildren/); assert.match(adm, /\$\('#seoFix'\)\.replaceChildren\(simpleTable\(g\?\.fixTitles/); assert.match(adm, /Wariant B do rozważenia/);
 });

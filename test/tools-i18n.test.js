@@ -37,7 +37,7 @@ test('SSR: adresy narzędzi w językach zwracają 200 z własnym tytułem, canon
     for (const l of LANGS) for (const k of Object.keys(TOOLS)) {
       const u = toolUrl(l, k), { status, text } = await get('/' + u), d = TOOL_LANGS[l].data[k];
       assert.equal(status, 200, u);
-      assert.ok(text.includes(`<title>${d.title}`), `${u}: tytuł`);
+      assert.ok(text.includes(`<title>${d.seoTitle || d.title}`), `${u}: tytuł`);
       assert.ok(text.includes(`<link rel="canonical" href="${base}/${u}">`), `${u}: canonical`);
       assert.ok(text.includes(`<html lang="${l}">`), `${u}: lang`);
       assert.ok(text.includes(`hreflang="pl" href="${base}/narzedzia/${k}"`), `${u}: hreflang pl`);
