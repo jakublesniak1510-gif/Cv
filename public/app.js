@@ -25,6 +25,8 @@ if (ORDER_B) {
 }
 const STEP_TITLE = (n) => (ORDER_B && n === 5 ? 'Od jakiego ogłoszenia zaczynamy?' : ORDER_B && n === 6 ? 'Pakiet, wygląd i podsumowanie' : STEPS[n - 1]);
 let pendingDraft = ''; // ogłoszenie z rozszerzenia Chrome czekające na formularz skanera
+// Ogłoszenie wklejone na stronie zawodu („Masz ogłoszenie?”, lite.js): jednorazowo z pamięci tej karty.
+try { const a = sessionStorage.getItem('cvpo-scan-ad'); if (a) { sessionStorage.removeItem('cvpo-scan-ad'); pendingDraft = a; setTimeout(() => (pendingDraft = ''), 20000); } } catch {}
 let cfg = { demo: false, maxAds: 5, noPrint: false, maxRevisions: 5, loading: true };
 // Statystyki bez cookies: zbiorcze odsłony i kroki kreatora (serwer nie zapisuje IP ani identyfikatorów).
 const trackLater = []; // zdarzenia sprzed wczytania konfiguracji (np. powrót z płatności), wysyłane po „pv”

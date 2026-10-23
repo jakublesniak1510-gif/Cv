@@ -1527,5 +1527,22 @@
 "Metoda płatności": "Спосіб оплати",
 "Przelewy24 (przelew online, BLIK)": "Przelewy24 (онлайн-переказ, BLIK)",
 "Nie udało się otworzyć płatności. Spróbuj ponownie albo wybierz inną metodę płatności.": "Не вдалося відкрити оплату. Спробуйте ще раз або виберіть інший спосіб оплати.",
-"Nieznana metoda płatności. Odśwież stronę i wybierz ją ponownie.": "Невідомий спосіб оплати. Оновіть сторінку й виберіть його ще раз."
+"Nieznana metoda płatności. Odśwież stronę i wybierz ją ponownie.": "Невідомий спосіб оплати. Оновіть сторінку й виберіть його ще раз.",
+"Masz ogłoszenie na to stanowisko?": "Маєте оголошення на цю посаду?",
+"Wklej treść albo link. Darmowy skaner porówna ogłoszenie z Twoim CV i pokaże, których wymagań w nim nie widać.": "Вставте текст або посилання. Безкоштовний сканер порівняє оголошення з вашим резюме і покаже, яких вимог у ньому не видно.",
+"Treść lub link do ogłoszenia": "Текст або посилання на оголошення",
+"Sprawdź CV z tym ogłoszeniem": "Перевірити резюме з цим оголошенням",
+"Ogłoszenie przekażemy do skanera w tej przeglądarce. CV wgrasz w następnym kroku.": "Оголошення передамо сканеру в цьому браузері. Резюме завантажите на наступному кроці.",
+"Jedno CV, dwa ogłoszenia": "Одне резюме, два оголошення",
+"To samo przykładowe CV i dwa ogłoszenia na to stanowisko z innymi wymaganiami. Zaznaczyliśmy, co CV już pokazuje i co trzeba by dopisać – tylko jeśli naprawdę masz takie doświadczenie.": "Той самий приклад резюме і два оголошення на цю посаду з різними вимогами. Ми позначили, що резюме вже показує, а що треба було б дописати – лише якщо у вас справді є такий досвід.",
+"Ogłoszenie A": "Оголошення A",
+"Ogłoszenie B": "Оголошення B",
+"Wymagania z ogłoszenia:": "Вимоги з оголошення:",
+"widać w CV": "видно в резюме",
+"nie widać w CV": "не видно в резюме",
+"Na górę CV pod to ogłoszenie:": "На початок резюме під це оголошення:",
+"Przykładowe CV nie pokazuje tych wymagań. Dopisz je, jeśli masz takie doświadczenie.": "Приклад резюме не показує цих вимог. Допишіть їх, якщо маєте такий досвід.",
+"Czego szukają rekruterzy w CV {0}": "Що шукають рекрутери в резюме {0}",
+"Słowa kluczowe, które często pojawiają się w ogłoszeniach dla tego zawodu. Stan na {0}.": "Ключові слова, які часто трапляються в оголошеннях для цієї професії. Станом на {0}.",
+"Sprawdź CV za darmo": "Перевірити резюме безкоштовно"
 }

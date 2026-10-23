@@ -1527,5 +1527,22 @@
 "Metoda płatności": "Payment method",
 "Przelewy24 (przelew online, BLIK)": "Przelewy24 (online bank transfer, BLIK)",
 "Nie udało się otworzyć płatności. Spróbuj ponownie albo wybierz inną metodę płatności.": "We could not open the payment. Please try again or choose another payment method.",
-"Nieznana metoda płatności. Odśwież stronę i wybierz ją ponownie.": "Unknown payment method. Refresh the page and choose it again."
+"Nieznana metoda płatności. Odśwież stronę i wybierz ją ponownie.": "Unknown payment method. Refresh the page and choose it again.",
+"Masz ogłoszenie na to stanowisko?": "Have a job ad for this role?",
+"Wklej treść albo link. Darmowy skaner porówna ogłoszenie z Twoim CV i pokaże, których wymagań w nim nie widać.": "Paste the text or a link. The free scanner compares the ad with your CV and shows which requirements it does not show yet.",
+"Treść lub link do ogłoszenia": "Job ad text or link",
+"Sprawdź CV z tym ogłoszeniem": "Check my CV against this ad",
+"Ogłoszenie przekażemy do skanera w tej przeglądarce. CV wgrasz w następnym kroku.": "We pass the ad to the scanner in this browser. You upload your CV in the next step.",
+"Jedno CV, dwa ogłoszenia": "One CV, two job ads",
+"To samo przykładowe CV i dwa ogłoszenia na to stanowisko z innymi wymaganiami. Zaznaczyliśmy, co CV już pokazuje i co trzeba by dopisać – tylko jeśli naprawdę masz takie doświadczenie.": "The same example CV and two job ads for this role with different requirements. We marked what the CV already shows and what you would need to add – only if you really have that experience.",
+"Ogłoszenie A": "Job ad A",
+"Ogłoszenie B": "Job ad B",
+"Wymagania z ogłoszenia:": "Requirements in the ad:",
+"widać w CV": "shown in the CV",
+"nie widać w CV": "not shown in the CV",
+"Na górę CV pod to ogłoszenie:": "Put at the top of the CV for this ad:",
+"Przykładowe CV nie pokazuje tych wymagań. Dopisz je, jeśli masz takie doświadczenie.": "The example CV does not show these requirements. Add them if you have that experience.",
+"Czego szukają rekruterzy w CV {0}": "What recruiters look for in {0} CVs",
+"Słowa kluczowe, które często pojawiają się w ogłoszeniach dla tego zawodu. Stan na {0}.": "Keywords that often appear in job ads for this role. As of {0}.",
+"Sprawdź CV za darmo": "Check your CV for free"
 }
