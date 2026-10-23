@@ -1527,5 +1527,8 @@
 "Metoda płatności": "Payment method",
 "Przelewy24 (przelew online, BLIK)": "Przelewy24 (online bank transfer, BLIK)",
 "Nie udało się otworzyć płatności. Spróbuj ponownie albo wybierz inną metodę płatności.": "We could not open the payment. Please try again or choose another payment method.",
-"Nieznana metoda płatności. Odśwież stronę i wybierz ją ponownie.": "Unknown payment method. Refresh the page and choose it again."
+"Nieznana metoda płatności. Odśwież stronę i wybierz ją ponownie.": "Unknown payment method. Refresh the page and choose it again.",
+"Do zapłaty": "To pay",
+"jednorazowo, bez abonamentu": "one-off, no subscription",
+". Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów. Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.": ". I understand my data will be sent to an AI provider only to prepare the documents. I want the service to be performed immediately after payment. I understand that once it has been performed, I lose the right to withdraw from the contract."
 }
