@@ -123,7 +123,7 @@ app.use((req, res, next) => (ALIAS_HOSTS.has(req.hostname) && BASE_URL.startsWit
 
 // Prosty limit zapytań na adres IP.
 const limiter = (max, windowMs) => { const hits = new Map(); return (req) => { const now = Date.now(), h = (hits.get(req.ip) || []).filter((t) => now - t < windowMs); if (h.length >= max) return false; hits.set(req.ip, [...h, now]); return true; }; };
-const photoLimit = limiter(5, 3600_000), answerLimit = limiter(8, 3600_000), importLimit = limiter(10, 600_000), fetchLimit = limiter(20, 600_000), scanLimit = limiter(6, 3600_000), cvCheckLimit = limiter(12, 3600_000), chatLimit = limiter(30, 3600_000);
+const photoLimit = limiter(5, 3600_000), answerLimit = limiter(8, 3600_000), importLimit = limiter(10, 600_000), fetchLimit = limiter(20, 600_000), scanLimit = limiter(6, 3600_000), cvCheckLimit = limiter(12, 3600_000), chatLimit = limiter(30, 3600_000), adKwLimit = limiter(20, 3600_000);
 const FOLLOWUP_AFTER = 29 * 24 * 3600 * 1000, REMINDER_AFTER = 7 * 24 * 3600 * 1000, REVIEW_AFTER = 4 * 24 * 3600 * 1000;
 
 // Bot AI na Messengerze i Instagramie (podpis Meta wymaga surowej treści, więc przed globalnym parserem JSON).
@@ -183,7 +183,7 @@ app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
 
 // --- Wyciągacz słów kluczowych z ogłoszenia (poradnik „Słowa kluczowe ATS”, generator podsumowania): bez CV, bez zapisywania ---
 app.post('/api/ad-keywords', express.json({ limit: '40kb' }), (req, res) => {
-  if (!scanLimit(req)) return res.status(429).json({ error: 'Wykorzystano limit na godzinę. Spróbuj później.' });
+  if (!adKwLimit(req)) return res.status(429).json({ error: 'Wykorzystano limit na godzinę. Spróbuj później.' });
   const adText = typeof req.body?.adText === 'string' ? req.body.adText.trim().slice(0, 10000) : '';
   if (adText.length < 80) return res.status(400).json({ error: 'Wklej pełną treść ogłoszenia (min. 80 znaków).' });
   const r = scanFallback({ cvText: '-', adText });

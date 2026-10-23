@@ -33,6 +33,7 @@
     const r = await fetch('/api/ad-keywords', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adText: ad }) });
     const j = await r.json(); if (!r.ok) throw new Error(j.error); return j.keywords;
   };
+  for (const b of document.querySelectorAll('form.kw-extract button[hidden], form.sum-gen button[hidden]')) b.hidden = false;
   const mk = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; };
   for (const f of document.querySelectorAll('form.kw-extract')) f.addEventListener('submit', async (e) => {
     e.preventDefault(); const box = f.querySelector('.w-out'), btn = f.querySelector('button');
@@ -49,7 +50,7 @@
       const boxes = k.map((x) => { const c = mk('input', { type: 'checkbox', value: x }); c.addEventListener('change', draw); return c; });
       function draw() {
         const on = boxes.filter((c) => c.checked).map((c) => c.value);
-        text.textContent = on.length ? `[Stanowisko] z doświadczeniem: ${on.slice(0, 3).join(', ')}.${on.length > 3 ? ` Na co dzień: ${on.slice(3, 6).join(', ')}.` : ''} Szukam pracy jako [stanowisko z ogłoszenia], gdzie wykorzystam [Twoja mocna strona].` : 'Zaznacz słowa, które naprawdę Cię opisują.';
+        text.textContent = on.length ? `[Stanowisko] z doświadczeniem w: ${on.slice(0, 3).join(', ')}.${on.length > 3 ? ` Na co dzień: ${on.slice(3, 6).join(', ')}.` : ''} Szukam pracy jako [stanowisko z ogłoszenia], gdzie wykorzystam [Twoja mocna strona].` : 'Zaznacz słowa, które naprawdę Cię opisują.';
       }
       box.replaceChildren(mk('p', { textContent: 'Zaznacz tylko to, co jest prawdą o Tobie:' }), mk('div', { className: 'kw-pick' }, ...boxes.map((c) => mk('label', { className: 'check' }, c, ' ', c.value))), text);
       draw();
