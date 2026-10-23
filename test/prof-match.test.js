@@ -8,7 +8,7 @@ import { PROF_LANGS } from '../lib/professions-i18n.js';
 import { toolUrl } from '../lib/tools-i18n.js';
 import { twoAds, profGen } from '../lib/prof-match.js';
 
-const KEYS = ['Masz ogłoszenie na to stanowisko?', 'Wklej treść albo link. Darmowy skaner porówna ogłoszenie z Twoim CV i pokaże, których wymagań w nim nie widać.', 'Treść lub link do ogłoszenia', 'Sprawdź CV z tym ogłoszeniem', 'Ogłoszenie przekażemy do skanera w tej przeglądarce. CV wgrasz w następnym kroku.', 'Jedno CV, dwa ogłoszenia', 'To samo przykładowe CV i dwa ogłoszenia na to stanowisko z innymi wymaganiami. Zaznaczyliśmy, co CV już pokazuje i co trzeba by dopisać – tylko jeśli naprawdę masz takie doświadczenie.', 'Ogłoszenie A', 'Ogłoszenie B', 'Wymagania z ogłoszenia:', 'widać w CV', 'nie widać w CV', 'Na górę CV pod to ogłoszenie:', 'Przykładowe CV nie pokazuje tych wymagań. Dopisz je, jeśli masz takie doświadczenie.', 'Czego szukają rekruterzy w CV {0}', 'Słowa kluczowe, które często pojawiają się w ogłoszeniach dla tego zawodu. Stan na {0}.', 'Sprawdź CV za darmo'];
+const KEYS = ['Masz ogłoszenie na to stanowisko?', 'Wklej treść albo link. Darmowy skaner porówna ogłoszenie z Twoim CV i pokaże, których wymagań w nim nie widać.', 'Treść lub link do ogłoszenia', 'Sprawdź CV z tym ogłoszeniem', 'Ogłoszenie przekażemy do skanera w tej przeglądarce. CV wgrasz w następnym kroku.', 'Jedno CV, dwa ogłoszenia', 'To samo przykładowe CV i dwa ogłoszenia na to stanowisko z innymi wymaganiami. Zaznaczyliśmy, co CV już pokazuje i co trzeba by dopisać – tylko jeśli naprawdę masz takie doświadczenie.', 'Ogłoszenie A', 'Ogłoszenie B', 'Wymagania z ogłoszenia:', 'widać w CV', 'nie widać w CV', 'Na górę CV pod to ogłoszenie:', 'Przykładowe CV nie pokazuje tych wymagań. Dopisz je, jeśli masz takie doświadczenie.', 'Czego szukają rekruterzy w CV {0}', 'Słowa kluczowe, które często pojawiają się w ogłoszeniach dla tego zawodu. Lista z aktualizacji strony: {0}.', 'Sprawdź CV za darmo'];
 const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
 const SCAN = { pl: '/narzedzia/skaner-cv', en: `/${toolUrl('en', 'skaner-cv')}`, uk: `/${toolUrl('uk', 'skaner-cv')}`, de: `/${toolUrl('de', 'skaner-cv')}` };
 
@@ -41,7 +41,7 @@ test('Wszystkie strony zawodów w 4 językach: „Masz ogłoszenie?” do skaner
         const two = /<div class="two-ads">([\s\S]*?)<\/div><\/div><p class="prof-cta">/.exec(h)?.[1];
         assert.ok(two && (two.match(/class="ad-col"/g) || []).length === 2, `${url}: dwa ogłoszenia`);
         for (const j of p.sample.jobs) assert.ok(!two.includes(j.company), `${url}: bez nazw firm z przykładu`);
-        assert.match(h, /<p class="small">[^<]*(?:Stan na|As of|Stand:|Станом на) \d{2}\.\d{2}\.\d{4}\.<\/p>/, `${url}: data słów kluczowych`);
+        assert.match(h, /<p class="small">[^<]*(?:Lista z aktualizacji strony:|List from the page update:|Liste aus der Aktualisierung der Seite:|Список з оновлення сторінки:) \d{2}\.\d{2}\.\d{4}\.<\/p>/, `${url}: data słów kluczowych`);
         const cta = /<p class="prof-cta"><a class="btn ghost" href="([^"]+)">[^<]+<\/a> <a class="btn" href="([^"]+)">/.exec(h);
         assert.ok(Buffer.byteLength(h) < 40e3, `${url}: budżet rozmiaru HTML 40 kB (${Buffer.byteLength(h)})`);
         assert.ok(cta && cta[1] === SCAN[l] && cta[2].includes(`zamow=1&amp;zawod=${p.slug}`), `${url}: skaner, potem kreator`);
