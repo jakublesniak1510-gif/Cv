@@ -90,8 +90,9 @@ test('JSON-LD strony głównej: poprawna składnia, SoftwareApplication z Aggreg
 const NOT_PERSON = ['obsluga-klienta', 'specjalista-kadr-i-plac'];
 test('Strony zawodów: tytuł z szablonu z odmianą z danych, opis ze słowami kluczowymi i skanerem, bez błędów odmiany', () => {
   const t = (u) => pages.find((p) => p.u === u)?.title, d = (u) => pages.find((p) => p.u === u)?.desc;
-  assert.equal(t('/cv/hydraulik'), 'CV hydraulika pod ogłoszenie – wzór i generator');
-  assert.ok(pages.every((p) => !/\b5 minut/.test(p.title)), 'bez „5 minut” w tytułach');
+  assert.equal(t('/cv/hydraulik'), 'CV hydraulika pod ogłoszenie – wzór i generator online');
+  assert.equal(t(`/uk/${PROF_LANGS.uk.seg}/${PROF_LANGS.uk.prof.hydraulik.slugLang}`), 'Резюме сантехніка під вакансію – зразок і генератор онлайн');
+  assert.ok(pages.every((p) => !/5 minut|5 minutes|5 Minuten|5 хвилин/i.test(`${p.title} ${p.desc}`)), 'bez „5 minut” w tytułach i opisach');
   assert.match(d('/cv/hydraulik'), /^Wzór CV hydraulika ze słowami kluczowymi z ogłoszeń: .+\. Wygeneruj CV pod ogłoszenie lub sprawdź swoje darmowym skanerem\.$/);
   assert.equal(t('/en/cv/plumber'), 'Plumber CV for a job ad – template and generator');
   assert.match(t(`/de/lebenslauf/${PROF_LANGS.de.prof.hydraulik.slugLang}`), /^Lebenslauf Installateur zur Stellenanzeige/);
@@ -103,7 +104,7 @@ test('Strony zawodów: tytuł z szablonu z odmianą z danych, opis ze słowami k
     const gw = g.toLowerCase().split(' '), nw = p.name.split(' / ')[0].toLowerCase().split(' ');
     if (NOT_PERSON.includes(p.slug)) assert.match(g, /^w /, `${p.slug}: wyjątek`);
     else assert.ok(gw.some((w, i) => w !== nw[i] && /(a|y|i|ego|ej|u|ów)$/u.test(w)), `${p.slug}: „${g}” nie wygląda na dopełniacz od „${p.name}”`);
-    for (const l of ['pl', 'en', 'de']) {
+    for (const l of ['pl', 'en', 'uk', 'de']) {
       const x = profSeo(l === 'pl' ? p : { ...p, ...PROF_LANGS[l].prof[p.slug] }, l);
       assert.ok(x.seoTitle && x.seoTitle.length <= 60 && x.metaDescription.length <= 155, `${l}/${p.slug}`);
       assert.doesNotMatch(x.seoTitle + x.metaDescription, /undefined|  |\s[,.]/, `${l}/${p.slug}: puste pola`);

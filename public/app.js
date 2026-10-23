@@ -14,6 +14,9 @@ const STEPS = ['Pakiet i wygląd CV', 'Twoje dane', 'Doświadczenie', 'Wykształ
 // Test A/B „wizard_order” (lib/ab.js, data-order="b" od serwera): najpierw ogłoszenie, potem dane, doświadczenie, wykształcenie,
 // a pakiet, dodatki, języki i wygląd w podsumowaniu. Kroki zachowują numery sekcji (walidacja, analityka), zmienia się kolejność.
 const ORDER_B = document.getElementById('wiz')?.dataset.order === 'b';
+// Test A/B „checkout” (lib/ab.js, data-checkout="b" od serwera): cena na górze, metody płatności jako ikony,
+// zgody w układzie kompaktowym – nadal dwa osobne pola (regulamin; osobno zgoda z art. 38 pkt 13), domyślnie odznaczone.
+const CHECKOUT_B = document.getElementById('wiz')?.dataset.checkout === 'b';
 const ORDER = ORDER_B ? [5, 2, 3, 4, 6] : [1, 2, 3, 4, 5, 6];
 if (ORDER_B) {
   const s1 = document.querySelector('#wiz section[data-step="1"]'), s5 = document.querySelector('#wiz section[data-step="5"]'), s6 = document.querySelector('#wiz section[data-step="6"]');
@@ -25,6 +28,8 @@ if (ORDER_B) {
 }
 const STEP_TITLE = (n) => (ORDER_B && n === 5 ? 'Od jakiego ogłoszenia zaczynamy?' : ORDER_B && n === 6 ? 'Pakiet, wygląd i podsumowanie' : STEPS[n - 1]);
 let pendingDraft = ''; // ogłoszenie z rozszerzenia Chrome czekające na formularz skanera
+// Ogłoszenie wklejone na stronie zawodu („Masz ogłoszenie?”, lite.js): jednorazowo z pamięci tej karty.
+try { const a = sessionStorage.getItem('cvpo-scan-ad'); if (a) { sessionStorage.removeItem('cvpo-scan-ad'); pendingDraft = a; setTimeout(() => (pendingDraft = ''), 20000); } } catch {}
 let cfg = { demo: false, maxAds: 5, noPrint: false, maxRevisions: 5, loading: true };
 // Statystyki bez cookies: zbiorcze odsłony i kroki kreatora (serwer nie zapisuje IP ani identyfikatorów).
 const trackLater = []; // zdarzenia sprzed wczytania konfiguracji (np. powrót z płatności), wysyłane po „pv”
@@ -800,7 +805,7 @@ function restoreDraft(from) {
 function refresh() {
   if ($('#langPick').children.length) syncLangPick();
   saveDraft();
-  $('#total').textContent = total() + ' zł'; if (step === 6) payTrust(6);
+  $('#total').textContent = total() + ' zł'; if (CHECKOUT_B) $('#totalTop').textContent = total() + ' zł'; if (step === 6) payTrust(6);
   $('#bundleTip').textContent = pkg() === 'cv' ? '' : bundleOn() ? `Masz pakiet „Pewna rozmowa”: ${PRICE.bundleOff} zł taniej.` : `Pakiet „Pewna rozmowa”: zaznacz przygotowanie do rozmowy i symulator, a zapłacisz ${PRICE.bundleOff} zł mniej.`;
   $('#bundleTip').hidden = pkg() === 'cv';
   $('#brk').textContent = [addonsTotal() ? `dodatki ${addonsTotal()} zł` : '', discount() ? `rabat −${discount()} zł` : ''].filter(Boolean).join(' · ');
@@ -889,6 +894,10 @@ $('#toPack').onclick = () => { $('input[name=pkg][value=pack3]').checked = true;
 }
 $('#wizForm').addEventListener('input', saveDraft);
 $('#gwBox').addEventListener('change', () => payTrust(step));
+if (CHECKOUT_B) {
+  $('#sumTop').hidden = false;
+  for (const id of ['consent', 'waiver']) $('#' + id).closest('label').classList.add('compact');
+}
 $('#addExp').onclick = () => addRow('exp');
 $('#addEdu').onclick = () => addRow('edu');
 $('#addAd').onclick = () => addRow('ads');
@@ -915,7 +924,7 @@ function payTrust(n) {
   if (n === 6 && total() > 0) { if (!$('#gwBox').childElementCount) gwPicker($('#gwBox'), 'gw'); } else $('#gwBox').hidden = true;
   if (!on) return;
   const g = payGateways().find((x) => x.id === gwValue($('#gwBox'))) || cfg.pay;
-  const parts = [...(g?.methods || []).map((m, i, a) => [el('span', { textContent: m }), i < a.length - 1 ? ', ' : '']).flat()];
+  const parts = CHECKOUT_B ? (g?.methods || []).map((m) => el('span', { className: 'payico', textContent: m })) : [...(g?.methods || []).map((m, i, a) => [el('span', { textContent: m }), i < a.length - 1 ? ', ' : '']).flat()];
   const items = [parts.length ? parts : null, g ? [el('span', { textContent: `bezpieczna płatność przez ${g.provider}` })] : null, [el('span', { textContent: 'dokumenty zwykle gotowe w kilka minut' })], [el('span', { textContent: 'PDF także na e-mail' })]].filter(Boolean);
   box.replaceChildren(...items.flatMap((x, i) => (i ? [' · ', ...x] : x)));
 }
@@ -1046,7 +1055,7 @@ $('#wizForm').onsubmit = async (e) => {
   const v = (id) => $('#' + id).value;
   const body = {
     draftToken: srvToken() || undefined,
-    usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, gateway: gwValue($('#gwBox')), outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, ...(CHECKOUT_B ? { consentForm: 'compact' } : {}), gateway: gwValue($('#gwBox')), outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   // Zgoda na cookies reklamowe (baner): tylko wtedy serwer zgłosi zakup do Meta (Conversions API) z identyfikatorami piksela.
