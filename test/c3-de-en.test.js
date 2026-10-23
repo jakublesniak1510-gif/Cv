@@ -67,8 +67,8 @@ test('Teksty C3: tytuły ≤ 60, opisy ≤ 155, źródła przy każdym artykule,
   }
   const ai = C3_ARTS.en['cv-pod-ai'];
   assert.match(JSON.stringify(ai), /22A/); assert.ok(ai.sources.some((s) => s.u.includes('legislation.gov.uk')), 'UK: DUA Act 2025');
-  const ext = JSON.parse(read('seo-data/ext-en.json'))['article:jak-dopasowac-cv-do-ogloszenia'];
-  assert.ok(ext?.sections?.length >= 3, 'rozbudowa tailor-cv-to-job-ad');
+  const tl = ART_LANGS.en.data['jak-dopasowac-cv-do-ogloszenia'], ext = JSON.parse(read('seo-data/c3-en.json'))['tailor-ext'];
+  assert.ok(ext.sections.length >= 3 && ext.sections.every((s) => tl.sections.includes(s) || tl.sections.some((x) => x.h === s.h)), 'rozbudowa tailor-cv-to-job-ad');
 });
 
 test('Case study DE/EN: te same fakty, w obu ogłoszeniach CV pod ofertę pokazuje więcej wymagań niż ogólne, brakujące zostają brakujące', async () => {
@@ -84,7 +84,7 @@ test('Case study DE/EN: te same fakty, w obu ogłoszeniach CV pod ofertę pokazu
     assert.equal(r.status, 200, url); assert.match(r.h, new RegExp(`<html lang="${l}"`));
     assert.equal((m.match(/class="ad-col"/g) || []).length, 4);
     assert.match(m, l === 'de' ? /\d von 5 Anforderungen im Text sichtbar/ : /\d of 5 requirements visible in the text/);
-    assert.doesNotMatch(m, /\d+\s?%/, 'bez procentów (skaner liczy po polsku)');
+    assert.doesNotMatch(r.h.slice(r.h.indexOf('<h1>'), r.h.indexOf('class="more"', r.h.indexOf('<h1>'))), /\d+\s?%/, 'bez procentów (skaner liczy po polsku)');
     assert.match(r.h, /"@type":"FAQPage"/);
     for (const h of ['pl', 'de', 'en']) assert.match(r.h, new RegExp(`hreflang="${h}"`));
   }

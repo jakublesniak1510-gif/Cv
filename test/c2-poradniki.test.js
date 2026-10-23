@@ -11,6 +11,7 @@ import { ART_TOPICS } from '../lib/seo.js';
 // PR C2: poradniki o ATS i dopasowaniu CV z elementami interaktywnymi, list pod ogłoszenie, rozbudowa podsumowania.
 const SLUGS = ['ats-mity-i-fakty', 'format-cv-pod-ats', 'czy-dopasowywac-cv-do-kazdej-oferty', 'cv-pod-ai', 'slowa-kluczowe-ats-wedlug-zawodu'];
 const port = 4500 + Math.floor(Math.random() * 90), U = `http://localhost:${port}`;
+const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
 let srv;
 before(async () => {
   srv = spawn(process.execPath, ['server.js'], { env: { ...process.env, PORT: String(port), DATA_DIR: fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-c2-')), BASE_URL: U, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '' }, stdio: 'ignore' });
@@ -48,9 +49,26 @@ test('Strony: widżety, źródła, FAQPage; /api/ad-keywords bez zapisu; list po
   const j = await r.json(); assert.equal(r.headers.get('cache-control'), 'no-store'); assert.ok(j.keywords.includes('uprawnienia UDT'), JSON.stringify(j));
   assert.equal((await fetch(`${U}/api/ad-keywords`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"adText":"za krótko"}' })).status, 400);
   const l = await (await fetch(`${U}/narzedzia/list-motywacyjny-pod-ogloszenie`)).text();
-  assert.match(l, /<title>List motywacyjny pod ofertę pracy – generator online/); assert.match(l, /49 zł/); assert.match(l, /dane fikcyjne/); assert.match(l, /"@type":"FAQPage"/);
+  assert.match(l, /<title>List motywacyjny pod ofertę: przykład i lista kontrolna<\/title>/); assert.doesNotMatch(l, /generator/i); assert.match(l, /49 zł/); assert.match(l, /dane fikcyjne/); assert.match(l, /"@type":"FAQPage"/);
   const sm = await (await fetch(`${U}/sitemap.xml`)).text();
   for (const u of [...SLUGS.map((s) => `poradnik/${s}`), 'narzedzia/list-motywacyjny-pod-ogloszenie']) assert.ok(sm.includes(`${U}/${u}</loc>`), u);
   const lite = fs.readFileSync(new URL('../public/lite.js', import.meta.url), 'utf8');
   for (const c of ['form.kw-extract', 'form.sum-gen', 'form.time-calc']) assert.ok(lite.includes(c), c);
+});
+
+test('Recenzja #71: osobny limit słów kluczowych, formularze widżetów POST bez JS, wynik kalkulatora w HTML, linki do strony listu', async () => {
+  const srvJs = read('server.js');
+  assert.match(srvJs, /adKwLimit = limiter\(20, 3600_000\)/); assert.match(srvJs, /app\.post\('\/api\/ad-keywords'[\s\S]{0,200}if \(!adKwLimit\(req\)\)/);
+  for (const slug of ['slowa-kluczowe-ats-wedlug-zawodu', 'podsumowanie-zawodowe-w-cv']) {
+    const h = await (await fetch(`${U}/poradnik/${slug}`)).text();
+    const f = /<form class="(?:kw-extract|sum-gen) paste-ad"[^>]*>[\s\S]*?<\/form>/.exec(h)[0];
+    assert.match(f, /method="post"/); assert.match(f, /<button class="btn" type="submit" hidden>/); assert.match(f, /<noscript>/);
+  }
+  const t = await (await fetch(`${U}/poradnik/czy-dopasowywac-cv-do-kazdej-oferty`)).text();
+  assert.match(t, /<p class="calc-out" role="status">Ręcznie: ok\. 5 godz\. tygodniowo\. Ze skanerem: ok\. 1,7 godz\./);
+  for (const p of ['/poradnik/jak-napisac-list-motywacyjny', '/poradnik', '/narzedzia/skaner-cv']) assert.match(await (await fetch(U + p)).text(), /href="\/narzedzia\/list-motywacyjny-pod-ogloszenie"/, p);
+  const ats = await (await fetch(`${U}/poradnik/jak-przejsc-przez-ats`)).text();
+  for (const s of ['ats-mity-i-fakty', 'format-cv-pod-ats', 'slowa-kluczowe-ats-wedlug-zawodu']) assert.ok(ats.includes(`href="/poradnik/${s}"`), s);
+  const css = read('public/style.css');
+  for (const c of ['.widget{', '.kw-pick{', '.sum-draft{', '.calc-out{', '.sources{', 'ul.checklist{list-style:none']) assert.ok(css.includes(c), c);
 });

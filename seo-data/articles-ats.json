@@ -3,7 +3,7 @@
   "title": "Czy ATS odrzuca CV? Mity o ATS sprawdzone",
   "metaDescription": "Czy ATS naprawdę odrzuca większość CV? Sprawdzamy 8 popularnych mitów o systemach rekrutacyjnych: skąd się wzięły i jak jest naprawdę.",
   "lead": "O systemach ATS krąży wiele przerażających historii, a część z nich powtarza się bez żadnego źródła. Sprawdzamy najpopularniejsze mity, podajemy werdykt i wyjaśniamy, co faktycznie dzieje się z CV po kliknięciu „Aplikuj”.",
-  "readMinutes": 6,
+  "readMinutes": 5,
   "sections": [
    {
     "h": "Mit 1: „ATS odrzuca 75% CV, zanim zobaczy je człowiek”",
@@ -17,7 +17,7 @@
     "h": "Mit 2: „ATS to robot, który sam decyduje o kandydatach”",
     "p": [
      "Werdykt: w większości fałsz. ATS to przede wszystkim baza danych i narzędzie do zarządzania rekrutacją. Zbiera zgłoszenia, odczytuje z CV tekst, pozwala rekruterowi wyszukiwać i filtrować kandydatów oraz śledzić, kto jest na jakim etapie.",
-     "Systemy te są popularne także w Polsce. Serwis Zielona Linia, powołując się na „Badanie pracodawców 2019” serwisu InterviewMe, podał, że „62% badanych używa systemów ATS do weryfikacji CV”. To jednak deklaracje pracodawców i rekruterów z ankiety sprzed kilku lat. Liczba mówi o tym, ilu badanych korzysta z ATS, a nie o tym, ile CV system odrzuca.",
+     "Systemy te są popularne także w Polsce. Zielona Linia, powołując się na „Badanie pracodawców 2019” firmy InterviewMe, podał, że „62% badanych używa systemów ATS do weryfikacji CV”. To jednak deklaracje pracodawców i rekruterów z ankiety sprzed kilku lat. Liczba mówi o tym, ilu badanych korzysta z ATS, a nie o tym, ile CV system odrzuca.",
      "W praktyce to rekruter wpisuje w wyszukiwarkę nazwę narzędzia, uprawnienia czy stanowiska i przegląda wyniki. Dlatego CV musi być czytelne dla systemu, ale ostatecznie przekonuje człowieka."
     ]
    },
@@ -40,7 +40,7 @@
    {
     "h": "Mit 5: „Biały tekst ze słowami kluczowymi oszuka system”",
     "p": [
-     "Werdykt: fałsz, a do tego ryzykowny. ATS przy odczycie usuwa formatowanie i zostawia sam tekst. Białe litery na białym tle stają się wtedy zwykłym, widocznym tekstem w profilu kandydata.",
+     "Werdykt: fałsz, a do tego ryzykowna praktyka. Większość systemów przy odczycie zwykle usuwa formatowanie i zostawia sam tekst. Białe litery na białym tle stają się wtedy zwykłym, widocznym tekstem w profilu kandydata.",
      "Rekruterzy cytowani przez serwis Built In mówią, że kandydaci, którzy ukrywają tekst w CV, zwykle odpadają z rekrutacji. Dotyczy to również ukrytych poleceń dla sztucznej inteligencji. Zamiast przewagi zostaje wrażenie nieuczciwości."
     ]
    },
@@ -80,12 +80,8 @@
     "a": "Nie. System usuwa formatowanie, więc biały lub bardzo mały tekst staje się widoczny dla rekrutera. Takie zgłoszenia są zwykle odrzucane jako próba manipulacji."
    },
    {
-    "q": "Czy zdjęcie lub tabele przeszkadzają ATS?",
-    "a": "Zdjęcie samo w sobie zwykle nie blokuje odczytu, ale system go nie przeczyta. Tabele, kolumny i pola tekstowe mogą pomieszać kolejność tekstu, dlatego ważne informacje lepiej zapisać zwykłym tekstem w jednej kolumnie."
-   },
-   {
     "q": "Czy darmowe sprawdzanie CV jest bezpieczne (RODO)?",
-    "a": "Narzędzia w serwisie nie zapisują przesłanego pliku ani wyniku analizy. Plik jest używany tylko do przygotowania wyniku, który widzisz na ekranie."
+    "a": "Narzędzia w serwisie nie zapisują przesłanego pliku ani treści CV. Jeśli porównujesz CV z ogłoszeniem, sam wynik porównania (procent, słowa kluczowe i wskazówki, bez treści CV) zostaje w pamięci serwera przez godzinę, żeby można było go udostępnić, a potem jest usuwany."
    }
   ],
   "sources": [
@@ -106,10 +102,6 @@
     "u": "https://zielonalinia.gov.pl/krawat-nie-pomoze-jesli-podczas-rekrutacji-bedziesz-zbyt-pewny-siebie-i-nieprzygotowany/"
    },
    {
-    "t": "Bezprawnik: Nowoczesne systemy ATS do rekrutacji czasami bardziej przeszkadzają, niż pomagają",
-    "u": "https://bezprawnik.pl/nowoczesne-systemy-ats-do-rekrutacji-czasami-bardziej-przeszkadzaja-niz-pomagaja"
-   },
-   {
     "t": "Kula: Auto-rejection rules and knockout questions (dokumentacja systemu ATS)",
     "u": "https://support.kula.ai/articles/7962068559-auto-rejection-rules-and-knockout-questions"
    },
@@ -127,14 +119,14 @@
   "title": "PDF czy DOCX pod ATS? Format, czcionki i tabele w CV",
   "metaDescription": "PDF czy DOCX? Jakie czcionki, czy kolumny i tabele szkodzą, co z nagłówkiem, ikonami i nazwą pliku. Praktyczny przewodnik po formacie CV pod ATS.",
   "lead": "Treść CV jest najważniejsza, ale system rekrutacyjny musi ją najpierw poprawnie odczytać. Ten poradnik przechodzi po kolei przez elementy pliku, które najczęściej sprawiają kłopot: dla każdego opisujemy ryzyko i to, co warto zrobić.",
-  "readMinutes": 6,
+  "readMinutes": 5,
   "sections": [
    {
     "h": "PDF tekstowy, PDF ze skanu czy DOCX",
     "p": [
      "Najważniejsza zasada: wyślij plik w formacie, o który prosi pracodawca. Jeśli ogłoszenie lub formularz wskazuje DOCX, nie wysyłaj PDF, i odwrotnie. Gdy wskazówek brak, zarówno PDF wygenerowany z edytora tekstu, jak i plik DOCX są zwykle bezpiecznym wyborem.",
      "Kluczowa różnica nie leży między PDF a DOCX, tylko między plikiem z tekstem a plikiem z obrazem. PDF zapisany z Worda, Google Docs czy kreatora CV zawiera litery, które system może odczytać. PDF powstały ze skanu, zrzutu ekranu lub zdjęcia telefonem zawiera tylko obraz strony, więc ATS może nie znaleźć w nim żadnego tekstu.",
-     "DOCX ma tę zaletę, że systemy dobrze radzą sobie z jego tekstem. Ma też wadę: wygląd może się zmienić po otwarciu w innym programie. PDF zachowuje układ, dlatego przy braku wymagań wielu kandydatów wybiera właśnie PDF z tekstem.",
+     "DOCX ma tę zaletę, że systemy zwykle poprawnie odczytują jego tekst. Ma też wadę: wygląd może się zmienić po otwarciu w innym programie. PDF zachowuje układ, dlatego przy braku wymagań wielu kandydatów wybiera właśnie PDF z tekstem.",
      "Unikaj formatów, o które nikt nie prosi: zdjęć w JPG, plików z programów graficznych, prezentacji czy linków do dokumentów w chmurze zamiast załącznika. Formularz może ich nie przyjąć, a nawet jeśli przyjmie, system nie zawsze wyciągnie z nich tekst."
     ]
    },
@@ -148,7 +140,7 @@
    {
     "h": "Kolumny, tabele i pola tekstowe",
     "p": [
-     "Ryzyko: system czyta tekst w innej kolejności, niż widzi go człowiek. Daty mogą trafić do niewłaściwego stanowiska, a lewa kolumna z umiejętnościami może zlać się z opisem doświadczenia. Pola tekstowe bywają pomijane w całości.",
+     "Ryzyko (według poradników biur karier): system czyta tekst w innej kolejności, niż widzi go człowiek. Daty mogą trafić do niewłaściwego stanowiska, a lewa kolumna z umiejętnościami może zlać się z opisem doświadczenia. Pola tekstowe bywają pomijane w całości.",
      "Co zrobić: wybierz układ jednokolumnowy. Daty i miejsca pracy wpisuj w zwykłych wierszach tekstu, a do wyrównania używaj tabulatorów zamiast tabel. Jeśli zależy Ci na nowoczesnym wyglądzie, osiągniesz go kolorem nagłówków, odstępami i pogrubieniem.",
      "Wiele gotowych szablonów z internetu opiera się właśnie na tabelach lub dwóch kolumnach, nawet jeśli tego nie widać. Przed użyciem szablonu włącz w edytorze widok znaków niedrukowanych lub linii siatki, żeby sprawdzić, jak naprawdę jest zbudowany."
     ]
@@ -163,7 +155,7 @@
    {
     "h": "Ikony, grafiki i paski umiejętności",
     "p": [
-     "Ryzyko: system nie czyta grafiki. Ikona telefonu zamiast słowa „Telefon”, logo firm zamiast ich nazw czy paski i kropki pokazujące poziom umiejętności nie przekazują systemowi żadnej informacji. Dla rekrutera paski są też mało czytelne, bo nie wiadomo, co oznacza na przykład trzy piąte paska.",
+     "Ryzyko: system nie czyta grafiki. Ikona telefonu zamiast słowa „Telefon”, logo firm zamiast ich nazw czy paski i kropki pokazujące poziom umiejętności nie przekazują systemowi żadnej informacji. Dla rekrutera paski są też mało czytelne, bo nie wiadomo, co oznaczają na przykład trzy piąte paska.",
      "Co zrobić: wszystko, co ważne, zapisz tekstem. Zamiast paska wpisz „angielski B2” lub „Excel: tabele przestawne, WYSZUKAJ.PIONOWO”. Zdjęcie, jeśli chcesz je dodać, nie zaszkodzi odczytowi tekstu, ale system go nie przeczyta, więc nie umieszczaj na nim ani obok niego żadnych informacji."
     ]
    },
@@ -178,7 +170,7 @@
    {
     "h": "Nazwa pliku i nazwy sekcji",
     "p": [
-     "Ryzyko: plik o nazwie „cv_final_v3_nowe” wygląda nieprofesjonalnie i łatwo go pomylić z innym zgłoszeniem. Niektóre formularze mają kłopot z polskimi znakami lub spacjami w nazwie pliku. Pomysłowe nazwy sekcji utrudniają z kolei rozpoznanie, gdzie jest doświadczenie, a gdzie wykształcenie.",
+     "Ryzyko: plik o nazwie „cv_final_v3_nowe” wygląda nieprofesjonalnie i łatwo go pomylić z innym zgłoszeniem. Według poradników biur karier niektóre formularze mają kłopot z polskimi znakami lub spacjami w nazwie pliku. Pomysłowe nazwy sekcji utrudniają z kolei rozpoznanie, gdzie jest doświadczenie, a gdzie wykształcenie.",
      "Co zrobić: nazwij plik prosto, na przykład Jan_Kowalski_CV.pdf, bez polskich znaków. W dokumencie stosuj standardowe nagłówki: Doświadczenie zawodowe, Wykształcenie, Umiejętności, Języki, Certyfikaty."
     ]
    },
@@ -193,7 +185,7 @@
   "faq": [
    {
     "q": "Czy PDF jest dobry dla ATS?",
-    "a": "Tak, jeśli to PDF z tekstem zapisany z edytora. Problem stanowi PDF ze skanu lub zdjęcia, bo zawiera obraz zamiast liter. Jeśli pracodawca prosi o inny format, wyślij ten, o który prosi."
+    "a": "Zwykle tak, jeśli to PDF z tekstem zapisany z edytora. Problem stanowi PDF ze skanu lub zdjęcia, bo zawiera obraz zamiast liter. Jeśli pracodawca prosi o inny format, wyślij ten, o który prosi."
    },
    {
     "q": "Czy zdjęcie lub tabele przeszkadzają ATS?",
@@ -205,7 +197,7 @@
    },
    {
     "q": "Gdzie sprawdzić CV za darmo i czy to bezpieczne (RODO)?",
-    "a": "Darmowy „Test CV pod ATS” na naszej stronie pokazuje, jak system odczytuje tekst z pliku. Narzędzia w serwisie nie zapisują przesłanego pliku ani wyniku analizy: plik służy wyłącznie do przygotowania wyniku, który widzisz na ekranie."
+    "a": "Darmowy „Test CV pod ATS” na naszej stronie pokazuje, jak system odczytuje tekst z pliku. Narzędzia w serwisie nie zapisują przesłanego pliku ani treści CV. Jeśli porównujesz CV z ogłoszeniem, sam wynik porównania (procent, słowa kluczowe i wskazówki, bez treści CV) zostaje w pamięci serwera przez godzinę, żeby można było go udostępnić, a potem jest usuwany."
    }
   ],
   "sources": [
@@ -226,7 +218,7 @@
     "p": [
      "Jedno uniwersalne CV wysyłane wszędzie to zwykle stracona szansa, bo rekruter szuka w dokumencie odpowiedzi na wymagania z konkretnego ogłoszenia. Z drugiej strony przepisywanie całego CV pod każdą ofertę szybko męczy i nie zawsze się opłaca.",
      "Rozsądnie jest podzielić oferty na trzy grupy: te, w które warto włożyć pełne dopasowanie, te, przy których wystarczy kilka szybkich zmian, i te, na które lepiej w ogóle nie aplikować. Poniżej opisujemy, po czym je rozpoznać.",
-     "Decyzję warto podjąć, zanim zaczniesz edytować dokument. Przeczytaj ogłoszenie do końca, zaznacz wymagania obowiązkowe i oceń, ile z nich spełniasz. Dopiero wtedy wiesz, czy dana oferta zasługuje na godzinę pracy, kwadrans czy na pominięcie."
+     "Decyzję warto podjąć, zanim zaczniesz edytować dokument. Przeczytaj ogłoszenie do końca, zaznacz wymagania obowiązkowe i oceń, ile z nich spełniasz. Dopiero wtedy wiesz, czy dana oferta zasługuje na godzinę pracy, na kwadrans czy na pominięcie."
     ]
    },
    {
@@ -250,7 +242,7 @@
     "p": [
      "Nie każda oferta jest warta zgłoszenia. Jeśli nie spełniasz wymagania, które jest warunkiem koniecznym, na przykład prawnie wymaganych uprawnień, prawa jazdy przy pracy kierowcy czy języka, w którym toczy się cała praca, dopasowanie CV niczego nie zmieni.",
      "Zastanów się też, gdy ogłoszenie dotyczy zupełnie innego poziomu doświadczenia, a Ty nie masz argumentów, które by to uzasadniały. Czas lepiej poświęcić na dopracowanie aplikacji na oferty, gdzie Twoje szanse są realne.",
-     "Inaczej jest z wymaganiami opisanymi jako „mile widziane” lub „dodatkowym atutem będzie”. Brak części z nich zwykle nie dyskwalifikuje, więc nie rezygnuj z aplikacji tylko dlatego, że nie odhaczasz każdego punktu."
+     "Inaczej jest z wymaganiami opisanymi jako „mile widziane” lub „dodatkowym atutem będzie”. Brak części z nich zwykle nie dyskwalifikuje, więc nie rezygnuj z aplikacji tylko dlatego, że nie spełniasz każdego punktu."
     ]
    },
    {
@@ -258,7 +250,7 @@
     "p": [
      "Jeśli masz mało czasu, skup się na tych częściach CV, które rekruter czyta najpierw. Pierwsze to podsumowanie zawodowe na górze strony: dwa lub trzy zdania, które nazywają stanowisko z ogłoszenia i najważniejsze dopasowane umiejętności.",
      "Drugie to kolejność umiejętności. Przesuń na początek te, które pojawiają się w wymaganiach, i zapisz je tak samo jak w ogłoszeniu. Pozostałe mogą zostać niżej, nie trzeba ich usuwać.",
-     "Trzecie to pierwsze punkty przy ostatnim stanowisku. Wybierz z bazy osiągnięć te, które najlepiej odpowiadają obowiązkom z oferty, i ustaw je na początku listy. Te trzy zmiany zwykle zajmują kilkanaście minut, a zmieniają to, co rekruter widzi w pierwszej chwili."
+     "Trzecie to pierwsze punkty przy ostatnim stanowisku. Wybierz z bazy osiągnięć (czyli z dłuższej listy wszystkich swoich osiągnięć, opisanej niżej) te, które najlepiej odpowiadają obowiązkom z oferty, i ustaw je na początku listy. Te trzy zmiany zwykle zajmują kilkanaście minut, a zmieniają to, co rekruter widzi w pierwszej chwili."
     ]
    },
    {
@@ -301,12 +293,12 @@
   "title": "CV pod AI: jak pisać, gdy CV czyta sztuczna inteligencja",
   "metaDescription": "Co naprawdę czyta automatyczna selekcja, dlaczego ukryte polecenia szkodzą, jakie ryzyko niesie CV z ChatGPT i co mówią AI Act oraz RODO.",
   "lead": "Coraz więcej firm korzysta z narzędzi, które streszczają, porządkują lub oceniają zgłoszenia. To rodzi pytania: czy pisać inaczej, czy można „oszukać” algorytm i czy wolno użyć ChatGPT. Wyjaśniamy, jak pisać CV, które dobrze odczyta zarówno system, jak i człowiek.",
-  "readMinutes": 6,
+  "readMinutes": 5,
   "sections": [
    {
     "h": "Co właściwie czyta automatyczna selekcja",
     "p": [
-     "Niezależnie od tego, czy firma używa klasycznego ATS, czy narzędzia z elementami sztucznej inteligencji, pierwszy krok jest podobny: system wyciąga z pliku tekst. Nie widzi kolorów, ikon ani układu graficznego, tylko słowa w określonej kolejności. Jeśli tekst odczyta się źle, nawet najlepiej działający model oceni błędne dane.",
+     "Niezależnie od tego, czy firma używa klasycznego ATS, czy narzędzia z elementami sztucznej inteligencji, pierwszy krok jest podobny: system wyciąga z pliku tekst. Zwykle nie widzi kolorów, ikon ani układu graficznego, tylko słowa w określonej kolejności. Jeśli tekst odczyta się źle, nawet najlepiej działający model oceni błędne dane.",
      "Następnie narzędzie może porównać treść z ogłoszeniem, wyróżnić umiejętności, przygotować krótkie streszczenie dla rekrutera albo zaproponować kolejność kandydatów. To, które z tych funkcji są włączone, zależy od firmy. W praktyce wynik takiej analizy trafia do człowieka, który przegląda CV i podejmuje decyzję.",
      "Dla kandydata oznacza to prostą rzecz: najlepiej działa jasna, uporządkowana treść z konkretnymi nazwami stanowisk, narzędzi i osiągnięć. Tego samego szuka rekruter czytający CV samodzielnie."
     ]
@@ -314,7 +306,7 @@
    {
     "h": "Ukryte polecenia i biały tekst: dlaczego to się odwraca",
     "p": [
-     "W sieci krążą porady, by wpisać w CV białą czcionką polecenie w stylu „ignore previous instructions” i prośbę o wysoką ocenę kandydata. Problem polega na tym, że system przy odczycie usuwa formatowanie. Ukryty tekst staje się zwykłym tekstem, widocznym w profilu kandydata i w streszczeniach.",
+     "W sieci krążą porady, by wpisać w CV białą czcionką polecenie w stylu „ignore previous instructions” i prośbę o wysoką ocenę kandydata. Problem polega na tym, że większość systemów przy odczycie zwykle usuwa formatowanie. Ukryty tekst staje się zwykłym tekstem, widocznym w profilu kandydata i w streszczeniach.",
      "Serwis Built In opisał, że duża firma rekrutacyjna wykrywa ukryty tekst w CV analizowanych przez AI, a rekruterzy zwykle eliminują kandydatów, którzy go stosują. Nawet jeśli jakieś narzędzie dałoby się zmylić, decyzję i tak podejmuje człowiek, który po zobaczeniu takiego polecenia raczej nie uzna kandydata za wiarygodnego.",
      "Ta sama zasada dotyczy białej listy słów kluczowych, mikroskopijnej czcionki i tekstu ukrytego za grafiką. To nie jest sprytna optymalizacja, tylko próba manipulacji, która może zamknąć drogę także do kolejnych rekrutacji w tej firmie."
     ]
@@ -338,7 +330,7 @@
    {
     "h": "Co mówią przepisy: AI Act i RODO",
     "p": [
-     "Unijne rozporządzenie o sztucznej inteligencji (AI Act, rozporządzenie 2024/1689) w załączniku III, punkt 4, zalicza do systemów wysokiego ryzyka systemy AI przeznaczone do rekrutacji lub wyboru osób, w szczególności do publikowania ukierunkowanych ogłoszeń, analizowania i filtrowania podań o pracę oraz oceny kandydatów. Dla takich systemów rozporządzenie przewiduje szczególne obowiązki dotyczące między innymi nadzoru człowieka i przejrzystości. Obowiązki te wchodzą w życie etapami.",
+     "Unijne rozporządzenie o sztucznej inteligencji (AI Act, rozporządzenie 2024/1689) w załączniku III, punkt 4, zalicza do systemów wysokiego ryzyka systemy AI przeznaczone do rekrutacji lub wyboru osób. Chodzi w szczególności o publikowanie ukierunkowanych ogłoszeń, analizowanie i filtrowanie podań o pracę oraz ocenę kandydatów. Dla takich systemów rozporządzenie przewiduje szczególne obowiązki, między innymi dotyczące nadzoru człowieka i przejrzystości. Obowiązki te zaczynają obowiązywać etapami.",
      "Niezależnie od AI Act obowiązuje RODO. Artykuł 22 daje prawo do tego, by nie podlegać decyzji, która opiera się wyłącznie na zautomatyzowanym przetwarzaniu i wywołuje wobec Ciebie skutki prawne lub w podobny sposób istotnie na Ciebie wpływa. Przepis przewiduje wyjątki, ale wtedy administrator musi zapewnić zabezpieczenia, co najmniej prawo do interwencji człowieka, wyrażenia własnego stanowiska i zakwestionowania decyzji.",
      "Ten opis ma charakter ogólny i nie jest poradą prawną. Jeśli podejrzewasz, że decyzję w Twojej sprawie podjął wyłącznie system, możesz zapytać pracodawcę o sposób przetwarzania danych w rekrutacji."
     ]
@@ -367,7 +359,7 @@
    },
    {
     "q": "Czy darmowe sprawdzanie CV jest bezpieczne (RODO)?",
-    "a": "Narzędzia w serwisie nie zapisują przesłanego pliku ani wyniku analizy. Plik jest używany tylko do przygotowania wyniku widocznego na ekranie."
+    "a": "Narzędzia w serwisie nie zapisują przesłanego pliku ani treści CV. Jeśli porównujesz CV z ogłoszeniem, sam wynik porównania (procent, słowa kluczowe i wskazówki, bez treści CV) zostaje w pamięci serwera przez godzinę, żeby można było go udostępnić, a potem jest usuwany."
    }
   ],
   "sources": [
@@ -395,7 +387,7 @@
  },
  "slowa-kluczowe-ats-wedlug-zawodu": {
   "title": "Słowa kluczowe ATS w CV: listy dla 20 zawodów",
-  "metaDescription": "Jak wybrać słowa kluczowe z ogłoszenia i gdzie je wpisać w CV: dosłowne brzmienie, skróty i pełne nazwy. Poniżej gotowe listy dla popularnych zawodów.",
+  "metaDescription": "Jak wybrać słowa kluczowe z ogłoszenia i gdzie je wpisać w CV: dosłowne brzmienie, skróty i pełne nazwy. Gotowe listy dla 20 popularnych zawodów.",
   "lead": "Poniżej znajdziesz listy słów kluczowych dla popularnych zawodów. Traktuj je jako punkt wyjścia: najważniejszym źródłem zawsze pozostaje konkretne ogłoszenie. Najpierw wyjaśniamy, jak wybrać właściwe słowa i gdzie umieścić je w CV.",
   "readMinutes": 5,
   "sections": [
@@ -421,7 +413,7 @@
      "Wyszukiwarka w systemie nie zawsze rozpoznaje synonimy. Jeśli ogłoszenie mówi „obsługa klienta kluczowego”, a w CV jest „opieka nad dużymi kontami”, rekruter może nie trafić na Twoje zgłoszenie. Dlatego tam, gdzie to zgodne z prawdą, używaj dokładnie tych słów, co ogłoszenie.",
      "Przy skrótach podaj obie formy, przynajmniej raz: pełną nazwę i skrót w nawiasie, na przykład „Key Account Management (KAM)” albo „bezpieczeństwo i higiena pracy (BHP)”. Dzięki temu CV znajdzie się zarówno przy wyszukiwaniu skrótu, jak i pełnej nazwy.",
      "Podobnie z nazwami polskimi i angielskimi. Jeśli ogłoszenie jest po polsku, ale używa angielskiej nazwy narzędzia lub metody, zachowaj ją w tej formie. Nazwy programów zapisuj tak, jak robi to producent.",
-     "Osobną kwestią jest nazwa stanowiska. W różnych firmach ta sama praca nazywa się inaczej, na przykład specjalista ds. kadr, specjalista HR czy kadrowy. Jeśli Twoje oficjalne stanowisko brzmiało inaczej niż w ogłoszeniu, zostaw prawdziwą nazwę przy doświadczeniu, a nazwę z ogłoszenia użyj w tytule zawodowym lub podsumowaniu, o ile rzetelnie opisuje to, co robisz."
+     "Osobną kwestią jest nazwa stanowiska. W różnych firmach ta sama praca nazywa się inaczej, na przykład specjalista ds. kadr, specjalista HR czy kadrowy. Jeśli Twoje oficjalne stanowisko brzmiało inaczej niż w ogłoszeniu, zostaw prawdziwą nazwę przy doświadczeniu, a nazwy z ogłoszenia użyj w tytule zawodowym lub podsumowaniu, o ile rzetelnie opisuje to, co robisz."
     ]
    },
    {
@@ -444,7 +436,7 @@
     "h": "Czego unikać",
     "p": [
      "Nie powtarzaj tego samego słowa w każdym punkcie i nie twórz długich list haseł bez kontekstu. Po wyszukaniu CV i tak czyta człowiek, a nagromadzenie słów kluczowych wygląda nienaturalnie.",
-     "Nie ukrywaj słów kluczowych białą czcionką ani pod grafiką. System przy odczycie usuwa formatowanie, więc ukryty tekst staje się widoczny i zwykle kończy rekrutację. Nie wpisuj też umiejętności, których nie masz, nawet jeśli figurują na liście dla Twojego zawodu.",
+     "Nie ukrywaj słów kluczowych białą czcionką ani pod grafiką. Większość systemów przy odczycie zwykle usuwa formatowanie, więc ukryty tekst staje się widoczny i zwykle kończy rekrutację. Nie wpisuj też umiejętności, których nie masz, nawet jeśli figurują na liście dla Twojego zawodu.",
      "Uważaj również na słowa kluczowe zapisane tylko w grafice, logo lub ikonie. Jeśli nazwa programu jest widoczna wyłącznie jako obrazek, system jej nie przeczyta, a wyszukiwarka jej nie znajdzie."
     ]
    },
