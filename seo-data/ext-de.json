@@ -1,0 +1,403 @@
+{
+  "article:cv-do-pracy-w-polsce": {
+    "sections": [
+      {
+        "h": "Deutscher Lebenslauf und polnisches CV im Vergleich",
+        "p": [
+          "Wer bisher in Deutschland gearbeitet hat, kann vieles übernehmen. Die Zentrale Auslands- und Fachvermittlung (ZAV) der Bundesagentur für Arbeit empfiehlt für den deutschen Lebenslauf höchstens zwei Seiten, die neueste Station zuerst und drei bis fünf Stichpunkte zu den Aufgaben – wie beim polnischen CV.",
+          "Unterschiede zeigen sich vor allem am Ende des Dokuments. Den deutschen Lebenslauf schließen Sie laut ZAV mit Datum und Unterschrift ab, beim polnischen CV steht an dieser Stelle üblicherweise die RODO-Klausel. Ersetzen Sie also beim Übertragen ins Polnische die Zeile mit Ort, Datum und Unterschrift durch die Klausel, sofern die Anzeige nichts anderes verlangt.",
+          "Auch bei den persönlichen Daten lohnt ein zweiter Blick. Für den deutschen Lebenslauf empfiehlt die ZAV, Geburtsdatum und Geburtsort anzugeben. In Polen gehört das Geburtsdatum nach Art. 22¹ § 1 Kodeks pracy zu den Daten, die ein Arbeitgeber von Bewerbenden verlangen darf. Sie können es also angeben oder nachreichen, wenn danach gefragt wird."
+        ]
+      },
+      {
+        "h": "Gehalt: was Sie in Polen nicht angeben müssen",
+        "p": [
+          "Seit dem 24. Dezember 2025 gilt in Polen Art. 18³ca Kodeks pracy. Danach muss der Arbeitgeber Bewerbenden das Anfangsgehalt oder eine Gehaltsspanne mitteilen, und zwar in der Stellenanzeige, vor dem Vorstellungsgespräch oder spätestens vor Abschluss des Arbeitsvertrags.",
+          "Gleichzeitig nimmt Art. 22¹ § 1 Kodeks pracy Angaben zum Gehalt im aktuellen und in früheren Arbeitsverhältnissen ausdrücklich von den Daten aus, die der Arbeitgeber zum bisherigen Werdegang verlangen darf. Ihr bisheriges Gehalt gehört deshalb nicht in den polnischen Lebenslauf. Ihre Ergebnisse und Verantwortungsbereiche können Sie trotzdem konkret beschreiben."
+        ]
+      },
+      {
+        "h": "Arbeitszeugnis und świadectwo pracy",
+        "p": [
+          "In Deutschland haben Beschäftigte nach § 109 Gewerbeordnung bei Ende des Arbeitsverhältnisses Anspruch auf ein schriftliches Zeugnis. Das einfache Zeugnis nennt Art und Dauer der Tätigkeit, das qualifizierte bewertet zusätzlich Leistung und Verhalten. Das Gesetz verlangt eine klare und verständliche Sprache und verbietet Formulierungen, die eine andere Aussage als den Wortlaut transportieren sollen. Rechnen Sie trotzdem nicht damit, dass polnische Personaler die Abstufungen typischer deutscher Zeugnisformulierungen kennen.",
+          "Das polnische świadectwo pracy nach Art. 97 Kodeks pracy ist ein anderes Dokument. Es enthält Zeitraum und Art der Arbeit, die Positionen, die Art der Beendigung und Angaben, die für Ansprüche aus Arbeits- und Sozialversicherungsrecht nötig sind. Gehalt und erworbene Qualifikationen werden nur auf Wunsch des Beschäftigten aufgenommen. Eine Bewertung der Leistung sieht die Vorschrift nicht vor.",
+          "Für Ihre Bewerbung in Polen heißt das: Ein deutsches Arbeitszeugnis ist eine nützliche Ergänzung, ersetzt aber keine klar formulierten Erfolge im Lebenslauf. Schreiben Sie die wichtigsten Ergebnisse direkt ins CV und prüfen Sie es vor dem Versand mit dem kostenlosen Lebenslauf-Scanner. Fragen Sie den Arbeitgeber, ob er eine Übersetzung der Zeugnisse braucht, bevor Sie eine in Auftrag geben."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Soll ich den Lebenslauf für Polen unterschreiben?",
+        "a": "In Deutschland endet der Lebenslauf meist mit Datum und Unterschrift. In Polen steht an dieser Stelle üblicherweise die RODO-Klausel. Eine Unterschrift schadet nicht, verlangt die Anzeige sie aber nicht, können Sie darauf verzichten."
+      },
+      {
+        "q": "Muss ich in Polen mein bisheriges Gehalt angeben?",
+        "a": "Nein. Art. 22¹ Kodeks pracy nimmt Angaben zum Gehalt im aktuellen und in früheren Arbeitsverhältnissen von den Daten aus, die der Arbeitgeber verlangen darf. Umgekehrt muss der Arbeitgeber Ihnen seit dem 24. Dezember 2025 das Anfangsgehalt oder eine Spanne nennen."
+      },
+      {
+        "q": "Kann ich mein deutsches Arbeitszeugnis in Polen verwenden?",
+        "a": "Ja, als Ergänzung. Polnische Arbeitgeber kennen vor allem das świadectwo pracy, das keine Leistungsbewertung enthält. Beschreiben Sie Ihre Erfolge deshalb direkt im Lebenslauf und legen Sie das Zeugnis bei, wenn es gewünscht wird."
+      }
+    ],
+    "sources": [
+      {
+        "t": "Bundesagentur für Arbeit (ZAV): Bewerbungsverfahren in Deutschland",
+        "u": "https://www.arbeitsagentur.de/vor-ort/zav/working-and-living-in-germany/newsletter-iss/01-2026/bewerbung"
+      },
+      {
+        "t": "Kodeks pracy, Tekst jednolity Dz.U. 2026 poz. 1245 (Art. 18³ca, 22¹, 97)",
+        "u": "https://api.sejm.gov.pl/eli/acts/DU/2026/1245/text.pdf"
+      },
+      {
+        "t": "Gewerbeordnung § 109 Zeugnis",
+        "u": "https://www.gesetze-im-internet.de/gewo/__109.html"
+      }
+    ]
+  },
+  "tool:klauzula-rodo": {
+    "sections": [
+      {
+        "h": "Rechtsgrundlage in Polen: Art. 22¹ Kodeks pracy",
+        "p": [
+          "Welche Daten ein polnischer Arbeitgeber von Bewerbenden verlangen darf, regelt Art. 22¹ § 1 Kodeks pracy. Dazu gehören Vor- und Nachname, Geburtsdatum, die von Ihnen angegebenen Kontaktdaten, Ausbildung, berufliche Qualifikationen und der bisherige Werdegang. Angaben zum Gehalt im aktuellen und in früheren Arbeitsverhältnissen sind davon ausdrücklich ausgenommen.",
+          "Ausbildung, Qualifikationen und Werdegang darf der Arbeitgeber nach § 2 nur verlangen, wenn sie für die Arbeit oder die Position erforderlich sind. Die polnische Datenschutzbehörde UODO beschreibt die Liste in ihrem Leitfaden „ABC rekrutacji“ als abschließend.",
+          "Für diese Daten ist nach Auffassung der UODO keine Einwilligung nötig. Die Behörde bezeichnet die verbreitete Praxis, eine Einwilligung zur Datenverarbeitung für Rekrutierungszwecke in Lebenslauf oder Anschreiben aufzunehmen, sogar ausdrücklich als nicht richtig. Dass viele Anzeigen die Klausel trotzdem verlangen, ist vor allem eine Gewohnheit."
+        ]
+      },
+      {
+        "h": "Wann die Einwilligung doch eine Rolle spielt: Art. 22¹a und 22¹b",
+        "p": [
+          "Art. 22¹a § 1 Kodeks pracy erlaubt es, andere Daten als die gesetzlich aufgezählten auf Grundlage einer Einwilligung zu verarbeiten. Das betrifft typischerweise Angaben, die Sie freiwillig in den Lebenslauf schreiben, etwa ein Foto, Interessen oder ein Profil in sozialen Netzwerken. Ausgenommen sind Daten über strafrechtliche Verurteilungen im Sinne von Art. 10 DSGVO.",
+          "Nach § 2 darf es Ihnen nicht schaden, wenn Sie keine Einwilligung erteilen oder sie zurückziehen. Insbesondere darf das kein Grund sein, Sie nicht einzustellen. Nach § 3 gilt die Regel sowohl für Daten, die der Arbeitgeber erfragt, als auch für Daten, die Sie von sich aus mitteilen. Die UODO ergänzt, dass Arbeitgeber nicht nahelegen sollen, welche zusätzlichen Daten Bewerbende schicken.",
+          "Für besondere Kategorien personenbezogener Daten nach Art. 9 DSGVO, etwa Gesundheitsdaten oder religiöse Überzeugungen, gilt Art. 22¹b: Die Einwilligung kann nur dann Grundlage sein, wenn Sie die Daten aus eigener Initiative übermitteln. Überlegen Sie deshalb genau, ob solche Angaben überhaupt in den Lebenslauf gehören."
+        ]
+      },
+      {
+        "h": "Einwilligung nach der DSGVO: Art. 6 und Art. 7",
+        "p": [
+          "Die DSGVO nennt in Art. 6 Abs. 1 die Rechtsgrundlagen, auf die eine Datenverarbeitung gestützt werden kann. Die Einwilligung nach Buchstabe a ist eine davon, ebenso die Verarbeitung für vorvertragliche Maßnahmen auf Anfrage der betroffenen Person nach Buchstabe b. Die UODO betont, dass die Einwilligung nur dann die richtige Grundlage ist, wenn keine andere Rechtsgrundlage greift.",
+          "Art. 7 DSGVO regelt die Bedingungen für die Einwilligung, darunter das Recht, sie jederzeit zu widerrufen. Die UODO fasst die Regeln so zusammen: Niemand darf eine Einwilligung erzwingen, vorausgefüllte Kästchen reichen nicht aus, und der Widerruf muss so einfach sein wie die Erteilung. Für die Bewerbung bedeutet das: Eine Klausel im Lebenslauf ist eine Erklärung, die Sie später zurücknehmen können.",
+          "Die UODO nennt außerdem Eigenschaften, die eine wirksame Einwilligung haben muss: freiwillig, konkret, informiert und eindeutig. Ein allgemeiner Satz ohne Zweck ist daher wenig hilfreich. Der Generator formuliert den Zweck ausdrücklich: die Verarbeitung für das laufende Bewerbungsverfahren."
+        ]
+      },
+      {
+        "h": "Einwilligung für künftige Bewerbungsverfahren",
+        "p": [
+          "Möchte ein Arbeitgeber Ihren Lebenslauf auch für spätere Stellen nutzen, ist das ein zusätzlicher Zweck. Die UODO weist darauf hin, dass dafür eine Einwilligung nötig sein kann, und empfiehlt, sie für einen bestimmten Zeitraum zu erteilen. Deshalb bietet der Generator diesen Satz als eigene, optionale Ergänzung an.",
+          "Nach Abschluss des Verfahrens sollen die Daten laut UODO gelöscht werden, sofern kein anderer Zweck und keine andere Rechtsgrundlage besteht. Sie können außerdem fragen, welche Daten über Sie gespeichert sind, und die Löschung verlangen. Haben Sie die zusätzliche Einwilligung nicht erteilt, endet die Nutzung Ihres Lebenslaufs grundsätzlich mit dem konkreten Verfahren."
+        ]
+      },
+      {
+        "h": "Und in Deutschland? § 26 BDSG und das EuGH-Urteil C-34/21",
+        "p": [
+          "Art. 88 DSGVO erlaubt den Mitgliedstaaten, spezifischere Vorschriften zum Datenschutz im Beschäftigungskontext zu erlassen. Nach Art. 88 Abs. 2 müssen diese Vorschriften geeignete und besondere Maßnahmen zum Schutz der menschlichen Würde, der berechtigten Interessen und der Grundrechte der Betroffenen enthalten. Deutschland hat dafür § 26 BDSG geschaffen. Nach dessen Absatz 8 gelten auch Bewerberinnen und Bewerber als Beschäftigte, und Absatz 2 verlangt, bei einer Einwilligung die Abhängigkeit im Beschäftigungsverhältnis zu berücksichtigen.",
+          "Am 30. März 2023 hat der Europäische Gerichtshof in der Rechtssache C-34/21 entschieden, dass nationale Vorschriften zum Beschäftigtendatenschutz unangewendet bleiben müssen, wenn sie die Voraussetzungen von Art. 88 Abs. 1 und 2 DSGVO nicht erfüllen. Eine bloße Wiederholung der DSGVO genügt nicht. Konkret ging es um eine hessische Vorschrift, die weitgehend wortgleich mit § 26 Abs. 1 Satz 1 BDSG ist. Die abschließende Bewertung hat der EuGH dem nationalen Gericht überlassen.",
+          "Der Hessische Beauftragte für Datenschutz und Informationsfreiheit geht davon aus, dass das Urteil auch § 26 BDSG betrifft. Für private Arbeitgeber verweist er dann auf die allgemeinen Rechtsgrundlagen des Art. 6 Abs. 1 DSGVO. Bewerbungsunterlagen können danach im Rahmen vorvertraglicher Maßnahmen nach Buchstabe b verarbeitet werden.",
+          "Unabhängig von dieser Diskussion braucht die Verarbeitung von Bewerbungsunterlagen in Deutschland keine Einwilligungsklausel im Lebenslauf. Deutsche Lebensläufe enden laut ZAV mit Datum und Unterschrift. Die RODO-Klausel ist eine polnische Gepflogenheit. Für eine Bewerbung in Deutschland lassen Sie sie weg, außer der Arbeitgeber verlangt ausdrücklich eine Erklärung."
+        ]
+      },
+      {
+        "h": "Was die Klausel nicht leistet",
+        "p": [
+          "Die Klausel erweitert nicht die Liste der Daten, die ein Arbeitgeber verlangen darf. Sie ersetzt auch keine Informationen, die der Arbeitgeber selbst zur Datenverarbeitung geben muss. Diese Seite beschreibt die Rechtslage nur allgemein und ist keine Rechtsberatung. Bei Fragen zu einem konkreten Fall wenden Sie sich an die Datenschutzbehörde oder an eine Fachanwältin oder einen Fachanwalt.",
+          "Bevor Sie die Klausel einfügen, lohnt sich ein Blick auf den übrigen Lebenslauf. Mit dem kostenlosen Lebenslauf-Scanner sehen Sie, ob Ihr Dokument zur Anzeige passt. Wenn Sie einen Lebenslauf passend zur Stellenanzeige erstellen, wird die Klausel in der passenden Sprache automatisch ergänzt."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Darf ein polnischer Arbeitgeber mein Geburtsdatum verlangen?",
+        "a": "Ja. Das Geburtsdatum gehört nach Art. 22¹ § 1 Kodeks pracy zu den Daten, die ein Arbeitgeber von Bewerbenden verlangen darf. Ihr früheres Gehalt gehört dagegen ausdrücklich nicht dazu."
+      },
+      {
+        "q": "Kann ich meine Einwilligung zurückziehen?",
+        "a": "Ja, jederzeit, und der Widerruf muss so einfach sein wie die Erteilung. Nach Art. 22¹a § 2 Kodeks pracy darf Ihnen daraus kein Nachteil entstehen, insbesondere darf er kein Grund sein, Sie nicht einzustellen."
+      },
+      {
+        "q": "Brauche ich die Klausel bei einer Bewerbung in Deutschland?",
+        "a": "In der Regel nicht. Deutsche Arbeitgeber verarbeiten Bewerbungsunterlagen ohne Einwilligungsklausel im Lebenslauf. Verlangt ein Unternehmen ausdrücklich eine Erklärung, verwenden Sie dessen Text."
+      },
+      {
+        "q": "Was bedeutet das EuGH-Urteil C-34/21 für Bewerbende?",
+        "a": "Das Urteil betrifft die Frage, auf welche Rechtsgrundlage Arbeitgeber in Deutschland die Verarbeitung stützen. Für Ihren Lebenslauf ändert sich dadurch nichts: Eine Klausel ist in Deutschland weiterhin nicht üblich."
+      },
+      {
+        "q": "Sollte ich Gesundheitsdaten im Lebenslauf angeben?",
+        "a": "Solche Daten gehören zu den besonderen Kategorien nach Art. 9 DSGVO. In Polen dürfen sie auf Grundlage einer Einwilligung nur verarbeitet werden, wenn Sie sie aus eigener Initiative mitteilen. Überlegen Sie gut, ob sie für die Stelle wirklich nötig sind."
+      }
+    ],
+    "sources": [
+      {
+        "t": "Kodeks pracy, Tekst jednolity Dz.U. 2026 poz. 1245 (Art. 22¹, 22¹a, 22¹b)",
+        "u": "https://api.sejm.gov.pl/eli/acts/DU/2026/1245/text.pdf"
+      },
+      {
+        "t": "UODO: ABC rekrutacji",
+        "u": "https://uodo.gov.pl/pl/701/4471"
+      },
+      {
+        "t": "UODO: Zgoda nie zawsze jest podstawą przetwarzania danych",
+        "u": "https://uodo.gov.pl/pl/701/4467"
+      },
+      {
+        "t": "Bundesdatenschutzgesetz § 26",
+        "u": "https://www.gesetze-im-internet.de/bdsg_2018/__26.html"
+      },
+      {
+        "t": "HBDI: Handreichung zur Verarbeitung personenbezogener Daten von Beschäftigten im Lichte des EuGH-Urteils C-34/21",
+        "u": "https://datenschutz.hessen.de/sites/datenschutz.hessen.de/files/2023-05/handreichung_beschaeftigtendatenschutz_eugh-urteil.pdf"
+      }
+    ]
+  },
+  "prof:nauczyciel-przedszkola": {
+    "sections": [
+      {
+        "h": "Welche Qualifikation in Polen verlangt wird",
+        "p": [
+          "Nach Art. 9 der Karta Nauczyciela, dem polnischen Lehrerstatut, darf eine Stelle als Lehrkraft übernehmen, wer ein Hochschulstudium mit entsprechender pädagogischer Vorbereitung oder eine Lehrerbildungsanstalt abgeschlossen hat. Hinzu kommen die Einhaltung grundlegender moralischer Grundsätze und die gesundheitliche Eignung. Die Einzelheiten regelt die Verordnung des Bildungsministers vom 14. September 2023 über die Qualifikationen von Lehrkräften.",
+          "Nach § 4 dieser Verordnung ist für Kindergärten und die Klassen 1 bis 3 vor allem ein einstufiges Masterstudium im Fach „pedagogika przedszkolna i wczesnoszkolna“ mit pädagogischer Vorbereitung vorgesehen. Daneben gelten unter anderem ein nach den bis zum 3. August 2019 geltenden Regeln abgeschlossenes Studium in diesem Fach, ein Pädagogikstudium mit Spezialisierung auf Vorschul- oder frühe Schulpädagogik und ein Abschluss einer Lehrerbildungsanstalt mit entsprechender Spezialisierung.",
+          "Für den Lebenslauf heißt das: Schreiben Sie Fach, Studienform und pädagogische Vorbereitung genau so, wie sie im Diplom stehen, zum Beispiel „Pedagogika przedszkolna i wczesnoszkolna, jednolite studia magisterskie, przygotowanie pedagogiczne“. Haben Sie die Qualifikation über ein Aufbaustudium erworben, nennen Sie es mit Hochschule und Abschlussjahr."
+        ]
+      },
+      {
+        "h": "Laufbahnstufen: początkujący, mianowany, dyplomowany",
+        "p": [
+          "Art. 9a Karta Nauczyciela kennt heute zwei Laufbahnstufen: „nauczyciel mianowany“ und „nauczyciel dyplomowany“. Die früheren Stufen „stażysta“ und „kontraktowy“ sind aufgehoben. Wer noch keine Stufe hat, wird als „nauczyciel początkujący“ bezeichnet und absolviert die Vorbereitung auf den Lehrerberuf („przygotowanie do zawodu nauczyciela“).",
+          "Verwenden Sie im Lebenslauf die aktuelle Bezeichnung, auch wenn ältere Unterlagen noch die frühere Stufe nennen. Stehen Sie am Anfang, ist eine Zeile wie „Nauczyciel początkujący – w trakcie przygotowania do zawodu nauczyciela“ ehrlich und für die Leitung sofort verständlich."
+        ]
+      },
+      {
+        "h": "Erzieherin in Deutschland: ein reglementierter Beruf",
+        "p": [
+          "In Deutschland ist der Beruf Erzieherin oder Erzieher landesrechtlich geregelt. Das Portal „Anerkennung in Deutschland“ zählt ihn zu den reglementierten Berufen in der Zuständigkeit der Bundesländer. Wie die Ausbildung aussieht, regelt jedes Land selbst. In Bayern zum Beispiel findet sie an Fachakademien für Sozialpädagogik statt und dauert in Vollzeit drei Jahre: zwei Studienjahre mit integrierten Praktika und ein Jahr Berufspraktikum. Am Ende steht die staatliche Anerkennung.",
+          "Damit unterscheiden sich die Wege deutlich: In Polen ist die Kindergartenpädagogin in der Regel eine Hochschulabsolventin mit Lehrerstatus, in Deutschland ist die Erzieherausbildung eine landesrechtlich geregelte Ausbildung, in Bayern etwa an einer Fachakademie. Übersetzen Sie Ihre Qualifikation deshalb nicht einfach mit „staatlich anerkannte Erzieherin“, solange Sie keine Anerkennung haben. Schreiben Sie stattdessen zum Beispiel „Kindergartenpädagogin (Polen), Master Vorschul- und Grundschulpädagogik – Anerkennung beantragt“."
+        ]
+      },
+      {
+        "h": "Polnischen Abschluss in Deutschland anerkennen lassen",
+        "p": [
+          "Für reglementierte Berufe ist die Anerkennung Voraussetzung, wenn Sie in Deutschland darin arbeiten möchten. Welche Stelle zuständig ist und welche Unterlagen Sie brauchen, zeigt der Anerkennungs-Finder auf anerkennung-in-deutschland.de. Ein Anerkennungsbescheid auf Deutsch hilft Arbeitgebern außerdem, Ihre Kenntnisse schnell einzuordnen.",
+          "Wie ein Verfahren aussieht, zeigt das Beispiel Berlin. Dort wird nach dem Sozialberufe-Anerkennungsgesetz geprüft, ob Ihre ausländische Qualifikation mit dem deutschen Abschluss gleichwertig ist. Verlangt werden Deutschkenntnisse mindestens auf Niveau C1 und ein erweitertes Führungszeugnis. Zu den Unterlagen gehören ein tabellarischer Lebenslauf auf Deutsch, die Abschlussnachweise mit Fächer- und Stundenübersicht, Nachweise über Berufserfahrung und Weiterbildungen sowie Übersetzungen durch öffentlich bestellte oder ermächtigte Übersetzer. Die Gebühr beträgt in Berlin 145 Euro. Voraussetzung ist außerdem, dass Sie noch in keinem anderen Bundesland einen Antrag gestellt haben.",
+          "In anderen Bundesländern können Anforderungen und Gebühren abweichen. Prüfen Sie die Angaben für das Land, in dem Sie arbeiten möchten, und vermerken Sie im Lebenslauf den aktuellen Stand, etwa „Anerkennungsverfahren läuft seit 03/2026“."
+        ]
+      },
+      {
+        "h": "Formulierungen für den Lebenslauf",
+        "p": [
+          "Beschreiben Sie Ihre Arbeit mit Tätigkeiten statt mit Eigenschaften. Geeignet sind etwa: „Planung und Durchführung der Bildungsarbeit nach dem Kernlehrplan der Vorschulerziehung“, „Beobachtung und Dokumentation der Entwicklung jedes Kindes als Grundlage für Elterngespräche“ oder „Zusammenarbeit mit der psychologisch-pädagogischen Beratungsstelle bei Kindern mit Förderbedarf“.",
+          "Für deutsche Kitas lohnt es sich, die dort üblichen Begriffe zu verwenden, etwa „Eingewöhnung“, „Bildungs- und Erziehungspartnerschaft mit Eltern“ oder „Portfolioarbeit“, sofern Sie diese Aufgaben tatsächlich übernommen haben. Nennen Sie auch die Altersgruppen, mit denen Sie gearbeitet haben, denn die Krippe und die Gruppe vor der Einschulung stellen unterschiedliche Anforderungen.",
+          "Prüfen Sie zum Schluss mit dem kostenlosen Lebenslauf-Scanner, ob die Begriffe aus der Anzeige in Ihrem Dokument vorkommen. Wenn Sie sich bei mehreren Einrichtungen bewerben, erstellen Sie für jede Anzeige einen Lebenslauf passend zur Stellenanzeige."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Kann ich in Polen mit einem anderen pädagogischen Studium im Kindergarten arbeiten?",
+        "a": "Möglicherweise. Die Verordnung über die Qualifikationen von Lehrkräften lässt neben dem Fach „pedagogika przedszkolna i wczesnoszkolna“ unter anderem ältere Studiengänge und eine Pädagogik mit vorschulischer Spezialisierung zu. Nennen Sie Ihr Studium genau, damit die Leitung es prüfen kann."
+      },
+      {
+        "q": "Welches Deutschniveau brauche ich für die Anerkennung als Erzieherin?",
+        "a": "Das hängt vom Bundesland ab. In Berlin sind für die staatliche Anerkennung mindestens Kenntnisse auf Niveau C1 nötig. Für andere Länder finden Sie die Anforderungen über den Anerkennungs-Finder."
+      },
+      {
+        "q": "Wie bezeichne ich mich in einem deutschen Lebenslauf ohne Anerkennung?",
+        "a": "Nennen Sie Ihren tatsächlichen Abschluss und das Land, zum Beispiel „Kindergartenpädagogin (Polen), Master Vorschul- und Grundschulpädagogik“. Den Titel „staatlich anerkannte Erzieherin“ verwenden Sie erst mit Anerkennungsbescheid."
+      },
+      {
+        "q": "Gibt es die Stufe „nauczyciel kontraktowy“ noch?",
+        "a": "Nein. Die Karta Nauczyciela kennt heute die Stufen „nauczyciel mianowany“ und „nauczyciel dyplomowany“. Wer noch keine Stufe hat, ist „nauczyciel początkujący“."
+      }
+    ],
+    "sources": [
+      {
+        "t": "Rozporządzenie MEiN z 14 września 2023 r. w sprawie szczegółowych kwalifikacji wymaganych od nauczycieli (Dz.U. 2023 poz. 2102)",
+        "u": "https://api.sejm.gov.pl/eli/acts/DU/2023/2102/text.pdf"
+      },
+      {
+        "t": "Karta Nauczyciela, Tekst jednolity Dz.U. 2026 poz. 515 (Art. 9, 9a)",
+        "u": "https://api.sejm.gov.pl/eli/acts/DU/2026/515/text.pdf"
+      },
+      {
+        "t": "Anerkennung in Deutschland: Anerkennungsgesetze der Länder",
+        "u": "https://www.anerkennung-in-deutschland.de/html/de/ag/laendergesetze.php"
+      },
+      {
+        "t": "Anerkennung in Deutschland: Berufliche Anerkennung",
+        "u": "https://www.anerkennung-in-deutschland.de/html/de/ag/berufliche-anerkennung.php"
+      },
+      {
+        "t": "Service-Portal Berlin: Anerkennung als Erzieherin oder Erzieher mit ausländischer Berufsqualifikation",
+        "u": "https://service.berlin.de/dienstleistung/329574/"
+      },
+      {
+        "t": "Bundesagentur für Arbeit, BiZ Fürth: Wie werde ich staatlich anerkannte/r Erzieher/in?",
+        "u": "https://www.arbeitsagentur.de/vor-ort/datei/biz-merkblatt_erzieher_ba122462.pdf"
+      }
+    ]
+  },
+  "prof:kierownik-sprzedazy": {
+    "sections": [
+      {
+        "h": "Abschluss nachweisen: Zeugnisbewertung statt Anerkennung",
+        "p": [
+          "Für nicht reglementierte Berufe ist in Deutschland keine Anerkennung vorgeschrieben, um darin zu arbeiten. Ob ein Beruf reglementiert ist, zeigt der Anerkennungs-Finder auf anerkennung-in-deutschland.de. Für Ihre Bewerbung kann trotzdem ein Nachweis über Ihren ausländischen Hochschulabschluss sinnvoll sein.",
+          "Diesen Nachweis stellt die Zentralstelle für ausländisches Bildungswesen (ZAB) als Zeugnisbewertung aus. Sie ordnet einen ausländischen Hochschulabschluss in das deutsche Bildungssystem ein und nennt die vergleichbare Stufe, etwa Bachelor oder Master. Laut ZAB verlangen viele Arbeitgebende eine Zeugnisbewertung als Voraussetzung für die Bewerbung.",
+          "Liegt Ihnen eine Zeugnisbewertung vor, nennen Sie sie direkt beim Abschluss: „Master Management, Uniwersytet Ekonomiczny (Polen) – Zeugnisbewertung der ZAB liegt vor“. Haben Sie keine, beschreiben Sie den Abschluss mit seiner Originalbezeichnung und einer kurzen deutschen Erläuterung."
+        ]
+      },
+      {
+        "h": "Gehalt und Provision: neue Regeln in Polen",
+        "p": [
+          "Seit dem 24. Dezember 2025 muss ein Arbeitgeber in Polen nach Art. 18³ca Kodeks pracy Bewerbenden das Anfangsgehalt oder eine Gehaltsspanne mitteilen, und zwar in der Anzeige, vor dem Vorstellungsgespräch oder spätestens vor Abschluss des Vertrags. Anzeigen und Stellenbezeichnungen sollen geschlechtsneutral sein. Deshalb können Ihnen in polnischen Anzeigen Formen wie „Kierownik / Kierowniczka sprzedaży“ begegnen.",
+          "Außerdem nimmt Art. 22¹ § 1 Kodeks pracy Angaben zum Gehalt im aktuellen und in früheren Arbeitsverhältnissen von den Daten aus, die ein Arbeitgeber verlangen darf. Ihr Fixgehalt und Ihre Provision gehören daher nicht in den Lebenslauf. Die Ergebnisse Ihres Teams können Sie dagegen beschreiben, solange Sie keine vertraulichen Daten preisgeben.",
+          "Fragt eine deutsche Anzeige nach Ihrer Gehaltsvorstellung, nennen Sie sie im Anschreiben oder im Bewerbungsformular, nicht im Lebenslauf."
+        ]
+      },
+      {
+        "h": "Wettbewerbsverbot: was Sie wissen sollten",
+        "p": [
+          "In Polen können Arbeitgeber und Beschäftigte mit Zugang zu besonders wichtigen Informationen nach Art. 101² Kodeks pracy ein Wettbewerbsverbot für die Zeit nach dem Arbeitsverhältnis vereinbaren. Der Vertrag muss die Dauer des Verbots und die Entschädigung festlegen. Die Entschädigung darf nicht niedriger sein als 25 % des Gehalts, das der Beschäftigte vor dem Ende des Arbeitsverhältnisses für einen der Verbotsdauer entsprechenden Zeitraum erhalten hat. Nach Art. 101³ ist die Schriftform erforderlich.",
+          "Details eines solchen Vertrags gehören nicht in den Lebenslauf. Wenn ein Verbot Sie aber in einer bestimmten Branche einschränkt, sollten Sie das spätestens im Gespräch offen ansprechen. Prüfen Sie außerdem, ob Kundennamen oder Projektdetails unter eine Vertraulichkeitsvereinbarung fallen, bevor Sie sie im Lebenslauf nennen."
+        ]
+      },
+      {
+        "h": "Arbeitszeugnis, świadectwo pracy und Referenzen",
+        "p": [
+          "In Deutschland können Beschäftigte nach § 109 Gewerbeordnung ein qualifiziertes Zeugnis verlangen, das auch Leistung und Verhalten bewertet. Es muss klar und verständlich formuliert sein und darf keine versteckten Aussagen enthalten. Die Bundesagentur für Arbeit empfiehlt, den Bewerbungsunterlagen nach Möglichkeit Zeugnisse aller früheren Arbeitgeber beizulegen.",
+          "Das polnische świadectwo pracy nach Art. 97 Kodeks pracy nennt Zeitraum und Art der Arbeit, die Positionen und die Art der Beendigung, enthält aber keine Leistungsbewertung. Bewerben Sie sich aus Polen in Deutschland, erklären Sie das bei Bedarf kurz. Wenn Sie von früheren Vorgesetzten ein Empfehlungsschreiben („referencje“) haben, ist es eine gute Ergänzung, weil es Ihre Führungsleistung aus Sicht des Arbeitgebers beschreibt."
+        ]
+      },
+      {
+        "h": "Ergebnisse formulieren, ohne zu übertreiben",
+        "p": [
+          "Recruiter können die Angaben im Lebenslauf im Gespräch und über Referenzen überprüfen. Nennen Sie daher nur Zahlen, die Sie erklären können, und sagen Sie, worauf sie sich beziehen: Region, Zeitraum, Produktgruppe. Ein Satz wie „Umsatzwachstum der Region um [Wert] % in [Zeitraum], bei gleicher Teamgröße“ ist überprüfbar und deshalb überzeugend.",
+          "Neben Zahlen zählen Führungsaufgaben, die Sie wirklich übernommen haben, zum Beispiel: „Einführung wöchentlicher Pipeline-Reviews im CRM“, „Einarbeitungsplan für neue Außendienstmitarbeiter erstellt und umgesetzt“, „Abstimmung des Vertriebsbudgets mit dem Controlling“ oder „Verhandlung von Rahmenverträgen mit Handelsketten“.",
+          "Prüfen Sie Ihren Entwurf mit dem kostenlosen Lebenslauf-Scanner. Für jede neue Bewerbung können Sie einen Lebenslauf passend zur Stellenanzeige erstellen, der die Anforderungen aus der Anzeige mit Ihren tatsächlichen Ergebnissen verbindet."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Muss ich in Polen mein aktuelles Gehalt angeben?",
+        "a": "Nein. Angaben zum Gehalt im aktuellen und in früheren Arbeitsverhältnissen gehören nach Art. 22¹ Kodeks pracy nicht zu den Daten, die ein Arbeitgeber verlangen darf. Er muss Ihnen seinerseits das Anfangsgehalt oder eine Spanne nennen."
+      },
+      {
+        "q": "Gehört ein Wettbewerbsverbot in den Lebenslauf?",
+        "a": "Nein, Vertragsdetails gehören nicht ins Dokument. Schränkt das Verbot Sie in einer Branche ein, sprechen Sie das im Gespräch an, damit es später keine Überraschungen gibt."
+      },
+      {
+        "q": "Brauche ich für eine Bewerbung in Deutschland eine Zeugnisbewertung der ZAB?",
+        "a": "Vorgeschrieben ist sie für nicht reglementierte Berufe nicht. Laut ZAB verlangen aber viele Arbeitgebende eine Zeugnisbewertung als Voraussetzung für die Bewerbung. Sie ordnet Ihren Abschluss in das deutsche System ein."
+      },
+      {
+        "q": "Mein polnisches świadectwo pracy enthält keine Bewertung. Ist das ein Nachteil?",
+        "a": "Nein, das Dokument ist gesetzlich so gestaltet. Ergänzen Sie es um konkrete Erfolge im Lebenslauf und, wenn vorhanden, um ein Empfehlungsschreiben früherer Vorgesetzter."
+      }
+    ],
+    "sources": [
+      {
+        "t": "Kodeks pracy, Tekst jednolity Dz.U. 2026 poz. 1245 (Art. 18³ca, 22¹, 97, 101², 101³)",
+        "u": "https://api.sejm.gov.pl/eli/acts/DU/2026/1245/text.pdf"
+      },
+      {
+        "t": "ZAB (KMK): Zeugnisbewertung",
+        "u": "https://zab.kmk.org/de/zeugnisbewertung"
+      },
+      {
+        "t": "Anerkennung in Deutschland: Berufliche Anerkennung",
+        "u": "https://www.anerkennung-in-deutschland.de/html/de/ag/berufliche-anerkennung.php"
+      },
+      {
+        "t": "Gewerbeordnung § 109 Zeugnis",
+        "u": "https://www.gesetze-im-internet.de/gewo/__109.html"
+      },
+      {
+        "t": "Bundesagentur für Arbeit: Bewerbung schreiben",
+        "u": "https://www.arbeitsagentur.de/arbeitslos-arbeit-finden/bewerbungstraining/bewerbung-schreiben"
+      }
+    ]
+  },
+  "article:podsumowanie-zawodowe-w-cv": {
+    "sections": [
+      {
+        "h": "Kurzprofil, Profil, podsumowanie zawodowe: die Begriffe",
+        "p": [
+          "Im deutschen Lebenslauf heißt der Abschnitt meist „Kurzprofil“ oder „Profil“, im englischen CV „Summary“ oder „Profile“. In Polen finden Sie „Podsumowanie zawodowe“ oder „Profil zawodowy“. Gemeint ist immer dasselbe: ein kurzer Absatz unter den Kontaktdaten, der Ihre Erfahrung zusammenfasst.",
+          "Verwechseln Sie den Abschnitt nicht mit der Kurzbewerbung. Die Bundesagentur für Arbeit bezeichnet mit „Kurzprofil“ auch eine verkürzte Bewerbung aus Anschreiben und einseitigem Lebenslauf, die vor allem bei Initiativbewerbungen und Aushilfsjobs üblich ist. Steht in einer Anzeige „Kurzprofil“, prüfen Sie deshalb, ob ein einzelner Absatz oder eine verkürzte Bewerbung gemeint ist."
+        ]
+      },
+      {
+        "h": "Kurzprofil in Deutschland und in Polen",
+        "p": [
+          "In Deutschland gehört zu einer vollständigen Bewerbung in der Regel ein Anschreiben von höchstens einer Seite. Die Zentrale Auslands- und Fachvermittlung der Bundesagentur für Arbeit rät, Soft Skills wie Teamfähigkeit eher dort zu erwähnen als im Lebenslauf. Das Kurzprofil im deutschen Lebenslauf kann sich deshalb auf überprüfbare Angaben konzentrieren: Beruf, Erfahrung, Schwerpunkte, Werkzeuge, Abschlüsse.",
+          "In Polen wird nicht bei jeder Stelle ein Anschreiben erwartet. Dann übernimmt das Kurzprofil einen Teil seiner Aufgabe und sollte in einem Satz sagen, warum Sie zu genau dieser Stelle passen. Eine Gehaltsvorstellung gehört in keinem der beiden Länder ins Kurzprofil. In Polen muss der Arbeitgeber seit dem 24. Dezember 2025 nach Art. 18³ca Kodeks pracy ohnehin selbst das Anfangsgehalt oder eine Spanne nennen.",
+          "Wer sich aus Deutschland in Polen bewirbt oder umgekehrt, sollte das Profil nicht einfach übersetzen, sondern neu gewichten. Ein Satz wie „Erfahrung mit Kunden aus Deutschland und Polen, Deutsch C1 und Polnisch Muttersprache“ ist für einen Arbeitgeber mit Geschäft in beiden Ländern oft wichtiger als ein weiterer Fachbegriff."
+        ]
+      },
+      {
+        "h": "Schritt für Schritt: von der Anzeige zum Kurzprofil",
+        "p": [
+          "Markieren Sie in der Anzeige die drei Anforderungen, die am häufigsten oder an erster Stelle genannt werden. Suchen Sie für jede einen Beleg aus Ihrem Werdegang: eine Station, ein Projekt, ein Zertifikat. Was Sie nicht belegen können, lassen Sie weg. Die ZAV rät ausdrücklich, nur Nachweise anzugeben, die Sie auch vorlegen können.",
+          "Bauen Sie den Text dann in dieser Reihenfolge auf: Beruf und Jahre der Erfahrung, Schwerpunkt mit den wichtigsten Werkzeugen oder Verfahren, ein konkretes Ergebnis und zum Schluss die Stelle, die Sie suchen. Verwenden Sie dabei die Begriffe der Anzeige, wenn sie Ihre Erfahrung richtig beschreiben, denn Personaler und ATS-Software suchen nach genau diesen Wörtern.",
+          "Lesen Sie den Absatz danach laut. Klingt ein Satz so, als könnte er in jedem Lebenslauf stehen, ersetzen Sie ihn durch eine Tatsache. Mit dem kostenlosen Lebenslauf-Scanner können Sie zusätzlich prüfen, ob die wichtigsten Begriffe der Anzeige im Dokument vorkommen."
+        ]
+      },
+      {
+        "h": "Weitere Beispiele",
+        "p": [
+          "Rückkehr nach einer Familienpause: „Personalsachbearbeiterin mit sieben Jahren Erfahrung in Lohnabrechnung und Personalverwaltung. Nach der Elternzeit habe ich meine Kenntnisse im aktuellen Arbeitsrecht in einer Weiterbildung aufgefrischt. Ich suche eine Stelle in Teilzeit in der Personalabteilung eines mittelständischen Unternehmens.“",
+          "Wechsel zwischen Deutschland und Polen: „Speditionskaufmann mit fünf Jahren Erfahrung im grenzüberschreitenden Straßengüterverkehr zwischen Deutschland und Polen. Ich disponiere Komplett- und Teilladungen, verhandle mit Frachtführern und kommuniziere mit Kunden auf Deutsch und Polnisch. Ich suche eine Stelle als Disponent in Polen.“",
+          "Führungskraft: „Schichtleiter in der Kunststoffverarbeitung mit vier Jahren Führungserfahrung und einem Team von zwölf Personen. Verantwortlich für Schichtplanung, Einarbeitung neuer Mitarbeitender und die Einhaltung der Arbeitssicherheit. Ich möchte als Produktionsleiter mehr Verantwortung übernehmen.“",
+          "Die Beispiele zeigen das Prinzip. Übernehmen Sie nur Angaben, die auf Sie zutreffen, und ersetzen Sie Zahlen und Bereiche durch Ihre eigenen."
+        ]
+      },
+      {
+        "h": "Kurzprofil bei Bewerbungen aus dem Ausland",
+        "p": [
+          "Wer seine Erfahrung im Ausland gesammelt hat, muss im Kurzprofil mehr erklären. Personaler kennen ausländische Arbeitgeber, Abschlüsse und Berufsbezeichnungen oft nicht. Nennen Sie deshalb den Beruf mit der Bezeichnung, die im Zielland üblich ist, und das Land, in dem Sie gearbeitet haben, zum Beispiel „Elektrikerin mit sechs Jahren Erfahrung in der Gebäudeinstallation in Polen“.",
+          "Sprachkenntnisse gehören ins Kurzprofil, wenn die Anzeige sie verlangt oder wenn sie für die Stelle einen klaren Vorteil bieten. Geben Sie dann das Niveau nach dem Gemeinsamen Europäischen Referenzrahmen an, also A1 bis C2, statt allgemeiner Wörter wie „gut“ oder „fließend“. Ausführlicher stehen die Sprachen weiter unten im Abschnitt Kenntnisse.",
+          "Ist ein ausländischer Abschluss für die Stelle wichtig, können Sie den Stand eines Anerkennungsverfahrens in einem kurzen Satz erwähnen, etwa „Anerkennung des Abschlusses beantragt“. Schreiben Sie nichts, was Sie im Gespräch nicht belegen können. Ein ehrliches, konkretes Profil wirkt überzeugender als eine lange Liste von Eigenschaften."
+        ]
+      },
+      {
+        "h": "Sprache und Stil",
+        "p": [
+          "Im deutschen Lebenslauf sind zwei Formen üblich: ganze Sätze in der Ich-Form oder ein Nominalstil ohne „ich“, etwa „Erfahrene Buchhalterin mit Schwerpunkt Konzernabschluss“. Entscheiden Sie sich für eine Form und bleiben Sie dabei. Im Polnischen achten Sie auf die Verbformen: „zrealizowałam“ oder „zrealizowałem“ muss zum Rest des Dokuments passen.",
+          "Lassen Sie ein Kurzprofil in einer Fremdsprache von einer Person gegenlesen, die die Sprache sehr gut beherrscht. Die ZAV empfiehlt das für den gesamten Lebenslauf, und im Kurzprofil, das zuerst gelesen wird, fallen Fehler besonders auf. Wenn Sie keine Zeit für mehrere Fassungen haben, erstellen Sie einen Lebenslauf passend zur Stellenanzeige, in dem das Kurzprofil aus Ihren Angaben und dem Text der Anzeige formuliert wird."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Wie lang sollte das Kurzprofil sein?",
+        "a": "Zwei bis vier Sätze genügen in den meisten Fällen. Wird der Absatz länger, wiederholt er meist Inhalte aus der Berufserfahrung und wird übersprungen."
+      },
+      {
+        "q": "Gehören Soft Skills ins Kurzprofil?",
+        "a": "Nur, wenn Sie sie mit einem Beispiel belegen können. Für deutsche Bewerbungen rät die Zentrale Auslands- und Fachvermittlung, Eigenschaften wie Teamfähigkeit eher im Anschreiben zu erwähnen."
+      },
+      {
+        "q": "Brauche ich ein Kurzprofil, wenn ich ein Anschreiben schicke?",
+        "a": "Es ist trotzdem sinnvoll, weil viele Personaler zuerst den Lebenslauf lesen. Das Anschreiben erklärt Ihre Motivation, das Kurzprofil fasst Ihre Qualifikation in wenigen Sätzen zusammen."
+      },
+      {
+        "q": "Gehört eine Gehaltsvorstellung ins Kurzprofil?",
+        "a": "Nein. Fragt die Anzeige danach, nennen Sie sie im Anschreiben oder im Formular. In Polen muss der Arbeitgeber das Anfangsgehalt oder eine Spanne seit Dezember 2025 selbst angeben."
+      }
+    ],
+    "sources": [
+      {
+        "t": "Bundesagentur für Arbeit (ZAV): Bewerbungsverfahren in Deutschland",
+        "u": "https://www.arbeitsagentur.de/vor-ort/zav/working-and-living-in-germany/newsletter-iss/01-2026/bewerbung"
+      },
+      {
+        "t": "Bundesagentur für Arbeit: Bewerbung schreiben",
+        "u": "https://www.arbeitsagentur.de/arbeitslos-arbeit-finden/bewerbungstraining/bewerbung-schreiben"
+      },
+      {
+        "t": "Kodeks pracy, Tekst jednolity Dz.U. 2026 poz. 1245 (Art. 18³ca)",
+        "u": "https://api.sejm.gov.pl/eli/acts/DU/2026/1245/text.pdf"
+      }
+    ]
+  }
+}
