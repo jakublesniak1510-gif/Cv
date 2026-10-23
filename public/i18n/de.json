@@ -1529,6 +1529,8 @@
 "Nieznana metoda płatności. Odśwież stronę i wybierz ją ponownie.": "Unbekannte Zahlungsmethode. Laden Sie die Seite neu und wählen Sie sie erneut.",
 "Źródła": "Quellen",
 "Sprawdź swoje CV darmowym skanerem": "Lebenslauf mit dem kostenlosen Scanner prüfen",
+"Do zapłaty": "Zu zahlen",
+"jednorazowo, bez abonamentu": "einmalig, ohne Abo",
 "Masz ogłoszenie na to stanowisko?": "Haben Sie eine Stellenanzeige für diese Position?",
 "Wklej treść albo link. Darmowy skaner porówna ogłoszenie z Twoim CV i pokaże, których wymagań w nim nie widać.": "Fügen Sie den Text oder einen Link ein. Der kostenlose Scanner vergleicht die Anzeige mit Ihrem Lebenslauf und zeigt, welche Anforderungen darin noch nicht sichtbar sind.",
 "Treść lub link do ogłoszenia": "Text oder Link der Anzeige",
@@ -1566,5 +1568,6 @@
 "Co sprawdza darmowy skaner CV?": "Was prüft der kostenlose Lebenslauf-Scanner?",
 "Porównuje Twoje obecne CV z ogłoszeniem i pokazuje dopasowanie w procentach, spełnione wymagania, wymagania, których w CV nie widać, oraz trzy rady. Skaner jest bezpłatny, nie wymaga konta i nie zapisuje pliku ani wyniku.": "Er vergleicht Ihren aktuellen Lebenslauf mit der Anzeige und zeigt die Übereinstimmung in Prozent, die erfüllten Anforderungen, die im Lebenslauf nicht sichtbaren Anforderungen und drei Tipps. Der Scanner ist kostenlos, braucht kein Konto und speichert weder Datei noch Ergebnis.",
 "Jak sprawdzić dopasowanie CV do oferty pracy?": "Wie prüfe ich, ob mein Lebenslauf zum Stellenangebot passt?",
-"Wklej ogłoszenie i wgraj CV do skanera na tej stronie. W kilkanaście sekund zobaczysz, które wymagania z oferty Twoje CV pokazuje, a których brakuje. Potem możesz poprawić CV sam albo zamówić CV pod to ogłoszenie.": "Fügen Sie die Anzeige ein und laden Sie Ihren Lebenslauf in den Scanner auf dieser Seite hoch. In wenigen Sekunden sehen Sie, welche Anforderungen des Angebots Ihr Lebenslauf zeigt und welche fehlen. Danach können Sie den Lebenslauf selbst verbessern oder einen Lebenslauf für diese Anzeige bestellen."
+"Wklej ogłoszenie i wgraj CV do skanera na tej stronie. W kilkanaście sekund zobaczysz, które wymagania z oferty Twoje CV pokazuje, a których brakuje. Potem możesz poprawić CV sam albo zamówić CV pod to ogłoszenie.": "Fügen Sie die Anzeige ein und laden Sie Ihren Lebenslauf in den Scanner auf dieser Seite hoch. In wenigen Sekunden sehen Sie, welche Anforderungen des Angebots Ihr Lebenslauf zeigt und welche fehlen. Danach können Sie den Lebenslauf selbst verbessern oder einen Lebenslauf für diese Anzeige bestellen.",
+"Zakresy obowiązków i wymagania dla wybranych zawodów – pomoc przy pisaniu ogłoszeń": "Aufgaben und Anforderungen für ausgewählte Berufe (auf Polnisch) – Hilfe beim Schreiben von Stellenanzeigen"
 }

@@ -1529,6 +1529,8 @@
 "Nieznana metoda płatności. Odśwież stronę i wybierz ją ponownie.": "Невідомий спосіб оплати. Оновіть сторінку й виберіть його ще раз.",
 "Źródła": "Джерела",
 "Sprawdź swoje CV darmowym skanerem": "Перевірте резюме безкоштовним сканером",
+"Do zapłaty": "До сплати",
+"jednorazowo, bez abonamentu": "одноразово, без підписки",
 "Masz ogłoszenie na to stanowisko?": "Маєте оголошення на цю посаду?",
 "Wklej treść albo link. Darmowy skaner porówna ogłoszenie z Twoim CV i pokaże, których wymagań w nim nie widać.": "Вставте текст або посилання. Безкоштовний сканер порівняє оголошення з вашим резюме і покаже, яких вимог у ньому не видно.",
 "Treść lub link do ogłoszenia": "Текст або посилання на оголошення",
@@ -1566,5 +1568,6 @@
 "Co sprawdza darmowy skaner CV?": "Що перевіряє безкоштовний сканер резюме?",
 "Porównuje Twoje obecne CV z ogłoszeniem i pokazuje dopasowanie w procentach, spełnione wymagania, wymagania, których w CV nie widać, oraz trzy rady. Skaner jest bezpłatny, nie wymaga konta i nie zapisuje pliku ani wyniku.": "Він порівнює ваше резюме з оголошенням і показує відповідність у відсотках, виконані вимоги, вимоги, яких у резюме не видно, і три поради. Сканер безкоштовний, не потребує акаунта й не зберігає файлу чи результату.",
 "Jak sprawdzić dopasowanie CV do oferty pracy?": "Як перевірити відповідність резюме вакансії?",
-"Wklej ogłoszenie i wgraj CV do skanera na tej stronie. W kilkanaście sekund zobaczysz, które wymagania z oferty Twoje CV pokazuje, a których brakuje. Potem możesz poprawić CV sam albo zamówić CV pod to ogłoszenie.": "Вставте оголошення й завантажте резюме в сканер на цій сторінці. За кілька секунд побачите, які вимоги вакансії ваше резюме показує, а яких бракує. Потім можна виправити резюме самостійно або замовити резюме під це оголошення."
+"Wklej ogłoszenie i wgraj CV do skanera na tej stronie. W kilkanaście sekund zobaczysz, które wymagania z oferty Twoje CV pokazuje, a których brakuje. Potem możesz poprawić CV sam albo zamówić CV pod to ogłoszenie.": "Вставте оголошення й завантажте резюме в сканер на цій сторінці. За кілька секунд побачите, які вимоги вакансії ваше резюме показує, а яких бракує. Потім можна виправити резюме самостійно або замовити резюме під це оголошення.",
+"Zakresy obowiązków i wymagania dla wybranych zawodów – pomoc przy pisaniu ogłoszeń": "Обов’язки та вимоги для вибраних професій (польською) – допомога в написанні оголошень"
 }
