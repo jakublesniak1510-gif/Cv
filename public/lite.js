@@ -25,6 +25,13 @@
   // Pasek „Zacznij” na telefonie (jak na stronie głównej): po przewinięciu, schowany przy otwartym menu.
   const mcta = $('#mcta');
   if (mcta) addEventListener('scroll', () => { const show = scrollY > 500 && (nav?.hidden ?? true); mcta.hidden = !show; document.body.classList.toggle('mcta-on', show); }, { passive: true });
+  // „Masz ogłoszenie?” na stronach zawodów: treść idzie do skanera przez pamięć tej karty przeglądarki (nie na serwer).
+  for (const pf of document.querySelectorAll('form.paste-ad')) pf.addEventListener('submit', (e) => {
+    e.preventDefault(); const ta = pf.querySelector('textarea'), v = ta.value.trim();
+    if (!v) { ta.focus(); return; }
+    try { sessionStorage.setItem('cvpo-scan-ad', v.slice(0, 20000)); } catch {}
+    location.href = pf.dataset.scan;
+  });
   // Formularz „Dla firm i uczelni”.
   const f = $('#b2bForm');
   f?.addEventListener('submit', async (e) => {

@@ -25,6 +25,8 @@ if (ORDER_B) {
 }
 const STEP_TITLE = (n) => (ORDER_B && n === 5 ? 'Od jakiego ogłoszenia zaczynamy?' : ORDER_B && n === 6 ? 'Pakiet, wygląd i podsumowanie' : STEPS[n - 1]);
 let pendingDraft = ''; // ogłoszenie z rozszerzenia Chrome czekające na formularz skanera
+// Ogłoszenie wklejone na stronie zawodu („Masz ogłoszenie?”, lite.js): jednorazowo z pamięci tej karty.
+try { const a = sessionStorage.getItem('cvpo-scan-ad'); if (a) { sessionStorage.removeItem('cvpo-scan-ad'); pendingDraft = a; setTimeout(() => (pendingDraft = ''), 20000); } } catch {}
 let cfg = { demo: false, maxAds: 5, noPrint: false, maxRevisions: 5, loading: true };
 // Statystyki bez cookies: zbiorcze odsłony i kroki kreatora (serwer nie zapisuje IP ani identyfikatorów).
 const trackLater = []; // zdarzenia sprzed wczytania konfiguracji (np. powrót z płatności), wysyłane po „pv”
@@ -1804,7 +1806,7 @@ const profResult = (p) => ({ position: p.sample.headline, lang: p.lang || 'pl', 
   education: [p.sample.education], skills: p.sample.skills, languages: p.sample.languages || [], certificates: [], interests: '', clause: CLAUSE } });
 // Podstrony bez danych z content.json: treść w <template id="pg-…"> w index.html (serwer renderuje ją też dla wyszukiwarek).
 const STATIC_PAGES = ['jak-to-dziala', 'dla-firm', 'program-polecen'];
-const HOME_TITLE = 'CV pod ogłoszenie i list motywacyjny od 39 zł';
+const HOME_TITLE = 'Dopasuj CV do ogłoszenia – darmowy skaner CV, od 39 zł';
 // Publiczny adres podstrony: na wersjach EN / UA / DE strona główna to /<język>, a przetłumaczone artykuły mają własne adresy.
 const ART_SEG = { de: 'ratgeber', en: 'guides', uk: 'porady' }, PROF_SEG = { de: 'lebenslauf', en: 'cv', uk: 'rezyume' }, TOOL_SEG = { de: 'tools', en: 'tools', uk: 'instrumenty' };
 // Regulamin i polityka prywatności: pełne strony w języku (SSR); stare kotwice #regulamin / #prywatnosc przekierowują.
