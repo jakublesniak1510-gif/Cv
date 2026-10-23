@@ -14,8 +14,8 @@ const STEPS = ['Pakiet i wygląd CV', 'Twoje dane', 'Doświadczenie', 'Wykształ
 // Test A/B „wizard_order” (lib/ab.js, data-order="b" od serwera): najpierw ogłoszenie, potem dane, doświadczenie, wykształcenie,
 // a pakiet, dodatki, języki i wygląd w podsumowaniu. Kroki zachowują numery sekcji (walidacja, analityka), zmienia się kolejność.
 const ORDER_B = document.getElementById('wiz')?.dataset.order === 'b';
-// Test A/B „checkout” (lib/ab.js, data-checkout="b" od serwera): cena na górze, jedno pole zgód zamiast dwóch
-// (regulamin + wykonanie od razu, art. 38 pkt 13 – treść zapisuje serwer), metody płatności jako ikony.
+// Test A/B „checkout” (lib/ab.js, data-checkout="b" od serwera): cena na górze, metody płatności jako ikony,
+// zgody w układzie kompaktowym – nadal dwa osobne pola (regulamin; osobno zgoda z art. 38 pkt 13), domyślnie odznaczone.
 const CHECKOUT_B = document.getElementById('wiz')?.dataset.checkout === 'b';
 const ORDER = ORDER_B ? [5, 2, 3, 4, 6] : [1, 2, 3, 4, 5, 6];
 if (ORDER_B) {
@@ -893,10 +893,8 @@ $('#toPack').onclick = () => { $('input[name=pkg][value=pack3]').checked = true;
 $('#wizForm').addEventListener('input', saveDraft);
 $('#gwBox').addEventListener('change', () => payTrust(step));
 if (CHECKOUT_B) {
-  // jedno pole zamiast „#consent” i „#waiver” (oba nadal wysyłane, walidacja bez zmian)
-  $('#sumTop').hidden = false; $('#consentAllBox').hidden = false;
-  for (const id of ['consent', 'waiver']) $('#' + id).closest('label').hidden = true;
-  $('#consentAll').addEventListener('change', (e) => { $('#consent').checked = $('#waiver').checked = e.target.checked; });
+  $('#sumTop').hidden = false;
+  for (const id of ['consent', 'waiver']) $('#' + id).closest('label').classList.add('compact');
 }
 $('#addExp').onclick = () => addRow('exp');
 $('#addEdu').onclick = () => addRow('edu');
@@ -1055,7 +1053,7 @@ $('#wizForm').onsubmit = async (e) => {
   const v = (id) => $('#' + id).value;
   const body = {
     draftToken: srvToken() || undefined,
-    usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, ...(CHECKOUT_B ? { consentForm: 'combined' } : {}), gateway: gwValue($('#gwBox')), outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, ...(CHECKOUT_B ? { consentForm: 'compact' } : {}), gateway: gwValue($('#gwBox')), outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   // Zgoda na cookies reklamowe (baner): tylko wtedy serwer zgłosi zakup do Meta (Conversions API) z identyfikatorami piksela.

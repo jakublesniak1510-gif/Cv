@@ -20,22 +20,22 @@ test('Eksperyment „checkout”: włączany EXPERIMENTS, wariant B oznacza krea
   assert.match(both, /<div id="wiz" class="wiz" data-checkout="b" data-order="b" hidden/);
 });
 
-test('Wariant B: cena na górze, jedno pole zgód z pełną treścią art. 38 pkt 13, zgody marketingowe osobno i odznaczone', () => {
+test('Wariant B: cena na górze, zgody kompaktowo, ale nadal DWA osobne pola (art. 38 pkt 13 osobno, odznaczone), marketing bez zmian', () => {
   const html = read('public/index.html'), app = read('public/app.js'), srv = read('server.js');
-  const combined = strip(/<label class="check" id="consentAllBox" hidden><input type="checkbox" id="consentAll"> <span>([\s\S]*?)<\/span><\/label>/.exec(html)[1]);
-  const server = /const CONSENT_COMBINED = '([^']+)';/.exec(srv)[1];
-  assert.equal(combined, server, 'treść w formularzu = treść zapisywana przy zamówieniu');
-  assert.ok(server.includes('Akceptuję Regulamin') && server.includes('Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.'), 'obie zgody w pełnym brzmieniu');
-  assert.doesNotMatch(/id="consentAll"[^>]*>/.exec(html)[0], /checked/, 'odznaczone');
+  assert.ok(!html.includes('consentAll'), 'bez połączonego pola');
+  const consent = /<label class="check"><input type="checkbox" id="consent">[\s\S]*?<\/label>/.exec(html)[0], waiver = /<label class="check"><input type="checkbox" id="waiver"> <span>([^<]+)<\/span><\/label>/.exec(html);
+  assert.ok(waiver, 'osobne pole zgody z art. 38 pkt 13');
+  assert.equal(waiver[1], /const WAIVER = '([^']+)';/.exec(srv)[1], 'treść w formularzu = treść zapisywana');
+  assert.ok(!/checked/.test(consent) && !/id="waiver" checked/.test(html), 'odznaczone');
+  assert.doesNotMatch(consent, /odstąpienia/, 'regulamin bez zgody na utratę prawa odstąpienia');
   assert.match(html, /<div class="sum-top" id="sumTop" hidden>/);
-  // marketing: osobne pola, odznaczone, zwinięte – bez zmian w wariancie B
   const opt = /<details class="optbox" id="optMail">([\s\S]*?)<\/details>/.exec(html)[1];
   for (const id of ['reviewAsk', 'outcomeAsk', 'payRem', 'reminder', 'wantAlerts', 'followUp']) assert.match(opt, new RegExp(`<input type="checkbox" id="${id}">`), id);
   assert.match(app, /const CHECKOUT_B = document\.getElementById\('wiz'\)\?\.dataset\.checkout === 'b';/);
-  assert.match(app, /\$\('#consentAll'\)\.addEventListener\('change', \(e\) => \{ \$\('#consent'\)\.checked = \$\('#waiver'\)\.checked = e\.target\.checked; \}\)/);
-  assert.match(app, /\.\.\.\(CHECKOUT_B \? \{ consentForm: 'combined' \} : \{\}\)/);
+  assert.match(app, /for \(const id of \['consent', 'waiver'\]\) \$\('#' \+ id\)\.closest\('label'\)\.classList\.add\('compact'\)/);
+  assert.doesNotMatch(app, /\$\('#consent'\)\.checked = \$\('#waiver'\)\.checked/, 'jedno kliknięcie nie zaznacza obu zgód');
+  assert.match(app, /\.\.\.\(CHECKOUT_B \? \{ consentForm: 'compact' \} : \{\}\)/);
   assert.match(app, /className: 'payico'/, 'metody płatności jako ikony');
-  for (const l of ['en', 'uk', 'de']) assert.ok(JSON.parse(read(`public/i18n/${l}.json`))[server.replace(/^Akceptuję Regulamin i Politykę prywatności/, '')], `${l}: tłumaczenie`);
 });
 
 test('Raport A/B: konwersja ostatni krok → opłacone per wariant i test istotności', () => {
@@ -47,7 +47,7 @@ test('Raport A/B: konwersja ostatni krok → opłacone per wariant i test istotn
   assert.match(read('public/admin.js'), /'% ostatni krok → opłacone'/);
 });
 
-test('Zamówienie z wariantu B zapisuje treść połączonej zgody; wariant A – dotychczasową', async () => {
+test('Zamówienie: ta sama treść zgody z art. 38 pkt 13 w obu wariantach, w B oznaczony formularz „compact”', async () => {
   const port = 4400 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-abco-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
@@ -56,12 +56,12 @@ test('Zamówienie z wariantu B zapisuje treść połączonej zgody; wariant A �
     for (let i = 0; i < 60; i++) { try { await fetch(U + '/api/config'); break; } catch { await wait(150); } }
     const ad = 'Szukamy magazyniera. Wymagania: obsługa wózka widłowego, doświadczenie w magazynie, sumienność i dokładność. '.repeat(2);
     const order = (extra) => fetch(U + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pkg: 'cv', consent: true, waiver: true, profile: { name: 'Jan Test', email: 'jan@test.pl', experience: [{ title: 'Magazynier', company: 'Firma', period: '2020 – 2024' }] }, ads: [{ title: 'Magazynier', text: ad }], ...extra }) }).then((r) => r.json());
-    const b = await order({ consentForm: 'combined' }), a = await order({}), x = await order({ consentForm: 'cokolwiek' });
+    const b = await order({ consentForm: 'compact' }), a = await order({}), x = await order({ consentForm: 'combined' });
     await wait(300);
     const all = JSON.parse(fs.readFileSync(path.join(dir, 'orders.json'), 'utf8')), get = (id) => all[id] || Object.values(all).find((o) => o.id === id);
-    const combined = /const CONSENT_COMBINED = '([^']+)';/.exec(read('server.js'))[1];
-    assert.equal(get(b.id).waiver.text, combined); assert.equal(get(b.id).waiver.form, 'combined');
-    assert.match(get(a.id).waiver.text, /^Chcę, aby usługa/); assert.equal(get(a.id).waiver.form, undefined);
-    assert.match(get(x.id).waiver.text, /^Chcę, aby usługa/, 'nieznana wartość → treść wariantu A');
+    const W = /const WAIVER = '([^']+)';/.exec(read('server.js'))[1];
+    assert.equal(get(b.id).waiver.text, W); assert.equal(get(b.id).waiver.form, 'compact');
+    assert.equal(get(a.id).waiver.text, W); assert.equal(get(a.id).waiver.form, undefined);
+    assert.equal(get(x.id).waiver.text, W); assert.equal(get(x.id).waiver.form, undefined, 'nieznana wartość pomijana');
   } finally { srv.kill(); }
 });
