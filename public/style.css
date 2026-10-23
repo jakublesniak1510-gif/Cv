@@ -968,4 +968,9 @@ details>summary{min-height:44px;padding-block:11px;box-sizing:border-box}
 /* „Sprawdź CV” / „Test CV pod ATS”: podgląd tekstu odczytanego z pliku */
 .ats-text{white-space:pre-wrap;word-break:break-word;max-height:420px;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px;line-height:1.45}
 .check-result h4{margin:14px 0 6px}.reqs-list .ok{color:#127a3a;font-weight:700}.reqs-list .no{opacity:.6;font-weight:700}
-.sources{font-size:14px;padding-left:18px}.sources li{margin:4px 0;word-break:break-word}
+.widget{margin:28px 0;padding:18px;border:1px solid var(--line);border-radius:14px;background:var(--alt)}.widget h2:first-child{margin-top:0}.widget h3{font-size:16px;margin:16px 0 8px}
+.w-out:not(:empty){margin-top:12px}.kw-pick{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0}.kw-pick .check{min-height:44px}
+.sum-draft{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:10px;padding:12px;margin-top:10px}
+.calc-out{font-weight:600;margin:8px 0 0}.time-calc{display:grid;gap:8px}
+.sources{font-size:14px;color:var(--mute);padding-left:18px}.sources li{margin:4px 0;word-break:break-word}
+ul.checklist{list-style:none;padding-left:0}

@@ -16,7 +16,7 @@ test('Tematy poradnika: każdy artykuł w dokładnie jednym temacie; „Powiąza
     assert.ok(r.length >= 3 && r.length <= 5, `${a.slug}: ${r.length}`);
     assert.equal(new Set(hrefs).size, hrefs.length);
     assert.ok(!hrefs.includes(`/poradnik/${a.slug}`), 'bez linku do siebie');
-    for (const h of hrefs) assert.match(h, /^\/(poradnik\/[\w-]+|cv\/[\w-]+|wzor-cv(\/[\w-]+)?)$/);
+    for (const h of hrefs) assert.match(h, /^\/(poradnik\/[\w-]+|cv\/[\w-]+|wzor-cv(\/[\w-]+)?|narzedzia\/[\w-]+)$/);
   }
 });
 

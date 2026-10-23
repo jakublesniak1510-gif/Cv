@@ -1,0 +1,327 @@
+{
+  "ats-lebenslauf": {
+    "title": "ATS-Lebenslauf: So besteht Ihr Lebenslauf den Scan",
+    "seoTitle": "ATS-Lebenslauf: So besteht Ihr Lebenslauf den Scan",
+    "metaDescription": "Wie ein ATS Ihren Lebenslauf liest, was mit Foto, Tabellen und Unterschrift passiert und welche Punkte Sie vor dem Absenden prüfen. Mit Checkliste.",
+    "lead": "Viele Unternehmen sammeln Bewerbungen in einem Bewerbermanagementsystem (ATS) und nicht in einem E-Mail-Postfach. Das System liest den Text Ihres Lebenslaufs aus, und Recruiter suchen später darin. Hier erfahren Sie, wie das Auslesen funktioniert, was bei einem deutschen Lebenslauf zu beachten ist und was Sie vor dem Absenden prüfen sollten.",
+    "readMinutes": 8,
+    "sections": [
+      {
+        "h": "Was ein ATS mit Ihrem Lebenslauf macht",
+        "p": [
+          "ATS steht für Applicant Tracking System, auf Deutsch Bewerbermanagementsystem. Unternehmen veröffentlichen darin Stellenanzeigen, sammeln Bewerbungen und verfolgen, in welcher Phase sich jede Person befindet. Solche Systeme nutzen große Unternehmen, aber auch Personalagenturen und viele mittelständische Firmen.",
+          "Wenn Sie Ihren Lebenslauf über ein Formular auf der Karriereseite oder über ein Jobportal hochladen, landet er oft in einem ATS. Das System zieht zuerst den Text aus der Datei. Dieser Schritt heißt Parsing. Danach ordnet es den Text Abschnitten und Feldern zu: Kontaktdaten, Berufserfahrung, Ausbildung, Kenntnisse. Die Daten landen in einer Datenbank, meist zusammen mit der Originaldatei."
+        ]
+      },
+      {
+        "h": "Wie Recruiter im ATS suchen",
+        "p": [
+          "Bei vielen Bewerbungen filtern oder durchsuchen Recruiter die Datenbank, oft nach Schlüsselwörtern. Sie geben zum Beispiel eine Stellenbezeichnung, ein Programm oder eine Qualifikation ein. Lebensläufe, in denen diese Begriffe als Text vorkommen, erscheinen in den Ergebnissen.",
+          "Wie die Suche genau funktioniert, hängt vom System und von den Einstellungen des Unternehmens ab. Über eine Einladung zum Vorstellungsgespräch entscheidet in der Regel ein Mensch. Ihr Lebenslauf muss also zwei Dinge leisten: Das System muss den Text richtig auslesen, und der Recruiter muss ihn danach gut lesen können."
+        ]
+      },
+      {
+        "h": "Parser-Vorschau: So liest ein System Ihren Lebenslauf",
+        "p": [
+          "Sie können selbst prüfen, was ein System aus Ihrer Datei macht. Öffnen Sie den Lebenslauf als PDF, markieren Sie den gesamten Text und fügen Sie ihn in einen einfachen Texteditor ein. Ungefähr so sieht der Parser Ihr Dokument: als reinen Text, ohne Farben, Spalten und Bilder.",
+          "Prüfen Sie dann: Ist die Reihenfolge logisch? Stehen die Daten bei der richtigen Station? Vermischen sich Kenntnisse mit Kontaktdaten? Werden Umlaute und ß korrekt dargestellt? Fehlt etwas, zum Beispiel Text aus einer Grafik oder aus der Kopfzeile? Wenn ja, ändern Sie das Layout oder exportieren Sie die Datei neu aus einem anderen Programm.",
+          "Schneller geht es mit unserem kostenlosen Lebenslauf-ATS-Test. Sie laden Ihren Lebenslauf hoch und sehen den Text so, wie ein einfacher Parser ihn ausliest, aufgeteilt in erkannte Abschnitte. So bemerken Sie Probleme mit Spalten, Tabellen oder Grafiken, bevor Sie die Bewerbung absenden. Jedes ATS arbeitet etwas anders, die Vorschau ist daher eine Orientierung und keine exakte Kopie eines bestimmten Systems."
+        ]
+      },
+      {
+        "h": "Deutsche Besonderheiten: Foto, Unterschrift und Co.",
+        "p": [
+          "Ein deutscher Lebenslauf hat einige Traditionen, die Sie aus anderen Ländern vielleicht nicht kennen. Für das ATS zählt dabei nur eines: Was als Text in der Datei steht, kann es auslesen. Bilder, auch ein Foto oder eine eingescannte Unterschrift, liest es nicht als Text.",
+          "Zum Foto: Gesetzlich vorgeschrieben ist es nicht. Das Allgemeine Gleichbehandlungsgesetz (AGG) schützt Bewerberinnen und Bewerber vor Benachteiligung wegen ethnischer Herkunft, Geschlecht, Religion oder Weltanschauung, Behinderung, Alter und sexueller Identität. Ein Foto lässt einige dieser Merkmale erkennen. Auch deshalb erwarten viele Arbeitgeber heute kein Foto mehr. Ob Sie eines beifügen, entscheiden Sie selbst."
+        ],
+        "table": {
+          "head": [
+            "Element",
+            "Üblich in Deutschland",
+            "Was das ATS daraus macht"
+          ],
+          "rows": [
+            [
+              "Foto",
+              "Lange üblich, heute freiwillig. Wegen des AGG verlangen viele Arbeitgeber keines.",
+              "Ignoriert das Bild. Text, der nur im Bild steht (z. B. Name auf einer Grafik), geht verloren."
+            ],
+            [
+              "Tabellarischer Lebenslauf",
+              "Standard: Stationen in umgekehrt chronologischer Reihenfolge, die neueste zuerst. Übliche Überschriften wie „Berufserfahrung“, „Ausbildung“, „Kenntnisse“, „Sprachen“.",
+              "Gut lesbar, wenn die Überschriften üblich sind und Datum, Arbeitgeber und Position in einer Zeile oder direkt untereinander stehen."
+            ],
+            [
+              "Unterschrift und Datum",
+              "Traditionell am Ende des Lebenslaufs, bei Online-Bewerbungen meist verzichtbar.",
+              "Ort und Datum als Text werden gelesen. Eine eingescannte Unterschrift ist ein Bild und wird nicht als Text erkannt."
+            ],
+            [
+              "Tabellen und Spalten",
+              "In vielen Vorlagen beliebt, z. B. eine Seitenleiste mit Kontaktdaten und Kenntnissen.",
+              "Wird oft Zeile für Zeile quer über die Spalten gelesen. Daten und Kenntnisse können bei der falschen Station landen."
+            ],
+            [
+              "Kopf- und Fußzeile",
+              "Häufig für Name, Kontaktdaten oder Seitenzahlen genutzt.",
+              "Manche Systeme lesen diesen Bereich nicht oder nicht vollständig. Kontaktdaten gehören in den Haupttext."
+            ],
+            [
+              "Dateiformat PDF oder DOCX",
+              "PDF ist verbreitet. Manche Formulare verlangen ausdrücklich DOCX.",
+              "Beides funktioniert, wenn der Text markierbar ist. Ein eingescanntes PDF ist nur ein Bild und liefert keinen Text."
+            ]
+          ]
+        }
+      },
+      {
+        "h": "Layout und Abschnittsnamen",
+        "p": [
+          "Die sicherste Wahl ist eine einspaltige Vorlage. Stellen Sie Kenntnisse als Text dar und nicht als Balken, Sterne oder Kreise. Statt einer Grafik zum Sprachniveau schreiben Sie einfach „Englisch B2“.",
+          "Nutzen Sie bekannte Abschnittsnamen: Berufserfahrung, Ausbildung, Kenntnisse, Sprachen. Originelle Überschriften wie „Mein Weg“ erschweren die Zuordnung. Schreiben Sie Daten im ganzen Dokument im gleichen Format, zum Beispiel 03/2022 – heute. Nennen Sie bei jeder Station Arbeitgeber, Ort und Position."
+        ]
+      },
+      {
+        "h": "Schlüsselwörter aus der Stellenanzeige",
+        "p": [
+          "Lesen Sie die Anzeige und notieren Sie Stellenbezeichnung, Programme, Qualifikationen und Sprachen mit Niveau. Was Sie wirklich können, übernehmen Sie in genau der Schreibweise der Anzeige. Steht dort „Führerschein Klasse B“, schreiben Sie das und nicht nur „Fahrer“. Bei Abkürzungen nennen Sie einmal beide Formen, zum Beispiel „Enterprise Resource Planning (ERP)“.",
+          "Setzen Sie die Begriffe in Ihr Kurzprofil, in die Kenntnisse und vor allem in die Beschreibung Ihrer Stationen. Fügen Sie keine Wortlisten ohne Zusammenhang ein und keinen versteckten Text in weißer Schrift. Beim Auslesen entfernt das ATS die Formatierung. Versteckter Text wird dann für den Recruiter sichtbar, und solche Bewerbungen werden nach Aussage von Recruitern meist aussortiert."
+        ]
+      },
+      {
+        "h": "Online-Formulare und Bewerbungsportale",
+        "p": [
+          "Manche Systeme füllen nach dem Hochladen das Formular automatisch aus. Prüfen Sie diese Felder immer vor dem Absenden. Daten, Firmennamen oder Stellenbezeichnungen werden dabei mitunter falsch zugeordnet.",
+          "Gibt es Felder für offene Fragen, beantworten Sie diese kurz und konkret. „Siehe Lebenslauf“ reicht nicht. Recruiter lesen solche Antworten oft als Erstes."
+        ]
+      },
+      {
+        "h": "Checkliste vor dem Absenden",
+        "p": [
+          "Text: Lässt sich der gesamte Text im PDF markieren und kopieren? Ist die Reihenfolge nach dem Kopieren logisch? Stehen Name und Kontaktdaten im Haupttext und nicht nur in der Kopfzeile oder in einer Grafik?",
+          "Aufbau: Hat der Lebenslauf eine Spalte und übliche Überschriften? Sind die Stationen umgekehrt chronologisch geordnet? Haben alle Daten dasselbe Format?",
+          "Inhalt: Kommen die wichtigsten Begriffe aus der Anzeige im Text vor, soweit Sie die Anforderungen erfüllen? Sind Sprachen mit Niveau angegeben, zum Beispiel „Englisch C1“?",
+          "Datei und Formular: Hat die Datei einen einfachen Namen, etwa Vorname_Nachname_Lebenslauf.pdf? Entspricht das Format den Vorgaben der Anzeige? Haben Sie die automatisch ausgefüllten Formularfelder geprüft?"
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Lehnt ein ATS meinen Lebenslauf automatisch ab?",
+        "a": "Das hängt vom System und von den Einstellungen des Unternehmens ab. Meist sammelt und ordnet das ATS die Bewerbungen, und Recruiter suchen und filtern darin. Über eine Einladung entscheidet in der Regel ein Mensch. Wichtig ist, dass Ihr Text richtig ausgelesen wird und die passenden Begriffe enthält."
+      },
+      {
+        "q": "Muss ich ein Foto in den Lebenslauf einfügen?",
+        "a": "Nein. Ein Foto ist gesetzlich nicht vorgeschrieben, und viele Arbeitgeber erwarten wegen des AGG keines mehr. Das ATS ignoriert das Bild ohnehin. Wenn Sie ein Foto verwenden, darf es keinen wichtigen Text ersetzen."
+      },
+      {
+        "q": "PDF oder Word: Welches Format ist besser für ein ATS?",
+        "a": "Beide Formate funktionieren, wenn der Text markierbar ist. Halten Sie sich an die Vorgaben der Anzeige. Gibt es keine, ist ein aus einem Textprogramm exportiertes PDF meist eine gute Wahl. Ein eingescanntes Dokument enthält dagegen keinen lesbaren Text."
+      },
+      {
+        "q": "Brauche ich Unterschrift und Datum im Lebenslauf?",
+        "a": "Bei Online-Bewerbungen ist das meist nicht nötig. Wenn Sie unterschreiben möchten, schreiben Sie Ort und Datum als Text darunter. Eine eingescannte Unterschrift ist ein Bild, das das ATS nicht als Text liest."
+      },
+      {
+        "q": "Wie prüfe ich, ob mein Lebenslauf ATS-tauglich ist?",
+        "a": "Machen Sie den Kopiertest: gesamten Text aus dem PDF kopieren und in einen Texteditor einfügen. Oder nutzen Sie unseren kostenlosen Lebenslauf-ATS-Test, der zeigt, wie ein einfacher Parser Ihren Text ausliest."
+      }
+    ],
+    "sources": [
+      {
+        "t": "Bundesagentur für Arbeit: Den perfekten Lebenslauf erstellen",
+        "u": "https://www.arbeitsagentur.de/bildung/bewerbung/lebenslauf"
+      },
+      {
+        "t": "Antidiskriminierungsstelle des Bundes: Allgemeines Gleichbehandlungsgesetz (AGG)",
+        "u": "https://www.antidiskriminierungsstelle.gov.de/DE/ueber-diskriminierung/recht-und-gesetz/allgemeines-gleichbehandlungsgesetz/allgemeines-gleichbehandlungsgesetz-node.html"
+      },
+      {
+        "t": "Antidiskriminierungsstelle des Bundes: Zugang zum Arbeitsleben (geschützte Merkmale im Bewerbungsverfahren)",
+        "u": "https://www.antidiskriminierungsstelle.gov.de/DE/ueber-diskriminierung/lebensbereiche/arbeitsleben/zugang-zum-arbeitsleben/zugang-zum-arbeitsleben-node.html"
+      },
+      {
+        "t": "Built In: Your AI Resume Hacks Probably Won’t Fool Hiring Algorithms (ATS entfernt Formatierung, Reaktion von Recruitern auf versteckten Text)",
+        "u": "https://builtin.com/articles/hidden-ai-prompts-in-resume"
+      }
+    ]
+  },
+  "schluesselwoerter-im-lebenslauf": {
+    "title": "Schlüsselwörter im Lebenslauf: Listen für 15 Berufe",
+    "seoTitle": "Schlüsselwörter im Lebenslauf: Listen für 15 Berufe",
+    "metaDescription": "So finden Sie Schlüsselwörter in der Stellenanzeige und setzen sie richtig in den Lebenslauf: genaue Schreibweise, Abkürzungen, Platzierung. Mit Listen.",
+    "lead": "Unter diesem Ratgeber finden Sie einen Schlüsselwort-Extraktor für Ihre Stellenanzeige und Listen mit Schlüsselwörtern für 15 Berufe. Nutzen Sie die Listen als Ausgangspunkt: Die wichtigste Quelle bleibt immer die konkrete Anzeige. Zuerst erklären wir, wie Sie die richtigen Begriffe auswählen und wo sie in den Lebenslauf gehören.",
+    "readMinutes": 6,
+    "sections": [
+      {
+        "h": "So nutzen Sie die Listen und den Extraktor",
+        "p": [
+          "Die Listen für die einzelnen Berufe zeigen Kenntnisse, Programme und Qualifikationen, die in Stellenanzeigen für diese Tätigkeiten oft vorkommen. Sie helfen Ihnen, an Dinge zu denken, die Sie im Alltag tun, aber noch nicht in den Lebenslauf geschrieben haben.",
+          "Kopieren Sie jedoch nicht die ganze Liste. Wählen Sie nur, was Sie wirklich können und was zur Stelle passt. Jeden Begriff im Lebenslauf sollten Sie mit einem Beispiel aus Beruf, Ausbildung oder einem Projekt belegen können. Recruiter fragen im Gespräch oft genau danach.",
+          "Für Ihre konkrete Bewerbung nutzen Sie den Extraktor unter dem Artikel: Sie fügen den Text der Stellenanzeige ein und sehen die Begriffe, die darin vorkommen. Verwendet die Anzeige andere Wörter als unsere Liste, hat die Anzeige Vorrang. Diese Begriffe geben Recruiter am ehesten in die Suche des Systems ein."
+        ]
+      },
+      {
+        "h": "So finden Sie die Schlüsselwörter in der Anzeige",
+        "p": [
+          "Lesen Sie die Anzeige mit einem Textmarker. Markieren Sie die Stellenbezeichnung, Programme und Systeme, Berechtigungen und Zertifikate, Sprachen mit Niveau sowie konkrete Tätigkeiten aus den Aufgaben, zum Beispiel „Bearbeitung von Reklamationen“ oder „Reisekostenabrechnung“.",
+          "Die wichtigsten Stellen sind meist die Abschnitte „Ihre Aufgaben“ und „Ihr Profil“ oder „Anforderungen“. Achten Sie darauf, was sich wiederholt und was am Anfang der Liste steht. Begriffe mit dem Zusatz „von Vorteil“ oder „wünschenswert“ sind weniger wichtig. Wenn Sie sie erfüllen, zeigen Sie sie trotzdem.",
+          "Allgemeine Eigenschaften wie Teamfähigkeit oder Belastbarkeit sucht ein Recruiter selten über die Suchfunktion. Zeigen Sie sie lieber mit einem Beispiel in der Beschreibung Ihrer Erfahrung."
+        ]
+      },
+      {
+        "h": "Genaue Schreibweise, Abkürzungen und Sprachniveaus",
+        "p": [
+          "Die Suche im System erkennt Synonyme nicht immer. Steht in der Anzeige „Betreuung von Key Accounts“ und in Ihrem Lebenslauf „Pflege von Großkunden“, findet der Recruiter Ihre Bewerbung womöglich nicht. Verwenden Sie daher, wo es der Wahrheit entspricht, genau die Wörter aus der Anzeige.",
+          "Bei Abkürzungen nennen Sie mindestens einmal beide Formen, zum Beispiel „Key Account Management (KAM)“. Programmnamen schreiben Sie so wie der Hersteller, etwa „SAP S/4HANA“ oder „SAP FI“. Bei Berechtigungen übernehmen Sie die Bezeichnung der Anzeige: Steht dort „Staplerschein“, schreiben Sie „Staplerschein (Fahrausweis für Flurförderzeuge)“, damit beide Suchbegriffe passen.",
+          "Sprachen geben Sie mit Niveau nach dem Gemeinsamen Europäischen Referenzrahmen (GER) an, zum Beispiel „Englisch B2“ oder „Deutsch C1“. Verlangt die Anzeige „verhandlungssichere Englischkenntnisse“, können Sie das Niveau und die Formulierung der Anzeige kombinieren, wenn beides stimmt.",
+          "Ein eigenes Thema ist die Stellenbezeichnung. Dieselbe Tätigkeit heißt in verschiedenen Firmen unterschiedlich, etwa Personalreferent, HR-Generalist oder Sachbearbeiter Personal. Lassen Sie bei der Station Ihren echten Titel stehen. Den Titel aus der Anzeige können Sie im Kurzprofil verwenden, wenn er Ihre Tätigkeit zutreffend beschreibt."
+        ]
+      },
+      {
+        "h": "Wo die Schlüsselwörter im Lebenslauf stehen sollten",
+        "p": [
+          "Die wichtigsten Stellen sind: die Berufsbezeichnung unter Ihrem Namen, das Kurzprofil, der Abschnitt Kenntnisse und die Beschreibung Ihrer Stationen. Titel und Kurzprofil liest der Recruiter zuerst. Dort sollten die Stellenbezeichnung aus der Anzeige und zwei oder drei zentrale Kompetenzen stehen.",
+          "Der Abschnitt Kenntnisse zeigt Programme und Berechtigungen auf einen Blick. Am stärksten wirken Schlüsselwörter aber in der Beschreibung Ihrer Erfahrung, denn dort sieht man, wo und wie Sie etwas eingesetzt haben.",
+          "Berechtigungen und Zertifikate führen Sie in einem eigenen Abschnitt mit vollständigem Namen auf, bei Bedarf mit Gültigkeitsdatum. Sprachen nennen Sie mit GER-Niveau."
+        ]
+      },
+      {
+        "h": "Schlüsselwörter im Zusammenhang",
+        "p": [
+          "Vergleichen Sie zwei Einträge. „Excel, Reporting“ sind nur Stichwörter. „Erstellung wöchentlicher Vertriebsberichte in Excel mit Pivot-Tabellen“ enthält dieselben Begriffe und zeigt zusätzlich Umfang und Niveau.",
+          "Ein guter Punkt in der Beschreibung verbindet Tätigkeit, Werkzeug und Ergebnis. Er muss nicht lang sein. Wichtig ist, dass das Schlüsselwort in einem natürlichen Satz steht, den der Recruiter ohne Nachfrage versteht.",
+          "Das gilt auch für Soft Skills. Statt „Teamfähigkeit“ zu schreiben, beschreiben Sie eine Situation: Sie haben die Arbeit von mehreren Personen koordiniert, mit einer anderen Abteilung zusammengearbeitet oder neue Kollegen eingearbeitet. Den Begriff aus der Anzeige können Sie in diesen Satz einbauen. So bekommt der Recruiter einen Beleg statt einer Behauptung."
+        ]
+      },
+      {
+        "h": "Was Sie vermeiden sollten",
+        "p": [
+          "Wiederholen Sie dasselbe Wort nicht in jedem Punkt, und schreiben Sie keine langen Wortlisten ohne Zusammenhang. Nach der Suche liest ein Mensch Ihren Lebenslauf, und eine Häufung von Schlüsselwörtern wirkt unnatürlich.",
+          "Verstecken Sie keine Schlüsselwörter in weißer Schrift oder unter einer Grafik. Beim Auslesen entfernt das ATS die Formatierung und liest nur den Text. Versteckter Text wird so für den Recruiter sichtbar. Solche Bewerbungen werden meist aussortiert (nach Aussage von Recruitern). Schreiben Sie auch keine Kenntnisse in den Lebenslauf, die Sie nicht haben, selbst wenn sie auf der Liste für Ihren Beruf stehen.",
+          "Achten Sie außerdem auf Begriffe, die nur in einer Grafik, einem Logo oder einem Symbol stehen. Ist ein Programmname nur als Bild zu sehen, kann das System ihn nicht lesen und die Suche findet ihn nicht."
+        ]
+      },
+      {
+        "h": "Kurzer Check vor dem Absenden",
+        "p": [
+          "Öffnen Sie Ihren Lebenslauf und suchen Sie mit der Suchfunktion nach jedem wichtigen Begriff aus der Anzeige. Fehlt etwas, das Sie tatsächlich können, ergänzen Sie es an passender Stelle. Prüfen Sie auch, ob sich der Text markieren und kopieren lässt. Ein Wort, das nur in einer Grafik steht, existiert für das System nicht.",
+          "Schneller geht es mit dem Extraktor unter diesem Artikel: Sie fügen die Anzeige ein und sehen die Begriffe, die Sie mit Ihrem Lebenslauf abgleichen können."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Woher bekomme ich Schlüsselwörter für meinen Lebenslauf?",
+        "a": "Vor allem aus der Stellenanzeige: aus Stellenbezeichnung, Aufgaben und Anforderungen. Die Berufslisten unter dem Artikel und andere Anzeigen für ähnliche Stellen helfen, Lücken zu schließen."
+      },
+      {
+        "q": "Soll ich Begriffe auf Deutsch oder auf Englisch schreiben?",
+        "a": "So wie in der Anzeige. Verwendet sie einen englischen Begriff, etwa „Key Account Management“, übernehmen Sie ihn. Bei Abkürzungen nennen Sie einmal die volle Bezeichnung und die Abkürzung in Klammern."
+      },
+      {
+        "q": "Funktioniert versteckter Text mit Schlüsselwörtern?",
+        "a": "Nein. Das ATS entfernt beim Auslesen die Formatierung, dadurch wird weiße Schrift für den Recruiter sichtbar. Solche Bewerbungen werden meist als Täuschungsversuch aussortiert."
+      },
+      {
+        "q": "Wie gebe ich Sprachkenntnisse an?",
+        "a": "Mit dem Niveau nach GER, zum Beispiel „Englisch B2“ oder „Deutsch C1“. Steht in der Anzeige eine Formulierung wie „verhandlungssicher“, können Sie sie ergänzen, wenn sie zutrifft."
+      },
+      {
+        "q": "Was schreibe ich, wenn ich nicht alle Anforderungen erfülle?",
+        "a": "Zeigen Sie die Anforderungen, die Sie erfüllen, und Erfahrung, die den fehlenden nahekommt. Wenn Sie etwas gerade lernen, schreiben Sie das offen. Nehmen Sie keine Begriffe auf, die Sie nicht mit einem Beispiel belegen können."
+      }
+    ],
+    "sources": [
+      {
+        "t": "Built In: Your AI Resume Hacks Probably Won’t Fool Hiring Algorithms (ATS entfernt Formatierung, Reaktion von Recruitern auf versteckten Text)",
+        "u": "https://builtin.com/articles/hidden-ai-prompts-in-resume"
+      }
+    ]
+  },
+  "case": {
+    "title": "Ein Lebenslauf, zwei Stellenanzeigen: Was sich ändert und warum",
+    "seoTitle": "Ein Lebenslauf, zwei Stellenanzeigen: Beispiel",
+    "metaDescription": "Dieselbe Person, dieselben Fakten, zwei Stellenanzeigen: zwei Versionen des Lebenslaufs nebeneinander, mit markierten Begriffen aus den Anzeigen.",
+    "lead": "Eine Person, dieselben Fakten und zwei Stellenanzeigen mit unterschiedlichen Anforderungen. Wir zeigen, wie sich der Lebenslauf für jede Anzeige ändert, welche Begriffe aus der Anzeige in den Text kommen und welche Anforderungen sichtbar werden. Person und Anzeigen sind fiktiv.",
+    "name": "Anna Beispiel",
+    "facts": [
+      "Seit 2021 Kundenservice in einem Onlineshop für Haushaltswaren: E-Mails und Chat, Retouren und Reklamationen, ein Teil der Anfragen per Telefon.",
+      "Arbeit im CRM-System und im Bestellsystem des Shops.",
+      "Davor (2018–2021) Kassiererin und Verkäuferin in einem Supermarkt, Schichtarbeit.",
+      "Einarbeitung neuer Kolleginnen und Kollegen, Englisch auf Niveau B2."
+    ],
+    "generic": {
+      "summary": "Ich bringe mehrere Jahre im Onlinehandel und im Einzelhandel mit. Ich bin kommunikativ, zuverlässig und gern im Kontakt mit Menschen.",
+      "bullets": [
+        "Betreuung von Anfragen in einem Onlineshop",
+        "Kasse und Verkauf im Supermarkt, Schichtdienst",
+        "Unterstützung neuer Teammitglieder beim Start; Englisch B2"
+      ]
+    },
+    "ads": [
+      {
+        "key": "A",
+        "title": "Anzeige A: Kundenservice im Onlineshop (Chat und E-Mail)",
+        "text": "Mitarbeiter/in Kundenservice E-Commerce\nAnforderungen: Kundenservice per Chat und E-Mail, Bearbeitung von Reklamationen und Retouren, Erfahrung mit CRM-Systemen, Englischkenntnisse B2, sichere Rechtschreibung",
+        "reqs": [
+          "Kundenservice per Chat und E-Mail",
+          "Bearbeitung von Reklamationen und Retouren",
+          "Erfahrung mit CRM-Systemen",
+          "Englischkenntnisse B2",
+          "sichere Rechtschreibung"
+        ],
+        "cv": {
+          "summary": "Mitarbeiterin im [[Kundenservice]] E-Commerce: Seit 2021 beantworte ich Anfragen eines Onlineshops per [[Chat und E-Mail]] und übernehme die [[Bearbeitung von Reklamationen und Retouren]]. [[Erfahrung mit CRM-Systemen]] aus der täglichen Arbeit. [[Englischkenntnisse B2]].",
+          "bullets": [
+            "[[Kundenservice per Chat und E-Mail]] für einen Onlineshop mit Haushaltswaren",
+            "[[Bearbeitung von Reklamationen und Retouren]] von der Meldung bis zum Abschluss",
+            "Tägliche Arbeit im [[CRM-System]] und im Bestellsystem des Shops",
+            "Einarbeitung neuer Kolleginnen und Kollegen im Team"
+          ]
+        }
+      },
+      {
+        "key": "B",
+        "title": "Anzeige B: Kundenberater/in an der Hotline",
+        "text": "Kundenberater/in Hotline\nAnforderungen: Telefonate mit Kunden, Arbeit im CRM-System, Erfahrung mit Reklamationen, Schichtbereitschaft, Erfahrung im Vertrieb von Mobilfunkverträgen",
+        "reqs": [
+          "Telefonate mit Kunden",
+          "Arbeit im CRM-System",
+          "Erfahrung mit Reklamationen",
+          "Schichtbereitschaft",
+          "Erfahrung im Vertrieb von Mobilfunkverträgen"
+        ],
+        "cv": {
+          "summary": "Kundenberaterin aus dem Onlinehandel: [[Telefonate mit Kunden]], [[Erfahrung mit Reklamationen]] und Retouren sowie tägliche [[Arbeit im CRM-System]]. [[Schichtbereitschaft]]: Schichtarbeit kenne ich aus meiner früheren Tätigkeit im Supermarkt.",
+          "bullets": [
+            "[[Telefonate mit Kunden]] eines Onlineshops: Bestellungen, Retouren, Reklamationen",
+            "[[Arbeit im CRM-System]]: Anliegen und Kontaktverlauf dokumentieren",
+            "Kassiererin und Verkäuferin im Supermarkt (2018–2021), Schichtarbeit",
+            "Einarbeitung neuer Kolleginnen und Kollegen"
+          ]
+        }
+      }
+    ],
+    "changes": [
+      "Das Kurzprofil nennt, was die jeweilige Anzeige sucht: in A Chat, E-Mail und Reklamationen, in B Telefon, CRM-System und Schichtarbeit.",
+      "Dieselben Aufgaben stehen in den Worten der Anzeige. Aus „Betreuung von Anfragen“ wird in B „Telefonate mit Kunden“, weil ein Teil der Anfragen tatsächlich telefonisch kam.",
+      "Die Reihenfolge der Punkte ändert sich, damit das Wichtigste für die Anzeige oben steht.",
+      "Nichts wurde hinzugefügt: „sichere Rechtschreibung“ (A) und „Erfahrung im Vertrieb von Mobilfunkverträgen“ (B) stehen nicht in den Fakten und fehlen deshalb im Lebenslauf."
+    ],
+    "faq": [
+      {
+        "q": "Heißt Anpassen, Erfahrung dazuzuschreiben?",
+        "a": "Nein. Beide Versionen enthalten dieselben Fakten. Es ändern sich Reihenfolge, Wortwahl und der Inhalt des Kurzprofils. Anforderungen, die die Person nicht erfüllt, bleiben offen."
+      },
+      {
+        "q": "Wie kommt die Angabe „x von 5 Anforderungen sichtbar“ zustande?",
+        "a": "Wir prüfen per einfachem Wortabgleich, welche der fünf Anforderungen aus der Anzeige im Text des Lebenslaufs vorkommen. Das ist kein echtes ATS und ein Beispiel zur Veranschaulichung. Echte Anzeigen sind länger, das Prinzip ist dasselbe."
+      },
+      {
+        "q": "Muss ich den Lebenslauf für jede Anzeige anpassen?",
+        "a": "Es lohnt sich bei Stellen, die Ihnen wirklich wichtig sind, und wenn sich die Art der Arbeit ändert, etwa vom Chat zur Hotline. Bei sehr ähnlichen Anzeigen reicht oft eine kleine Änderung im Kurzprofil."
+      }
+    ]
+  }
+}
