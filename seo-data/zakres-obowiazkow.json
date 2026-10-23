@@ -1,0 +1,1323 @@
+{
+ "kasjer": {
+  "nazwaD": "kasjera",
+  "intro": "Kasjer obsługuje klientów przy kasie: rejestruje sprzedaż, przyjmuje płatności i dba o porządek na stanowisku. Pracuje najczęściej w sklepach spożywczych, marketach, drogeriach i na stacjach paliw. W mniejszych sklepach praca przy kasie często łączy się z wykładaniem towaru.",
+  "obowiazki": [
+   "obsługa kasy fiskalnej i terminala płatniczego",
+   "rejestrowanie sprzedaży oraz wydawanie paragonów i faktur",
+   "przyjmowanie płatności gotówkowych i bezgotówkowych",
+   "rozliczanie utargu na koniec zmiany",
+   "przyjmowanie zwrotów zgodnie z procedurą sklepu",
+   "pomoc klientom przy kasach samoobsługowych",
+   "weryfikacja wieku przy sprzedaży alkoholu i wyrobów tytoniowych",
+   "dbałość o ekspozycję towaru w strefie przykasowej",
+   "kontrola dat przydatności i oznaczeń cenowych",
+   "informowanie klientów o promocjach i programie lojalnościowym"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "aktualne orzeczenie do celów sanitarno-epidemiologicznych (w sklepach z żywnością)",
+    "gotowość do pracy zmianowej, także w weekendy i święta",
+    "dokładność przy liczeniu pieniędzy",
+    "uprzejmość w kontakcie z klientem",
+    "gotowość do przyjęcia odpowiedzialności materialnej"
+   ],
+   "mile_widziane": [
+    "doświadczenie w obsłudze kasy fiskalnej lub kasy online",
+    "doświadczenie w handlu detalicznym",
+    "status ucznia lub studenta przy umowie zlecenie",
+    "podstawowa znajomość języka obcego w sklepach w miejscach turystycznych"
+   ]
+  },
+  "warunki": [
+   "praca zmianowa w godzinach otwarcia sklepu",
+   "umowa o pracę lub umowa zlecenie",
+   "pełny etat lub część etatu",
+   "szkolenie stanowiskowe na początku pracy"
+  ],
+  "jak_w_cv": [
+   "Wpisz rodzaj sklepu i obsługiwany sprzęt: kasa fiskalna, kasa samoobsługowa, terminal.",
+   "Opisz rozliczanie utargu i odpowiedzialność materialną jednym konkretnym zdaniem.",
+   "Podaj dyspozycyjność (zmiany, weekendy) w podsumowaniu, a nie na końcu CV.",
+   "Warto dopisać aktualne orzeczenie sanitarno-epidemiologiczne, jeśli ogłoszenie go wymaga."
+  ],
+  "dla_firm": "Kandydaci na kasę pytają najczęściej o grafik, więc warto podać system zmian i dni pracy. Dobrze też wymienić zadania poza kasą, np. wykładanie towaru czy kontrolę dat, żeby nikt nie był zaskoczony po pierwszym dniu."
+ },
+ "sprzedawca": {
+  "nazwaD": "sprzedawcy",
+  "intro": "Sprzedawca doradza klientom w wyborze produktów, obsługuje sprzedaż i dba o wygląd sali sprzedaży. Pracuje w sklepach odzieżowych, elektronicznych, meblowych, budowlanych i spożywczych, a także w salonach firmowych. Zakres pracy zależy od branży: w sklepie specjalistycznym większe znaczenie ma wiedza o produkcie.",
+  "obowiazki": [
+   "doradztwo klientom przy wyborze produktów",
+   "prezentowanie cech i zastosowań towaru",
+   "obsługa kasy i terminala płatniczego",
+   "realizacja celów sprzedażowych sklepu",
+   "dbanie o ekspozycję towaru zgodnie ze standardami merchandisingu",
+   "przyjmowanie dostaw i rozpakowywanie towaru",
+   "uzupełnianie półek i wieszaków",
+   "przyjmowanie reklamacji i zwrotów",
+   "udział w inwentaryzacjach",
+   "utrzymanie porządku na sali sprzedaży"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "łatwość nawiązywania kontaktu z klientem",
+    "gotowość do pracy zmianowej i w weekendy",
+    "umiejętność pracy w zespole",
+    "zaangażowanie w realizację celów sprzedażowych",
+    "dbałość o porządek i estetykę sali"
+   ],
+   "mile_widziane": [
+    "doświadczenie w sprzedaży w podobnej branży",
+    "znajomość produktów oferowanych przez sklep",
+    "doświadczenie w obsłudze kasy",
+    "komunikatywna znajomość języka angielskiego"
+   ]
+  },
+  "warunki": [
+   "praca zmianowa, także w weekendy",
+   "umowa o pracę lub umowa zlecenie",
+   "premie uzależnione od wyników sprzedaży",
+   "rabat pracowniczy na zakupy",
+   "szkolenia produktowe"
+  ],
+  "jak_w_cv": [
+   "Podaj branżę i rodzaj sklepu, bo ułatwia to ocenę dopasowania.",
+   "Opisz, jakim klientom i przy jakich produktach doradzasz, zamiast pisać ogólnie o obsłudze klienta.",
+   "Wpisz zadania zaplecza: dostawy, ekspozycja, inwentaryzacje.",
+   "Wyróżnienia i zrealizowane cele wymień tylko wtedy, gdy umiesz o nich opowiedzieć na rozmowie."
+  ],
+  "dla_firm": "Branża i rodzaj sklepu mówią kandydatowi więcej niż ogólne „praca w handlu”. Warto napisać, ile czasu zajmuje doradztwo na sali, a ile kasa, i jasno opisać pracę w weekendy."
+ },
+ "kierownik-sklepu": {
+  "nazwaD": "kierownika sklepu",
+  "intro": "Kierownik sklepu odpowiada za codzienne funkcjonowanie placówki: zespół, wyniki sprzedaży, stany towaru i standardy obsługi. Pracuje w sklepach sieciowych, salonach firmowych i samodzielnych placówkach handlowych. Łączy pracę biurową z obecnością na sali sprzedaży.",
+  "obowiazki": [
+   "zarządzanie zespołem sprzedawców i kasjerów",
+   "układanie grafików pracy i planowanie obsady zmian",
+   "rekrutacja i wdrażanie nowych pracowników",
+   "realizacja celów sprzedażowych sklepu",
+   "analiza wyników sprzedaży i raportowanie do kierownika regionu",
+   "nadzór nad stanami magazynowymi i zamówieniami",
+   "organizacja i rozliczanie inwentaryzacji",
+   "kontrola standardów ekspozycji towaru",
+   "ograniczanie strat i nadzór nad gospodarką kasową",
+   "rozwiązywanie trudnych sytuacji z klientami",
+   "dbałość o przestrzeganie zasad BHP i przepisów w sklepie"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "doświadczenie w handlu detalicznym",
+    "doświadczenie w kierowaniu zespołem",
+    "umiejętność analizy wyników sprzedaży",
+    "dobra organizacja pracy własnej i zespołu",
+    "gotowość do przyjęcia odpowiedzialności materialnej",
+    "dyspozycyjność w godzinach otwarcia sklepu"
+   ],
+   "mile_widziane": [
+    "doświadczenie na stanowisku zastępcy kierownika lub kierownika zmiany",
+    "znajomość programów do zarządzania sprzedażą i magazynem",
+    "znajomość arkusza kalkulacyjnego",
+    "wykształcenie wyższe, np. z zakresu handlu lub zarządzania"
+   ]
+  },
+  "warunki": [
+   "umowa o pracę",
+   "praca w systemie zmianowym zgodnym z godzinami otwarcia",
+   "premia zależna od wyników sklepu (często spotykana)",
+   "szkolenia menedżerskie"
+  ],
+  "jak_w_cv": [
+   "Podaj orientacyjną wielkość zespołu i typ sklepu; pomijaj liczby, których nie da się potwierdzić.",
+   "Opisz konkretne działania: grafiki, inwentaryzacje, ograniczanie strat, wdrażanie nowych osób.",
+   "Warto wymienić usprawnienia, które da się omówić na rozmowie.",
+   "Wpisz systemy i narzędzia używane do raportowania i zamówień."
+  ],
+  "dla_firm": "Na stanowisku kierowniczym liczy się zakres odpowiedzialności: orientacyjna wielkość zespołu, samodzielność w zamówieniach i grafikach oraz to, komu kierownik raportuje. Taki opis przyciąga osoby o właściwym poziomie doświadczenia."
+ },
+ "merchandiser": {
+  "nazwaD": "merchandisera",
+  "intro": "Merchandiser dba o to, by produkty producenta lub dystrybutora były prawidłowo wyeksponowane w sklepach. Pracuje najczęściej w terenie, odwiedzając sklepy na wyznaczonej trasie, i raportuje stan ekspozycji w aplikacji. Współpracuje z personelem sklepów i przedstawicielami handlowymi.",
+  "obowiazki": [
+   "układanie produktów zgodnie z planogramem",
+   "kontrola dostępności produktów i stanów na półkach",
+   "sprawdzanie poprawności cen i oznaczeń",
+   "montaż i demontaż materiałów POS",
+   "przygotowywanie ekspozycji dodatkowych i promocyjnych",
+   "rotacja towaru i kontrola dat ważności",
+   "raportowanie wizyt i wykonywanie zdjęć ekspozycji w aplikacji mobilnej",
+   "współpraca z kierownikami i personelem sklepów",
+   "planowanie trasy i harmonogramu wizyt",
+   "przekazywanie informacji o działaniach konkurencji"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "prawo jazdy kat. B",
+    "samodzielność i dobra organizacja pracy",
+    "obsługa smartfona i aplikacji mobilnych",
+    "dokładność i dbałość o estetykę ekspozycji",
+    "gotowość do pracy w terenie"
+   ],
+   "mile_widziane": [
+    "doświadczenie w pracy z planogramami",
+    "doświadczenie w merchandisingu w sieciach handlowych",
+    "znajomość terenu, na którym odbywa się praca",
+    "podstawowa znajomość arkusza kalkulacyjnego"
+   ]
+  },
+  "warunki": [
+   "praca w terenie na wyznaczonej trasie",
+   "umowa o pracę lub umowa zlecenie",
+   "samochód służbowy lub zwrot kosztów używania prywatnego auta",
+   "elastyczne godziny pracy w ramach harmonogramu wizyt"
+  ],
+  "jak_w_cv": [
+   "Wpisz kategorie produktów i typy sklepów, w których układasz ekspozycję.",
+   "Opisz pracę z planogramem i raportowanie w aplikacji, bo to częste słowa kluczowe w ogłoszeniach.",
+   "Podaj obszar pracy w terenie i prawo jazdy w widocznym miejscu.",
+   "Warto zaznaczyć samodzielne planowanie trasy wizyt."
+  ],
+  "dla_firm": "Praca w terenie wymaga konkretów: obszar i długość trasy, kategorie produktów, sposób raportowania oraz to, czy firma zapewnia samochód. Prawo jazdy, jeśli jest konieczne, lepiej wpisać wprost do wymagań."
+ },
+ "obsluga-klienta": {
+  "nazwaD": "specjalisty ds. obsługi klienta",
+  "intro": "Specjalista ds. obsługi klienta odpowiada na pytania klientów, rozwiązuje ich problemy i prowadzi sprawy do zakończenia. Pracuje w działach obsługi klienta sklepów internetowych, firm usługowych, banków, operatorów telekomunikacyjnych i centrów usług wspólnych. Kontakt odbywa się głównie przez telefon, e-mail i czat.",
+  "obowiazki": [
+   "obsługa zgłoszeń klientów telefonicznie, mailowo i na czacie",
+   "udzielanie informacji o produktach, usługach i statusie zamówień",
+   "rozpatrywanie reklamacji i zwrotów",
+   "prowadzenie historii kontaktu w systemie CRM",
+   "rozwiązywanie problemów klientów zgodnie z procedurami",
+   "przekazywanie spraw do innych działów i monitorowanie ich realizacji",
+   "dbanie o jakość odpowiedzi pisemnych",
+   "realizacja standardów czasu odpowiedzi i jakości obsługi",
+   "zgłaszanie powtarzających się problemów i propozycji usprawnień",
+   "aktualizowanie bazy wiedzy i szablonów odpowiedzi"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "poprawna polszczyzna w mowie i piśmie",
+    "swobodna obsługa komputera",
+    "komunikatywność i cierpliwość w kontakcie z klientem",
+    "umiejętność rozwiązywania problemów",
+    "gotowość do pracy według procedur i standardów jakości"
+   ],
+   "mile_widziane": [
+    "doświadczenie w pracy w systemie CRM lub systemie zgłoszeń",
+    "znajomość języka angielskiego lub innego języka obcego",
+    "doświadczenie w obsłudze reklamacji",
+    "znajomość branży, w której działa firma"
+   ]
+  },
+  "warunki": [
+   "praca stacjonarna, hybrydowa lub zdalna",
+   "umowa o pracę lub umowa zlecenie",
+   "praca w stałych godzinach lub w systemie zmianowym",
+   "szkolenie wdrożeniowe z produktów i systemów"
+  ],
+  "jak_w_cv": [
+   "Wymień kanały kontaktu i rodzaj spraw, np. reklamacje, pytania o zamówienia, sprawy techniczne.",
+   "Podaj nazwy systemów CRM lub narzędzi do zgłoszeń, jeśli są znane.",
+   "Sprawdź CV pod kątem literówek, bo jest ono próbką pisemnej komunikacji.",
+   "Warto dodać języki obce z opisem, w jakich sprawach ich używasz."
+  ],
+  "dla_firm": "Najważniejsze dla kandydata są kanały kontaktu – telefon, czat czy e-mail – i rodzaj spraw. Systemy, z których korzysta zespół, oraz godziny pracy pomagają ocenić, czy to praca dla niego."
+ },
+ "konsultant-call-center": {
+  "nazwaD": "konsultanta call center",
+  "intro": "Konsultant call center prowadzi rozmowy telefoniczne z klientami: odbiera połączenia przychodzące albo dzwoni z ofertą lub w sprawach serwisowych. Pracuje w centrach kontaktu działających dla banków, operatorów, ubezpieczycieli, sklepów i firm energetycznych. Praca opiera się na skryptach, systemie CRM i celach jakościowych lub sprzedażowych.",
+  "obowiazki": [
+   "obsługa połączeń przychodzących od klientów",
+   "realizacja połączeń wychodzących w ramach kampanii",
+   "prezentowanie oferty i telesprzedaż produktów lub usług",
+   "prowadzenie rozmów według skryptu",
+   "wprowadzanie danych i notatek z rozmów do systemu CRM",
+   "przyjmowanie reklamacji i zgłoszeń",
+   "umawianie spotkań dla doradców lub przedstawicieli",
+   "realizacja celów sprzedażowych i jakościowych",
+   "weryfikacja danych klientów zgodnie z zasadami ochrony danych osobowych"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "wyraźna dykcja i poprawna polszczyzna",
+    "swobodna obsługa komputera",
+    "odporność na stres",
+    "gotowość do pracy z celami sprzedażowymi lub jakościowymi",
+    "dyspozycyjność zgodna z grafikiem projektu"
+   ],
+   "mile_widziane": [
+    "doświadczenie w telesprzedaży lub obsłudze infolinii",
+    "doświadczenie w pracy z systemem CRM",
+    "znajomość języka obcego w projektach zagranicznych",
+    "znajomość branży projektu, np. bankowej lub telekomunikacyjnej"
+   ]
+  },
+  "warunki": [
+   "praca zmianowa w godzinach działania infolinii",
+   "umowa zlecenie lub umowa o pracę",
+   "praca stacjonarna lub zdalna",
+   "premie za realizację celów",
+   "płatne szkolenie produktowe na start"
+  ],
+  "jak_w_cv": [
+   "Opisz rodzaj rozmów (przychodzące, wychodzące, sprzedaż, obsługa) i branżę projektu.",
+   "Wpisz systemy, w których pracujesz, oraz pracę ze skryptem.",
+   "Wyróżnienia za jakość rozmów podaj tylko wtedy, gdy umiesz o nich opowiedzieć.",
+   "Podaj dyspozycyjność w widocznym miejscu CV."
+  ],
+  "dla_firm": "Rozmowy przychodzące i wychodzące to dwie różne prace, dlatego warto to napisać w pierwszym zdaniu ogłoszenia. Do tego temat rozmów, grafik i sposób rozliczania celów."
+ },
+ "przedstawiciel-handlowy": {
+  "nazwaD": "przedstawiciela handlowego",
+  "intro": "Przedstawiciel handlowy sprzedaje produkty lub usługi firmy klientom na przydzielonym terenie, najczęściej w modelu B2B. Odwiedza sklepy, hurtownie, warsztaty, firmy lub instytucje, negocjuje warunki i dba o stałą współpracę. Dużą część czasu spędza w trasie.",
+  "obowiazki": [
+   "pozyskiwanie nowych klientów na przydzielonym terenie",
+   "obsługa i rozwój współpracy z obecnymi klientami",
+   "przygotowywanie ofert handlowych",
+   "prowadzenie negocjacji handlowych",
+   "realizacja planów sprzedażowych",
+   "planowanie tras i harmonogramu wizyt",
+   "prezentacja produktów i nowości",
+   "monitorowanie płatności i należności klientów",
+   "raportowanie wizyt i wyników w systemie CRM",
+   "obserwacja rynku i działań konkurencji"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "prawo jazdy kat. B",
+    "doświadczenie w sprzedaży",
+    "umiejętności negocjacyjne",
+    "samodzielność i dobra organizacja pracy",
+    "gotowość do codziennej pracy w terenie"
+   ],
+   "mile_widziane": [
+    "doświadczenie w sprzedaży B2B w danej branży",
+    "znajomość rynku i klientów w regionie",
+    "doświadczenie w pracy z systemem CRM",
+    "wykształcenie wyższe lub techniczne przy produktach specjalistycznych"
+   ]
+  },
+  "warunki": [
+   "umowa o pracę lub współpraca B2B",
+   "samochód służbowy, często także do użytku prywatnego",
+   "telefon i laptop służbowy",
+   "wynagrodzenie podstawowe z premią od wyników"
+  ],
+  "jak_w_cv": [
+   "Podaj branżę, typ klientów i obszar, na którym sprzedajesz.",
+   "Opisz sposób pozyskiwania klientów i rodzaj negocjacji.",
+   "Wyniki sprzedażowe warto wpisać tylko wtedy, gdy są sprawdzalne i można je omówić na rozmowie.",
+   "Prawo jazdy i znajomość regionu umieść w podsumowaniu."
+  ],
+  "dla_firm": "Teren, typ klientów i zakres samodzielności w negocjacjach to podstawa opisu. Narzędzia pracy, np. samochód służbowy i telefon, oraz zasady premii ułatwiają porównanie ofert."
+ },
+ "magazynier": {
+  "nazwaD": "magazyniera",
+  "intro": "Magazynier przyjmuje, składuje i wydaje towar oraz kompletuje zamówienia. Pracuje w centrach dystrybucyjnych, magazynach sklepów internetowych, hurtowniach i zakładach produkcyjnych. Praca jest fizyczna i zwykle odbywa się w systemie zmianowym.",
+  "obowiazki": [
+   "kompletacja zamówień przy użyciu skanera",
+   "przyjmowanie dostaw i kontrola zgodności z dokumentami",
+   "wydawanie towaru i przygotowanie przesyłek do wysyłki",
+   "rozmieszczanie towaru w lokalizacjach magazynowych",
+   "obsługa systemu WMS",
+   "pakowanie, foliowanie i etykietowanie palet",
+   "obsługa wózka paletowego ręcznego lub elektrycznego",
+   "udział w inwentaryzacjach",
+   "zgłaszanie uszkodzeń i braków towaru",
+   "utrzymanie porządku i przestrzeganie zasad BHP"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "gotowość do pracy fizycznej",
+    "gotowość do pracy zmianowej",
+    "dokładność i sumienność",
+    "przestrzeganie zasad BHP",
+    "umiejętność pracy w zespole"
+   ],
+   "mile_widziane": [
+    "uprawnienia UDT kategorii II WJO na wózki jezdniowe podnośnikowe",
+    "doświadczenie w kompletacji ze skanerem",
+    "znajomość systemu WMS",
+    "doświadczenie w pracy w centrum dystrybucyjnym"
+   ]
+  },
+  "warunki": [
+   "praca zmianowa, często w systemie dwu- lub trzyzmianowym",
+   "umowa o pracę, umowa zlecenie lub zatrudnienie przez agencję pracy tymczasowej",
+   "praca fizyczna w hali magazynowej",
+   "odzież robocza i szkolenie stanowiskowe"
+  ],
+  "jak_w_cv": [
+   "Wymień rodzaje zadań: kompletacja, przyjęcia, wydania, inwentaryzacje.",
+   "Podaj uprawnienia UDT na wózki z kategorią, np. II WJO, jeśli je masz.",
+   "Przy pracy przez agencję opisz magazyn i branżę, a nie tylko nazwę agencji.",
+   "Warto wpisać nazwę systemu WMS lub typ skanera, z których korzystasz."
+  ],
+  "dla_firm": "Rodzaj towaru, system zmian i używany sprzęt mówią najwięcej o pracy w magazynie. Warto jasno napisać, czy uprawnienia UDT kategorii II WJO są warunkiem, czy firma może je sfinansować."
+ },
+ "operator-wozka-widlowego": {
+  "nazwaD": "operatora wózka widłowego",
+  "intro": "Operator wózka widłowego przemieszcza, załadowuje i składuje towar przy użyciu wózków jezdniowych podnośnikowych. Pracuje w magazynach, centrach logistycznych, zakładach produkcyjnych, składach budowlanych i portach. Bezpieczeństwo pracy jest w tym zawodzie jednym z głównych kryteriów oceny kandydata.",
+  "obowiazki": [
+   "obsługa wózka czołowego, bocznego lub wysokiego składowania",
+   "załadunek i wyładunek samochodów ciężarowych",
+   "składowanie towaru na regałach wysokiego składowania",
+   "przemieszczanie palet między strefami magazynu i produkcji",
+   "zaopatrywanie linii produkcyjnych w materiały",
+   "potwierdzanie operacji skanerem w systemie WMS",
+   "codzienna kontrola stanu technicznego wózka przed pracą",
+   "wymiana butli gazowej lub ładowanie akumulatora wózka",
+   "zgłaszanie usterek przełożonemu",
+   "przestrzeganie zasad BHP i ruchu wewnątrzzakładowego"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "uprawnienia UDT do obsługi wózków jezdniowych podnośnikowych kategorii II WJO lub I WJO",
+    "doświadczenie w obsłudze wózka widłowego",
+    "przestrzeganie zasad BHP",
+    "gotowość do pracy zmianowej"
+   ],
+   "mile_widziane": [
+    "uprawnienia UDT kategorii I WJO obejmujące wózki specjalizowane",
+    "doświadczenie na wózku wysokiego składowania lub w wąskich korytarzach",
+    "przeszkolenie w zakresie wymiany butli gazowej w wózkach",
+    "znajomość systemu WMS i obsługi skanera"
+   ]
+  },
+  "warunki": [
+   "praca zmianowa",
+   "umowa o pracę lub zatrudnienie przez agencję pracy tymczasowej",
+   "praca w hali magazynowej lub na placu składowym",
+   "odzież robocza i szkolenie stanowiskowe"
+  ],
+  "jak_w_cv": [
+   "Wpisz uprawnienia UDT z kategorią (I WJO lub II WJO) na początku CV.",
+   "Wymień rodzaje wózków, np. czołowy, boczny, reach truck, wózek systemowy.",
+   "Opisz typowe zadania: wyładunek, wysokie składowanie, zaopatrywanie produkcji.",
+   "Warto dodać szkolenia stanowiskowe i pracę zgodną z zasadami BHP."
+  ],
+  "dla_firm": "Wymagana kategoria UDT (I WJO lub II WJO), rodzaje wózków i orientacyjna wysokość składowania pozwalają kandydatom od razu ocenić, czy ich uprawnienia wystarczą."
+ },
+ "kierownik-magazynu": {
+  "nazwaD": "kierownika magazynu",
+  "intro": "Kierownik magazynu organizuje pracę magazynu i zespołu: od przyjęć towaru, przez składowanie, po wysyłki. Pracuje w centrach dystrybucyjnych, firmach logistycznych, zakładach produkcyjnych i hurtowniach. Odpowiada za wydajność, poprawność stanów i bezpieczeństwo pracy.",
+  "obowiazki": [
+   "zarządzanie zespołem magazynierów, operatorów i liderów zmian",
+   "planowanie obsady i organizacja pracy zmianowej",
+   "nadzór nad przyjęciami, składowaniem i wydaniami towaru",
+   "monitorowanie wskaźników KPI magazynu",
+   "nadzór nad poprawnością stanów i organizacja inwentaryzacji",
+   "optymalizacja procesów magazynowych, np. z wykorzystaniem narzędzi Lean",
+   "współpraca z działem transportu, zakupów i produkcji",
+   "nadzór nad przestrzeganiem zasad BHP i stanem technicznym sprzętu",
+   "raportowanie wyników do przełożonych",
+   "rekrutacja i szkolenie pracowników"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "doświadczenie w zarządzaniu zespołem w magazynie lub logistyce",
+    "znajomość procesów magazynowych",
+    "znajomość systemu WMS lub ERP",
+    "dobra znajomość arkusza kalkulacyjnego",
+    "umiejętność analizy danych i wskaźników"
+   ],
+   "mile_widziane": [
+    "znajomość narzędzi Lean lub standardu 5S",
+    "wykształcenie wyższe, np. z logistyki",
+    "znajomość języka angielskiego",
+    "doświadczenie we wdrażaniu zmian w organizacji magazynu"
+   ]
+  },
+  "warunki": [
+   "umowa o pracę",
+   "praca w systemie dziennym z gotowością do reagowania na potrzeby zmian",
+   "samochód lub telefon służbowy, w części ofert",
+   "premia zależna od realizacji celów (często spotykana)"
+  ],
+  "jak_w_cv": [
+   "Opisz charakter magazynu (branża, typ towaru) i orientacyjną wielkość zespołu.",
+   "Wymień nadzorowane procesy i używane systemy.",
+   "Podaj konkretne usprawnienia, które da się opisać krok po kroku na rozmowie.",
+   "Warto zaznaczyć odpowiedzialność za BHP i inwentaryzacje."
+  ],
+  "dla_firm": "Opis skali i specyfiki magazynu, podległego zespołu i używanych systemów pokazuje, z jakim zakresem odpowiedzialności wiąże się stanowisko. Metody pracy, np. Lean, lepiej oznaczyć jako mile widziane, jeśli nie są warunkiem."
+ },
+ "kurier": {
+  "nazwaD": "kuriera",
+  "intro": "Kurier odbiera i doręcza przesyłki klientom indywidualnym i firmom w wyznaczonym rejonie. Pracuje dla firm kurierskich, często jako podwykonawca, a także dla sklepów i firm dostarczających zakupy. Większość dnia spędza w samochodzie dostawczym i w kontakcie z odbiorcami.",
+  "obowiazki": [
+   "załadunek przesyłek w oddziale lub sortowni",
+   "planowanie kolejności doręczeń na trasie",
+   "doręczanie przesyłek do klientów indywidualnych i firm",
+   "odbiór przesyłek od nadawców",
+   "skanowanie przesyłek i potwierdzanie doręczeń w aplikacji",
+   "pobieranie płatności za pobraniem i ich rozliczanie",
+   "kontakt z odbiorcami w sprawie terminu doręczenia",
+   "dbałość o stan powierzonego pojazdu",
+   "rozliczanie dokumentów i zwrotów po zakończeniu trasy"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "prawo jazdy kat. B",
+    "doświadczenie w prowadzeniu samochodu",
+    "dobra organizacja pracy",
+    "kultura osobista w kontakcie z klientem",
+    "obsługa smartfona i aplikacji mobilnej"
+   ],
+   "mile_widziane": [
+    "doświadczenie jako kurier lub kierowca samochodu dostawczego",
+    "znajomość topografii miasta lub rejonu",
+    "własna działalność gospodarcza przy współpracy B2B",
+    "niekaralność za przestępstwa przeciwko mieniu (często wymagana przez zleceniodawców)"
+   ]
+  },
+  "warunki": [
+   "umowa o pracę, umowa zlecenie lub współpraca B2B",
+   "samochód dostawczy udostępniony przez firmę lub własny pojazd",
+   "praca w stałym rejonie doręczeń",
+   "praca w dzień, czasem także w soboty"
+  ],
+  "jak_w_cv": [
+   "Podaj prawo jazdy i doświadczenie za kierownicą w pierwszych linijkach.",
+   "Opisz rejon pracy i rodzaj doręczeń, np. paczki, palety, zakupy spożywcze.",
+   "Wpisz obsługę skanera, aplikacji kurierskiej i płatności za pobraniem.",
+   "Warto dodać wcześniejszą pracę jako kierowca samochodu dostawczego, nawet w innej branży."
+  ],
+  "dla_firm": "Forma współpracy (umowa czy działalność), rejon, rodzaj pojazdu i godziny pracy to informacje, o które kandydaci pytają najpierw. Podanie ich w ogłoszeniu skraca rozmowy wstępne."
+ },
+ "pracownik-produkcji": {
+  "nazwaD": "pracownika produkcji",
+  "intro": "Pracownik produkcji wykonuje zadania na linii produkcyjnej lub przy maszynie: montaż, obsługę urządzeń, pakowanie i kontrolę jakości. Pracuje w zakładach branży spożywczej, motoryzacyjnej, elektronicznej, meblarskiej i opakowaniowej. Zakres obowiązków zależy od branży i rodzaju wyrobów.",
+  "obowiazki": [
+   "praca na linii produkcyjnej zgodnie z instrukcją stanowiskową",
+   "obsługa maszyn i urządzeń produkcyjnych",
+   "montaż podzespołów lub elementów wyrobu",
+   "wizualna kontrola jakości wyrobów",
+   "pakowanie i etykietowanie produktów",
+   "uzupełnianie materiałów na stanowisku",
+   "realizacja norm wydajności",
+   "prowadzenie dokumentacji produkcyjnej na stanowisku",
+   "utrzymanie porządku zgodnie ze standardem 5S",
+   "przestrzeganie zasad BHP i higieny produkcji"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "gotowość do pracy zmianowej",
+    "dokładność i sumienność",
+    "przestrzeganie zasad BHP",
+    "umiejętność pracy w zespole",
+    "aktualne orzeczenie do celów sanitarno-epidemiologicznych (w produkcji spożywczej)"
+   ],
+   "mile_widziane": [
+    "doświadczenie w pracy na produkcji w podobnej branży",
+    "uprawnienia UDT kategorii II WJO na wózki jezdniowe",
+    "znajomość standardu 5S",
+    "wykształcenie zawodowe lub techniczne"
+   ]
+  },
+  "warunki": [
+   "praca zmianowa",
+   "umowa o pracę lub zatrudnienie przez agencję pracy tymczasowej",
+   "praca stojąca przy linii lub maszynie",
+   "odzież robocza i szkolenie stanowiskowe",
+   "dojazd zorganizowany przez pracodawcę, w części ofert"
+  ],
+  "jak_w_cv": [
+   "Wpisz branżę i rodzaj wyrobów, przy których pracujesz.",
+   "Opisz typ stanowiska: linia, maszyna, montaż, pakowanie, kontrola jakości.",
+   "Podaj uprawnienia i orzeczenia, jeśli ogłoszenie ich wymaga.",
+   "Warto dodać znajomość standardu 5S lub pracę według instrukcji stanowiskowych."
+  ],
+  "dla_firm": "Kandydaci bez doświadczenia chętniej aplikują, gdy ogłoszenie mówi, czego firma nauczy na miejscu. Warto podać branżę, typ stanowiska, system zmian i to, czy orzeczenie sanitarno-epidemiologiczne jest wymagane."
+ },
+ "mechanik-samochodowy": {
+  "nazwaD": "mechanika samochodowego",
+  "intro": "Mechanik samochodowy diagnozuje i naprawia pojazdy oraz wykonuje ich obsługę okresową. Pracuje w niezależnych warsztatach, autoryzowanych serwisach marek i serwisach flotowych. Coraz większą część pracy stanowi diagnostyka komputerowa.",
+  "obowiazki": [
+   "diagnostyka usterek pojazdów, także przy użyciu testera komputerowego",
+   "naprawy mechaniczne silnika i osprzętu",
+   "naprawy układu hamulcowego, zawieszenia i układu kierowniczego",
+   "wymiana rozrządu, sprzęgła i elementów układu wydechowego",
+   "obsługa okresowa: wymiana oleju, filtrów i płynów eksploatacyjnych",
+   "serwis klimatyzacji samochodowej",
+   "wymiana i naprawa opon (w części warsztatów)",
+   "korzystanie z dokumentacji serwisowej producentów",
+   "jazdy próbne po naprawie",
+   "dbanie o porządek i narzędzia na stanowisku"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "doświadczenie w naprawie samochodów osobowych lub dostawczych",
+    "znajomość budowy pojazdów",
+    "obsługa narzędzi diagnostycznych",
+    "prawo jazdy kat. B",
+    "samodzielność i dokładność"
+   ],
+   "mile_widziane": [
+    "wykształcenie techniczne w zawodzie mechanika pojazdów samochodowych",
+    "zaświadczenie o odbytym szkoleniu w zakresie odzysku czynnika z klimatyzacji samochodowej (tzw. uprawnienia f-gazowe)",
+    "doświadczenie z konkretnymi markami pojazdów",
+    "doświadczenie z pojazdami hybrydowymi lub elektrycznymi"
+   ]
+  },
+  "warunki": [
+   "umowa o pracę",
+   "praca w warsztacie w godzinach jego otwarcia",
+   "dostęp do narzędzi i sprzętu diagnostycznego",
+   "szkolenia producentów w serwisach autoryzowanych"
+  ],
+  "jak_w_cv": [
+   "Wymień konkretne rodzaje napraw zamiast ogólnego opisu „naprawa samochodów”.",
+   "Podaj marki pojazdów i testery diagnostyczne, które obsługujesz.",
+   "Wpisz zaświadczenie ze szkolenia f-gazowego, jeśli je masz.",
+   "Warto dodać szkolenia producentów i kursy z nowych technologii."
+  ],
+  "dla_firm": "Profil warsztatu, obsługiwane marki i dostępny sprzęt diagnostyczny pomagają mechanikom ocenić, czy ich doświadczenie pasuje. Zaświadczenie ze szkolenia f-gazowego warto oznaczyć jako wymagane albo mile widziane."
+ },
+ "spawacz": {
+  "nazwaD": "spawacza",
+  "intro": "Spawacz łączy elementy metalowe wybranymi metodami spawania według rysunku technicznego i instrukcji technologicznej. Pracuje w zakładach produkujących konstrukcje stalowe, w stoczniach, przy produkcji maszyn, na budowach i przy montażu instalacji. Wiele ofert dotyczy także pracy za granicą.",
+  "obowiazki": [
+   "spawanie metodą MAG, TIG lub MMA zgodnie z instrukcją technologiczną",
+   "spawanie konstrukcji stalowych",
+   "spawanie stali nierdzewnej lub aluminium (w zależności od stanowiska)",
+   "przygotowanie elementów do spawania: cięcie, ukosowanie, szlifowanie",
+   "sczepianie i pasowanie elementów według rysunku",
+   "czytanie rysunku technicznego",
+   "kontrola wizualna wykonanych spoin",
+   "obróbka spoin po spawaniu",
+   "dbanie o sprzęt spawalniczy i stanowisko pracy",
+   "przestrzeganie zasad BHP i ochrony przeciwpożarowej"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "aktualne świadectwo egzaminu kwalifikacyjnego spawacza wg PN-EN ISO 9606-1 w wymaganej metodzie i pozycji",
+    "aktualne uprawnienia spawalnicze w wymaganej metodzie",
+    "doświadczenie w spawaniu",
+    "umiejętność czytania rysunku technicznego",
+    "przestrzeganie zasad BHP"
+   ],
+   "mile_widziane": [
+    "uprawnienia w kilku metodach lub pozycjach albo do spawania aluminium (PN-EN ISO 9606-2)",
+    "uprawnienia w kilku metodach spawania lub pozycjach",
+    "doświadczenie w spawaniu stali nierdzewnej lub aluminium",
+    "gotowość do wyjazdów i pracy na montażach"
+   ]
+  },
+  "warunki": [
+   "umowa o pracę lub umowa zlecenie",
+   "praca w hali produkcyjnej lub na budowie",
+   "praca zmianowa (w części zakładów)",
+   "odzież ochronna i sprzęt spawalniczy zapewnione przez pracodawcę",
+   "zakwaterowanie przy pracy wyjazdowej, w części ofert"
+  ],
+  "jak_w_cv": [
+   "Wpisz metody spawania i ważność uprawnień na początku CV.",
+   "Podaj materiały i pozycje spawania, które potrafisz wykonać na próbie spawalniczej.",
+   "Opisz rodzaj konstrukcji, przy których pracujesz.",
+   "Warto zaznaczyć samodzielną pracę z rysunkiem technicznym."
+  ],
+  "dla_firm": "Metoda, pozycja i materiał – te trzy informacje decydują o tym, czy spawacz ma odpowiednie świadectwo. Warto też napisać, czy rekrutacja obejmuje próbę spawalniczą i jak ona wygląda."
+ },
+ "elektryk": {
+  "nazwaD": "elektryka",
+  "intro": "Elektryk montuje, uruchamia, konserwuje i naprawia instalacje oraz urządzenia elektryczne. Pracuje na budowach, w firmach instalacyjnych, w działach utrzymania ruchu zakładów przemysłowych i przy obsłudze budynków. Do samodzielnej pracy przy urządzeniach elektrycznych potrzebne jest świadectwo kwalifikacyjne.",
+  "obowiazki": [
+   "montaż instalacji elektrycznych w budynkach mieszkalnych i przemysłowych",
+   "montaż i podłączanie rozdzielnic",
+   "układanie przewodów i tras kablowych",
+   "podłączanie urządzeń, oświetlenia i osprzętu",
+   "wykonywanie pomiarów elektrycznych",
+   "czytanie schematów i dokumentacji technicznej",
+   "diagnozowanie i usuwanie awarii",
+   "konserwacja maszyn i urządzeń w ramach utrzymania ruchu",
+   "prowadzenie dokumentacji z wykonanych prac",
+   "przestrzeganie zasad BHP przy pracach pod napięciem i w jego pobliżu"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "świadectwo kwalifikacyjne SEP grupy G1 w zakresie eksploatacji (E)",
+    "doświadczenie w montażu lub serwisie instalacji elektrycznych",
+    "umiejętność czytania schematów elektrycznych",
+    "znajomość zasad BHP",
+    "samodzielność w pracy"
+   ],
+   "mile_widziane": [
+    "świadectwo kwalifikacyjne SEP grupy G1 w zakresie dozoru (D)",
+    "wykształcenie techniczne elektryczne",
+    "doświadczenie w utrzymaniu ruchu lub automatyce przemysłowej",
+    "prawo jazdy kat. B",
+    "aktualne badania do pracy na wysokości"
+   ]
+  },
+  "warunki": [
+   "umowa o pracę lub współpraca B2B",
+   "praca na budowach, w zakładzie lub w trasie serwisowej",
+   "praca zmianowa w utrzymaniu ruchu",
+   "narzędzia, odzież robocza i samochód służbowy, w części ofert"
+  ],
+  "jak_w_cv": [
+   "Wpisz świadectwo kwalifikacyjne z grupą i zakresem (E, D) oraz datą ważności.",
+   "Podaj rodzaj instalacji: mieszkaniowe, przemysłowe, budowy, utrzymanie ruchu.",
+   "Opisz wykonywane pomiary i pracę z dokumentacją.",
+   "Warto zaznaczyć, które prace wykonujesz samodzielnie."
+  ],
+  "dla_firm": "Wymagana grupa i zakres świadectwa kwalifikacyjnego oraz charakter prac (budowa, utrzymanie ruchu, serwis) pozwalają kandydatom szybko ocenić, czy ich uprawnienia są wystarczające."
+ },
+ "pracownik-budowlany": {
+  "nazwaD": "pracownika budowlanego",
+  "intro": "Pracownik budowlany wykonuje prace ogólnobudowlane lub wykończeniowe według poleceń kierownika budowy i brygadzisty. Pracuje na budowach domów, bloków, obiektów przemysłowych i przy remontach. Zakres prac zależy od etapu budowy i specjalizacji brygady.",
+  "obowiazki": [
+   "prace murarskie",
+   "wykonywanie szalunków i zbrojenia",
+   "betonowanie i pielęgnacja betonu",
+   "tynkowanie ścian i sufitów",
+   "prace wykończeniowe: szpachlowanie, malowanie, układanie płytek",
+   "montaż płyt gipsowo-kartonowych",
+   "przygotowanie terenu i materiałów do pracy",
+   "obsługa elektronarzędzi i drobnego sprzętu budowlanego",
+   "praca według rysunków i poleceń przełożonego",
+   "utrzymanie porządku na budowie i przestrzeganie zasad BHP"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "doświadczenie w pracach budowlanych",
+    "gotowość do pracy fizycznej na zewnątrz",
+    "przestrzeganie zasad BHP",
+    "aktualne badania lekarskie, często także do pracy na wysokości",
+    "umiejętność pracy w brygadzie"
+   ],
+   "mile_widziane": [
+    "umiejętność czytania rysunku budowlanego",
+    "prawo jazdy kat. B",
+    "uprawnienia do obsługi maszyn budowlanych lub montażu rusztowań",
+    "własne narzędzia",
+    "gotowość do wyjazdów na budowy w innych miejscowościach"
+   ]
+  },
+  "warunki": [
+   "umowa o pracę lub umowa zlecenie",
+   "praca na budowie w różnych warunkach pogodowych",
+   "praca w dzień, czasem także w soboty",
+   "zakwaterowanie przy budowach wyjazdowych, w części ofert"
+  ],
+  "jak_w_cv": [
+   "Wypisz rodzaje prac w krótkiej liście, np. szalunki, zbrojenie, tynki.",
+   "Podaj typy budów, na których pracujesz.",
+   "Wpisz badania i uprawnienia w osobnej sekcji.",
+   "Warto zaznaczyć prace wykonywane samodzielnie i gotowość do wyjazdów."
+  ],
+  "dla_firm": "Krótka, rzeczowa lista konkretnych prac, lokalizacja budowy i wymagane badania wystarczą. Jeśli praca jest wyjazdowa, warto napisać, czy firma zapewnia zakwaterowanie."
+ },
+ "kucharz": {
+  "nazwaD": "kucharza",
+  "intro": "Kucharz przygotowuje potrawy według receptur, dba o stanowisko pracy i przestrzega zasad bezpieczeństwa żywności. Pracuje w restauracjach, hotelach, firmach cateringowych, stołówkach i barach. Charakter pracy zależy od rodzaju kuchni: à la carte, bankietowej czy zbiorowego żywienia.",
+  "obowiazki": [
+   "przygotowywanie potraw według receptur i standardów lokalu",
+   "przygotowanie stanowiska i półproduktów przed serwisem",
+   "wydawanie dań podczas serwisu",
+   "przyjmowanie i kontrola dostaw",
+   "prawidłowe przechowywanie i oznaczanie produktów",
+   "kontrola dat przydatności i rotacja surowców",
+   "prowadzenie dokumentacji HACCP",
+   "udział w planowaniu menu i zamówień",
+   "utrzymanie czystości w kuchni i na stanowisku"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "aktualne orzeczenie do celów sanitarno-epidemiologicznych",
+    "znajomość zasad HACCP",
+    "doświadczenie w pracy w kuchni",
+    "umiejętność pracy pod presją czasu",
+    "gotowość do pracy zmianowej i w weekendy"
+   ],
+   "mile_widziane": [
+    "wykształcenie gastronomiczne",
+    "doświadczenie w kuchni à la carte lub w określonej kuchni, np. włoskiej",
+    "doświadczenie w obsłudze bankietów lub cateringu",
+    "znajomość technik takich jak sous-vide"
+   ]
+  },
+  "warunki": [
+   "praca zmianowa, także wieczorami i w weekendy",
+   "umowa o pracę lub umowa zlecenie",
+   "posiłek pracowniczy (często spotykany)",
+   "praca w gorącym otoczeniu i w pozycji stojącej"
+  ],
+  "jak_w_cv": [
+   "Wpisz rodzaj kuchni i lokalu oraz zajmowane stanowisko, np. kucharz zmianowy, kucharz w kuchni zimnej.",
+   "Opisz specjalizację i typowe dania, które przygotowujesz.",
+   "Podaj znajomość HACCP i aktualne orzeczenie sanitarno-epidemiologiczne.",
+   "Warto zaznaczyć udział w tworzeniu menu lub zamówieniach."
+  ],
+  "dla_firm": "Rodzaj kuchni, stanowisko i grafik to podstawa. Orzeczenie i znajomość HACCP lepiej wpisać do wymagań, a konkretną specjalizację – do mile widzianych, jeśli nie jest warunkiem."
+ },
+ "kelner": {
+  "nazwaD": "kelnerki",
+  "intro": "Kelnerka lub kelner obsługuje gości na sali: przyjmuje zamówienia, podaje dania i napoje oraz rozlicza rachunki. Praca odbywa się w restauracjach, kawiarniach, hotelach i przy obsłudze przyjęć okolicznościowych. Ważne są kultura osobista i znajomość karty.",
+  "obowiazki": [
+   "przyjmowanie gości i wskazywanie stolików",
+   "przedstawianie karty dań i napojów oraz doradztwo w wyborze",
+   "przyjmowanie zamówień i wprowadzanie ich do systemu POS",
+   "podawanie dań i napojów zgodnie ze standardami serwisu",
+   "rozliczanie rachunków i obsługa terminala płatniczego",
+   "nakrywanie i sprzątanie stołów",
+   "przygotowanie sali przed otwarciem i po zamknięciu lokalu",
+   "obsługa przyjęć okolicznościowych i bankietów",
+   "współpraca z kuchnią i barem"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "aktualne orzeczenie do celów sanitarno-epidemiologicznych",
+    "wysoka kultura osobista",
+    "dyspozycyjność wieczorami i w weekendy",
+    "umiejętność pracy w szybkim tempie",
+    "komunikatywność"
+   ],
+   "mile_widziane": [
+    "doświadczenie w obsłudze gości",
+    "komunikatywna znajomość języka angielskiego lub innego języka obcego",
+    "znajomość systemu POS",
+    "znajomość podstaw win i serwisu napojów"
+   ]
+  },
+  "warunki": [
+   "praca zmianowa, często wieczorami i w weekendy",
+   "umowa zlecenie lub umowa o pracę",
+   "napiwki według zasad lokalu",
+   "posiłek pracowniczy (często spotykany)",
+   "praca sezonowa w miejscowościach turystycznych"
+  ],
+  "jak_w_cv": [
+   "Podaj rodzaj lokalu, np. kawiarnia, restauracja hotelowa, obsługa wesel.",
+   "Wpisz system do zamówień i rozliczania rachunków, jeśli go znasz.",
+   "Opisz języki obce w kontekście obsługi gości.",
+   "Warto zaznaczyć dyspozycyjność w weekendy i wieczorami."
+  ],
+  "dla_firm": "Kandydaci zwracają uwagę na rodzaj lokalu, grafik i zasady podziału napiwków. Języki obce warto oznaczyć jako wymagane tylko wtedy, gdy goście naprawdę z nich korzystają."
+ },
+ "barista": {
+  "nazwaD": "baristy",
+  "intro": "Barista przygotowuje kawę i inne napoje, obsługuje gości i dba o czystość sprzętu. Pracuje w kawiarniach sieciowych i niezależnych, piekarniach z kawiarnią, hotelach oraz punktach z kawą na wynos. W wielu lokalach do obowiązków należy też obsługa kasy i przygotowanie prostych przekąsek.",
+  "obowiazki": [
+   "przygotowanie espresso i napojów na bazie espresso",
+   "spienianie mleka i dekorowanie napojów techniką latte art",
+   "obsługa ekspresu kolbowego",
+   "ustawianie młynka i kontrola parametrów parzenia",
+   "parzenie kawy metodami alternatywnymi, np. drip lub aeropress",
+   "obsługa gości i doradztwo w wyborze kawy",
+   "obsługa kasy i terminala płatniczego",
+   "czyszczenie ekspresu, młynka i stanowiska",
+   "przyjmowanie dostaw i kontrola dat przydatności",
+   "przestrzeganie zasad HACCP"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "aktualne orzeczenie do celów sanitarno-epidemiologicznych",
+    "uprzejmość i łatwość kontaktu z gośćmi",
+    "dbałość o czystość i porządek",
+    "gotowość do pracy zmianowej i w weekendy"
+   ],
+   "mile_widziane": [
+    "doświadczenie w pracy z ekspresem kolbowym",
+    "znajomość kaw specialty i alternatywnych metod parzenia",
+    "umiejętność latte art",
+    "kursy baristyczne",
+    "komunikatywna znajomość języka angielskiego"
+   ]
+  },
+  "warunki": [
+   "praca zmianowa, często od wczesnych godzin porannych",
+   "umowa zlecenie lub umowa o pracę",
+   "szkolenie baristyczne na start (w części kawiarni)",
+   "napiwki według zasad lokalu"
+  ],
+  "jak_w_cv": [
+   "Wpisz rodzaj ekspresu i młynka, z których korzystasz.",
+   "Opisz napoje i metody parzenia przygotowywane samodzielnie.",
+   "Podaj kursy baristyczne i zainteresowanie kawą specialty.",
+   "Warto dodać pracę przy kasie i obsługę gości przy dużym ruchu."
+  ],
+  "dla_firm": "Rodzaj kawiarni, sprzęt i godziny pracy pokazują, czego się spodziewać. Jeśli firma szkoli z latte art czy metod alternatywnych, warto to napisać – zachęci to także osoby początkujące."
+ },
+ "pokojowka": {
+  "nazwaD": "pokojówki",
+  "intro": "Pokojówka sprząta i przygotowuje pokoje hotelowe dla gości zgodnie ze standardami obiektu. Pracuje w dziale housekeeping hoteli, pensjonatów, aparthoteli i ośrodków wypoczynkowych. Praca wymaga dokładności, dobrego tempa i dyskrecji.",
+  "obowiazki": [
+   "sprzątanie pokoi hotelowych po wyjeździe gości",
+   "codzienne sprzątanie pokoi zajętych",
+   "przygotowanie pokoi na przyjazd gości",
+   "wymiana pościeli i ręczników",
+   "sprzątanie łazienek i dezynfekcja powierzchni",
+   "uzupełnianie kosmetyków, wyposażenia i minibarów",
+   "sprzątanie korytarzy i części wspólnych",
+   "raportowanie stanu pokoi do recepcji lub kierownika",
+   "zgłaszanie usterek i rzeczy pozostawionych przez gości"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "dokładność i dbałość o szczegóły",
+    "dobre tempo pracy",
+    "dyskrecja",
+    "gotowość do pracy w weekendy i święta",
+    "umiejętność bezpiecznego stosowania środków czystości"
+   ],
+   "mile_widziane": [
+    "doświadczenie w sprzątaniu pokoi hotelowych",
+    "znajomość standardów hoteli sieciowych",
+    "podstawowa znajomość języka obcego",
+    "gotowość do pracy w sezonie"
+   ]
+  },
+  "warunki": [
+   "praca w systemie zmianowym, głównie w godzinach dziennych",
+   "umowa o pracę lub umowa zlecenie",
+   "praca sezonowa w obiektach turystycznych",
+   "odzież robocza zapewniona przez hotel"
+  ],
+  "jak_w_cv": [
+   "Podaj rodzaj obiektu, np. hotel sieciowy, pensjonat, aparthotel.",
+   "Opisz zadania: pokoje po wyjeździe, pokoje zajęte, części wspólne, minibary.",
+   "Wpisz znajomość standardów i środków czystości.",
+   "Warto zaznaczyć dyspozycyjność w sezonie i w weekendy."
+  ],
+  "dla_firm": "Opis dnia pracy – zakres sprzątania pokoi i części wspólnych, grafik oraz to, czy praca obejmuje pranie i uzupełnianie minibarów – pomaga kandydatom ocenić ofertę. Doświadczenie hotelowe warto oznaczyć jako mile widziane, jeśli firma wdraża nowe osoby."
+ },
+ "opiekun-osob-starszych": {
+  "nazwaD": "opiekunki osób starszych",
+  "intro": "Opiekunka osób starszych pomaga podopiecznym w codziennych czynnościach, dba o ich higienę, posiłki i bezpieczeństwo. Pracuje w domach podopiecznych, także za granicą w systemie z zamieszkaniem, w domach opieki i w usługach opiekuńczych. Zakres opieki zależy od stanu zdrowia i samodzielności podopiecznego.",
+  "obowiazki": [
+   "pomoc w higienie osobistej i ubieraniu",
+   "opieka nad osobą leżącą, w tym zmiana pozycji i zapobieganie odleżynom",
+   "opieka nad osobą z demencją",
+   "przygotowywanie posiłków, także według zaleceń dietetycznych",
+   "pilnowanie przyjmowania leków według zaleceń lekarza",
+   "pomoc w poruszaniu się i spacerach",
+   "towarzyszenie podczas wizyt lekarskich",
+   "prowadzenie gospodarstwa domowego: zakupy, sprzątanie, pranie",
+   "dotrzymywanie towarzystwa i aktywizacja podopiecznego",
+   "kontakt z rodziną podopiecznego"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "doświadczenie w opiece nad osobami starszymi lub chorymi",
+    "cierpliwość i empatia",
+    "odpowiedzialność i samodzielność",
+    "znajomość języka kraju wyjazdu przy pracy za granicą, często niemieckiego"
+   ],
+   "mile_widziane": [
+    "kurs opiekuna osób starszych",
+    "kurs pierwszej pomocy",
+    "prawo jazdy kat. B",
+    "doświadczenie w opiece nad osobą leżącą lub z demencją",
+    "referencje od poprzednich rodzin lub agencji"
+   ]
+  },
+  "warunki": [
+   "praca z zamieszkaniem u podopiecznego w systemie wyjazdowym",
+   "umowa zlecenie lub umowa o pracę",
+   "praca na zmiany w domach opieki",
+   "zakwaterowanie i wyżywienie przy opiece z zamieszkaniem"
+  ],
+  "jak_w_cv": [
+   "Opisz zakres opieki i stan podopiecznych, np. osoba leżąca, demencja, cukrzyca.",
+   "Jeśli opiekujesz się kimś za granicą, podaj kraj i formę pracy.",
+   "Wpisz kursy i poziom znajomości języka obcego.",
+   "Warto dodać informację o referencjach i gotowości do pracy z zamieszkaniem."
+  ],
+  "dla_firm": "Rzetelny opis stanu zdrowia podopiecznego, zakresu pomocy i warunków zamieszkania pozwala dobrać osobę z odpowiednim doświadczeniem. Wymagany poziom języka lepiej podać wprost."
+ },
+ "pielegniarka": {
+  "nazwaD": "pielęgniarki",
+  "intro": "Pielęgniarka sprawuje opiekę nad pacjentami, wykonuje zabiegi i procedury pielęgniarskie oraz współpracuje z lekarzami w zespole terapeutycznym. Pracuje w szpitalach, przychodniach podstawowej opieki zdrowotnej, placówkach prywatnych, zakładach opiekuńczych i w opiece długoterminowej. Do pracy w zawodzie potrzebne jest prawo wykonywania zawodu.",
+  "obowiazki": [
+   "rozpoznawanie potrzeb pacjenta i planowanie opieki pielęgniarskiej",
+   "podawanie leków zgodnie ze zleceniem lekarskim",
+   "wykonywanie iniekcji, wlewów i pobieranie materiału do badań",
+   "pomiar i monitorowanie parametrów życiowych",
+   "wykonywanie opatrunków i pielęgnacja ran",
+   "przygotowanie pacjenta do badań i zabiegów",
+   "prowadzenie dokumentacji medycznej, także elektronicznej",
+   "edukacja zdrowotna pacjentów i ich rodzin",
+   "współpraca z lekarzami i zespołem terapeutycznym",
+   "przestrzeganie procedur sanitarno-epidemiologicznych"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "prawo wykonywania zawodu pielęgniarki stwierdzone przez okręgową radę pielęgniarek i położnych",
+    "wykształcenie pielęgniarskie",
+    "znajomość procedur pielęgniarskich",
+    "umiejętność prowadzenia dokumentacji medycznej",
+    "gotowość do pracy w systemie zmianowym lub równoważnym"
+   ],
+   "mile_widziane": [
+    "specjalizacja lub kurs kwalifikacyjny w danej dziedzinie pielęgniarstwa",
+    "kursy specjalistyczne, np. z wykonywania i interpretacji zapisu EKG",
+    "doświadczenie na podobnym oddziale",
+    "znajomość systemów elektronicznej dokumentacji medycznej"
+   ]
+  },
+  "warunki": [
+   "umowa o pracę lub kontrakt",
+   "praca w systemie zmianowym lub równoważnym, także w nocy i w święta",
+   "praca w godzinach dziennych w przychodniach",
+   "dofinansowanie kursów i specjalizacji (w części placówek)"
+  ],
+  "jak_w_cv": [
+   "Wpisz prawo wykonywania zawodu i specjalizacje w widocznym miejscu CV.",
+   "Podaj oddziały lub rodzaje placówek, w których pracujesz.",
+   "Opisz procedury wykonywane samodzielnie i znane systemy dokumentacji.",
+   "Warto wymienić kursy kwalifikacyjne i specjalistyczne z nazwą dziedziny."
+  ],
+  "dla_firm": "Oddział lub rodzaj placówki, system pracy i forma zatrudnienia to informacje, od których zależy decyzja kandydatek i kandydatów. Wymagana specjalizacja powinna być oddzielona od tej, która jest tylko atutem."
+ },
+ "opiekunka-dziecieca": {
+  "nazwaD": "opiekunki do dziecka",
+  "intro": "Opiekunka do dziecka zajmuje się dzieckiem pod nieobecność rodziców: dba o jego bezpieczeństwo, posiłki, sen i zabawę. Pracuje w domu rodziny jako niania, a także w żłobkach, klubach dziecięcych i salach zabaw. Zakres obowiązków zależy od wieku dziecka i ustaleń z rodzicami.",
+  "obowiazki": [
+   "opieka nad dzieckiem i dbanie o jego bezpieczeństwo",
+   "opieka nad niemowlęciem: karmienie, przewijanie, usypianie",
+   "przygotowywanie posiłków dla dziecka",
+   "organizowanie zabaw rozwojowych i zajęć dostosowanych do wieku",
+   "spacery i aktywność na świeżym powietrzu",
+   "odprowadzanie i odbieranie dziecka z przedszkola lub szkoły",
+   "pomoc w odrabianiu lekcji u starszych dzieci",
+   "dbanie o porządek w pokoju i rzeczach dziecka",
+   "przekazywanie rodzicom informacji o przebiegu dnia"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "w żłobku lub klubie dziecięcym: kwalifikacje opiekuna wymagane ustawą o opiece nad dziećmi w wieku do lat 3 (art. 16), np. kurs opiekuna dziecięcego albo wykształcenie pedagogiczne",
+    "doświadczenie w opiece nad dziećmi w podobnym wieku",
+    "odpowiedzialność i cierpliwość",
+    "zaświadczenie o niekaralności (często wymagane)",
+    "dyspozycyjność w ustalonych godzinach"
+   ],
+   "mile_widziane": [
+    "kurs pierwszej pomocy przedmedycznej, także u dzieci",
+    "referencje od poprzednich rodzin",
+    "prawo jazdy kat. B",
+    "znajomość języka obcego"
+   ]
+  },
+  "warunki": [
+   "praca w domu rodziny w stałych godzinach",
+   "umowa zlecenie, umowa o pracę lub umowa uaktywniająca",
+   "praca w żłobku w godzinach jego otwarcia",
+   "praca na część etatu lub doraźnie"
+  ],
+  "jak_w_cv": [
+   "Podaj wiek dzieci, które były pod Twoją opieką.",
+   "Opisz konkretne zajęcia i codzienne zadania, a nie tylko cechy charakteru.",
+   "Wpisz kursy, wykształcenie i informację o referencjach.",
+   "Warto zaznaczyć zaświadczenie o niekaralności, jeśli je masz."
+  ],
+  "dla_firm": "Wiek dziecka, godziny pracy i zakres obowiązków ustalone na początku ułatwiają budowanie zaufania między rodziną a opiekunką. W żłobku lub klubie dziecięcym trzeba też podać wymagane kwalifikacje."
+ },
+ "pracownik-sprzatajacy": {
+  "nazwaD": "pracownika sprzątającego",
+  "intro": "Pracownik sprzątający utrzymuje czystość w biurach, budynkach użyteczności publicznej, sklepach, szpitalach, magazynach i halach. Pracuje najczęściej w firmach sprzątających lub w zespołach obsługi obiektu. Wiele zleceń odbywa się poza standardowymi godzinami pracy biur.",
+  "obowiazki": [
+   "sprzątanie powierzchni biurowych i części wspólnych",
+   "mycie podłóg, sanitariatów i kuchni socjalnych",
+   "dezynfekcja powierzchni i punktów częstego dotyku",
+   "obsługa maszyn czyszczących, np. szorowarki lub odkurzacza przemysłowego",
+   "dobór środków czystości do rodzaju powierzchni",
+   "mycie okien i przeszkleń",
+   "opróżnianie koszy i segregacja odpadów",
+   "uzupełnianie środków higienicznych",
+   "praca według harmonogramu sprzątania obiektu",
+   "zgłaszanie usterek i braków"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "dokładność i sumienność",
+    "znajomość zasad bezpiecznego stosowania środków czystości",
+    "przestrzeganie zasad BHP",
+    "dyspozycyjność w godzinach pracy obiektu"
+   ],
+   "mile_widziane": [
+    "doświadczenie w sprzątaniu podobnych obiektów",
+    "obsługa maszyn czyszczących",
+    "doświadczenie w sprzątaniu placówek medycznych",
+    "zaświadczenie o niekaralności (np. w bankach, szkołach, placówkach medycznych)"
+   ]
+  },
+  "warunki": [
+   "praca wczesnym rankiem, wieczorem lub w weekendy",
+   "umowa o pracę lub umowa zlecenie",
+   "pełny etat lub część etatu",
+   "odzież robocza i środki czystości zapewnione przez pracodawcę"
+  ],
+  "jak_w_cv": [
+   "Wymień rodzaje obiektów, w których sprzątasz, np. biura, szpitale, magazyny.",
+   "Wpisz maszyny czyszczące, które obsługujesz.",
+   "Jeśli odpowiadasz za stały obiekt, opisz go jako przykład rzetelności.",
+   "Warto podać dyspozycyjność w nietypowych godzinach."
+  ],
+  "dla_firm": "Rodzaj obiektu, godziny pracy i sprzęt to najważniejsze informacje. Jeśli wymagane jest zaświadczenie o niekaralności albo obsługa szorowarki, warto to napisać wprost."
+ },
+ "kierowca": {
+  "nazwaD": "kierowcy kat. C i C+E",
+  "intro": "Kierowca kategorii C lub C+E przewozi ładunki samochodem ciężarowym lub zestawem z naczepą albo przyczepą. Pracuje w firmach transportowych, spedycyjnych, dystrybucyjnych i produkcyjnych, w transporcie krajowym lub międzynarodowym. Musi przestrzegać przepisów o czasie pracy kierowców i zasad bezpiecznego przewozu ładunków.",
+  "obowiazki": [
+   "przewóz ładunków na trasach krajowych lub międzynarodowych",
+   "obsługa tachografu cyfrowego i karty kierowcy",
+   "przestrzeganie przepisów o czasie pracy i odpoczynku kierowców",
+   "nadzór nad załadunkiem i wyładunkiem oraz zabezpieczenie ładunku",
+   "kontrola dokumentów przewozowych, np. listów przewozowych CMR",
+   "codzienna kontrola stanu technicznego pojazdu",
+   "kontakt z dyspozytorem i klientami na trasie",
+   "dbałość o powierzony pojazd i jego wyposażenie",
+   "rozliczanie kosztów trasy i dokumentów"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "prawo jazdy kat. C lub C+E",
+    "kwalifikacja wstępna lub kwalifikacja wstępna przyspieszona – świadectwo kwalifikacji zawodowej i wpis kodu 95 w prawie jazdy",
+    "karta kierowcy",
+    "aktualne badania lekarskie i psychologiczne kierowcy",
+    "znajomość przepisów o czasie pracy kierowców"
+   ],
+   "mile_widziane": [
+    "doświadczenie w transporcie międzynarodowym",
+    "zaświadczenie ADR do przewozu towarów niebezpiecznych",
+    "doświadczenie z określonym typem naczepy, np. chłodnią lub plandeką",
+    "komunikatywna znajomość języka obcego"
+   ]
+  },
+  "warunki": [
+   "umowa o pracę",
+   "praca w systemie tygodniowym albo w systemie dłuższych wyjazdów w transporcie międzynarodowym",
+   "powroty codzienne w transporcie lokalnym lub dystrybucji",
+   "przypisany pojazd, w części ofert"
+  ],
+  "jak_w_cv": [
+   "Wpisz kategorie prawa jazdy, kod 95, kartę kierowcy i badania na samym początku CV.",
+   "Podaj rodzaj tras i typ zestawów, którymi jeździsz.",
+   "Opisz rodzaje ładunków i dodatkowe uprawnienia, np. ADR.",
+   "Bezszkodową jazdę warto zaznaczyć tylko wtedy, gdy jest to zgodne z prawdą."
+  ],
+  "dla_firm": "Rodzaj tras, system wyjazdów, typ zestawu i ładunków przesądzają o tym, czy praca odpowiada kierowcy. Kod 95 to wymóg, a ADR zwykle atut – warto to rozdzielić."
+ },
+ "ksiegowa": {
+  "nazwaD": "księgowej",
+  "intro": "Księgowa ewidencjonuje operacje gospodarcze, rozlicza podatki i przygotowuje dane finansowe dla firmy lub jej klientów. Pracuje w biurach rachunkowych, działach finansowo-księgowych przedsiębiorstw i centrach usług wspólnych. Zakres pracy zależy od rodzaju prowadzonych ksiąg i samodzielności na stanowisku.",
+  "obowiazki": [
+   "prowadzenie pełnej księgowości lub księgi przychodów i rozchodów",
+   "dekretowanie i księgowanie dokumentów",
+   "sporządzanie deklaracji VAT i plików JPK",
+   "rozliczanie podatku dochodowego",
+   "rozrachunki z kontrahentami",
+   "uzgadnianie sald i kont oraz zamknięcie miesiąca",
+   "ewidencja środków trwałych",
+   "udział w przygotowaniu sprawozdań finansowych",
+   "kontakt z urzędem skarbowym i ZUS",
+   "obsługa faktur w Krajowym Systemie e-Faktur"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "doświadczenie w księgowości",
+    "znajomość przepisów podatkowych i ustawy o rachunkowości",
+    "obsługa programu finansowo-księgowego",
+    "dobra znajomość arkusza kalkulacyjnego",
+    "dokładność i samodzielność"
+   ],
+   "mile_widziane": [
+    "wykształcenie wyższe ekonomiczne lub z zakresu finansów",
+    "kursy lub certyfikaty księgowe, np. Stowarzyszenia Księgowych w Polsce lub ACCA",
+    "doświadczenie w samodzielnym zamykaniu roku",
+    "doświadczenie w obsłudze firm z określonej branży"
+   ]
+  },
+  "warunki": [
+   "umowa o pracę",
+   "praca stacjonarna lub hybrydowa",
+   "większe obciążenie w okresach rozliczeń miesięcznych i rocznych",
+   "dofinansowanie szkoleń z przepisów (w części firm)"
+  ],
+  "jak_w_cv": [
+   "Podaj rodzaj prowadzonych ksiąg i typy obsługiwanych firm.",
+   "Wpisz programy księgowe i przygotowywane deklaracje.",
+   "Opisz poziom samodzielności, np. zamknięcia miesiąca czy rozliczenia roczne.",
+   "Warto wymienić kursy z bieżących zmian przepisów."
+  ],
+  "dla_firm": "Rodzaj ksiąg, poziom samodzielności i używane programy pokazują, na jakim poziomie można rozpocząć pracę. Certyfikaty księgowe dobrze oznaczyć jako atut, jeśli nie są warunkiem."
+ },
+ "asystentka-biura": {
+  "nazwaD": "asystentki biura",
+  "intro": "Asystentka biura dba o sprawne działanie biura: obsługuje sekretariat, korespondencję i kalendarze oraz wspiera pracowników w sprawach organizacyjnych. Pracuje w firmach różnych branż, kancelariach, biurach projektowych i instytucjach. Często jest pierwszą osobą kontaktu dla gości i klientów.",
+  "obowiazki": [
+   "obsługa sekretariatu i recepcji biura",
+   "obsługa korespondencji przychodzącej i wychodzącej",
+   "prowadzenie obiegu dokumentów",
+   "obsługa centrali telefonicznej i skrzynki mailowej",
+   "prowadzenie kalendarzy i organizacja spotkań",
+   "organizacja podróży służbowych",
+   "zamawianie materiałów biurowych i kontakt z dostawcami",
+   "przygotowywanie pism, zestawień i prezentacji",
+   "wsparcie administracyjne działów firmy",
+   "przyjmowanie gości i klientów"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "dobra znajomość pakietu MS Office",
+    "poprawna polszczyzna w mowie i piśmie",
+    "dobra organizacja pracy",
+    "dyskrecja",
+    "wysoka kultura osobista"
+   ],
+   "mile_widziane": [
+    "znajomość języka angielskiego w stopniu komunikatywnym",
+    "doświadczenie w pracy biurowej lub w sekretariacie",
+    "znajomość systemów elektronicznego obiegu dokumentów",
+    "prawo jazdy kat. B"
+   ]
+  },
+  "warunki": [
+   "umowa o pracę",
+   "praca stacjonarna w biurze",
+   "stałe godziny pracy w dni robocze",
+   "pełny etat lub część etatu"
+  ],
+  "jak_w_cv": [
+   "Opisz zadania prowadzone samodzielnie: obieg dokumentów, kalendarze, podróże.",
+   "Wpisz programy i systemy, z których korzystasz.",
+   "Podaj języki obce i to, w jakich sytuacjach ich używasz.",
+   "Sprawdź starannie język i formatowanie CV, bo świadczą o jakości pracy biurowej."
+  ],
+  "dla_firm": "Proporcje między pracą sekretariatu a wsparciem działów mówią więcej niż sama nazwa stanowiska. Wymagany język obcy warto podać z poziomem."
+ },
+ "recepcjonistka": {
+  "nazwaD": "recepcjonistki",
+  "intro": "Recepcjonistka obsługuje gości i klientów w punkcie recepcji: wita ich, udziela informacji i prowadzi sprawy formalne związane z pobytem lub wizytą. Pracuje w hotelach, biurowcach, przychodniach, salonach usługowych i obiektach sportowych. W hotelach praca zwykle odbywa się w systemie zmianowym.",
+  "obowiazki": [
+   "obsługa recepcji i przyjmowanie gości",
+   "meldowanie i wymeldowywanie gości hotelowych",
+   "obsługa systemu rezerwacyjnego",
+   "przyjmowanie rezerwacji telefonicznych i mailowych",
+   "rozliczanie pobytów i przyjmowanie płatności",
+   "obsługa centrali telefonicznej",
+   "udzielanie informacji o usługach obiektu i okolicy",
+   "obsługa korespondencji i przesyłek",
+   "współpraca z działem housekeeping i obsługą techniczną",
+   "przyjmowanie i przekazywanie uwag gości"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "wysoka kultura osobista",
+    "komunikatywna znajomość języka angielskiego",
+    "obsługa komputera i pakietu MS Office",
+    "gotowość do pracy zmianowej (w hotelach)",
+    "umiejętność radzenia sobie w sytuacjach wymagających szybkiej reakcji"
+   ],
+   "mile_widziane": [
+    "doświadczenie na recepcji hotelowej lub biurowej",
+    "znajomość systemu rezerwacyjnego lub hotelowego",
+    "znajomość drugiego języka obcego",
+    "wykształcenie z zakresu hotelarstwa lub turystyki"
+   ]
+  },
+  "warunki": [
+   "praca zmianowa, także nocna w hotelach",
+   "stałe godziny w recepcjach biurowych i przychodniach",
+   "umowa o pracę lub umowa zlecenie",
+   "posiłek pracowniczy w hotelach (często spotykany)"
+  ],
+  "jak_w_cv": [
+   "Podaj rodzaj obiektu: hotel, biurowiec, przychodnia.",
+   "Wpisz konkretne zadania, np. meldowanie gości, rozliczanie pobytów, rezerwacje.",
+   "Wymień systemy rezerwacyjne i języki obce z opisem użycia.",
+   "Warto zaznaczyć dyspozycyjność do pracy zmianowej."
+  ],
+  "dla_firm": "Rodzaj obiektu, system pracy i używane systemy rezerwacji to podstawa ogłoszenia. Jasne rozdzielenie języka wymaganego od drugiego języka jako atutu ułatwia aplikowanie osobom z różnym doświadczeniem."
+ },
+ "specjalista-kadr-i-plac": {
+  "nazwaD": "specjalisty ds. kadr i płac",
+  "intro": "Specjalista ds. kadr i płac prowadzi dokumentację pracowniczą, nalicza wynagrodzenia i rozlicza składki oraz podatki związane z zatrudnieniem. Pracuje w działach HR firm, biurach rachunkowych i centrach usług wspólnych. Praca wymaga stałego śledzenia zmian w prawie pracy i ubezpieczeń społecznych.",
+  "obowiazki": [
+   "prowadzenie akt osobowych pracowników",
+   "przygotowywanie umów, aneksów i świadectw pracy",
+   "naliczanie wynagrodzeń z umów o pracę i umów cywilnoprawnych",
+   "rozliczanie absencji, urlopów i zasiłków",
+   "prowadzenie ewidencji czasu pracy",
+   "rozliczenia z ZUS i urzędem skarbowym",
+   "sporządzanie informacji PIT-11 dla pracowników",
+   "obsługa pracowniczych planów kapitałowych (PPK)",
+   "kontrola terminów badań lekarskich i szkoleń BHP",
+   "przygotowywanie raportów kadrowo-płacowych"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "znajomość Kodeksu pracy i przepisów ubezpieczeń społecznych",
+    "doświadczenie w naliczaniu wynagrodzeń",
+    "obsługa programu kadrowo-płacowego",
+    "obsługa programu Płatnik lub e-Płatnik",
+    "dobra znajomość arkusza kalkulacyjnego",
+    "dokładność i dyskrecja"
+   ],
+   "mile_widziane": [
+    "wykształcenie wyższe, np. z zakresu prawa, ekonomii lub zarządzania zasobami ludzkimi",
+    "studia podyplomowe lub kursy kadrowo-płacowe",
+    "doświadczenie w rozliczaniu pracowników cudzoziemców",
+    "znajomość zasad rozliczeń z PFRON"
+   ]
+  },
+  "warunki": [
+   "umowa o pracę",
+   "praca stacjonarna lub hybrydowa",
+   "stałe godziny pracy z większym obciążeniem w okresie naliczania list płac",
+   "szkolenia z bieżących zmian przepisów"
+  ],
+  "jak_w_cv": [
+   "Opisz sprawy prowadzone samodzielnie: akta, listy płac, rozliczenia z ZUS i urzędem skarbowym.",
+   "Wpisz programy kadrowo-płacowe, w których pracujesz.",
+   "Podaj skalę obsługi opisowo, np. jedna firma lub kilka firm klientów biura.",
+   "Warto dodać kursy z prawa pracy i aktualizacji przepisów."
+  ],
+  "dla_firm": "Zakres samodzielności, rodzaje umów i używany program kadrowo-płacowy pokazują, czy nowa osoba od razu przejmie obsługę. Doświadczenie z PFRON czy PPK warto oznaczyć jako wymagane albo mile widziane."
+ },
+ "logistyk": {
+  "nazwaD": "logistyka",
+  "intro": "Logistyk planuje i koordynuje przepływ towarów: zamówienia, dostawy, stany magazynowe i transport. Pracuje w firmach produkcyjnych, handlowych, dystrybucyjnych oraz u operatorów logistycznych. Dużą część pracy stanowi analiza danych i współpraca z dostawcami oraz przewoźnikami.",
+  "obowiazki": [
+   "planowanie dostaw i harmonogramów transportu",
+   "zarządzanie zapasami i kontrola stanów magazynowych",
+   "składanie i monitorowanie zamówień u dostawców",
+   "współpraca ze spedytorami i przewoźnikami",
+   "obsługa systemu ERP, np. SAP, oraz systemu WMS",
+   "analiza wskaźników KPI w arkuszu kalkulacyjnym",
+   "przygotowywanie raportów logistycznych",
+   "stosowanie reguł Incoterms w transakcjach z partnerami",
+   "rozwiązywanie problemów z opóźnieniami i reklamacjami dostaw",
+   "udział w projektach optymalizacji kosztów logistyki"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "doświadczenie w logistyce, zakupach lub planowaniu",
+    "zaawansowana znajomość arkusza kalkulacyjnego",
+    "znajomość systemu ERP",
+    "znajomość języka angielskiego",
+    "umiejętności analityczne"
+   ],
+   "mile_widziane": [
+    "wykształcenie wyższe z zakresu logistyki lub zarządzania",
+    "znajomość systemu SAP lub WMS",
+    "znajomość reguł Incoterms",
+    "doświadczenie w transporcie międzynarodowym lub obsłudze celnej"
+   ]
+  },
+  "warunki": [
+   "umowa o pracę",
+   "praca stacjonarna lub hybrydowa",
+   "praca w biurze z kontaktem z magazynem lub produkcją",
+   "szkolenia z systemów i narzędzi analitycznych"
+  ],
+  "jak_w_cv": [
+   "Opisz procesy prowadzone samodzielnie: planowanie, zamówienia, zapasy, transport.",
+   "Wpisz systemy i narzędzia analityczne, z których korzystasz.",
+   "Podaj przykład usprawnienia lub rozwiązanego problemu z dostawami.",
+   "Warto zaznaczyć poziom języka angielskiego i kontakt z partnerami zagranicznymi."
+  ],
+  "dla_firm": "Warto napisać, za które procesy odpowiada stanowisko – zamówienia, transport, stany – i z jakich systemów korzysta. Znajomość konkretnego systemu, np. SAP, lepiej oznaczyć jako atut, jeśli firma wdraża."
+ }
+}
