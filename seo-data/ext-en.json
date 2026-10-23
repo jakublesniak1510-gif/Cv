@@ -420,5 +420,70 @@
     "u": "https://nationalcareers.service.gov.uk/careers-advice/cv-sections"
    }
   ]
+ },
+ "article:jak-dopasowac-cv-do-ogloszenia": {
+  "sections": [
+   {
+    "h": "One bullet, two job ads: a worked mini-example",
+    "p": [
+     "Say you worked on reception at a dental practice. Your facts: you booked and changed patient appointments in the practice’s booking software, answered calls and emails, took payments and ordered office supplies. Your current bullet says: “Front desk duties at a busy dental practice.”",
+     "Ad 1 is for a medical receptionist and asks for “managing patient appointments” and “experience of practice management software”. The same bullet becomes: “Managed patient appointments, bookings and cancellations using the practice management software.” Nothing is new. You’ve just named what you already did, in the ad’s words.",
+     "Ad 2 is for an office administrator and asks for “handling incoming calls and emails” and “ordering office supplies”. Now the bullet becomes: “Handled incoming calls and emails for a dental practice and ordered office supplies.” Same job, same facts, different focus.",
+     "Notice what didn’t happen. Neither version claims invoicing, diary management for a director or any other duty from the ads that wasn’t in your facts. If an ad asks for something you haven’t done, leave it out of the CV and, if it matters, mention in your cover letter how you’d learn it."
+    ]
+   },
+   {
+    "h": "Essential and desirable criteria: how to act on them",
+    "p": [
+     "Many UK ads, especially in the public sector, come with a person specification that lists essential and desirable criteria. The Civil Service, for example, says its assessment methods help match people to the essential requirements of the job, and it asks candidates to use a supporting statement to show how they meet the essential criteria.",
+     "Make a two-column note. In the first column, list every essential criterion. In the second, write where on your CV it’s visible: in your profile, in a bullet or in the skills section. Any essential criterion you meet but can’t point to on the page is the first thing to fix.",
+     "Desirable criteria come next. Add the ones you genuinely meet, but don’t let them push essential ones out of the top third of your CV. If you don’t meet a desirable criterion, you don’t need to mention it at all."
+    ]
+   },
+   {
+    "h": "Short on time? Tailor in this order",
+    "p": [
+     "If you only have ten minutes, don’t rewrite the whole CV. Start with the headline under your name and your profile, because a recruiter reads them first. Put in the job title from the ad, if it honestly describes your work, and two or three of the main requirements you meet.",
+     "Next, look at your most recent job. Reorder its bullets so that the two or three that match the ad come first, and use the ad’s wording in them. Then move the matching skills to the top of your skills list.",
+     "Older jobs, education and hobbies can usually stay as they are. If you have more time later, go back and check the rest against the ad."
+    ]
+   },
+   {
+    "h": "What stays the same in every version",
+    "p": [
+     "Some things never change from one CV to the next: employment dates, the names of employers, the job titles you actually held, your qualifications and grades, and licence or card details. An employer may check them with references or certificates, and different versions of the facts raise questions.",
+     "If your official title doesn’t match the ad, keep it and add a short description beside it, for example “Customer Service Assistant (live chat and email)”. You can use the ad’s title in your headline instead, as long as it honestly describes what you do.",
+     "Keep your CVs consistent with your LinkedIn profile too. A recruiter who compares them should see the same dates and titles, just described with a different focus."
+    ]
+   }
+  ],
+  "faq": [
+   {
+    "q": "Can I change my job title to match the job ad?",
+    "a": "Not in your work history. Keep the title you actually held, and add a short description in brackets if it helps. You can use the ad’s job title in your headline if it honestly describes your work."
+   },
+   {
+    "q": "Should I apply if I don’t meet every desirable criterion?",
+    "a": "Desirable criteria are extras, not conditions. Focus on showing every essential criterion you meet clearly. Add desirable ones only where you genuinely meet them."
+   },
+   {
+    "q": "What should I tailor first if I’m short of time?",
+    "a": "Your headline and profile, then the top bullets of your most recent job, then the order of your skills list. Those are the parts a recruiter reads first."
+   }
+  ],
+  "sources": [
+   {
+    "t": "GOV.UK: Success profiles – candidate overview (essential criteria and supporting statements)",
+    "u": "https://www.gov.uk/government/publications/success-profiles/success-profiles-candidate-overview"
+   },
+   {
+    "t": "National Careers Service: How to write a CV (tailor your CV to the job)",
+    "u": "https://nationalcareers.service.gov.uk/careers-advice/cv-sections"
+   },
+   {
+    "t": "National Careers Service: Application form advice (matching the keywords in the job advert)",
+    "u": "https://nationalcareers.service.gov.uk/careers-advice/application-forms"
+   }
+  ]
  }
 }

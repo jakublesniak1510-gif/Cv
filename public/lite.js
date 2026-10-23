@@ -29,15 +29,15 @@
   const adWords = async (f) => {
     const out = f.querySelector('.fstatus'); let ad = f.querySelector('textarea').value.trim();
     out.className = 'fstatus'; out.textContent = '';
-    if (/^https?:\/\/\S+$/i.test(ad)) { const r = await fetch('/api/fetch-ad', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: ad }) }); const j = await r.json(); if (!r.ok) throw new Error(`${j.error} Wklej treść ogłoszenia zamiast linku.`); ad = j.text; }
-    const r = await fetch('/api/ad-keywords', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adText: ad }) });
+    if (/^https?:\/\/\S+$/i.test(ad)) { const r = await fetch('/api/fetch-ad', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: ad }) }); const j = await r.json(); if (!r.ok) throw new Error(`${j.error} ${f.dataset.linkerr || 'Wklej treść ogłoszenia zamiast linku.'}`); ad = j.text; }
+    const r = await fetch('/api/ad-keywords', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adText: ad, lang: f.dataset.lang || 'pl' }) });
     const j = await r.json(); if (!r.ok) throw new Error(j.error); return j.keywords;
   };
   const mk = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; };
   for (const f of document.querySelectorAll('form.kw-extract')) f.addEventListener('submit', async (e) => {
     e.preventDefault(); const box = f.querySelector('.w-out'), btn = f.querySelector('button');
     btn.disabled = true;
-    try { const k = await adWords(f); box.replaceChildren(k.length ? mk('div', { className: 'kw' }, ...k.map((x) => mk('span', { textContent: x }))) : mk('p', { textContent: 'Nie znaleźliśmy wymagań w tym tekście. Wklej pełną treść ogłoszenia.' })); }
+    try { const k = await adWords(f); box.replaceChildren(k.length ? mk('div', { className: 'kw' }, ...k.map((x) => mk('span', { textContent: x }))) : mk('p', { textContent: f.dataset.none || 'Nie znaleźliśmy wymagań w tym tekście. Wklej pełną treść ogłoszenia.' })); }
     catch (x) { const o = f.querySelector('.fstatus'); o.className = 'fstatus bad'; o.textContent = x.message; }
     btn.disabled = false;
   });
