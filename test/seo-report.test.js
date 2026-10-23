@@ -173,3 +173,38 @@ test('Panel → SEO: ręczne generowanie w tle, raz na godzinę, błąd Search C
     t += 31 * 60e3; assert.equal((await (await post()).json()).started, true, 'po godzinie znowu można');
   } finally { srv.close(); }
 });
+
+test('CTR po zmianie tytułów: tyle samo dni przed i po ostatniej zmianie, grupy zapytań, sekcja w e-mailu i raporcie', async () => {
+  const ch = rep.titleChanges();
+  assert.ok(ch.length && ch.every((x) => /^\d{4}-\d{2}-\d{2}$/.test(x.date) && x.pages.length), 'seo-data/title-changes.json');
+  const calls = [];
+  const q = async (dims, s, e) => {
+    calls.push([s, e]); const after = s >= '2026-10-24';
+    return [
+      { keys: ['cvpodogloszenie.pl'], clicks: after ? 9 : 5, impressions: 20, position: 1.2 },
+      { keys: ['CV pod ogłoszenie'], clicks: after ? 4 : 2, impressions: 100, position: 6 },
+      { keys: ['jak dopasować cv do ogłoszenia'], clicks: 1, impressions: 50, position: 9 },
+      { keys: ['skaner cv za darmo'], clicks: after ? 3 : 1, impressions: 60, position: 7 },
+      { keys: ['wzór cv'], clicks: 30, impressions: 900, position: 6 },
+    ];
+  };
+  const changes = [{ date: '2026-09-01', pages: ['/'] }, { date: '2026-10-23', note: 'tytuły', pages: ['/'] }];
+  assert.equal(await rep.titleCtr('2026-08-30', q, changes), null, 'przed pierwszą zmianą: brak sekcji');
+  const early = await rep.titleCtr('2026-10-23', q, changes);
+  assert.equal(early.days, 0); assert.match(rep.ctrText(early), /za mało danych/);
+  const t = await rep.titleCtr('2026-10-30', q, changes);
+  assert.equal(t.change, '2026-10-23'); assert.equal(t.days, 7);
+  assert.deepEqual([t.before, t.after], [{ start: '2026-10-16', end: '2026-10-22' }, { start: '2026-10-24', end: '2026-10-30' }]);
+  assert.deepEqual(calls.slice(-2), [['2026-10-16', '2026-10-22'], ['2026-10-24', '2026-10-30']]);
+  const g = Object.fromEntries(t.groups.map((x) => [x.key, x]));
+  assert.deepEqual(Object.keys(g), ['marka', 'cv-pod-ogloszenie', 'dopasuj-cv', 'skaner-cv']);
+  assert.deepEqual([g.marka.before.clicks, g.marka.after.clicks, g.marka.after.ctr], [5, 9, 45]);
+  assert.deepEqual([g['cv-pod-ogloszenie'].before.impressions, g['cv-pod-ogloszenie'].after.ctr], [100, 4], 'wielkość liter i polskie znaki bez znaczenia; sama domena tylko w „marce”');
+  assert.equal(g['dopasuj-cv'].after.impressions, 50); assert.equal(g['skaner-cv'].after.clicks, 3);
+  assert.equal((await rep.titleCtr('2027-03-01', q, changes)).days, 28, 'najwyżej 28 dni');
+  const txt = rep.ctrText(t);
+  assert.match(txt, /CTR po zmianie tytułów \(zmiana 2026-10-23; 7 dni przed vs 7 dni po\)/); assert.match(txt, /Marka \(cvpodogloszenie\): CTR 25% → 45%, kliknięcia 5 → 9/);
+  const html = rep.reportHtml({ id: '2026-11-02', created: Date.now(), funnel: { stages: [], from: '', to: '' }, gsc: { period: { start: 'a', end: 'b' }, totals: { cur: {}, prev: {} }, queries: [], nearFirstPage: [], pages: [], zeroClickPages: [], byLang: [], byType: [], inspection: { sample: 0, states: {}, rows: [] }, titleCtr: t } });
+  assert.match(html, /<h2>CTR po zmianie tytułów<\/h2><p>Zmiana 2026-10-23 \(tytuły\): 7 dni przed/); assert.match(html, /<td>„skaner cv”<\/td><td>1\.7<\/td><td>5<\/td>/);
+  assert.match(fs.readFileSync(new URL('../public/admin.js', import.meta.url), 'utf8'), /\$\('#seoCtr'\)\.replaceChildren/);
+});
