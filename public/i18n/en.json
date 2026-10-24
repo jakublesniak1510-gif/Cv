@@ -1606,5 +1606,14 @@
 "Plik Word jest uszkodzony albo za duży.": "The Word file is damaged or too large.",
 "Nie zapisujemy pliku ani treści CV. Sam wynik jest w pamięci serwera do godziny.": "We do not store the file or the CV text. Only the result is kept in server memory for up to an hour.",
 "Zanim cokolwiek zamówisz, możesz sprawdzić obecne CV. Wgrywasz plik (PDF, Word lub TXT) i wklejasz ogłoszenie. Skaner porównuje oba teksty i pokazuje dopasowanie CV do oferty w procentach, spełnione wymagania, wymagania, których w CV nie widać, oraz trzy konkretne rady. Skaner jest bezpłatny, nie wymaga rejestracji i nie zapisuje pliku ani treści CV.": "Before you order anything, you can check your current CV. Upload the file (PDF, Word or TXT) and paste the job ad. The scanner compares both texts and shows how well the CV matches the offer as a percentage, the requirements you meet, the requirements the CV does not show, and three specific tips. The scanner is free, needs no registration and stores neither the file nor the CV text.",
-"Porównuje Twoje obecne CV z ogłoszeniem i pokazuje dopasowanie w procentach, spełnione wymagania, wymagania, których w CV nie widać, oraz trzy rady. Skaner jest bezpłatny, nie wymaga konta i nie zapisuje pliku ani treści CV.": "It compares your current CV with the job ad and shows the match as a percentage, the requirements you meet, the requirements the CV does not show, and three tips. The scanner is free, needs no account and does not store the file or the CV text."
+"Porównuje Twoje obecne CV z ogłoszeniem i pokazuje dopasowanie w procentach, spełnione wymagania, wymagania, których w CV nie widać, oraz trzy rady. Skaner jest bezpłatny, nie wymaga konta i nie zapisuje pliku ani treści CV.": "It compares your current CV with the job ad and shows the match as a percentage, the requirements you meet, the requirements the CV does not show, and three tips. The scanner is free, needs no account and does not store the file or the CV text.",
+"Sprawdź CV": "Check your CV",
+"Analiza CV bez ogłoszenia: sekcje, dane kontaktowe, RODO, test kopiowania.": "CV check without a job ad: sections, contact details, GDPR clause, copy test.",
+"Test CV pod ATS": "ATS CV test",
+"Zobacz, jaki tekst odczyta z Twojego CV program do rekrutacji.": "See what text a recruitment system reads from your CV.",
+"Kreator CV pod ogłoszenie": "CV builder for a job ad",
+"Zacznij od ogłoszenia: CV pod wymagania z tej oferty.": "Start with the job ad: a CV for the requirements of that offer.",
+"List motywacyjny pod ogłoszenie": "Cover letter for a job ad",
+"Przykład dwóch listów jednej osoby i lista kontrolna.": "Two letters by the same person and a checklist.",
+"Przykład: jedno CV, dwa ogłoszenia": "Example: one CV, two job ads"
 }

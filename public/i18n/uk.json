@@ -1606,5 +1606,14 @@
 "Plik Word jest uszkodzony albo za duży.": "Файл Word пошкоджений або завеликий.",
 "Nie zapisujemy pliku ani treści CV. Sam wynik jest w pamięci serwera do godziny.": "Ми не зберігаємо ні файл, ні текст резюме. Лише результат зберігається в пам’яті сервера до години.",
 "Zanim cokolwiek zamówisz, możesz sprawdzić obecne CV. Wgrywasz plik (PDF, Word lub TXT) i wklejasz ogłoszenie. Skaner porównuje oba teksty i pokazuje dopasowanie CV do oferty w procentach, spełnione wymagania, wymagania, których w CV nie widać, oraz trzy konkretne rady. Skaner jest bezpłatny, nie wymaga rejestracji i nie zapisuje pliku ani treści CV.": "Перш ніж щось замовити, ви можете перевірити своє резюме. Завантажте файл (PDF, Word або TXT) і вставте оголошення. Сканер порівнює обидва тексти й показує відповідність резюме вакансії у відсотках, виконані вимоги, вимоги, яких у резюме не видно, і три конкретні поради. Сканер безкоштовний, не потребує реєстрації та не зберігає ні файлу, ні тексту резюме.",
-"Porównuje Twoje obecne CV z ogłoszeniem i pokazuje dopasowanie w procentach, spełnione wymagania, wymagania, których w CV nie widać, oraz trzy rady. Skaner jest bezpłatny, nie wymaga konta i nie zapisuje pliku ani treści CV.": "Він порівнює ваше резюме з оголошенням і показує відповідність у відсотках, виконані вимоги, вимоги, яких у резюме не видно, і три поради. Сканер безкоштовний, не потребує акаунта й не зберігає файлу чи тексту резюме."
+"Porównuje Twoje obecne CV z ogłoszeniem i pokazuje dopasowanie w procentach, spełnione wymagania, wymagania, których w CV nie widać, oraz trzy rady. Skaner jest bezpłatny, nie wymaga konta i nie zapisuje pliku ani treści CV.": "Він порівнює ваше резюме з оголошенням і показує відповідність у відсотках, виконані вимоги, вимоги, яких у резюме не видно, і три поради. Сканер безкоштовний, не потребує акаунта й не зберігає файлу чи тексту резюме.",
+"Sprawdź CV": "Перевірити резюме",
+"Analiza CV bez ogłoszenia: sekcje, dane kontaktowe, RODO, test kopiowania.": "Перевірка резюме без оголошення: розділи, контакти, згода RODO, тест копіювання.",
+"Test CV pod ATS": "Тест резюме для ATS",
+"Zobacz, jaki tekst odczyta z Twojego CV program do rekrutacji.": "Подивіться, який текст система рекрутингу прочитає з вашого резюме.",
+"Kreator CV pod ogłoszenie": "Конструктор резюме під оголошення",
+"Zacznij od ogłoszenia: CV pod wymagania z tej oferty.": "Почніть з оголошення: резюме під вимоги цієї вакансії.",
+"List motywacyjny pod ogłoszenie": "Супровідний лист під оголошення",
+"Przykład dwóch listów jednej osoby i lista kontrolna.": "Два листи однієї людини та контрольний список.",
+"Przykład: jedno CV, dwa ogłoszenia": "Приклад: одне резюме, два оголошення"
 }

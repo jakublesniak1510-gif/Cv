@@ -42,3 +42,18 @@ test('Strony: poradnik z blokiem „Powiązane”, zawód z trzema sekcjami, hub
     assert.match(await get('/sitemap.xml'), /<loc>https:\/\/example\.test\/poradnik<\/loc>/);
   } finally { s.close(); }
 });
+
+test('Nowe strony C1 mają linki wejściowe ze strony głównej i z /poradnik; strony tylko po polsku znikają z wersji językowych', async () => {
+  const app = express(); seoRoutes(app, 'https://example.test');
+  const srv = app.listen(0), U = `http://127.0.0.1:${srv.address().port}`, get = async (p) => (await fetch(U + p)).text();
+  try {
+    const home = await get('/'), hub = await get('/poradnik');
+    for (const p of ['/narzedzia/sprawdz-cv', '/narzedzia/test-cv-ats', '/kreator-cv', '/poradnik/jedno-cv-dwa-ogloszenia', '/narzedzia/list-motywacyjny-pod-ogloszenie']) {
+      assert.ok(home.includes(`href="${p}"`) || hub.includes(`href="${p}"`), `${p}: link z / lub /poradnik`);
+      assert.ok(hub.includes(`href="${p}"`), `${p}: link z /poradnik`);
+    }
+    const en = await get('/en');
+    assert.ok(!en.includes('href="/kreator-cv"') && !en.includes('href="/narzedzia/list-motywacyjny-pod-ogloszenie"'), 'bez linków do stron tylko po polsku');
+    assert.ok(en.includes('href="/en/tools/cv-checker"') && en.includes('href="/en/tools/ats-cv-checker"'), 'narzędzia w wersji EN');
+  } finally { srv.close(); }
+});
