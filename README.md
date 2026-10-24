@@ -38,6 +38,9 @@ npm start              # http://localhost:3000
 Gdy są klucze Stripe i Przelewy24 oraz `PAY_PROVIDER=both`, klient wybiera bramkę w kasie (domyślnie Stripe). Test w sandboxie:
 konto testowe P24 (osobne ID i klucze), `P24_SANDBOX=1`, zamówienie z wybraną bramką „Przelewy24” na kwotę ok. 1 zł (kod rabatowy),
 płatność na stronie testowej P24, potem zwrot z panelu admina. Przy `P24_SANDBOX=1` panel admina pokazuje baner „P24 sandbox”.
+Sandbox i produkcja mają **różne** ID sprzedawcy i klucze (ID testowe na produkcji = „401 Incorrect authentication”); pole IP w panelu P24 zostaw puste.
+Zwrot przez API wymaga środków na saldzie P24 – przy 409 „Insufficient funds available” zrób zwrot w panelu P24 i kliknij „Oznacz jako zwrócone”.
+Błędy płatności i zwrotów: panel admina → **Problemy → Dziennik błędów**.
 Pełna instrukcja dla właściciela: [docs/P24.md](docs/P24.md).
 Dane zamówień trwają na dysku `/data` (zmienna `DATA_DIR`).
 
