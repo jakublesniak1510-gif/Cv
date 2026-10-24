@@ -118,17 +118,19 @@ test('PAY_PROVIDER=both: wybór bramki, zmiana bramki, sesje P24, wpłata po Str
     assert.ok(!Object.values(all).some((x) => x.profile?.email === 'blad@test.pl'), 'nieudane zamówienie usunięte');
   } finally { srv.kill(); m.p24.close(); m.stripe.close(); }
 
-  // 6) zwrot przez API P24: kwota, numer transakcji, sesja; ten sam zwrot = te same identyfikatory (bez podwójnego zlecenia)
+  // 6) zwrot przez API P24: kwota, numer transakcji, sesja; losowe identyfikatory w limitach dokumentacji (requestId ≤ 45,
+  // refundsUuid ≤ 35, opis ≤ 35) – podwójnemu zleceniu zapobiega panel (refundAttempt + lista zwrotów)
   Object.assign(process.env, { P24_MERCHANT_ID: String(MERCHANT), P24_CRC: CRC, P24_API_KEY: KEY });
   const m2 = mocks(); process.env.P24_BASE_URL = `http://localhost:${m2.p24.address().port}`;
   try {
     const { p24Refund } = await import('../lib/p24.js');
-    const a = await p24Refund({ orderId: 'abc-123', sessionId: 'abc-123.1', p24OrderId: '555', amount: 1500, already: 0 });
-    const b = await p24Refund({ orderId: 'abc-123', sessionId: 'abc-123.1', p24OrderId: '555', amount: 1500, already: 0 });
+    const a = await p24Refund({ orderId: 'abc-123', sessionId: 'abc-123.1', p24OrderId: '555', amount: 1500 });
+    const b = await p24Refund({ orderId: 'abc-123', sessionId: 'abc-123.1', p24OrderId: '555', amount: 1500 });
     const r = m2.calls.filter((c) => c.url === '/api/v1/transaction/refund');
     assert.equal(r.length, 2); assert.equal(r[0].b.refunds[0].orderId, 555); assert.equal(r[0].b.refunds[0].amount, 1500); assert.equal(r[0].b.refunds[0].sessionId, 'abc-123.1');
-    assert.equal(r[0].b.requestId, r[1].b.requestId); assert.equal(a.id, b.id, 'idempotentne identyfikatory');
-    assert.notEqual((await p24Refund({ orderId: 'abc-123', sessionId: 'abc-123.1', p24OrderId: '555', amount: 500, already: 1500 })).id, a.id);
+    assert.notEqual(r[0].b.requestId, r[1].b.requestId); assert.notEqual(a.id, b.id, 'nowe identyfikatory przy każdej próbie');
+    for (const c of r) { assert.ok(c.b.requestId.length <= 45 && c.b.refundsUuid.length <= 35 && c.b.refunds[0].description.length <= 35); assert.ok(Number.isInteger(c.b.refunds[0].amount)); }
+    assert.equal(a.id, r[0].b.refundsUuid);
   } finally { m2.p24.close(); m2.stripe.close(); for (const k of ['P24_MERCHANT_ID', 'P24_CRC', 'P24_API_KEY', 'P24_BASE_URL']) delete process.env[k]; }
 });
 
