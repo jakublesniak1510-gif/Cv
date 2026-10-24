@@ -25,6 +25,7 @@ import { scanFallback } from './lib/tailor.js';
 import { adKeywords } from './lib/ad-keywords.js';
 import { letterRoutes } from './lib/letter-landing.js';
 import { checkCv } from './lib/cv-check.js';
+import { profReqs } from './lib/prof-ad.js';
 import { landingRoutes } from './lib/landing.js';
 import { outcomes, outcomeRoutes, startOutcome, outcomeLinks, anonymizeOutcomes, publicOutcome, OUTCOME_CONSENT, OUTCOME_AFTER, OT } from './lib/outcomes.js';
 import { mailEnabled, sendOrderMail, sendReminder, sendFollowUp, sendReviewAsk, sendOutcomeAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail, sendOwnerMail } from './lib/mail.js';
@@ -264,7 +265,10 @@ function cleanProfile(p = {}) {
     photo: typeof p.photo === 'string' && p.photo.length < 400_000 && PHOTO.test(p.photo) ? p.photo : '',
   };
 }
-const cleanAds = (ads) => arr(ads, MAX_ADS).map((a) => ({ title: str(a?.title, 100), text: str(a?.text, 10000), lang: a?.lang in LANGS ? a.lang : 'auto' })).filter((a) => a.text.length >= 80);
+const cleanAds = (ads) => arr(ads, MAX_ADS).map((a) => ({ title: str(a?.title, 100), text: str(a?.text, 10000), lang: a?.lang in LANGS ? a.lang : 'auto', ...(a?.kind === 'profession' ? { kind: 'profession' } : {}) })).filter((a) => a.text.length >= 80);
+// „CV pod zawód” (lib/prof-ad.js): jedno CV bez listu – list motywacyjny i Pakiet 3 mają sens tylko przy prawdziwych ogłoszeniach.
+const PROF_ONLY_CV = 'CV pod zawód (bez ogłoszenia) zamawiasz jako jedno CV bez listu. Gdy znajdziesz ogłoszenie, zamów CV z listem pod tę ofertę.';
+const profMixError = (a, pkg) => (a.some((x) => x.kind === 'profession') && (a.length > 1 || pkg !== 'cv') ? PROF_ONLY_CV : null);
 const cleanLangs = (l) => [...new Set(arr(l, 6).filter((x) => x in LANGS))];
 const normCode = (c) => str(c, 20).toUpperCase().replace(/[^A-Z0-9-]/g, '');
 
@@ -366,6 +370,8 @@ app.get('/health', async (_req, res) => {
 const GW_INFO = { stripe: () => ({ id: 'stripe', provider: 'Stripe', methods: stripeMethods() }), p24: () => ({ id: 'p24', provider: 'Przelewy24', methods: ['BLIK', 'przelew online', 'karta'] }) };
 const payInfo = () => (DEMO ? null : { ...GW_INFO[GATEWAYS[0]](), gateways: GATEWAYS.map((g) => GW_INFO[g]()), p24Sandbox: GATEWAYS.includes('p24') && process.env.P24_SANDBOX === '1' });
 if (GATEWAYS.includes('stripe')) refreshStripeMethods().catch(() => {}); // raz przy starcie
+// Typowe wymagania zawodu do „CV pod zawód” (lista do odznaczenia w kreatorze; dane publiczne ze stron zawodów).
+app.get('/api/prof-reqs', (req, res) => res.set('Cache-Control', 'public, max-age=3600').json(profReqs(String(req.query.q || '').slice(0, 80))));
 app.get('/api/config', (req, res) => res.json({
   pay: payInfo(),
   aiPreview: aiEnabled(), ads: ADS, googleReview: GOOGLE_REVIEW, chromeExt: CHROME_EXT, demo: DEMO, salesClosed: salesClosedFor(req), ai: aiEnabled(), maxAds: MAX_ADS, noPrint: false, maxRevisions: MAX_REVISIONS, langs: LANGS, codeDiscount: CODE_DISCOUNT / 100,
@@ -597,6 +603,7 @@ app.post('/api/orders', async (req, res) => {
     if (!DEMO && !pickGateway(req.body?.gateway)) return res.status(400).json({ error: BAD_GATEWAY });
     const a = cleanAds(ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
+    if (profMixError(a, usePass ? 'cv_letter' : pkg)) return res.status(400).json({ error: PROF_ONLY_CV });
     const p = cleanProfile(profile);
     if (!p.name || !/^\S+@\S+\.\S+$/.test(p.email)) return res.status(400).json({ error: 'Podaj imię i nazwisko oraz poprawny e-mail.' });
     if (!p.experience.length && !p.education.length) return res.status(400).json({ error: 'Dodaj doświadczenie lub wykształcenie.' });
@@ -642,6 +649,7 @@ app.post('/api/orders/:id/followup', async (req, res) => {
     const c = await checkCode(req.body?.code, parent.profile.email);
     if (c.error) return res.status(400).json({ error: c.error });
     const pkg = ['cv', 'cv_letter', 'pack3'].includes(req.body?.pkg) ? req.body.pkg : parent.pkg;
+    if (profMixError(a, pkg)) return res.status(400).json({ error: PROF_ONLY_CV });
     const disc = discountFor(c, pkg, a.length, ad, true, langs), total = calcTotal(pkg, a.length, ad, true, langs, disc);
     if (total > 0 && req.body?.waiver !== true) return res.status(400).json({ error: 'Zaznacz zgodę na wykonanie usługi od razu po płatności.' });
     const order = { id: crypto.randomUUID(), ...(req.body?.waiver === true ? { waiver: { text: WAIVER, at: Date.now() } } : {}), refCtx: refCtx(req), uiLang: parent.uiLang, parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, true, langs, 0), total), total, profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, maxRevisions: MAX_REVISIONS, created: Date.now() };
