@@ -1615,5 +1615,21 @@
 "Zacznij od ogłoszenia: CV pod wymagania z tej oferty.": "Почніть з оголошення: резюме під вимоги цієї вакансії.",
 "List motywacyjny pod ogłoszenie": "Супровідний лист під оголошення",
 "Przykład dwóch listów jednej osoby i lista kontrolna.": "Два листи однієї людини та контрольний список.",
-"Przykład: jedno CV, dwa ogłoszenia": "Приклад: одне резюме, два оголошення"
+"Przykład: jedno CV, dwa ogłoszenia": "Приклад: одне резюме, два оголошення",
+"Nie masz jeszcze ogłoszenia?": "Ще не маєте оголошення?",
+"Zrób CV pod typowe wymagania tego zawodu – {X}": "Створити резюме під типові вимоги цієї професії – {X}",
+"Bez ogłoszenia": "Без оголошення",
+"Nie masz jeszcze ogłoszenia? Przygotujemy CV pod typowe wymagania zawodu. Odznacz to, czego nie dotyczy. Gdy znajdziesz ofertę, dopasuj CV do niej.": "Ще немає оголошення? Підготуємо резюме під типові вимоги професії. Зніміть позначки з того, що вас не стосується. Коли знайдете вакансію, адаптуйте резюме під неї.",
+"Zawód": "Професія",
+"Pokaż wymagania": "Показати вимоги",
+"np. magazynier, kasjerka": "напр. комірник, касирка",
+"Wpisz nazwę zawodu, np. magazynier.": "Введіть назву професії, напр. комірник.",
+"Nie udało się pobrać wymagań. Spróbuj ponownie.": "Не вдалося завантажити вимоги. Спробуйте ще раз.",
+"CV pod zawód to jedno CV bez listu motywacyjnego, 39 zł. Gdy znajdziesz ogłoszenie, zamów CV z listem pod konkretną ofertę.": "Резюме під професію – це одне резюме без супровідного листа, 39 zł. Коли знайдете оголошення, замовте резюме з листом під конкретну вакансію.",
+"Zapisane wymagania zawodu. Kliknij „Pokaż wymagania”, żeby je zmienić.": "Збережені вимоги професії. Натисніть «Показати вимоги», щоб їх змінити.",
+"CV pod zawód (bez ogłoszenia) to jedno CV bez listu. Usuń pozostałe ogłoszenia i wybierz pakiet „CV”.": "Резюме під професію (без оголошення) – це одне резюме без листа. Видаліть інші оголошення та оберіть пакет «CV».",
+"CV pod zawód (bez ogłoszenia) zamawiasz jako jedno CV bez listu. Gdy znajdziesz ogłoszenie, zamów CV z listem pod tę ofertę.": "Резюме під професію (без оголошення) замовляється як одне резюме без листа. Коли знайдете оголошення, замовте резюме з листом під цю вакансію.",
+"Typowe wymagania w ogłoszeniach: {0}. Odznacz to, czego nie dotyczy – CV i tak pokaże tylko to, co wpiszesz o sobie.": "Типові вимоги в оголошеннях: {0}. Зніміть позначки з того, що вас не стосується – резюме все одно покаже лише те, що ви напишете про себе.",
+"Nie mamy listy dla „{0}”. Typowe wymagania tego zawodu dobierzemy przy pisaniu CV.": "Для «{0}» у нас немає списку. Типові вимоги цієї професії доберемо під час написання резюме.",
+"To CV nie jest dopasowane do konkretnego pracodawcy – gdy znajdziesz ogłoszenie, zamów CV pod ofertę.": "Це резюме не адаптоване до конкретного роботодавця – коли знайдете оголошення, замовте резюме під вакансію."
 }

@@ -649,7 +649,8 @@ whenNear('#szablony', drawGallery);
 const rowT = {
   exp: () => `<div class="grid4"><label class="f">Stanowisko<input type="text" data-k="title"></label><label class="f">Firma<input type="text" data-k="company"></label><label class="f">Od<input type="text" data-k="from" placeholder="03.2021"></label><label class="f">Do<input type="text" data-k="to" placeholder="obecnie"></label></div><label class="f">Obowiązki i osiągnięcia <span class="h">każdy punkt w nowej linii</span><textarea data-k="description"></textarea></label>`,
   edu: () => `<div class="grid4"><label class="f">Szkoła<input type="text" data-k="school"></label><label class="f">Kierunek / tytuł<input type="text" data-k="degree"></label><label class="f">Od<input type="text" data-k="from"></label><label class="f">Do<input type="text" data-k="to"></label></div>`,
-  ads: () => `<div class="seg modes" role="tablist"><button type="button" role="tab" data-mode="link">Link do ogłoszenia</button><button type="button" role="tab" data-mode="photo">Zdjęcie ogłoszenia</button><button type="button" role="tab" data-mode="paste">Wklej treść</button></div>
+  ads: () => `<div class="seg modes" role="tablist"><button type="button" role="tab" data-mode="link">Link do ogłoszenia</button><button type="button" role="tab" data-mode="photo">Zdjęcie ogłoszenia</button><button type="button" role="tab" data-mode="paste">Wklej treść</button><button type="button" role="tab" data-mode="prof">Bez ogłoszenia</button></div>
+<div class="profbox" hidden><p class="hint">Nie masz jeszcze ogłoszenia? Przygotujemy CV pod typowe wymagania zawodu. Odznacz to, czego nie dotyczy. Gdy znajdziesz ofertę, dopasuj CV do niej.</p><label class="f">Zawód<span class="urlrow"><input type="text" class="profq" list="profList" autocomplete="off" placeholder="np. magazynier, kasjerka"><button type="button" class="btn sm profbtn">Pokaż wymagania</button></span></label><div class="profreqs"></div><input type="hidden" data-k="kind"></div>
 <div class="photobox" hidden><b class="flabel">Zdjęcie lub zrzut ekranu ogłoszenia</b><label class="btn ghost filebtn"><span>Wybierz zdjęcie</span><input type="file" class="adphoto" accept="image/*"></label><p class="hint">Zrób zdjęcie ogłoszenia albo wgraj zrzut ekranu, np. z Facebooka, OLX lub grupy z ofertami. Odczytamy z niego treść.</p><div class="pstatus" role="status"></div></div>
 <div class="linkbox"><label class="f">Adres ogłoszenia<span class="urlrow"><input type="text" data-k="url" inputmode="url" placeholder="https://…"><button type="button" class="btn sm fetchbtn">Pobierz</button></span></label><div class="fstatus" role="status"></div></div>
 <div class="adfields"><label class="adlang">Język dokumentów <select data-k="lang"><option value="auto">jak w ogłoszeniu</option><option value="pl">polski</option><option value="en">angielski</option><option value="de">niemiecki</option><option value="uk">ukraiński</option><option value="es">hiszpański</option><option value="fr">francuski</option></select></label><label class="f">Nazwa stanowiska<input type="text" data-k="title" placeholder="np. Kasjer / Sprzedawca"></label><label class="f">Treść ogłoszenia <span class="h">sprawdź i w razie potrzeby popraw</span><textarea data-k="text" style="min-height:150px"></textarea></label></div>`,
@@ -662,7 +663,10 @@ function addRow(box, v = {}) {
   $('#' + box).append(e);
   Object.entries(v).forEach(([k, val]) => { const i = $(`[data-k="${k}"]`, e); if (i) i.value = val; });
   // Na telefonie domyślnie „Wklej treść” (kopiowanie z aplikacji z ogłoszeniami jest tam łatwiejsze niż link).
-  if (box === 'ads' || box === 'fuAds') initAd(e, v.text || matchMedia('(max-width: 640px)').matches ? 'paste' : 'link');
+  if (box === 'ads' || box === 'fuAds') {
+    initAd(e, v.kind === 'profession' ? 'prof' : v.text || matchMedia('(max-width: 640px)').matches ? 'paste' : 'link');
+    if (v.kind === 'profession') { $('.profq', e).value = v.title || ''; $('.profreqs', e).append(el('p', { className: 'hint', textContent: 'Zapisane wymagania zawodu. Kliknij „Pokaż wymagania”, żeby je zmienić.' })); }
+  }
   renum(box); refresh();
 }
 // Zmniejszenie zdjęcia przed wysłaniem (telefony robią zdjęcia po kilka MB).
@@ -684,7 +688,44 @@ function setMode(e, mode) {
   $$('.modes button', e).forEach((b) => b.setAttribute('aria-selected', b.dataset.mode === mode));
   $('.linkbox', e).hidden = mode !== 'link';
   $('.photobox', e).hidden = mode !== 'photo';
-  $('.adfields', e).hidden = (mode === 'link' || mode === 'photo') && !e.dataset.fetched;
+  $('.adfields', e).hidden = mode === 'prof' || ((mode === 'link' || mode === 'photo') && !e.dataset.fetched);
+  $('.profbox', e).hidden = mode !== 'prof';
+  // „CV pod zawód”: pole kind = profession, treść „ogłoszenia” to typowe wymagania zawodu; poza tym trybem zwykłe ogłoszenie.
+  const kind = $('[data-k=kind]', e), was = kind.value;
+  kind.value = mode === 'prof' ? 'profession' : '';
+  if (was === 'profession' && mode !== 'prof') { $('[data-k=text]', e).value = ''; $('[data-k=title]', e).value = ''; }
+  if (mode === 'prof') { profList(); if (!passOn() && pkg() !== 'cv') { $('input[name=pkg][value=cv]').checked = true; } }
+  refresh();
+}
+// Lista zawodów do podpowiedzi (z danych stron zawodów) – raz na stronę.
+let profListDone = false;
+function profList() {
+  if (profListDone) return; profListDone = true;
+  loadContent().then((C) => { const d = el('datalist', { id: 'profList' }); d.append(...(C.INDEX || []).map((p) => el('option', { value: p.name }))); document.body.append(d); }).catch(() => (profListDone = false));
+}
+// Tekst dla generatora (taki sam układ jak lib/prof-ad.js profAdText): zawód, typowe obowiązki i zaznaczone wymagania.
+const profText = (name, reqs, duties) => [`CV pod zawód: ${name} (bez konkretnego ogłoszenia – typowe wymagania tego zawodu).`, duties.length ? `Typowe obowiązki: ${duties.join('; ')}.` : '',
+  reqs.length ? `Typowe wymagania: ${reqs.join('; ')}.` : `Typowe wymagania: dobierz najczęstsze wymagania w ogłoszeniach dla zawodu „${name}” w Polsce.`].filter(Boolean).join('\n');
+function initProf(e) {
+  const q = $('.profq', e), box = $('.profreqs', e), btn = $('.profbtn', e);
+  const run = async () => {
+    const v = q.value.trim(); box.replaceChildren();
+    if (v.length < 3) { box.append(el('p', { className: 'fstatus bad', textContent: 'Wpisz nazwę zawodu, np. magazynier.' })); return; }
+    btn.disabled = true;
+    try {
+      const r = await fetch(`/api/prof-reqs?q=${encodeURIComponent(v)}`), j = await r.json();
+      const name = j.slug ? j.name : v, boxes = j.reqs.map((x) => el('input', { type: 'checkbox', value: x, checked: true }));
+      const write = () => { $('[data-k=title]', e).value = name.slice(0, 100); $('[data-k=text]', e).value = profText(name, boxes.filter((c) => c.checked).map((c) => c.value), j.duties || []); saveDraft(); refresh(); };
+      boxes.forEach((c) => c.addEventListener('change', write));
+      box.append(el('p', { className: 'hint', textContent: j.slug ? `Typowe wymagania w ogłoszeniach: ${name}. Odznacz to, czego nie dotyczy – CV i tak pokaże tylko to, co wpiszesz o sobie.` : `Nie mamy listy dla „${v}”. Typowe wymagania tego zawodu dobierzemy przy pisaniu CV.` }),
+        el('div', { className: 'kw-pick' }, ...boxes.map((c) => el('label', { className: 'check' }, c, ' ', c.value))),
+        el('p', { className: 'note', textContent: 'CV pod zawód to jedno CV bez listu motywacyjnego, 39 zł. Gdy znajdziesz ogłoszenie, zamów CV z listem pod konkretną ofertę.' }), el('p', { className: 'hint small', textContent: 'To CV nie jest dopasowane do konkretnego pracodawcy – gdy znajdziesz ogłoszenie, zamów CV pod ofertę.' }));
+      write();
+    } catch { box.append(el('p', { className: 'fstatus bad', textContent: 'Nie udało się pobrać wymagań. Spróbuj ponownie.' })); }
+    btn.disabled = false;
+  };
+  btn.onclick = run; q.onkeydown = (k) => { if (k.key === 'Enter') { k.preventDefault(); run(); } };
+  e.profRun = (name) => { q.value = name; return run(); };
 }
 function initAd(e, mode) {
   $$('.modes button', e).forEach((b) => (b.onclick = () => setMode(e, b.dataset.mode)));
@@ -727,6 +768,7 @@ function initAd(e, mode) {
     file.value = '';
   };
   $('[data-k=url]', e).onkeydown = (k) => { if (k.key === 'Enter') { k.preventDefault(); run(); } };
+  initProf(e);
   if (cfg.fakeFetch) $('.linkbox', e).append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' }));
   setMode(e, mode);
 }
@@ -1013,6 +1055,8 @@ function validate(n) {
   if (n === 5 && ORDER_B && !passOn() && nAds() > PKG_ADS[pkg()]) { $('input[name=pkg][value=pack3]').checked = true; refresh(); }
   if ((n === 5 || (ORDER_B && n === 6)) && !passOn() && nAds() > PKG_ADS[pkg()]) return 'Wybrany pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe ogłoszenia albo wybierz Pakiet 3 za 79 zł.';
   if (n === 5) for (const [i, a] of rows('ads').entries()) {
+    if (a.kind === 'profession' && !a.text) return `Ogłoszenie ${i + 1}: wpisz zawód i kliknij „Pokaż wymagania”.`;
+    if (a.kind === 'profession' && (rows('ads').length > 1 || (!passOn() && pkg() !== 'cv'))) return 'CV pod zawód (bez ogłoszenia) to jedno CV bez listu. Usuń pozostałe ogłoszenia i wybierz pakiet „CV”.';
     if (!a.text) return `Ogłoszenie ${i + 1}: kliknij „Pobierz” przy linku albo wklej treść oferty.`;
     if (!a.title) return `Ogłoszenie ${i + 1}: podaj nazwę stanowiska.`;
     if (a.text.length < 80) return `Ogłoszenie ${i + 1}: wklej pełną treść oferty (min. 80 znaków).`;
@@ -2575,7 +2619,13 @@ if ((q.get('zamow') || LANGS[q.get('jezyk')]) && !q.get('id') && !q.get('draft')
   } catch {}
   // ?zawod=<slug> (przycisk na stronie zawodu): nazwa zawodu jako ogólne stanowisko, jeśli pole jest puste.
   const zaw = q.get('zawod') || '';
-  if (/^[a-z0-9-]{2,60}$/.test(zaw)) loadContent().then((C) => { const p = C.INDEX?.find((x) => x.slug === zaw); if (p && !$('#headline').value.trim()) { $('#headline').value = p.name; saveDraft(); } }).catch(() => {});
+  if (/^[a-z0-9-]{2,60}$/.test(zaw)) loadContent().then((C) => {
+    const p = C.INDEX?.find((x) => x.slug === zaw); if (!p) return;
+    if (!$('#headline').value.trim()) { $('#headline').value = p.name; saveDraft(); }
+    // ?tryb=zawod (przycisk „CV pod ten zawód” bez ogłoszenia): pierwsze ogłoszenie w trybie „Bez ogłoszenia” z wymaganiami zawodu.
+    const first = $('#ads .entry');
+    if (q.get('tryb') === 'zawod' && first && !$('[data-k=text]', first).value.trim()) { setMode(first, 'prof'); first.profRun?.(p.name); }
+  }).catch(() => {});
 }
 // „Wyślij mi link do dokończenia” (krok 1): jeden e-mail z linkiem; przypomnienie tylko z osobnym, niezaznaczonym polem.
 {

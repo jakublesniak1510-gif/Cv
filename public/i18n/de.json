@@ -1615,5 +1615,21 @@
 "Zacznij od ogłoszenia: CV pod wymagania z tej oferty.": "Beginnen Sie mit der Anzeige: ein Lebenslauf für die Anforderungen dieses Angebots.",
 "List motywacyjny pod ogłoszenie": "Anschreiben für eine Stellenanzeige",
 "Przykład dwóch listów jednej osoby i lista kontrolna.": "Zwei Anschreiben derselben Person und eine Checkliste.",
-"Przykład: jedno CV, dwa ogłoszenia": "Beispiel: ein Lebenslauf, zwei Stellenanzeigen"
+"Przykład: jedno CV, dwa ogłoszenia": "Beispiel: ein Lebenslauf, zwei Stellenanzeigen",
+"Nie masz jeszcze ogłoszenia?": "Noch keine Stellenanzeige?",
+"Zrób CV pod typowe wymagania tego zawodu – {X}": "Lebenslauf für die typischen Anforderungen dieses Berufs erstellen – {X}",
+"Bez ogłoszenia": "Ohne Anzeige",
+"Nie masz jeszcze ogłoszenia? Przygotujemy CV pod typowe wymagania zawodu. Odznacz to, czego nie dotyczy. Gdy znajdziesz ofertę, dopasuj CV do niej.": "Noch keine Anzeige? Wir erstellen einen Lebenslauf für die typischen Anforderungen des Berufs. Entfernen Sie die Haken bei allem, was nicht auf Sie zutrifft. Wenn Sie eine Anzeige finden, passen Sie den Lebenslauf daran an.",
+"Zawód": "Beruf",
+"Pokaż wymagania": "Anforderungen zeigen",
+"np. magazynier, kasjerka": "z. B. Lagermitarbeiter, Kassiererin",
+"Wpisz nazwę zawodu, np. magazynier.": "Geben Sie einen Beruf ein, z. B. Lagermitarbeiter.",
+"Nie udało się pobrać wymagań. Spróbuj ponownie.": "Die Anforderungen konnten nicht geladen werden. Bitte erneut versuchen.",
+"CV pod zawód to jedno CV bez listu motywacyjnego, 39 zł. Gdy znajdziesz ogłoszenie, zamów CV z listem pod konkretną ofertę.": "Ein Lebenslauf für einen Beruf ist ein Lebenslauf ohne Anschreiben, 39 zł. Wenn Sie eine Anzeige finden, bestellen Sie Lebenslauf und Anschreiben für dieses Angebot.",
+"Zapisane wymagania zawodu. Kliknij „Pokaż wymagania”, żeby je zmienić.": "Gespeicherte Anforderungen. Klicken Sie auf „Anforderungen zeigen“, um sie zu ändern.",
+"CV pod zawód (bez ogłoszenia) to jedno CV bez listu. Usuń pozostałe ogłoszenia i wybierz pakiet „CV”.": "Ein Lebenslauf für einen Beruf (ohne Anzeige) ist ein Lebenslauf ohne Anschreiben. Entfernen Sie die anderen Anzeigen und wählen Sie das Paket „CV“.",
+"CV pod zawód (bez ogłoszenia) zamawiasz jako jedno CV bez listu. Gdy znajdziesz ogłoszenie, zamów CV z listem pod tę ofertę.": "Einen Lebenslauf für einen Beruf (ohne Anzeige) bestellen Sie als einen Lebenslauf ohne Anschreiben. Wenn Sie eine Anzeige finden, bestellen Sie Lebenslauf und Anschreiben für dieses Angebot.",
+"Typowe wymagania w ogłoszeniach: {0}. Odznacz to, czego nie dotyczy – CV i tak pokaże tylko to, co wpiszesz o sobie.": "Typische Anforderungen in Stellenanzeigen: {0}. Entfernen Sie die Haken bei allem, was nicht zutrifft – der Lebenslauf zeigt ohnehin nur, was Sie über sich angeben.",
+"Nie mamy listy dla „{0}”. Typowe wymagania tego zawodu dobierzemy przy pisaniu CV.": "Für „{0}“ haben wir keine Liste. Die typischen Anforderungen dieses Berufs wählen wir beim Schreiben des Lebenslaufs.",
+"To CV nie jest dopasowane do konkretnego pracodawcy – gdy znajdziesz ogłoszenie, zamów CV pod ofertę.": "Dieser Lebenslauf ist nicht auf einen bestimmten Arbeitgeber zugeschnitten – wenn Sie eine Anzeige finden, bestellen Sie einen Lebenslauf für dieses Angebot."
 }
