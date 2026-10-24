@@ -1607,6 +1607,15 @@
 "Nie zapisujemy pliku ani treści CV. Sam wynik jest w pamięci serwera do godziny.": "Wir speichern weder die Datei noch den Text des Lebenslaufs. Nur das Ergebnis bleibt bis zu einer Stunde im Serverspeicher.",
 "Zanim cokolwiek zamówisz, możesz sprawdzić obecne CV. Wgrywasz plik (PDF, Word lub TXT) i wklejasz ogłoszenie. Skaner porównuje oba teksty i pokazuje dopasowanie CV do oferty w procentach, spełnione wymagania, wymagania, których w CV nie widać, oraz trzy konkretne rady. Skaner jest bezpłatny, nie wymaga rejestracji i nie zapisuje pliku ani treści CV.": "Bevor Sie etwas bestellen, können Sie Ihren aktuellen Lebenslauf prüfen. Laden Sie die Datei hoch (PDF, Word oder TXT) und fügen Sie die Anzeige ein. Der Scanner vergleicht beide Texte und zeigt die Übereinstimmung mit dem Angebot in Prozent, die erfüllten Anforderungen, die im Lebenslauf nicht sichtbaren Anforderungen und drei konkrete Tipps. Der Scanner ist kostenlos, braucht keine Registrierung und speichert weder die Datei noch den Text des Lebenslaufs.",
 "Porównuje Twoje obecne CV z ogłoszeniem i pokazuje dopasowanie w procentach, spełnione wymagania, wymagania, których w CV nie widać, oraz trzy rady. Skaner jest bezpłatny, nie wymaga konta i nie zapisuje pliku ani treści CV.": "Er vergleicht Ihren aktuellen Lebenslauf mit der Anzeige und zeigt die Übereinstimmung in Prozent, die erfüllten Anforderungen, die im Lebenslauf nicht sichtbaren Anforderungen und drei Tipps. Der Scanner ist kostenlos, braucht kein Konto und speichert weder Datei noch Lebenslauftext.",
+"Sprawdź CV": "Lebenslauf prüfen",
+"Analiza CV bez ogłoszenia: sekcje, dane kontaktowe, RODO, test kopiowania.": "Prüfung ohne Stellenanzeige: Abschnitte, Kontaktdaten, Datenschutzklausel, Kopiertest.",
+"Test CV pod ATS": "Lebenslauf-ATS-Test",
+"Zobacz, jaki tekst odczyta z Twojego CV program do rekrutacji.": "Sehen Sie, welchen Text ein Bewerbermanagementsystem aus Ihrem Lebenslauf liest.",
+"Kreator CV pod ogłoszenie": "Lebenslauf-Editor für eine Stellenanzeige",
+"Zacznij od ogłoszenia: CV pod wymagania z tej oferty.": "Beginnen Sie mit der Anzeige: ein Lebenslauf für die Anforderungen dieses Angebots.",
+"List motywacyjny pod ogłoszenie": "Anschreiben für eine Stellenanzeige",
+"Przykład dwóch listów jednej osoby i lista kontrolna.": "Zwei Anschreiben derselben Person und eine Checkliste.",
+"Przykład: jedno CV, dwa ogłoszenia": "Beispiel: ein Lebenslauf, zwei Stellenanzeigen",
 "Nie masz jeszcze ogłoszenia?": "Noch keine Stellenanzeige?",
 "Zrób CV pod typowe wymagania tego zawodu – {X}": "Lebenslauf für die typischen Anforderungen dieses Berufs erstellen – {X}",
 "Bez ogłoszenia": "Ohne Anzeige",
@@ -1621,5 +1630,6 @@
 "CV pod zawód (bez ogłoszenia) to jedno CV bez listu. Usuń pozostałe ogłoszenia i wybierz pakiet „CV”.": "Ein Lebenslauf für einen Beruf (ohne Anzeige) ist ein Lebenslauf ohne Anschreiben. Entfernen Sie die anderen Anzeigen und wählen Sie das Paket „CV“.",
 "CV pod zawód (bez ogłoszenia) zamawiasz jako jedno CV bez listu. Gdy znajdziesz ogłoszenie, zamów CV z listem pod tę ofertę.": "Einen Lebenslauf für einen Beruf (ohne Anzeige) bestellen Sie als einen Lebenslauf ohne Anschreiben. Wenn Sie eine Anzeige finden, bestellen Sie Lebenslauf und Anschreiben für dieses Angebot.",
 "Typowe wymagania w ogłoszeniach: {0}. Odznacz to, czego nie dotyczy – CV i tak pokaże tylko to, co wpiszesz o sobie.": "Typische Anforderungen in Stellenanzeigen: {0}. Entfernen Sie die Haken bei allem, was nicht zutrifft – der Lebenslauf zeigt ohnehin nur, was Sie über sich angeben.",
-"Nie mamy listy dla „{0}”. Typowe wymagania tego zawodu dobierzemy przy pisaniu CV.": "Für „{0}“ haben wir keine Liste. Die typischen Anforderungen dieses Berufs wählen wir beim Schreiben des Lebenslaufs."
+"Nie mamy listy dla „{0}”. Typowe wymagania tego zawodu dobierzemy przy pisaniu CV.": "Für „{0}“ haben wir keine Liste. Die typischen Anforderungen dieses Berufs wählen wir beim Schreiben des Lebenslaufs.",
+"To CV nie jest dopasowane do konkretnego pracodawcy – gdy znajdziesz ogłoszenie, zamów CV pod ofertę.": "Dieser Lebenslauf ist nicht auf einen bestimmten Arbeitgeber zugeschnitten – wenn Sie eine Anzeige finden, bestellen Sie einen Lebenslauf für dieses Angebot."
 }

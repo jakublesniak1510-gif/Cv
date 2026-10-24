@@ -178,7 +178,7 @@ function orderTable(rows, compact = false) {
     el('tbody', {}, rows.map((o) => {
       const tr = el('tr', { className: 'click', tabIndex: 0 },
         el('td', { className: 'num', textContent: dt(o.created) }), el('td', { className: 'ell', textContent: o.email, title: o.email }),
-        el('td', {}, o.pkgName, o.followup ? el('span', { className: 'tag', textContent: 'kolejne', style: 'margin-left:6px' }) : null, o.invoice ? el('span', { className: 'tag', textContent: o.invoice === 'todo' ? 'faktura do wystawienia' : 'faktura ✓', style: 'margin-left:6px' }) : null),
+        el('td', {}, o.pkgName, o.prof ? el('span', { className: 'tag', textContent: 'pod zawód', style: 'margin-left:6px' }) : null, o.followup ? el('span', { className: 'tag', textContent: 'kolejne', style: 'margin-left:6px' }) : null, o.invoice ? el('span', { className: 'tag', textContent: o.invoice === 'todo' ? 'faktura do wystawienia' : 'faktura ✓', style: 'margin-left:6px' }) : null),
         compact ? null : el('td', { className: 'mono', textContent: o.code || '—' }), el('td', { className: 'r', textContent: zl(o.total) }),
         el('td', {}, status(o.status)), compact ? null : el('td', {}, mailSt(o.mail)));
       tr.addEventListener('click', () => openOrder(o.id));
@@ -242,7 +242,7 @@ async function openOrder(id) {
       el('a', { className: 'btn ghost sm', href: o.link, target: '_blank', rel: 'noopener', textContent: 'Strona klienta ↗' })), act),
     el('div', {}, el('h3', { textContent: 'Zamówienie' }), kv([
       ['Numer', el('span', { className: 'mono', textContent: o.id })], ['Złożone', dt(o.created)], ['Opłacone', dt(o.paidAt)],
-      ['Pakiet', o.pkgName], ['Dodatki', addons.join(', ') || '—'], ['Kwota', o.refunded ? `${zl(o.total)} · zwrócono ${zl(o.refunded)}` : zl(o.total)],
+      ['Pakiet', o.prof ? `${o.pkgName} · pod zawód (bez ogłoszenia)` : o.pkgName], ['Dodatki', addons.join(', ') || '—'], ['Kwota', o.refunded ? `${zl(o.total)} · zwrócono ${zl(o.refunded)}` : zl(o.total)],
       o.code && ['Kod', `${o.code} (−${zl(o.discount)})`],
       ['Poprawki', `${o.revisions} z 10`], ['Kod klienta', o.myCode || '—'], ['Dane znikną', dd(o.expires)],
     ])),

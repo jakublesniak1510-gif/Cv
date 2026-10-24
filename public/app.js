@@ -719,7 +719,7 @@ function initProf(e) {
       boxes.forEach((c) => c.addEventListener('change', write));
       box.append(el('p', { className: 'hint', textContent: j.slug ? `Typowe wymagania w ogłoszeniach: ${name}. Odznacz to, czego nie dotyczy – CV i tak pokaże tylko to, co wpiszesz o sobie.` : `Nie mamy listy dla „${v}”. Typowe wymagania tego zawodu dobierzemy przy pisaniu CV.` }),
         el('div', { className: 'kw-pick' }, ...boxes.map((c) => el('label', { className: 'check' }, c, ' ', c.value))),
-        el('p', { className: 'note', textContent: 'CV pod zawód to jedno CV bez listu motywacyjnego, 39 zł. Gdy znajdziesz ogłoszenie, zamów CV z listem pod konkretną ofertę.' }));
+        el('p', { className: 'note', textContent: 'CV pod zawód to jedno CV bez listu motywacyjnego, 39 zł. Gdy znajdziesz ogłoszenie, zamów CV z listem pod konkretną ofertę.' }), el('p', { className: 'hint small', textContent: 'To CV nie jest dopasowane do konkretnego pracodawcy – gdy znajdziesz ogłoszenie, zamów CV pod ofertę.' }));
       write();
     } catch { box.append(el('p', { className: 'fstatus bad', textContent: 'Nie udało się pobrać wymagań. Spróbuj ponownie.' })); }
     btn.disabled = false;

@@ -84,3 +84,13 @@ test('API: /api/prof-reqs; zamówienie CV pod zawód tylko jako jedno CV bez lis
     assert.equal(n.status, 200);
   } finally { srv.kill(); }
 });
+
+test('Panel i raport sprzedaży rozróżniają CV pod zawód; kreator mówi, że CV nie jest pod konkretnego pracodawcę', async () => {
+  const app = read('public/app.js'), adm = read('public/admin.js');
+  assert.match(app, /To CV nie jest dopasowane do konkretnego pracodawcy – gdy znajdziesz ogłoszenie, zamów CV pod ofertę\./);
+  for (const l of ['en', 'de', 'uk']) assert.ok(JSON.parse(read(`public/i18n/${l}.json`))['To CV nie jest dopasowane do konkretnego pracodawcy – gdy znajdziesz ogłoszenie, zamów CV pod ofertę.'], l);
+  assert.match(read('lib/admin.js'), /prof: \(o\.ads \|\| \[\]\)\.some\(\(a\) => a\.kind === 'profession'\)/);
+  assert.match(adm, /o\.prof \? el\('span', \{ className: 'tag', textContent: 'pod zawód'/);
+  const ops = read('lib/ops.js');
+  assert.match(ops, /prof: \(o\.ads \|\| \[\]\)\.some\(\(a\) => a\.kind === 'profession'\)/); assert.match(ops, /s\.prof \? 'cv_prof' : s\.pkg/);
+});
