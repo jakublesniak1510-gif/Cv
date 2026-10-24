@@ -94,3 +94,13 @@ test('Panel i raport sprzedaży rozróżniają CV pod zawód; kreator mówi, że
   const ops = read('lib/ops.js');
   assert.match(ops, /prof: \(o\.ads \|\| \[\]\)\.some\(\(a\) => a\.kind === 'profession'\)/); assert.match(ops, /s\.prof \? 'cv_prof' : s\.pkg/);
 });
+
+test('Strona główna: wysoko w hero informacja o zwykłym CV bez ogłoszenia, otwiera kreator w trybie „Bez ogłoszenia” (4 języki)', () => {
+  const h = read('public/index.html'), hero = h.slice(h.indexOf('<section class="hero"'), h.indexOf('</section>', h.indexOf('<section class="hero"')));
+  assert.match(hero, /<p class="hero-noad">Nie masz jeszcze ogłoszenia\? <a href="\/\?zamow=1&amp;pkg=cv&amp;tryb=zawod" data-open data-pkg="cv" data-prof>Zrób zwykłe CV pod swój zawód – 39 zł<\/a><\/p>/);
+  const app = read('public/app.js');
+  assert.match(app, /if \('prof' in b\.dataset\) profStart\(\);/);
+  assert.match(app, /if \(q\.get\('tryb'\) === 'zawod' && !q\.get\('zawod'\)\) profStart\(\);/);
+  assert.match(app, /function profStart\(\) \{[\s\S]*?setMode\(first, 'prof'\)/);
+  for (const l of ['en', 'de', 'uk']) assert.ok(JSON.parse(read(`public/i18n/${l}.json`))['Zrób zwykłe CV pod swój zawód – 39 zł'], l);
+});
