@@ -54,7 +54,7 @@ test('Zwrot P24: powód odrzucenia w komunikacie i Zdarzeniach; ponowienie po ze
 
     // 1) 409 z listą błędów: powód z error[].message w komunikacie i w Zdarzeniach; próba rozstrzygnięta (bez refundAttempt)
     let r = await A(`/orders/${o.j.id}/refund`, {});
-    assert.equal(r.status, 502); assert.match(r.j.error, /Przelewy24 409: Insufficient funds available/);
+    assert.equal(r.status, 502); assert.match(r.j.error, /brak środków na saldzie P24[\s\S]*Transakcje → Zwrot[\s\S]*„Oznacz jako zwrócone”/);
     await wait(200); assert.ok(evs().some((m) => /^Zwrot nieudany \(Przelewy24\): Przelewy24 409: Insufficient funds available/.test(m)), JSON.stringify(evs()));
     assert.equal(read('orders.json')[o.j.id].refundAttempt, null);
     // 2) 201 ze status:false: powód z data[0].message
@@ -75,5 +75,47 @@ test('Zwrot P24: powód odrzucenia w komunikacie i Zdarzeniach; ponowienie po ze
     assert.ok(calls.some((c) => c.method === 'GET' && c.url === '/api/v1/refund/by/orderId/4242'));
     const ord = read('orders.json')[o.j.id];
     assert.equal(ord.refunded, 3900); assert.equal(ord.refundAttempt, null); assert.equal(ord.refunds.at(-1).id, att.uuid);
+  } finally { srv.kill(); p24.close(); }
+});
+
+test('Zwrot zrobiony poza panelem: „Oznacz jako zwrócone” zapisuje zwrot bez wywołania P24 (tylko zamówienia P24, w granicach kwoty)', { timeout: 90_000 }, async () => {
+  const calls = [];
+  const p24 = http.createServer(async (req, res) => {
+    let raw = ''; for await (const c of req) raw += c;
+    const b = raw ? JSON.parse(raw) : {}; calls.push(req.url);
+    res.setHeader('Content-Type', 'application/json');
+    if (req.url === '/api/v1/transaction/register') return res.end(JSON.stringify({ data: { token: 'T1' } }));
+    if (req.url === '/api/v1/transaction/verify') return res.end(JSON.stringify({ data: { status: 'success' } }));
+    if (req.url === '/api/v1/transaction/refund') { res.statusCode = 409; return res.end(JSON.stringify({ error: [{ ...b.refunds[0], status: false, message: 'Insufficient funds available' }], code: 409 })); }
+    res.statusCode = 404; res.end('{}');
+  }).listen(0);
+  const port = 5200 + Math.floor(Math.random() * 90), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-p24m-'));
+  const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', SALES_OPEN: '1', PAY_PROVIDER: 'p24', ADMIN_PASSWORD: 'tajne-haslo-testowe',
+    STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: String(MERCHANT), P24_CRC: CRC, P24_API_KEY: KEY, P24_BASE_URL: `http://localhost:${p24.address().port}` };
+  const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
+  const U = `http://localhost:${port}`;
+  const call = async (meth, p, b, h = {}) => { const r = await fetch(U + p, { method: meth, headers: { 'Content-Type': 'application/json', ...h }, body: b && JSON.stringify(b) }); return { status: r.status, j: await r.json().catch(() => ({})) }; };
+  const read = (f) => { try { return JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); } catch { return {}; } };
+  try {
+    for (let i = 0; i < 60; i++) { try { await fetch(U + '/api/config'); break; } catch { await wait(150); } }
+    const ad = 'Szukamy magazyniera. Wymagania: obsługa wózka widłowego, doświadczenie w magazynie, sumienność i dokładność. '.repeat(2);
+    const o = await call('POST', '/api/orders', { pkg: 'cv', consent: true, waiver: true, gateway: 'p24', profile: { name: 'Jan Test', email: 'jan@test.pl', experience: [{ title: 'Magazynier', company: 'X', period: '2020 – 2024' }] }, ads: [{ title: 'Magazynier', text: ad }] });
+    const n = { merchantId: MERCHANT, posId: MERCHANT, sessionId: `${o.j.id}.1`, amount: 3900, originAmount: 3900, currency: 'PLN', orderId: 4343, methodId: 154, statement: 'p24' };
+    await fetch(U + '/api/p24/status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...n, sign: sha({ ...n, crc: CRC }) }) });
+    let x; for (let i = 0; i < 80; i++) { x = (await call('GET', `/api/orders/${o.j.id}`)).j; if (x.status === 'done') break; await wait(150); }
+    const login = await fetch(U + '/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin': '1' }, body: JSON.stringify({ password: 'tajne-haslo-testowe' }) });
+    const H = { cookie: login.headers.get('set-cookie').split(';')[0], 'X-Admin': '1' };
+    assert.equal((await call('GET', `/api/admin/orders/${o.j.id}`, null, H)).j.manualLeft, 39);
+    assert.equal((await call('POST', `/api/admin/orders/${o.j.id}/refund-manual`, { amount: '50' }, H)).status, 400, 'ponad kwotę');
+    const before = calls.length;
+    const r1 = await call('POST', `/api/admin/orders/${o.j.id}/refund-manual`, { amount: '10' }, H); assert.equal(r1.status, 200); assert.equal(r1.j.amount, 10);
+    const r2 = await call('POST', `/api/admin/orders/${o.j.id}/refund-manual`, {}, H); assert.equal(r2.status, 200); assert.equal(r2.j.amount, 29);
+    assert.equal((await call('POST', `/api/admin/orders/${o.j.id}/refund-manual`, {}, H)).status, 409, 'już zwrócone');
+    assert.equal(calls.length, before, 'bez wywołań P24');
+    const ord = read('orders.json')[o.j.id];
+    assert.equal(ord.refunded, 3900); assert.deepEqual(ord.refunds.map((q) => q.source), ['manual', 'manual']);
+    await wait(200); assert.ok(Object.values(read('events.json')).some((e) => /oznaczony ręcznie/.test(e.message)));
+    const adm = fs.readFileSync(new URL('../public/admin.js', import.meta.url), 'utf8');
+    assert.match(adm, /'Oznacz jako zwrócone'/); assert.match(adm, /\/refund-manual`/); assert.match(adm, /oznaczony ręcznie \(zwrot poza panelem\)/);
   } finally { srv.kill(); p24.close(); }
 });

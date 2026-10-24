@@ -259,10 +259,26 @@ async function openOrder(id) {
   x.focus();
 }
 // Zwrot przez Stripe albo Przelewy24: całość albo podana kwota, z potwierdzeniem. Pieniądze wracają do klienta w kilka dni.
+// Zwrot zrobiony poza panelem (Przelewy24 albo przelew): tylko oznaczenie w zamówieniu, z potwierdzeniem.
+function manualRefund(o, reload) {
+  if (o.provider !== 'przelewy24' || !o.manualLeft) return null;
+  const box = el('div', { className: 'confirm', hidden: true });
+  const b = el('button', { className: 'btn ghost sm', textContent: 'Oznacz jako zwrócone' });
+  b.onclick = () => {
+    const v = (prompt(`Kwota zwrotu zrobionego poza panelem (zł), najwyżej ${String(o.manualLeft).replace('.', ',')}:`, String(o.manualLeft).replace('.', ',')) || '').trim();
+    if (!v) return;
+    const ok = el('button', { className: 'btn danger solid sm', textContent: `Tak, oznacz ${v} zł` }), no = el('button', { className: 'btn ghost sm', textContent: 'Anuluj' });
+    no.onclick = () => { box.hidden = true; };
+    ok.onclick = async () => { ok.disabled = no.disabled = true; try { const r = await post(`/orders/${o.id}/refund-manual`, { amount: v }); toast(`Oznaczono zwrot ${zl(r.amount)}.`); reload(); } catch (x) { toast(x.message); ok.disabled = no.disabled = false; } };
+    box.replaceChildren(el('strong', { textContent: `Oznaczyć ${v} zł jako zwrócone?` }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: 'Użyj tylko wtedy, gdy zwrot jest już zrobiony w panelu Przelewy24 albo przelewem. Panel nie wyśle pieniędzy, zapisze tylko zwrot w zamówieniu i w sprzedaży.' }), el('div', { className: 'actions' }, ok, no));
+    box.hidden = false; ok.focus();
+  };
+  return el('div', {}, b, box);
+}
 function refundBox(o, reload) {
   if (!['stripe', 'przelewy24'].includes(o.provider) && !o.refunds.length) return null;
-  const hist = o.refunds.length ? el('ul', { className: 'list' }, o.refunds.map((r) => el('li', { textContent: `${zl(r.amount)} · ${dt(r.at)} · ${r.source === 'stripe' ? 'w panelu Stripe' : r.source === 'panel-p24' ? 'z tego panelu (Przelewy24)' : 'z tego panelu'}` }))) : null;
-  if (!o.refundable) return el('div', {}, el('h3', { textContent: 'Zwrot' }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: o.refunded >= o.total ? 'Zamówienie zwrócone w całości.' : o.provider === 'przelewy24' ? 'Zwrot niedostępny (brak konfiguracji Przelewy24 albo numeru transakcji) – zrób go w panelu Przelewy24.' : 'Zwrot niedostępny (brak klucza Stripe).' }), hist);
+  const hist = o.refunds.length ? el('ul', { className: 'list' }, o.refunds.map((r) => el('li', { textContent: `${zl(r.amount)} · ${dt(r.at)} · ${r.source === 'stripe' ? 'w panelu Stripe' : r.source === 'panel-p24' ? 'z tego panelu (Przelewy24)' : r.source === 'manual' ? 'oznaczony ręcznie (zwrot poza panelem)' : 'z tego panelu'}` }))) : null;
+  if (!o.refundable) return el('div', {}, el('h3', { textContent: 'Zwrot' }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: o.refunded >= o.total ? 'Zamówienie zwrócone w całości.' : o.provider === 'przelewy24' ? 'Zwrot niedostępny (brak konfiguracji Przelewy24 albo numeru transakcji) – zrób go w panelu Przelewy24, a potem oznacz tutaj.' : 'Zwrot niedostępny (brak klucza Stripe).' }), manualRefund(o, reload), hist);
   const amt = el('input', { type: 'text', inputMode: 'decimal', value: String(o.refundable).replace('.', ','), ariaLabel: 'Kwota zwrotu w zł' });
   const box = el('div', { className: 'confirm', hidden: true });
   const b = el('button', { className: 'btn danger sm', textContent: 'Zwróć pieniądze' });
@@ -274,7 +290,7 @@ function refundBox(o, reload) {
     box.replaceChildren(el('strong', { textContent: `Zwrócić klientowi ${v} zł?` }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: 'Stripe odda pieniądze tą samą metodą, którą klient zapłacił (zwykle 5–10 dni). Opłaty Stripe za transakcję nie wracają. Tego nie da się cofnąć.' }), el('div', { className: 'actions' }, ok, no));
     box.hidden = false; ok.focus();
   };
-  return el('div', {}, el('h3', { textContent: 'Zwrot' }), el('div', { className: 'refund' }, el('label', { className: 'mute', style: 'font-size:14px' }, 'Kwota (zł) ', amt), b), box, hist,
+  return el('div', {}, el('h3', { textContent: 'Zwrot' }), el('div', { className: 'refund' }, el('label', { className: 'mute', style: 'font-size:14px' }, 'Kwota (zł) ', amt), b), box, manualRefund(o, reload), hist,
     el('p', { className: 'help', textContent: `Do zwrotu zostało ${zl(o.refundable)}. Dokumenty klienta zostają; jeśli trzeba, usuń dane przyciskiem „Usuń dane”.` }));
 }
 // Faktura bez VAT na życzenie: dane nabywcy do przepisania w programie do faktur i odhaczenie z numerem.
