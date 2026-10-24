@@ -1606,5 +1606,20 @@
 "Plik Word jest uszkodzony albo za duży.": "The Word file is damaged or too large.",
 "Nie zapisujemy pliku ani treści CV. Sam wynik jest w pamięci serwera do godziny.": "We do not store the file or the CV text. Only the result is kept in server memory for up to an hour.",
 "Zanim cokolwiek zamówisz, możesz sprawdzić obecne CV. Wgrywasz plik (PDF, Word lub TXT) i wklejasz ogłoszenie. Skaner porównuje oba teksty i pokazuje dopasowanie CV do oferty w procentach, spełnione wymagania, wymagania, których w CV nie widać, oraz trzy konkretne rady. Skaner jest bezpłatny, nie wymaga rejestracji i nie zapisuje pliku ani treści CV.": "Before you order anything, you can check your current CV. Upload the file (PDF, Word or TXT) and paste the job ad. The scanner compares both texts and shows how well the CV matches the offer as a percentage, the requirements you meet, the requirements the CV does not show, and three specific tips. The scanner is free, needs no registration and stores neither the file nor the CV text.",
-"Porównuje Twoje obecne CV z ogłoszeniem i pokazuje dopasowanie w procentach, spełnione wymagania, wymagania, których w CV nie widać, oraz trzy rady. Skaner jest bezpłatny, nie wymaga konta i nie zapisuje pliku ani treści CV.": "It compares your current CV with the job ad and shows the match as a percentage, the requirements you meet, the requirements the CV does not show, and three tips. The scanner is free, needs no account and does not store the file or the CV text."
+"Porównuje Twoje obecne CV z ogłoszeniem i pokazuje dopasowanie w procentach, spełnione wymagania, wymagania, których w CV nie widać, oraz trzy rady. Skaner jest bezpłatny, nie wymaga konta i nie zapisuje pliku ani treści CV.": "It compares your current CV with the job ad and shows the match as a percentage, the requirements you meet, the requirements the CV does not show, and three tips. The scanner is free, needs no account and does not store the file or the CV text.",
+"Nie masz jeszcze ogłoszenia?": "Don't have a job ad yet?",
+"Zrób CV pod typowe wymagania tego zawodu – {X}": "Create a CV for the typical requirements of this job – {X}",
+"Bez ogłoszenia": "No job ad",
+"Nie masz jeszcze ogłoszenia? Przygotujemy CV pod typowe wymagania zawodu. Odznacz to, czego nie dotyczy. Gdy znajdziesz ofertę, dopasuj CV do niej.": "No job ad yet? We will prepare a CV for the typical requirements of the job. Untick anything that does not apply to you. When you find an ad, tailor the CV to it.",
+"Zawód": "Job",
+"Pokaż wymagania": "Show requirements",
+"np. magazynier, kasjerka": "e.g. warehouse worker, cashier",
+"Wpisz nazwę zawodu, np. magazynier.": "Enter a job title, e.g. warehouse worker.",
+"Nie udało się pobrać wymagań. Spróbuj ponownie.": "Could not load the requirements. Please try again.",
+"CV pod zawód to jedno CV bez listu motywacyjnego, 39 zł. Gdy znajdziesz ogłoszenie, zamów CV z listem pod konkretną ofertę.": "A CV for a job type is one CV without a cover letter, 39 zł. When you find an ad, order a CV with a cover letter for that specific offer.",
+"Zapisane wymagania zawodu. Kliknij „Pokaż wymagania”, żeby je zmienić.": "Saved job requirements. Click “Show requirements” to change them.",
+"CV pod zawód (bez ogłoszenia) to jedno CV bez listu. Usuń pozostałe ogłoszenia i wybierz pakiet „CV”.": "A CV for a job type (without an ad) is one CV without a cover letter. Remove the other ads and choose the “CV” package.",
+"CV pod zawód (bez ogłoszenia) zamawiasz jako jedno CV bez listu. Gdy znajdziesz ogłoszenie, zamów CV z listem pod tę ofertę.": "A CV for a job type (without an ad) is ordered as one CV without a cover letter. When you find an ad, order a CV with a cover letter for that offer.",
+"Typowe wymagania w ogłoszeniach: {0}. Odznacz to, czego nie dotyczy – CV i tak pokaże tylko to, co wpiszesz o sobie.": "Typical requirements in job ads: {0}. Untick anything that does not apply – the CV will only show what you enter about yourself anyway.",
+"Nie mamy listy dla „{0}”. Typowe wymagania tego zawodu dobierzemy przy pisaniu CV.": "We do not have a list for “{0}”. We will choose the typical requirements of this job when writing the CV."
 }
