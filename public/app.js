@@ -727,6 +727,11 @@ function initProf(e) {
   btn.onclick = run; q.onkeydown = (k) => { if (k.key === 'Enter') { k.preventDefault(); run(); } };
   e.profRun = (name) => { q.value = name; return run(); };
 }
+// „Zrób zwykłe CV pod swój zawód” (hero, ?tryb=zawod bez zawodu): pierwsze ogłoszenie w trybie „Bez ogłoszenia”, kursor w polu zawodu.
+function profStart() {
+  const first = $('#ads .entry'); if (!first || $('[data-k=text]', first).value.trim() && first.dataset.mode !== 'prof') return;
+  setMode(first, 'prof'); setTimeout(() => $('.profq', first)?.focus(), 50);
+}
 function initAd(e, mode) {
   $$('.modes button', e).forEach((b) => (b.onclick = () => setMode(e, b.dataset.mode)));
   const status = $('.fstatus', e), btn = $('.fetchbtn', e);
@@ -1086,7 +1091,7 @@ const openWiz = (p) => {
   setTimeout(() => $('#wizClose').focus(), 0);
 };
 const closeWiz = () => { $('#wiz').hidden = true; modal(false); };
-document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (!b) return; e.preventDefault(); if (b.dataset.addon) { b.dataset.addon.split(',').forEach((a) => ($('#ad' + a).checked = true)); saveDraft(); } openWiz(b.dataset.pkg); });
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (!b) return; e.preventDefault(); if (b.dataset.addon) { b.dataset.addon.split(',').forEach((a) => ($('#ad' + a).checked = true)); saveDraft(); } openWiz(b.dataset.pkg); if ('prof' in b.dataset) profStart(); });
 $('#wizClose').onclick = closeWiz;
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#wiz').hidden) closeWiz(); });
 $('#back').onclick = () => go(ORDER[ORDER.indexOf(step) - 1] ?? ORDER[0]);
@@ -2617,6 +2622,7 @@ if ((q.get('zamow') || LANGS[q.get('jezyk')]) && !q.get('id') && !q.get('draft')
     const ad = sessionStorage.getItem('cvpo-wiz-ad'), first = $('#ads .entry');
     if (ad && first) { sessionStorage.removeItem('cvpo-wiz-ad'); const ta = $('[data-k=text]', first); if (ta && !ta.value.trim()) { ta.value = ad; setMode(first, 'paste'); saveDraft(); } }
   } catch {}
+  if (q.get('tryb') === 'zawod' && !q.get('zawod')) profStart();
   // ?zawod=<slug> (przycisk na stronie zawodu): nazwa zawodu jako ogólne stanowisko, jeśli pole jest puste.
   const zaw = q.get('zawod') || '';
   if (/^[a-z0-9-]{2,60}$/.test(zaw)) loadContent().then((C) => {
