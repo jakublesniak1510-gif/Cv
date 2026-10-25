@@ -166,6 +166,9 @@
       <p class="help" style="margin:-8px 0 14px">Formularz kontaktowy ze strony głównej (zapytania firm i instytucji są w zakładce „Firmy”). Odpowiadasz zwykłym e-mailem (przycisk „Odpowiedz”). Gdy ustawisz CONTACT_EMAIL, każda nowa wiadomość przychodzi też na ten adres. Wiadomości są usuwane po 180 dniach.</p>
       <div class="filters"><div class="seg" id="msgKind"><button type="button" data-k="new" aria-pressed="true">Nowe</button><button type="button" data-k="" aria-pressed="false">Wszystkie</button></div></div>
       <div id="msgList" class="rv-admin"></div>
+      <div class="card" style="margin-top:16px"><h2>Pytania czytelników (poradnik)</h2><p class="help" style="margin:-6px 0 12px">Pytanie przepisz bez danych osoby (bez imion, e-maili, telefonów, nazw firm klienta). Szkic nie jest widoczny; po „Opublikuj” trafia na /poradnik/pytania-czytelnikow (nad 10 pytaniami redakcji).</p>
+        <form id="qaForm" class="qa-form"><label class="f">Pytanie<input type="text" name="q" maxlength="300" required></label><label class="f">Odpowiedź<textarea name="a" rows="4" maxlength="1200" required></textarea></label><button class="btn sm" type="submit">Zapisz jako szkic</button></form>
+        <div id="qaList" class="tbl-wrap"></div></div>
     </section>
 
     <!-- Newsletter -->
