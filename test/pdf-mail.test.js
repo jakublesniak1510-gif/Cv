@@ -14,6 +14,6 @@ test('PDF CV i listu są poprawnymi plikami', async () => {
 test('mail ma załączniki PDF dla każdego ogłoszenia', async () => {
   const info = await sendOrderMail({ id: 'abc', pkg: 'cv_letter', profile, results: [res, res] }, 'https://x.pl');
   const m = JSON.parse(info.message);
-  assert.equal(m.to[0].address, 'z@x.pl'); assert.equal(m.attachments.length, 4);
+  assert.equal(m.to[0].address, 'z@x.pl'); assert.equal(m.attachments.length, 6, 'PDF CV, .txt CV i PDF listu dla 2 ogłoszeń');
   assert.match(m.attachments[0].filename, /^Zaneta_Lacka_CV_Kasjer\.pdf$/);
 });
