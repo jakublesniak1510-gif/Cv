@@ -936,7 +936,7 @@ details>summary{min-height:44px;padding-block:11px;box-sizing:border-box}
 @media(max-width:760px){.foot-cols div,.foot-cols span{gap:0}.foot-cols a{display:flex;align-items:center;min-height:44px}}
 .hero-micro{margin:10px 0 0;font-size:14px;color:var(--mute)}
 .tp-hero{padding-block:14px;min-height:52px}.tp-mini-box{margin-top:12px;min-height:150px}
-.hero-noad{margin:12px 0 0;font-size:15px}.hero-noad a{font-weight:600;display:inline-flex;align-items:center;min-height:44px}
+.hero-noad{margin:12px 0 0;font-size:15px}.hero-scan{margin:0;font-size:14px}.hero-scan a{display:inline-flex;align-items:center;min-height:44px}.hero-noad a{font-weight:600;display:inline-flex;align-items:center;min-height:44px}
 .wiz-foot{flex-wrap:wrap}#next{white-space:nowrap}
 .paytrust{flex-basis:100%;margin:0;font-size:12.5px;line-height:1.4;color:var(--mute);text-align:center}
 @media(max-width:640px){.wiz-foot.pay{gap:8px;padding:10px 12px}.wiz-foot.pay #back{font-size:0;padding:0;width:44px;min-height:44px;flex:none}.wiz-foot.pay #back::before{content:"←";font-size:20px}.wiz-foot.pay .tot{display:none}.wiz-foot.pay #next{flex:1}}
