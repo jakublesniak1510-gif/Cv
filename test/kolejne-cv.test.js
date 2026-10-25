@@ -26,10 +26,14 @@ test('Cena: CV 19 zł, CV z listem 29 zł, Pakiet 3 bez zmian; zwykłe zamówien
 
 test('Serwer, strona dokumentów, cennik, raport sprzedaży i regulamin (4 języki, data, historia)', () => {
   const srv = read('server.js'), app = read('public/app.js'), h = read('public/index.html');
-  assert.match(srv, /const ret = nextEligible\(parent\) \? 'next' : true/); assert.match(srv, /\.\.\.\(isNext \? \{ next: true \} : \{\}\)/);
+  assert.match(srv, /const isNext = nextEligible\(parent\) && \(pkg === 'cv' \|\| pkg === 'cv_letter'\) && !hasBundle\(pkg, ad\), ret = isNext \? 'next' : true;/);
+  assert.match(srv, /const c = isNext \? \{\} : await checkCode\(req\.body\?\.code, parent\.profile\.email\);/, 'bez kodów i salda');
+  assert.match(srv, /\.\.\.\(isNext \? \{ next: true \} : \{\}\)/);
+  assert.match(app, /code = fuIsNext\(fpkg\) \? '' : \$\('#fuCode'\)\.value\.trim\(\)/); assert.match(app, /\$\('#fuCode'\)\.closest\('label'\)\.hidden = fuIsNext\(fpkg\)/);
   assert.match(app, /const fuNext = \(\) => !!data\?\.paidAt && Date\.now\(\) - data\.paidAt <= 30 \* 864e5/);
   assert.match(h, /<span>Kolejne CV pod nowe ogłoszenie dla klientów:<\/span> <span id="nextPrice">19 zł<\/span> <span>\(z listem motywacyjnym<\/span> <span id="nextLetterPrice">29 zł<\/span>/);
   assert.match(read('lib/ops.js'), /x\.key === 'cv_next' \? 'Kolejne CV pod nowe ogłoszenie'/);
+  assert.match(legalBody('regulamin', 'pl'), /Pozycja nie łączy się z kodami rabatowymi ani saldem programu poleceń i nie obejmuje pakietu „Pewna rozmowa”/);
   for (const [l, re] of [['pl', /Kolejne CV pod nowe ogłoszenie – 19 zł \(z listem motywacyjnym – 29 zł\): stała pozycja cennika/], ['en', /Another CV for a new job advertisement – PLN 19 \(with a cover letter – PLN 29\): a standard price-list item/], ['de', /Weiterer Lebenslauf für eine neue Stellenanzeige – 19 PLN \(mit Anschreiben – 29 PLN\)/], ['uk', /Наступне резюме під нове оголошення — 19 zł \(із супровідним листом — 29 zł\)/]]) assert.match(legalBody('regulamin', l), re, l);
   assert.match(legalBody('regulamin', 'pl'), /Historia zmian: 25 października 2026 r\. – nowa pozycja cennika „Kolejne CV pod nowe ogłoszenie” \(§4 ust\. 1\)/);
   for (const l of ['en', 'de', 'uk']) assert.ok(JSON.parse(read(`public/i18n/${l}.json`))['Kolejne CV pod nowe ogłoszenie dla klientów:'], l);
