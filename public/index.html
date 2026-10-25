@@ -162,8 +162,8 @@
   <h2>Cennik</h2>
   <div class="prices">
     <div class="price-card"><h3>CV</h3><div class="amt">39 zł</div><ul><li>CV dopasowane do jednego ogłoszenia</li><li>Słowa kluczowe pod systemy ATS</li><li>PDF na stronie i w e-mailu</li></ul><button class="btn ghost" data-open data-pkg="cv">Wybierz CV</button></div>
-    <div class="price-card feat"><span class="badge">Najczęściej wybierany</span><h3>CV + list motywacyjny</h3><div class="amt">49 zł</div><ul><li>CV i list pod to samo ogłoszenie</li><li>List na jedną stronę A4, bez ogólników</li><li>PDF na stronie i w e-mailu</li></ul><button class="btn" data-open data-pkg="cv_letter">Wybierz komplet</button></div>
-    <div class="price-card"><span class="badge alt">Polecany</span><h3>Pakiet 3 CV + listy</h3><div class="amt">79 zł</div><ul><li>3 CV pod ten sam zawód, każde pod inne ogłoszenie</li><li>List motywacyjny do każdego CV</li><li>Dane wpisujesz tylko raz</li></ul><button class="btn ghost" data-open data-pkg="pack3">Wybierz pakiet</button></div>
+    <div class="price-card feat"><span class="badge">Polecany</span><h3>CV + list motywacyjny</h3><div class="amt">49 zł</div><ul><li>CV i list pod to samo ogłoszenie</li><li>List na jedną stronę A4, bez ogólników</li><li>PDF na stronie i w e-mailu</li></ul><button class="btn" data-open data-pkg="cv_letter">Wybierz komplet</button></div>
+    <div class="price-card"><span class="badge alt">Do 3 ogłoszeń</span><h3>Pakiet 3 CV + listy</h3><div class="amt">79 zł</div><ul><li>3 CV pod ten sam zawód, każde pod inne ogłoszenie</li><li>List motywacyjny do każdego CV</li><li>Dane wpisujesz tylko raz</li></ul><button class="btn ghost" data-open data-pkg="pack3">Wybierz pakiet</button></div>
     <div class="price-card"><span class="badge alt">Oszczędzasz 19 zł</span><h3>Pewna rozmowa</h3><div class="amt">109 zł</div><ul><li>CV i list motywacyjny pod ogłoszenie</li><li>Przygotowanie do rozmowy: 12 pytań z odpowiedziami</li><li>Symulator rozmowy z oceną odpowiedzi</li></ul><button class="btn ghost" data-open data-pkg="cv_letter" data-addon="Interview,Sim">Wybierz pakiet</button></div>
   </div>
   <div class="addons-row"><b>Dodatki:</b><span>Przygotowanie do rozmowy <b>+50 zł</b></span><span>Wiadomość do rekrutera i e-mail z aplikacją <b>+9 zł</b></span><span>Profil LinkedIn <b>+19 zł</b></span><span>Symulator rozmowy <b>+29 zł</b></span><span>Wersja Word (.docx) <b>+9 zł</b></span><span>Język ogłoszenia <b>w cenie</b></span><span>Tłumaczenie na inny język <b>+5 zł</b></span></div>
@@ -512,7 +512,7 @@
       </div>
       <div class="opts" id="pkgOpts">
         <label class="opt"><input type="radio" name="pkg" value="cv"><span class="o-t">Samo CV<b>39 zł</b></span><span class="o-d">CV dopasowane do ogłoszenia</span></label>
-        <label class="opt"><input type="radio" name="pkg" value="cv_letter" checked><span class="o-t">CV + list motywacyjny<b>49 zł</b></span><span class="o-d">Komplet dokumentów pod ogłoszenie</span></label>
+        <label class="opt rec"><input type="radio" name="pkg" value="cv_letter" checked><span class="o-t">CV + list motywacyjny<b>49 zł</b></span><span class="badge-rec">Polecany</span><span class="o-d">Komplet dokumentów pod ogłoszenie</span><span class="o-d rec-note"><span>list motywacyjny pod to samo ogłoszenie za</span> <span id="letterDiff">10 zł</span> <span>więcej</span></span></label>
         <label class="opt"><input type="radio" name="pkg" value="pack3"><span class="o-t">Pakiet 3 CV + listy<b>79 zł</b></span><span class="o-d">3 CV pod ten sam zawód, każde pod inne ogłoszenie, i list do każdego</span></label>
       </div>
       <h3 class="sh">Dodatki <span class="h">(opcjonalnie, raz na całe zamówienie)</span></h3>
@@ -581,8 +581,9 @@
     </section>
     <section data-step="6" hidden>
       <div class="sum-top" id="sumTop" hidden><span>Do zapłaty</span> <b id="totalTop"></b> <small>jednorazowo, bez abonamentu</small></div>
+      <div id="wizMatch" class="wiz-match" hidden></div>
+      <div id="pvBox" class="pv" hidden><div class="pv-head"><b>Tak zacznie się Twoje CV pod to ogłoszenie</b><p class="hint">Pokażemy nagłówek, podsumowanie zawodowe i 5 słów kluczowych z ogłoszenia, które znajdą się w CV. W tym celu Twoje dane i ogłoszenie trafią do dostawcy AI, tak jak przy zamówieniu.</p><button class="btn ghost sm" type="button" id="pvBtn">Pokaż podgląd</button></div><div id="pvOut" aria-live="polite"></div></div>
       <div id="sum"></div>
-      <div id="pvBox" class="pv" hidden><div class="pv-head"><b>Zobacz za darmo początek swojego CV</b><p class="hint">Pokażemy nagłówek, podsumowanie zawodowe i 5 słów kluczowych z ogłoszenia, które znajdą się w CV. W tym celu Twoje dane i ogłoszenie trafią do dostawcy AI, tak jak przy zamówieniu.</p><button class="btn ghost sm" type="button" id="pvBtn">Pokaż podgląd</button></div><div id="pvOut" aria-live="polite"></div></div>
       <div class="codebox"><label class="f">Kod rabatowy<span class="urlrow"><input type="text" id="codeInput" autocomplete="off" placeholder="np. KOD-AB12CD"><button type="button" class="btn ghost sm" id="codeApply">Zastosuj</button></span></label><p class="fstatus" id="codeMsg" role="status"></p></div>
       <label class="check"><input type="checkbox" id="wantInv"> <span>Potrzebuję faktury (bez VAT – sprzedawca jest zwolniony z VAT).</span></label>
       <div class="invbox" id="invBox" hidden>
@@ -610,6 +611,7 @@
       <label class="check"><input type="checkbox" id="consent"> <span>Akceptuję <a href="/regulamin" target="_blank" rel="noopener">Regulamin</a> i <a href="/polityka-prywatnosci" target="_blank" rel="noopener">Politykę prywatności</a>. Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów.</span></label>
       <div id="gwBox" class="gw-box" hidden></div>
       <label class="check"><input type="checkbox" id="waiver"> <span>Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.</span></label>
+      <ul class="pay-trust" id="payTrustList" hidden></ul>
       <!--tp-mini-->
     </section>
     <section data-step="7" hidden>
