@@ -817,7 +817,7 @@ $('#usePass').onchange = () => refresh();
 
 const DKEY = 'cvpo-draft-v1', FIELDS = ['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'];
 let saveT, restoring = false;
-const draftData = () => ({ design, photo, addons: { ...addons(), linkedinEn: $('#adLinkedinEn').checked }, langs: extraLangs(), pkg: pkg(), f: Object.fromEntries(FIELDS.map((k) => [k, $('#' + k).value])), exp: rows('exp'), edu: rows('edu'), ads: rows('ads') });
+const draftData = () => ({ step, design, photo, addons: { ...addons(), linkedinEn: $('#adLinkedinEn').checked }, langs: extraLangs(), pkg: pkg(), f: Object.fromEntries(FIELDS.map((k) => [k, $('#' + k).value])), exp: rows('exp'), edu: rows('edu'), ads: rows('ads') });
 // Szkic na serwerze („Wyślij mi link do dokończenia”, lib/wizard-drafts.js): po wysłaniu linku formularz synchronizuje się z nim (bez zdjęcia).
 const SKEY = 'cvpo-srv-draft';
 const srvToken = () => { try { return localStorage.getItem(SKEY) || ''; } catch { return ''; } };
@@ -2715,6 +2715,8 @@ async function loadSrvDraft(t) {
   try { localStorage.setItem(SKEY, t); } catch {}
   restoreDraft(d.data); $('#draftNote').hidden = true;
   openWiz(); flash('Wczytaliśmy zapisany szkic. Możesz dokończyć zamówienie.');
+  // Link z e-maila (także z przypomnienia) wraca dokładnie do kroku, na którym zapisano szkic.
+  const st = Number(d.data?.step); if (ORDER.includes(st) && st !== ORDER[0]) go(st);
 }
 if (q.get('szkic') && !q.get('id')) loadSrvDraft(q.get('szkic'));
 
