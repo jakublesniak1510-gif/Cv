@@ -18,9 +18,9 @@ const { seoRoutes } = await import('../lib/seo.js');
 const BASE = 'https://example.test';
 const body = (x = {}) => ({ org: 'Politechnika Testowa', nip: '123-456-32-18', address: 'ul. Prosta 1, 00-001 Warszawa', name: 'Anna Nowak', email: 'Biuro@Example.test', phone: '', pkg: 'cv_letter', qty: 50, pay: 'invoice', terms: true, ...x });
 
-test('Ceny B2B: progi 15/25/35% od ceny pakietu, w dół do pełnych złotych', () => {
-  assert.deepEqual(b2bTable(), { cv: [33, 29, 25], cv_letter: [41, 36, 31], pack3: [67, 59, 51] });
-  assert.equal(b2bQuote('cv', 10).unit, 3300); assert.equal(b2bQuote('cv', 49).unit, 3300); assert.equal(b2bQuote('cv', 50).unit, 2900); assert.equal(b2bQuote('pack3', 2000).total, 2000 * 5100);
+test('Ceny B2B: progi 10/18/25/35% od ceny pakietu, w dół do pełnych złotych', () => {
+  assert.deepEqual(b2bTable(), { cv: [35, 31, 29, 25], cv_letter: [44, 40, 36, 31], pack3: [71, 64, 59, 51] });
+  assert.equal(b2bQuote('cv', 10).unit, 3500); assert.equal(b2bQuote('cv', 24).unit, 3500); assert.equal(b2bQuote('cv', 25).unit, 3100); assert.equal(b2bQuote('cv', 50).unit, 2900); assert.equal(b2bQuote('cv', 99).unit, 2900); assert.equal(b2bQuote('cv', 100).unit, 2500); assert.equal(b2bQuote('pack3', 2000).total, 2000 * 5100);
   assert.throws(() => b2bQuote('cv', 9), /od 10/); assert.throws(() => b2bQuote('cv', 2001), /2000/); assert.throws(() => b2bQuote('interview', 20), /pakiet/i);
   const html = fs.readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
   assert.ok(html.includes(`<div class="amt">od ${Math.min(...Object.values(b2bTable()).flat())} zł</div>`), 'cena „od” na stronie zgodna z tabelą');
@@ -53,11 +53,11 @@ test('Płatność online i zwrot: część zwrotu zmniejsza pulę kodów, cało�
   const o = await b2b.createB2bOrder(body({ pay: 'now', qty: 20, pkg: 'cv' }));
   const b = await b2b.fulfillB2b(o.id, { paid: true, provider: 'stripe', paymentIntent: 'pi_1', base: BASE });
   assert.equal(b.status, 'paid'); assert.equal((await invoices.get(o.id)).due, undefined);
-  await b2b.b2bRefunded(o.id, 5 * 3300);
+  await b2b.b2bRefunded(o.id, 5 * 3500);
   assert.equal((await codes.get(b.code)).maxUses, 15);
-  await b2b.b2bRefunded(o.id, 20 * 3300);
+  await b2b.b2bRefunded(o.id, 20 * 3500);
   assert.equal((await codes.get(b.code)).disabled, true); assert.equal((await b2b.b2bOrders.get(o.id)).status, 'refunded');
-  assert.equal((await sales.get(o.id)).refunded, 20 * 3300);
+  assert.equal((await sales.get(o.id)).refunded, 20 * 3500);
 });
 
 test('Program partnerski: zgłoszenie, zatwierdzenie tworzy unikalny kod z prowizją, odrzucenie', async () => {
@@ -85,7 +85,7 @@ test('Strony: zamówienie, program partnerski, regulamin, raport bez danych osob
   const post = async (p, b) => { const r = await fetch(U + p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) }); return { status: r.status, json: await r.json() }; };
   try {
     const order = await get('/dla-instytucji/zamow?pkg=pack3');
-    assert.equal(order.status, 200); assert.match(order.text, /<option value="pack3" selected>/); assert.match(order.text, /<td>51 zł<\/td>/); assert.match(order.text, /src="\/b2b\.js"/);
+    assert.equal(order.status, 200); assert.match(order.text, /<option value="pack3" selected>/); assert.match(order.text, /<b>51 zł<\/b> za kod<br><small>5100 zł za 100<\/small>/); assert.match(order.text, /src="\/b2b\.js"/);
     assert.match(order.text, /<script src="\/lite\.js\?v=[0-9a-f]+" defer><\/script>/); assert.match(order.text, /rel="canonical"/);
     const pp = await get('/program-partnerski'); assert.equal(pp.status, 200); assert.match(pp.text, /id="partnerForm"/);
     const reg = await get('/program-partnerski/regulamin'); assert.equal(reg.status, 200); assert.match(reg.text, /§8\. Zmiany Regulaminu/);
