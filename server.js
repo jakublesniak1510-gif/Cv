@@ -31,7 +31,7 @@ import { checkCv } from './lib/cv-check.js';
 import { profReqs } from './lib/prof-ad.js';
 import { landingRoutes } from './lib/landing.js';
 import { outcomes, outcomeRoutes, startOutcome, outcomeLinks, anonymizeOutcomes, publicOutcome, OUTCOME_CONSENT, OUTCOME_AFTER, OT } from './lib/outcomes.js';
-import { mailEnabled, sendReferralMail, sendOrderMail, sendReminder, sendFollowUp, sendReviewAsk, sendOutcomeAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail, sendOwnerMail } from './lib/mail.js';
+import { mailEnabled, sendReferralMail, sendOrderMail, sendReminder, sendFollowUp, sendDeleteNotice, sendReviewAsk, sendOutcomeAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail, sendOwnerMail } from './lib/mail.js';
 import { socialRoutes, cleanupChats, botStatus } from './lib/social.js';
 import { b2bRoutes, b2bOrders, fulfillB2b, b2bRefunded, cleanupPartnerApps } from './lib/b2b.js';
 import { b2bMonthly } from './lib/b2b-monthly.js';
@@ -133,7 +133,7 @@ app.use((req, res, next) => (ALIAS_HOSTS.has(req.hostname) && BASE_URL.startsWit
 // Prosty limit zapytań na adres IP.
 const limiter = (max, windowMs) => { const hits = new Map(); return (req) => { const now = Date.now(), h = (hits.get(req.ip) || []).filter((t) => now - t < windowMs); if (h.length >= max) return false; hits.set(req.ip, [...h, now]); return true; }; };
 const photoLimit = limiter(5, 3600_000), answerLimit = limiter(8, 3600_000), importLimit = limiter(10, 600_000), fetchLimit = limiter(20, 600_000), scanLimit = limiter(6, 3600_000), cvCheckLimit = limiter(12, 3600_000), wizMatchLimit = limiter(60, 600_000), shareImgLimit = limiter(12, 3600_000), chatLimit = limiter(30, 3600_000), adKwLimit = limiter(20, 3600_000);
-const FOLLOWUP_AFTER = 29 * 24 * 3600 * 1000, REMINDER_AFTER = 7 * 24 * 3600 * 1000, REVIEW_AFTER = 4 * 24 * 3600 * 1000;
+const DELETE_NOTICE_AFTER = 25 * 864e5, FOLLOWUP_AFTER = 29 * 24 * 3600 * 1000, REMINDER_AFTER = 7 * 24 * 3600 * 1000, REVIEW_AFTER = 4 * 24 * 3600 * 1000;
 
 // Bot AI na Messengerze i Instagramie (podpis Meta wymaga surowej treści, więc przed globalnym parserem JSON).
 socialRoutes(app, {
@@ -623,7 +623,7 @@ previewRoutes(app, { cleanProfile, cleanAds });
 app.post('/api/orders', async (req, res) => {
   if (salesClosedFor(req)) return res.status(503).json({ error: CLOSED_MSG });
   try {
-    const { profile, ads, consent, design, addons, extraLangs, code, reminder, followUp, jobAlerts, reviewAsk, outcomeAsk, payReminder, uiLang, createAccount, invoice, adConsent, usePass, draftToken, waiver, consentForm, mode } = req.body || {};
+    const { profile, ads, consent, design, addons, extraLangs, code, reminder, followUp, jobAlerts, reviewAsk, outcomeAsk, payReminder, uiLang, createAccount, invoice, adConsent, usePass, draftToken, waiver, consentForm, mode, deleteNotice } = req.body || {};
     let { pkg } = req.body || {};
     if (!consent) return res.status(400).json({ error: 'Wymagana zgoda na przetwarzanie danych.' });
     if (!DEMO && !pickGateway(req.body?.gateway)) return res.status(400).json({ error: BAD_GATEWAY });
@@ -651,7 +651,7 @@ app.post('/api/orders', async (req, res) => {
     // Art. 38 pkt 13 ustawy o prawach konsumenta: płatne zamówienie tylko ze zgodą na wykonanie od razu (karnet i 0 zł bez blokady).
     if (total > 0 && waiver !== true) { if (passUse) await releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {}); return res.status(400).json({ error: 'Zaznacz zgodę na wykonanie usługi od razu po płatności.' }); }
     const shown = await previewFor(p, a[0]).catch(() => null); // podgląd z ostatniego kroku kreatora, jeśli był
-    const order = { ...(mode === 'rewrite' ? { mode: 'rewrite' } : {}), preview: shown, visit: visitInfo(req), refCtx: refCtx(req), invoice: total > 0 ? inv : null, id: orderId, ...(passUse ? { pass: { id: passUse.passId, use: passUse.use, items: passUse.items } } : {}), pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, outcomeAsk: outcomeAsk === true ? { consent: true, text: OUTCOME_CONSENT, at: Date.now(), sent: false } : { consent: false, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, ...(waiver === true ? { waiver: { text: WAIVER, at: Date.now(), ...(CHECKOUT_FORMS.has(consentForm) ? { form: consentForm } : {}) } } : {}), status: 'pending', results: [], revisions: 0, maxRevisions: MAX_REVISIONS, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
+    const order = { ...(mode === 'rewrite' ? { mode: 'rewrite' } : {}), preview: shown, visit: visitInfo(req), refCtx: refCtx(req), invoice: total > 0 ? inv : null, id: orderId, ...(passUse ? { pass: { id: passUse.passId, use: passUse.use, items: passUse.items } } : {}), pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, deleteNotice: { consent: !!deleteNotice, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, outcomeAsk: outcomeAsk === true ? { consent: true, text: OUTCOME_CONSENT, at: Date.now(), sent: false } : { consent: false, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, ...(waiver === true ? { waiver: { text: WAIVER, at: Date.now(), ...(CHECKOUT_FORMS.has(consentForm) ? { form: consentForm } : {}) } } : {}), status: 'pending', results: [], revisions: 0, maxRevisions: MAX_REVISIONS, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
     try { await reserveOrderCode(order, c.base); } catch (e) {
       if (passUse) await releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {});
       if (e instanceof CodeError) return res.status(409).json({ error: e.message }); throw e;
@@ -766,6 +766,21 @@ app.post('/api/orders/:id/upsell', async (req, res) => {
 });
 
 // Opinia klienta: tylko po gotowym zamówieniu, jedna na zamówienie (można ją zmienić).
+// Wypis z przypomnienia o usunięciu danych (PR V). GET tylko pokazuje przycisk (skanery linków w poczcie otwierają linki),
+// wypisuje POST – z przycisku albo „One-Click” z nagłówka List-Unsubscribe.
+const dnPage = (res, title, body) => res.set({ 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' }).type('html').send(`<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${title}</title><link rel="stylesheet" href="/style.css"></head><body><main class="inner narrow"><h1>${title}</h1>${body}<p><a href="/">CV Pod Ogłoszenie</a></p></main></body></html>`);
+app.get('/przypomnienie/wypisz', async (req, res) => {
+  const o = await getOrder(str(req.query.o, 40));
+  if (!o?.deleteNotice?.consent) return dnPage(res, 'Brak przypomnienia', '<p>Nie ma takiego przypomnienia albo zamówienie zostało już usunięte.</p>');
+  if (o.deleteNotice.off) return dnPage(res, 'Wypisano', '<p>Nie wyślemy przypomnienia o usunięciu danych.</p>');
+  dnPage(res, 'Wypisz się z przypomnienia', `<p>Nie wyślemy e-maila 5 dni przed usunięciem danych tego zamówienia.</p><form method="post" action="/przypomnienie/wypisz?o=${encodeURIComponent(o.id)}"><button class="btn" type="submit">Wypisz mnie</button></form>`);
+});
+app.post('/przypomnienie/wypisz', async (req, res) => {
+  const id = str(req.query.o, 40), o = await getOrder(id);
+  if (o?.deleteNotice?.consent) await updateOrder(id, (x) => ({ ...x, deleteNotice: { ...x.deleteNotice, off: true, offAt: Date.now() } }));
+  dnPage(res, 'Wypisano', '<p>Nie wyślemy przypomnienia o usunięciu danych.</p>');
+});
+
 // „Skąd nas znasz?” po płatności (lib/heard.js): raz na zamówienie, opcjonalne.
 app.post('/api/orders/:id/heard', async (req, res) => {
   const o = await getOrder(String(req.params.id)); if (!o || o.status === 'pending' || o.upsellOf) return res.status(404).json({ error: 'Nie znaleziono zamówienia.' });
@@ -1170,6 +1185,13 @@ async function hourly() {
       if (o.status !== 'done' || !o.reminder?.consent || o.reminder.sent || Date.now() - o.created < REMINDER_AFTER) continue;
       try { await sendReminder(o, BASE_URL); await updateOrder(o.id, (x) => ({ ...x, reminder: { ...x.reminder, sent: true, at: Date.now() } })); }
       catch (e) { console.error('Przypomnienie', o.id, e.message); }
+    }
+    // Dzień 25 (PR V): 5 dni przed usunięciem danych – pobierz dokumenty; kolejne CV 19 zł jeszcze przez 5 dni (jeden e-mail, osobna zgoda).
+    for (const o of Object.values(await allOrders())) {
+      const age = Date.now() - (o.paidAt || o.created || 0);
+      if (o.status !== 'done' || o.upsellOf || !o.deleteNotice?.consent || o.deleteNotice.sent || o.deleteNotice.off || age < DELETE_NOTICE_AFTER || Date.now() - o.created >= RETENTION_MS) continue;
+      try { await sendDeleteNotice(o, BASE_URL); await updateOrder(o.id, (x) => ({ ...x, deleteNotice: { ...x.deleteNotice, sent: true, at: Date.now() } })); }
+      catch (e) { console.error('Przypomnienie o usunięciu', o.id, e.message); }
     }
     // Po miesiącu (dzień przed usunięciem danych): jak poszła rekrutacja + kod rabatowy (jeden e-mail, za zgodą).
     for (const o of Object.values(await allOrders())) {
