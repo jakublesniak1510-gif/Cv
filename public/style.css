@@ -881,7 +881,7 @@ table.rep th[scope=row]{font-weight:600;color:var(--mute);width:55%}
 .share-card h1{font-size:clamp(26px,4.4vw,38px);font-weight:800;letter-spacing:-.02em}.share-card .eyebrow{margin:0}.share-card p{margin:0}.share-card .cta-box{width:100%;margin-top:10px}
 .ring.big{width:150px;height:150px}.ring.big b{width:118px;height:118px;font-size:36px}
 .share-btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-width:0}.share-link{flex:1 1 100%;min-width:0;font-size:14px}
-.scan-share{grid-column:1/-1;margin-top:4px}.scan-share-form{display:grid;gap:10px}.scan-share-form .filerow{display:flex;gap:8px;flex-wrap:wrap}.scan-share-form input[type=text]:not(.share-link){flex:1 1 220px;min-width:0}
+.scan-share{grid-column:1/-1;margin-top:4px}.scan-img{margin-top:10px}.scan-img .hint{margin:0 0 6px}.scan-share-form{display:grid;gap:10px}.scan-share-form .filerow{display:flex;gap:8px;flex-wrap:wrap}.scan-share-form input[type=text]:not(.share-link){flex:1 1 220px;min-width:0}
 @media(max-width:520px){.share-card{padding:20px}}
 /* dodatki po zakupie */
 .upsell{margin-top:26px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
