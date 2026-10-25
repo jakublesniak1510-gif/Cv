@@ -1004,10 +1004,12 @@ function go(n) {
 let pvSid = '', pvShown = null, pvOff = false;
 const PV_FAKE = ['Doświadczenie zawodowe', 'Stanowisko, nazwa firmy · 2021 – obecnie', 'Punkt opisujący zakres obowiązków i rezultaty pracy', 'Kolejny punkt dopasowany do wymagań z ogłoszenia', 'Wykształcenie', 'Nazwa szkoły, kierunek · rok ukończenia', 'Umiejętności', 'Umiejętność, umiejętność, umiejętność, umiejętność'];
 const pvSig = () => JSON.stringify([['headline', 'summary', 'skills'].map((k) => $('#' + k).value), rows('exp'), rows('edu'), rows('ads')[0]?.text || '']);
+// Pierwsze n zdań bez gubienia początku: dzielimy tylko po kropce/!/? ze spacją (więc „01.2021” nie ucina tekstu), a nie po skrótach (ok., np., m.in.).
+function firstSentences(t, n) { return String(t || '').trim().split(/(?<=[.!?])\s+/).reduce((a, x) => (a.length && /(^|\s)(ok|np|m\.in|tj|tzw|ds|ul|nr|dr|mgr|inż|godz|r)\.$/i.test(a[a.length - 1]) ? [...a.slice(0, -1), `${a[a.length - 1]} ${x}`] : [...a, x]), []).slice(0, n).join(' '); }
 function drawPreview(r) {
   $('#pvOut').replaceChildren(el('div', { className: 'pv-doc' },
     el('div', { className: 'pv-name', textContent: $('#name').value }), el('div', { className: 'pv-hl', textContent: r.headline }),
-    el('p', { textContent: (r.summary.match(/[^.!?]+[.!?]+(\s|$)/g) || [r.summary]).slice(0, 3).join('').trim() }), // 2–3 zdania podsumowania
+    el('p', { textContent: firstSentences(r.summary, 3) }), // 2–3 zdania podsumowania
     el('div', { className: 'pv-kw' }, el('span', { className: 'hint', textContent: 'Słowa kluczowe z ogłoszenia w Twoim CV:' }), ...r.keywords.map((k) => el('span', { className: 'chip', textContent: k }))),
     el('div', { className: 'pv-blur', ariaHidden: 'true' }, ...PV_FAKE.map((t, i) => el(i % 4 === 0 ? 'b' : 'p', { textContent: t }))),
     el('p', { className: 'hint', textContent: 'Pełne CV, dopasowane do ogłoszenia, dostaniesz po płatności. Nagłówek i podsumowanie będą spójne z tym podglądem.' })));
