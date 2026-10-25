@@ -1734,7 +1734,17 @@ function drawFollowup() {
 // Dodatki po zakupie: osobna płatność tylko za dodatek, potem dodatek pojawia się w tym zamówieniu.
 let upsellTimer = null;
 const UPSELL_PART = { letter: 'list motywacyjny', interview: 'przygotowanie do rozmowy', sim: 'symulator rozmowy' };
-const UPSELL_HINT = { linkedin: 'Nagłówek, sekcja „Informacje”, do 15 umiejętności i opisy stanowisk spójne z Twoim CV, do skopiowania na LinkedIn.', letter: 'List motywacyjny do każdego CV z tego zamówienia, pod to samo ogłoszenie.', interview: 'Pytania z tego ogłoszenia z przykładowymi odpowiedziami, autoprezentacja i lista rzeczy do przygotowania.', sim: 'Rozmowa z AI w roli rekrutera pod to stanowisko, z oceną odpowiedzi.', bundle: 'Wszystko, czego brakuje do rozmowy: list, przygotowanie i symulator razem taniej.' };
+const UPSELL_HINT = { messages: 'Wiadomość do rekrutera na LinkedIn i gotowy e-mail z aplikacją pod każde CV z tego zamówienia.', linkedin: 'Nagłówek, sekcja „Informacje”, do 15 umiejętności i opisy stanowisk spójne z Twoim CV, do skopiowania na LinkedIn.', letter: 'List motywacyjny do każdego CV z tego zamówienia, pod to samo ogłoszenie.', interview: 'Pytania z tego ogłoszenia z przykładowymi odpowiedziami, autoprezentacja i lista rzeczy do przygotowania.', sim: 'Rozmowa z AI w roli rekrutera pod to stanowisko, z oceną odpowiedzi.', bundle: 'Wszystko, czego brakuje do rozmowy: list, przygotowanie i symulator razem taniej.' };
+// Kopia lib/doc-names.js (bez rozszerzenia): Imię_Nazwisko_CV_Stanowisko, ASCII, maks. 80 znaków z „.pdf”.
+const UK_LAT = { а: 'a', б: 'b', в: 'v', г: 'h', ґ: 'g', д: 'd', е: 'e', є: 'ie', ж: 'zh', з: 'z', и: 'y', і: 'i', ї: 'i', й: 'i', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ф: 'f', х: 'kh', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'shch', ь: '', ю: 'iu', я: 'ia', ы: 'y', э: 'e', ё: 'e', ъ: '' };
+const asciiWords = (s) => String(s || '').replace(/[\u0400-\u04FF]/g, (c) => { const l = c.toLowerCase(), t = UK_LAT[l] ?? ''; return c !== l && t ? t[0].toUpperCase() + t.slice(1) : t; })
+  .replace(/ł/g, 'l').replace(/Ł/g, 'L').replace(/ß/g, 'ss').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+const DOC_KIND = { cv: 'CV', letter: 'List_motywacyjny', interview: 'Przygotowanie_do_rozmowy' };
+const docBase = (kind, name, position, lang) => {
+  const head = `${asciiWords(name) || 'Dokument'}_${DOC_KIND[kind]}`, tail = lang && lang !== 'pl' ? `_${lang.toUpperCase()}` : '';
+  const pos = asciiWords(position).slice(0, Math.max(0, 80 - head.length - tail.length - 5)).replace(/_+$/, '');
+  return `${head}${pos ? `_${pos}` : ''}${tail}`;
+};
 function drawUpsell() {
   const box = $('#upsell'), offers = data.upsells || [];
   clearTimeout(upsellTimer);
@@ -1858,7 +1868,8 @@ function showResult() {
     $('#revLeft').textContent = `Pozostało poprawek: ${data.revisionsLeft ?? cfg.maxRevisions}`;
     $('#hlTog').parentElement.hidden = curDoc !== 'cv';
     drawMatch(r); drawPaper();
-    try { document.title = `${DOCS[curDoc]} ${r.cv.name} – ${r.position}`; } catch {}
+    // Tytuł strony = domyślna nazwa pliku przy „Zapisz jako PDF” (ta sama co załącznik w mailu: lib/doc-names.js).
+    try { document.title = DOC_KIND[curDoc] ? docBase(curDoc, r.cv.name, r.position, r.lang) : `${DOCS[curDoc]} ${r.cv.name} – ${r.position}`; } catch {}
   };
   redraw = draw;
   drawMail();
