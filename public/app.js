@@ -2332,6 +2332,19 @@ function scanCtxHint(C) {
   const z = new URLSearchParams(location.search).get('zawod'), p = z && (C.INDEX || []).find((x) => x.slug === z);
   return p ? el('p', { className: 'tool-ctx' }, 'Skanujesz CV na: ', el('b', { textContent: p.name }), ' · ', pageLink(`cv/${p.slug}`, { textContent: 'Jak napisać CV dla tego zawodu' })) : null;
 }
+// Skaner z ?partner=<KOD> (PR Y): nagłówek z nazwą uczelni/szkoły z zatwierdzonego zgłoszenia; kod zapisany jak ?ref=.
+function partnerHead() {
+  const code = new URLSearchParams(location.search).get('partner');
+  if (!code || !/^[A-Za-z0-9-]{3,30}$/.test(code)) return null;
+  const box = el('p', { className: 'tool-ctx partner-head', hidden: true });
+  fetch(`/api/partner/${encodeURIComponent(code)}`).then((r) => (r.ok ? r.json() : null)).then((j) => {
+    if (!j) return;
+    try { localStorage.setItem(REF_KEY, j.code); } catch {}
+    box.replaceChildren(el('b', { textContent: `${j.uni ? 'Skaner CV dla studentów' : 'Skaner CV dla uczestników'}: ${j.org}` }), ' · ', el('span', { className: 'hint', textContent: `kod ${j.code} wpisze się sam przy zamówieniu` }));
+    box.hidden = false;
+  }).catch(() => {});
+  return box;
+}
 function toolPage(slug, C, item) {
   const t = item || C.TOOLS[slug], box = el('div', { className: 'tool-box' });
   // Generowane dokumenty są po polsku (do polskiego pracodawcy): w wersjach obcych mówimy to nad wynikiem.
@@ -2379,7 +2392,7 @@ function toolPage(slug, C, item) {
   // data-i18n: interfejs narzędzia tłumaczy się słownikiem (wynik w .tool-out zostaje po polsku).
   const root = el('div', { className: 'inner narrow' },
     el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', el('a', { href: '#poradnik', textContent: 'Darmowe narzędzia' }), '›', el('span', { textContent: t.title })),
-    el('h1', { textContent: t.title }), el('p', { className: 'lead', textContent: t.lead }), plNote(), ...(slug === 'skaner-cv' ? [scanCtxHint(C)].filter(Boolean) : []), box,
+    el('h1', { textContent: t.title }), el('p', { className: 'lead', textContent: t.lead }), plNote(), ...(slug === 'skaner-cv' ? [partnerHead(), scanCtxHint(C)].filter(Boolean) : []), box,
     ...(NO_SCAN_BLOCK.has(slug) ? [] : [toolScanBlock(slug)]),
     ...(t.about || []).map((x) => el('p', { textContent: x })),
     // rozszerzone wersje EN/DE (seo-data/ext-*.json): te same sekcje i źródła co w wersji z serwera

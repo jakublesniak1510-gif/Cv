@@ -18,7 +18,7 @@ test('Narzędzia: blok poza skanerem i narzędziami do CV, zawód z quizu, ?zawo
   assert.match(app, /onclick: \(\) => track\('toolscan', \{ t: slug \}\)/);
   assert.match(app, /\?zawod=\$\{encodeURIComponent\(p\.slug\)\}/);
   assert.match(app, /window\.__toolCtx\?\.\(ranked\[0\]\?\.p\)/, 'najlepszy zawód z quizu');
-  assert.match(app, /slug === 'skaner-cv' \? \[scanCtxHint\(C\)\]/);
+  assert.match(app, /slug === 'skaner-cv' \? \[partnerHead\(\), scanCtxHint\(C\)\]/, 'podpowiedź zawodu (i nagłówek uczelni z PR Y)');
   for (const l of ['en', 'de', 'uk']) { const d = JSON.parse(read(`public/i18n/${l}.json`)); for (const k of ['Sprawdź też swoje CV', 'CV dla zawodu: {0}', 'Skanujesz CV na:', 'Jak napisać CV dla tego zawodu']) assert.ok(d[k], `${l}: ${k}`); }
 });
 
