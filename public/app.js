@@ -1452,6 +1452,22 @@ function startResult(id) {
   $('#genTitle').textContent = 'Piszemy Twoje dokumenty'; window.scrollTo(0, 0);
   clearTimeout(timer); poll();
 }
+// „Skąd nas znasz?” (PR O, lib/heard.js): po płatności, jedno kliknięcie, opcjonalne; raz na zamówienie.
+const HEARD = [['google', 'Google'], ['reklama', 'Reklama (Facebook, Instagram)'], ['tiktok_youtube', 'TikTok / YouTube'], ['znajomy', 'Od znajomego'], ['pinterest', 'Pinterest'], ['inne', 'Inne']];
+function drawHeard(box) {
+  const other = ['#heardGen', '#heardRes'].map((x) => $(x)).filter((x) => x && x !== box);
+  if (!data || data.heard || data.status === 'pending' || data.upsellOf || cfg.preview) { box.hidden = true; return; }
+  if (box.dataset.ready) { box.hidden = false; return; }
+  box.dataset.ready = '1'; box.hidden = false; other.forEach((x) => { x.hidden = true; x.dataset.ready = ''; });
+  const text = el('input', { type: 'text', maxLength: 80, placeholder: 'Dopisz, jeśli chcesz (opcjonalnie)', ariaLabel: 'Dopisek (opcjonalnie)' });
+  const send = async (src) => {
+    box.querySelectorAll('button').forEach((b) => (b.disabled = true));
+    try { await fetch(`/api/orders/${orderId}/heard`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ src, text: text.value }) }); } catch {}
+    data.heard = true; box.replaceChildren(el('p', { className: 'hint', textContent: 'Dziękujemy za odpowiedź!' }));
+  };
+  box.replaceChildren(el('p', {}, el('b', { textContent: 'Skąd nas znasz?' }), ' ', el('span', { className: 'hint', textContent: 'Jedno kliknięcie, pytanie opcjonalne.' })),
+    text, el('div', { className: 'heard-opts' }, ...HEARD.map(([k, t]) => el('button', { type: 'button', className: 'btn ghost sm', textContent: t, onclick: () => send(k) }))));
+}
 async function poll() {
   let r; try { r = await fetch(`/api/orders/${orderId}`); } catch { r = null; }
   if (!r || !r.ok) { $('#genTitle').textContent = 'Nie znaleziono zamówienia'; $('#genMsg').textContent = 'Sprawdź link lub wróć na stronę główną.'; return; }
@@ -1460,6 +1476,7 @@ async function poll() {
   // Zakup do statystyk reklam (tylko za zgodą na cookie, raz na zamówienie, tuż po płatności).
   if (data.status !== 'pending' && data.total > 0 && data.paidAt && Date.now() - data.paidAt < 864e5) window.CONSENT?.purchase(data.id, data.total / 100);
   if (data.status === 'done') { $('#gen').hidden = true; return showResult(); }
+  drawHeard($('#heardGen'));
   if (data.status === 'paid') { $('#genTitle').textContent = 'Dokumenty są w przygotowaniu'; $('#genMsg').textContent = 'Mamy chwilowe opóźnienie. Płatność jest zachowana, a gotowe dokumenty wyślemy na Twój e-mail, zwykle w ciągu kilku godzin. Możesz zamknąć tę stronę albo spróbować ponownie.'; $('#retry').hidden = false; timer = setTimeout(poll, 60000); return; }
   if (data.status === 'pending' && data.canPay && ++pendingPolls >= 4) { $('#genTitle').textContent = 'Płatność nie jest jeszcze potwierdzona'; $('#genMsg').textContent = 'Jeśli przerwałeś płatność albo zamknąłeś okno banku, możesz ją dokończyć. Jeśli zapłaciłeś, poczekaj chwilę: potwierdzenie może przyjść z opóźnieniem.'; $('#payAgain').hidden = false; if (!$('#payAgainGw').childElementCount) gwPicker($('#payAgainGw'), 'gwa', data.gateway || undefined); timer = setTimeout(poll, 5000); return; }
   $('#genMsg').textContent = data.status === 'pending' ? 'Czekamy na potwierdzenie płatności…' : 'To zajmie około minuty. Nie zamykaj tej strony. Gotowe dokumenty wyślemy też na Twój e-mail.';
@@ -1843,6 +1860,8 @@ let redraw = () => {};
 function showResult() {
   clearDraft(); try { localStorage.removeItem(REF_KEY); } catch {}
   $('#result').hidden = false; window.scrollTo(0, 0);
+  // Pytanie na stronie dokumentów tylko w pierwszej dobie po płatności (później nie wraca).
+  if (data.paidAt && Date.now() - data.paidAt < 864e5) drawHeard($('#heardRes')); else $('#heardRes').hidden = true;
   curAd = Math.min(curAd, data.results.length - 1);
   const draw = () => {
     const base = data.results[curAd], vl = Object.keys(base.variants || {});
