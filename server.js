@@ -34,6 +34,7 @@ import { b2bRoutes, b2bOrders, fulfillB2b, b2bRefunded, cleanupPartnerApps } fro
 import { b2bMonthly } from './lib/b2b-monthly.js';
 import { crmHourly } from './lib/crm.js';
 import { growthRoutes, welcomeSeries, telegramHourly, rememberScan } from './lib/growth.js';
+import { tpCsp } from './lib/trustpilot.js';
 import { shareRoutes, cleanupShareCards } from './lib/share.js';
 import { sendPurchase, adContext } from './lib/capi.js';
 import { draftRoutes } from './lib/drafts.js';
@@ -106,7 +107,7 @@ app.use((req, res, next) => {
   // CSP: skrypty tylko z jednorazowym kluczem (nonce) dopisywanym do każdego <script> w HTML z serwera; skrypty, które one
   // dołączą (Google Ads i Meta po zgodzie na cookies), dziedziczą zaufanie ('strict-dynamic'). Panel ma tylko własny plik admin.js.
   const nonce = crypto.randomBytes(16).toString('base64');
-  res.set('Content-Security-Policy', csp(req.path === '/admin' ? "'self'" : `'nonce-${nonce}' 'strict-dynamic'`).replace("frame-ancestors 'none'", embed ? 'frame-ancestors *' : "frame-ancestors 'none'"));
+  res.set('Content-Security-Policy', tpCsp(csp(req.path === '/admin' ? "'self'" : `'nonce-${nonce}' 'strict-dynamic'`).replace("frame-ancestors 'none'", embed ? 'frame-ancestors *' : "frame-ancestors 'none'")));
   const send = res.send.bind(res);
   res.send = (body) => {
     if (typeof body === 'string' && (/text\/html/.test(res.get('Content-Type') || '') || (!res.get('Content-Type') && body.trimStart().startsWith('<')))) body = body.replace(/<script(?=[\s>])/g, `<script nonce="${nonce}"`);
