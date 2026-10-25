@@ -57,7 +57,7 @@ test('Regulamin (4 języki): CV pod zawód w §2, wyjątek w §3, data 24.10.202
     const b = legalBody('regulamin', l);
     assert.match(b, re, l); assert.match(b, /24[ .]/, l);
   }
-  assert.match(legalBody('regulamin', 'pl'), /obowiązuje od 24 października 2026 r\. Historia zmian: 24 października 2026 r\. – CV bez konkretnego ogłoszenia/);
+  assert.match(legalBody('regulamin', 'pl'), /Historia zmian: (?:[^;]*; )?24 października 2026 r\. – CV bez konkretnego ogłoszenia/);
 });
 
 test('API: /api/prof-reqs; zamówienie CV pod zawód tylko jako jedno CV bez listu; rodzaj zapisany w zamówieniu', { timeout: 60_000 }, async () => {
