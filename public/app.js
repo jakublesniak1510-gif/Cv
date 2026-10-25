@@ -1686,7 +1686,9 @@ function drawPaper() {
 const FU_NAME = (k) => (k === 'bundle' ? 'Pewna rozmowa' : PKG_NAME[k]);
 // Kolejne CV pod nowe ogłoszenie (cv_next) przez 30 dni od opłacenia zamówienia; list +różnica jak zwykle (lib/pricing.js: nextEligible).
 const fuNext = () => !!data?.paidAt && Date.now() - data.paidAt <= 30 * 864e5 && !!PRICE.cv_next;
-const fuBase = (k) => (fuNext() && (k === 'cv' || k === 'cv_letter' || k === 'bundle') ? PRICE.cv_next + (k === 'cv' ? 0 : PRICE.cv_letter - PRICE.cv) : PRICE[k === 'bundle' ? 'cv_letter' : k]);
+// Tylko CV i CV z listem (nie „Pewna rozmowa”), bez kodów rabatowych – pole kodu znika, kod nie jest wysyłany.
+const fuIsNext = (k) => fuNext() && (k === 'cv' || k === 'cv_letter');
+const fuBase = (k) => (fuIsNext(k) ? PRICE.cv_next + (k === 'cv' ? 0 : PRICE.cv_letter - PRICE.cv) : PRICE[k === 'bundle' ? 'cv_letter' : k]);
 const FU_PRICE = (k) => (k === 'bundle' ? fuBase(k) + PRICE.interview + PRICE.sim - PRICE.bundleOff : fuBase(k));
 const FU_ADS = (k) => (k === 'bundle' ? 1 : PKG_ADS[k]);
 function drawFollowup() {
@@ -1701,10 +1703,11 @@ function drawFollowup() {
     const n = $('#fuAds')?.children.length || 0;
     if ($('#fuAdd')) { $('#fuAdd').hidden = FU_ADS(fpkg) === 1; $('#fuAdd').disabled = n >= FU_ADS(fpkg); }
     if ($('#fuPay')) $('#fuPay').textContent = `Zamów za ${FU_PRICE(fpkg)} zł`;
+    if ($('#fuCode')) $('#fuCode').closest('label').hidden = fuIsNext(fpkg);
     if ($('#fuInfo')) $('#fuInfo').textContent = fpkg === 'bundle' ? 'CV i list motywacyjny, przygotowanie do rozmowy (12 pytań z odpowiedziami) i symulator rozmowy.' : '';
   };
   box.replaceChildren(el('h3', { textContent: 'Masz kolejne ogłoszenia?' }),
-    fuNext() ? el('p', { className: 'perk small' }, el('span', { textContent: 'Kolejne CV pod nowe ogłoszenie:' }), ` ${PRICE.cv_next} zł `, el('span', { textContent: '(z listem motywacyjnym' }), ` ${PRICE.cv_next + PRICE.cv_letter - PRICE.cv} zł) `, el('span', { textContent: 'przez 30 dni od opłacenia zamówienia.' })) : null,
+    fuNext() ? el('p', { className: 'perk small' }, el('span', { textContent: 'Kolejne CV pod nowe ogłoszenie:' }), ` ${PRICE.cv_next} zł `, el('span', { textContent: '(z listem motywacyjnym' }), ` ${PRICE.cv_next + PRICE.cv_letter - PRICE.cv} zł) `, el('span', { textContent: 'przez 30 dni od opłacenia zamówienia. Bez łączenia z kodami rabatowymi i saldem poleceń.' })) : null,
     el('p', { className: 'hint' }, el('span', { textContent: 'Twoje dane już mamy, więc nie wpisujesz ich ponownie. Dokumenty powstaną w tym samym wyglądzie.' }), data.myCode && !data.myCode.usedByMe ? el('span', { textContent: ` Twój kod ${data.myCode.code} obniży cenę o ${data.myCode.mine} zł.` }) : ''),
     pick, el('p', { className: 'hint', id: 'fuInfo' }), el('div', { id: 'fuAds' }),
     el('button', { type: 'button', className: 'btn ghost sm', id: 'fuAdd', textContent: '+ Dodaj ogłoszenie (w pakiecie do 3)', onclick: () => { addRow('fuAds'); drawPick(); } }),
@@ -1712,7 +1715,7 @@ function drawFollowup() {
     gwPicker(el('div', { className: 'gw-box', id: 'fuGw' }), 'fugw'),
     el('label', { className: 'check' }, el('input', { type: 'checkbox', id: 'fuWaiver' }), ' ', el('span', { textContent: 'Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.' })),
     el('p', {}, el('button', { type: 'button', className: 'btn', id: 'fuPay', textContent: '', onclick: async (e) => {
-      const ads = rows('fuAds'), err = $('#fuErr'), code = $('#fuCode').value.trim();
+      const ads = rows('fuAds'), err = $('#fuErr'), code = fuIsNext(fpkg) ? '' : $('#fuCode').value.trim();
       if (ads.length > FU_ADS(fpkg)) { err.textContent = 'Ten pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe albo wybierz Pakiet 3.'; return; }
       const bad = ads.find((a) => !a.title || a.text.length < 80);
       if (bad) { err.textContent = 'Podaj nazwę stanowiska i pełną treść ogłoszenia (min. 80 znaków).'; return; }

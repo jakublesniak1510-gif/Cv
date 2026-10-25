@@ -10,7 +10,7 @@ import { passRoutes, passesHourly, reservePass, passOrderPaid, releasePassOrder,
 import { accountIdOf, accountEmail } from './lib/account.js';
 import { wizardDraftRoutes, wizardDraftsHourly, draftOrdered, draftPaid } from './lib/wizard-drafts.js';
 import { offerRoutes, feedSources } from './lib/jobfeed.js';
-import { nextEligible, calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUNDLE_OFF, withLetter as hasLetter, upsellOffers, upsellPlan } from './lib/pricing.js';
+import { nextEligible, hasBundle, calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUNDLE_OFF, withLetter as hasLetter, upsellOffers, upsellPlan } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads, removeOrder } from './lib/store.js';
 import { generateForAd, linkedinChecked, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
@@ -670,12 +670,13 @@ app.post('/api/orders/:id/followup', async (req, res) => {
     const a = cleanAds(req.body?.ads);
     if (!a.length) return res.status(400).json({ error: 'Wklej treść ogłoszenia (min. 80 znaków).' });
     const ad = cleanAddons(req.body?.addons), langs = usefulExtraLangs(cleanLangs(req.body?.extraLangs), a);
-    const c = await checkCode(req.body?.code, parent.profile.email);
-    if (c.error) return res.status(400).json({ error: c.error });
     const pkg = ['cv', 'cv_letter', 'pack3'].includes(req.body?.pkg) ? req.body.pkg : parent.pkg;
     if (profMixError(a, pkg)) return res.status(400).json({ error: PROF_ONLY_CV });
-    // Kolejne CV pod nowe ogłoszenie 19 zł (z listem 29 zł) przez 30 dni od opłacenia poprzedniego zamówienia; potem zwykła cena.
-    const ret = nextEligible(parent) ? 'next' : true, isNext = ret === 'next' && (pkg === 'cv' || pkg === 'cv_letter');
+    // Kolejne CV pod nowe ogłoszenie 19 zł (z listem 29 zł) przez 30 dni od opłacenia poprzedniego zamówienia: tylko CV / CV z listem
+    // (nie „Pewna rozmowa”), bez kodów rabatowych i salda poleceń (nie łączy się). Poza tym zwykła cena i kody jak dotąd.
+    const isNext = nextEligible(parent) && (pkg === 'cv' || pkg === 'cv_letter') && !hasBundle(pkg, ad), ret = isNext ? 'next' : true;
+    const c = isNext ? {} : await checkCode(req.body?.code, parent.profile.email);
+    if (c.error) return res.status(400).json({ error: c.error });
     const disc = discountFor(c, pkg, a.length, ad, ret, langs), total = calcTotal(pkg, a.length, ad, ret, langs, disc);
     if (total > 0 && req.body?.waiver !== true) return res.status(400).json({ error: 'Zaznacz zgodę na wykonanie usługi od razu po płatności.' });
     const order = { id: crypto.randomUUID(), ...(req.body?.waiver === true ? { waiver: { text: WAIVER, at: Date.now() } } : {}), refCtx: refCtx(req), uiLang: parent.uiLang, parentId: parent.id, rootId: parent.rootId || parent.id, pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, ret, langs, 0), total), total, ...(isNext ? { next: true } : {}), profile: parent.profile, ads: a, design: parent.design, reminder: { consent: false, sent: false }, status: 'pending', results: [], revisions: 0, maxRevisions: MAX_REVISIONS, created: Date.now() };
