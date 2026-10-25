@@ -1672,5 +1672,7 @@
 "Faktura na życzenie": "Invoice on request",
 "list motywacyjny pod to samo ogłoszenie za": "a cover letter for the same job ad for",
 "więcej": "more",
-"Do 3 ogłoszeń": "Up to 3 job ads"
+"Do 3 ogłoszeń": "Up to 3 job ads",
+"CV pod trzy różne ogłoszenia, każde": "A CV for three different job ads, each",
+"CV pod trzy różne ogłoszenia, każde {0} zł": "A CV for three different job ads, each {0} PLN"
 }
