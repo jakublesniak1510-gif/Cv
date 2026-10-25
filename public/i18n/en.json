@@ -511,6 +511,8 @@
 "Zacznij od nowa": "Start over",
 "Wstaw dane przykładowe": "Fill in sample data",
 "Masz stare CV?": "Have an old CV?",
+"Mam już CV. Czy możecie je tylko poprawić pod ogłoszenie?": "I already have a CV. Can you just tailor it to the job ad?",
+"Tak. W kreatorze, w kroku z danymi, wgraj swoje CV i zaznacz „Mam już CV”. Zachowamy treść, kolejność i daty, a wygląd będzie w naszym szablonie. Nic nie dopisujemy: wymagania z ogłoszenia, których nie ma w Twoim CV, pokażemy w raporcie dopasowania.": "Yes. In the wizard, at the step with your details, upload your CV and tick “I already have a CV”. We keep the content, order and dates; the layout uses our template. We add nothing: requirements from the ad that are not in your CV are shown in the match report.",
 "Mam już CV – popraw je pod ogłoszenie, zachowując jego treść": "I already have a CV – tailor it to the job ad and keep its content",
 "Zachowujemy treść i kolejność Twojego CV; wygląd w naszym szablonie. Nic nie dopisujemy: wymagania z ogłoszenia, których nie ma w Twoim CV, pokażemy w raporcie dopasowania w części „Brakuje w CV” – do uzupełnienia przez Ciebie, jeśli są prawdą.": "We keep the content and order of your CV; the layout uses our template. We add nothing: requirements from the ad that are not in your CV will be shown in the match report under “Missing from your CV” – for you to add if they are true.",
 "Wgraj swoje CV (PDF lub Word): w trybie „Mam już CV” zachowujemy jego treść i kolejność.": "Upload your CV (PDF or Word): in “I already have a CV” mode we keep its content and order.",
