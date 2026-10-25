@@ -645,7 +645,7 @@
 </div>
 
 <!-- Generowanie -->
-<div id="gen" class="gen" hidden><div class="gen-box"><div class="spinner" aria-hidden="true"></div><h2 id="genTitle">Piszemy Twoje dokumenty</h2><p id="genMsg">To zajmie około minuty. Nie zamykaj tej strony.</p><button class="btn" id="retry" hidden>Spróbuj ponownie</button><div id="payAgainGw" class="gw-box" hidden></div><button class="btn" id="payAgain" hidden>Dokończ płatność</button></div></div>
+<div id="gen" class="gen" hidden><div class="gen-box"><div class="spinner" aria-hidden="true"></div><h2 id="genTitle">Piszemy Twoje dokumenty</h2><p id="genMsg">To zajmie około minuty. Nie zamykaj tej strony.</p><div id="heardGen" class="heard" hidden></div><button class="btn" id="retry" hidden>Spróbuj ponownie</button><div id="payAgainGw" class="gw-box" hidden></div><button class="btn" id="payAgain" hidden>Dokończ płatność</button></div></div>
 
 <!-- Wynik -->
 <section id="result" class="result" hidden><div class="inner">
@@ -660,6 +660,7 @@
     <a class="btn ghost" id="docxBtn" hidden download>Pobierz Word</a> <a class="btn ghost" id="txtBtn" href="#" download hidden>Pobierz .txt (ATS)</a>
   </div>
   <p class="mailnote noprint" id="mailNote" hidden></p>
+  <div class="heard card-lite noprint" id="heardRes" hidden></div>
   <p class="note noprint" id="printNote" hidden>W podglądzie nie można pobierać plików. Na działającej stronie ten przycisk zapisuje dokument jako PDF.</p>
   <p class="note noprint" id="simNote" hidden>Podgląd używa uproszczonego dopasowania. Na działającej stronie CV i list pisze Claude, pełniej i pod treść ogłoszenia.</p>
   <p class="note noprint" id="untrNote" hidden>Podgląd bez AI: dodatkowa wersja językowa nie jest tłumaczona, zmieniają się tylko nagłówki sekcji. Na działającej stronie tłumaczy ją Claude.</p>

@@ -12,6 +12,7 @@ import { wizardDraftRoutes, wizardDraftsHourly, draftOrdered, draftPaid } from '
 import { offerRoutes, feedSources } from './lib/jobfeed.js';
 import { nextEligible, hasBundle, calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUNDLE_OFF, withLetter as hasLetter, upsellOffers, upsellPlan } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads, removeOrder } from './lib/store.js';
+import { heardInput } from './lib/heard.js';
 import { docFile } from './lib/doc-names.js';
 import { cvToText } from './lib/cv-text.js';
 import { generateForAd, generateMessages, linkedinChecked, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
@@ -692,7 +693,7 @@ const view = (o, extra = {}) => ({
   ...extra, id: o.id, pkg: o.pkg, addons: o.addons || {}, extraLangs: o.extraLangs || [], total: o.total, status: o.status, results: (o.results || []).map(({ qa, ...r }) => r), error: o.error, mail: o.mail,
   design: cleanDesign(o.design), photo: o.profile.photo || '', email: o.profile.email, parentId: o.parentId || null,
   paidAt: o.paidAt || null, gateway: o.gateway || null, createAccount: !!o.createAccount, canPay: o.status === 'pending' && !DEMO, revisionsLeft: revLimit(o) - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
-  invoice: o.invoice?.pdf ? { number: o.invoice.number } : null,
+  invoice: o.invoice?.pdf ? { number: o.invoice.number } : null, heard: !!o.heard,
 });
 
 // Faktura PDF dla klienta (link na stronie dokumentów; adres zamówienia jest nie do zgadnięcia, jak przy dokumentach).
@@ -769,6 +770,15 @@ app.post('/api/orders/:id/upsell', async (req, res) => {
 });
 
 // Opinia klienta: tylko po gotowym zamówieniu, jedna na zamówienie (można ją zmienić).
+// „Skąd nas znasz?” po płatności (lib/heard.js): raz na zamówienie, opcjonalne.
+app.post('/api/orders/:id/heard', async (req, res) => {
+  const o = await getOrder(String(req.params.id)); if (!o || o.status === 'pending' || o.upsellOf) return res.status(404).json({ error: 'Nie znaleziono zamówienia.' });
+  let h; try { h = heardInput(req.body); } catch (e) { return res.status(400).json({ error: e.message }); }
+  if (o.heard) return res.json({ ok: true });
+  await updateOrder(o.id, { heard: { ...h, at: Date.now() } });
+  countEvent(`heard:${h.src}`).catch(() => {});
+  res.json({ ok: true });
+});
 app.post('/api/orders/:id/review', async (req, res) => {
   const o = await getOrder(req.params.id);
   if (!o || o.status !== 'done') return res.status(409).json({ error: 'Opinię wystawisz po otrzymaniu dokumentów.' });
