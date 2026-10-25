@@ -1863,6 +1863,10 @@ function showResult() {
     const editable = curDoc === 'cv' || curDoc === 'letter';
     $('#docxBtn').hidden = !(data.addons?.docx && editable);
     $('#docxBtn').href = `/api/orders/${orderId}/docx/${curAd}?doc=${curDoc}${curLang ? '&lang=' + curLang : ''}`;
+    // Wersja ATS .txt: przy CV, bezpłatna (PR Q).
+    $('#txtBtn').hidden = curDoc !== 'cv';
+    $('#txtBtn').href = `/api/orders/${orderId}/txt/${curAd}${curLang ? '?lang=' + curLang : ''}`;
+    $('#txtBtn').onclick = cfg.preview ? (e) => { e.preventDefault(); flash('W podglądzie pobieranie pliku .txt jest wyłączone.'); } : null;
     $('#docxBtn').onclick = cfg.preview ? (e) => { e.preventDefault(); flash('W podglądzie pobieranie pliku Word jest wyłączone. Na działającej stronie pobierzesz edytowalny plik .docx.'); } : null;
     $('#resActions').hidden = !editable;
     $('#revLeft').textContent = `Pozostało poprawek: ${data.revisionsLeft ?? cfg.maxRevisions}`;

@@ -1686,5 +1686,7 @@
 "CV dla zawodu: {0}": "Lebenslauf für: {0}",
 "Skanujesz CV na:": "Sie prüfen einen Lebenslauf für:",
 "Jak napisać CV dla tego zawodu": "So schreiben Sie den Lebenslauf für diesen Beruf",
-"Wiadomość do rekrutera na LinkedIn i gotowy e-mail z aplikacją pod każde CV z tego zamówienia.": "Eine Nachricht an die Recruiterin oder den Recruiter auf LinkedIn und eine fertige Bewerbungs-E-Mail zu jedem Lebenslauf aus dieser Bestellung."
+"Wiadomość do rekrutera na LinkedIn i gotowy e-mail z aplikacją pod każde CV z tego zamówienia.": "Eine Nachricht an die Recruiterin oder den Recruiter auf LinkedIn und eine fertige Bewerbungs-E-Mail zu jedem Lebenslauf aus dieser Bestellung.",
+"Pobierz .txt (ATS)": ".txt herunterladen (ATS)",
+"W podglądzie pobieranie pliku .txt jest wyłączone.": "Im Vorschaumodus ist der Download der .txt-Datei deaktiviert."
 }

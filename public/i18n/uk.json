@@ -1686,5 +1686,7 @@
 "CV dla zawodu: {0}": "Резюме для професії: {0}",
 "Skanujesz CV na:": "Ви перевіряєте резюме на посаду:",
 "Jak napisać CV dla tego zawodu": "Як написати резюме для цієї професії",
-"Wiadomość do rekrutera na LinkedIn i gotowy e-mail z aplikacją pod każde CV z tego zamówienia.": "Повідомлення рекрутеру в LinkedIn і готовий лист із заявкою до кожного резюме з цього замовлення."
+"Wiadomość do rekrutera na LinkedIn i gotowy e-mail z aplikacją pod każde CV z tego zamówienia.": "Повідомлення рекрутеру в LinkedIn і готовий лист із заявкою до кожного резюме з цього замовлення.",
+"Pobierz .txt (ATS)": "Завантажити .txt (ATS)",
+"W podglądzie pobieranie pliku .txt jest wyłączone.": "У попередньому перегляді завантаження файлу .txt вимкнено."
 }
