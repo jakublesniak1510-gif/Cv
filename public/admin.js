@@ -440,7 +440,18 @@ loaders.outcomes = async () => {
 // --- wiadomości (kontakt i zapytania firm) ---
 let msgFilter = 'new';
 $('#msgKind').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; msgFilter = b.dataset.k; $$('#msgKind button').forEach((x) => x.setAttribute('aria-pressed', x === b)); loaders.messages(); });
+// Pytania czytelników (PR X): szkic → publikacja; z wiadomości „Pytanie o CV do poradnika” przycisk „Do poradnika” wypełnia formularz.
+const loadQa = async () => {
+  const list = await api('/reader-qa');
+  $('#qaList').replaceChildren(list.length ? el('table', {}, el('tbody', {}, ...list.map((x) => el('tr', {},
+    el('td', { className: 'wrap' }, el('b', { textContent: x.q }), el('br'), el('small', { textContent: x.a })),
+    el('td', { textContent: x.status === 'published' ? `opublikowane ${dd(x.published)}` : 'szkic' }),
+    el('td', {}, el('button', { className: 'btn sm ghost', textContent: x.status === 'published' ? 'Wycofaj' : 'Opublikuj', onclick: async () => { await post(`/reader-qa/${x.id}`, { status: x.status === 'published' ? 'draft' : 'published' }); loadQa(); } }), ' ',
+      el('button', { className: 'btn sm danger', textContent: 'Usuń', onclick: async () => { await api(`/reader-qa/${x.id}`, { method: 'DELETE' }); loadQa(); } })))))) : el('div', { className: 'empty', textContent: 'Brak pytań z panelu. Na stronie są 10 pytań redakcji.' }));
+};
+$('#qaForm').onsubmit = async (e) => { e.preventDefault(); const f = e.target; try { await post('/reader-qa', { q: f.q.value, a: f.a.value }); f.reset(); toast('Zapisano szkic'); loadQa(); } catch (x) { toast(x.message); } };
 loaders.messages = async () => {
+  loadQa().catch(() => {});
   const all = await api('/messages'), fresh = all.filter((m) => m.status === 'new').length;
   setMsgBadge(fresh); $('#msgSum').textContent = all.length ? `${fresh} nowych z ${all.length}` : '';
   const list = all.filter((m) => (msgFilter === 'new' ? m.status === 'new' : true));
@@ -453,6 +464,7 @@ loaders.messages = async () => {
       kv([['E-mail', m.email], m.topic && ['Temat', m.topic]]),
       m.message ? el('p', { textContent: m.message, style: 'white-space:pre-wrap' }) : null,
       el('div', { className: 'actions' }, el('a', { className: 'btn sm', href: `mailto:${encodeURIComponent(m.email)}?subject=${encodeURIComponent(subj)}`, textContent: 'Odpowiedz' }),
+        m.topic === 'Pytanie o CV do poradnika' ? el('button', { className: 'btn sm ghost', textContent: 'Do poradnika', onclick: () => { $('#qaForm').q.value = (m.message || '').slice(0, 300); $('#qaForm').q.focus(); } }) : null,
         m.status === 'new' ? act(() => post(`/messages/${m.id}`, { status: 'done' }), 'Załatwione') : act(() => post(`/messages/${m.id}`, { status: 'new' }), 'Oznacz jako nowe'),
         act(() => api(`/messages/${m.id}`, { method: 'DELETE' }), 'Usuń', 'danger')));
   }));
