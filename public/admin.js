@@ -742,11 +742,13 @@ loaders.leads = async () => {
   $('#leadTable').replaceChildren(el('table', {},
     el('thead', {}, el('tr', {}, ['Data', 'Instytucja', 'Osoba', 'Kontakt', 'Osób', 'Wiadomość', ''].map((t, i) => el('th', { className: i === 4 ? 'r' : '', textContent: t })))),
     el('tbody', {}, list.map((l) => {
+      // Oferta PDF z progami i wyceną dla podanej liczby osób (jedna wysyłka na zapytanie).
+      const offer = (x) => (x.offerSentAt ? el('span', { className: 'mute', textContent: `oferta ${dd(x.offerSentAt)}` }) : el('button', { className: 'btn sm', textContent: 'Wyślij ofertę PDF', onclick: async (e) => { e.target.disabled = true; try { await post(`/leads/${x.id}/offer`); toast('Oferta wysłana'); loaders.leads(); } catch (z) { toast(z.message); e.target.disabled = false; } } }));
       const del = el('button', { className: 'btn danger sm', textContent: 'Usuń' });
       del.onclick = async () => { if (del.dataset.sure !== '1') { del.dataset.sure = '1'; del.textContent = 'Na pewno?'; return; } try { await api('/leads/' + l.id, { method: 'DELETE' }); loaders.leads(); } catch (x) { toast(x.message); } };
       return el('tr', {}, el('td', { className: 'num', textContent: dd(l.created) }), el('td', { textContent: l.org }), el('td', { textContent: l.name }),
         el('td', {}, el('a', { href: 'mailto:' + l.email, textContent: l.email }), l.phone ? el('div', { className: 'mute', textContent: l.phone }) : ''),
-        el('td', { className: 'r', textContent: l.count || '—' }), el('td', { className: 'mute', textContent: l.msg || '—' }), el('td', { className: 'r' }, del));
+        el('td', { className: 'r', textContent: l.count || '—' }), el('td', { className: 'mute', textContent: l.msg || '—' }), el('td', { className: 'r' }, offer(l), ' ', del));
     }))));
 };
 
