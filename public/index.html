@@ -567,6 +567,13 @@
     <section data-step="3" hidden>
       <p class="hint">Dodaj prace od najnowszej. Każdy punkt obowiązków w nowej linii. Im konkretniej (liczby, wyniki), tym lepsze CV.</p>
       <div id="exp"></div><button type="button" class="btn ghost sm" id="addExp">+ Dodaj stanowisko</button>
+      <label class="check career-on"><input type="checkbox" id="careerOn"> <span>Zmieniam branżę</span></label>
+      <div class="career" id="careerBox" hidden>
+        <p class="hint">Napiszemy CV pod nową branżę: wyżej pokażemy umiejętności, które przenosisz z dotychczasowej pracy. Niczego nie dopisujemy. <a href="/poradnik/cv-przy-zmianie-branzy" target="_blank" rel="noopener">Poradnik: CV przy zmianie branży</a></p>
+        <label class="f">Dotychczasowa branża<input type="text" id="careerFrom" maxlength="120" placeholder="np. gastronomia"></label>
+        <label class="f">Docelowa branża<input type="text" id="careerTo" maxlength="120" placeholder="np. logistyka"></label>
+        <label class="f">Co z obecnych zadań pasuje do nowej pracy?<textarea id="careerFit" rows="3" maxlength="600" placeholder="np. planowanie grafików, przyjmowanie dostaw, rozliczanie kasy"></textarea></label>
+      </div>
     </section>
     <section data-step="4" hidden>
       <h3 class="sh">Wykształcenie</h3><div id="edu"></div><button type="button" class="btn ghost sm" id="addEdu">+ Dodaj szkołę</button>

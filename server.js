@@ -288,6 +288,8 @@ function cleanProfile(p = {}) {
     skills: str(p.skills, 1500), languages: str(p.languages, 500),
     certificates: str(p.certificates, 1000), interests: str(p.interests, 500),
     notes: str(p.notes, 1500),
+    // Zmiana branży (PR U): tylko gdy podano docelową branżę.
+    ...(str(p.career?.to, 120) ? { career: { from: str(p.career.from, 120), to: str(p.career.to, 120), fit: str(p.career.fit, 600) } } : {}),
     photo: typeof p.photo === 'string' && p.photo.length < 400_000 && PHOTO.test(p.photo) ? p.photo : '',
   };
 }
