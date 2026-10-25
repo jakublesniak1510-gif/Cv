@@ -68,7 +68,7 @@ test('Regulamin §5b ust. 4 (4 języki): 10 zł, 50 zł, brak łączenia, e-mail
   for (const [l, re] of [['pl', /otrzymuje 10 zł salda\. Saldo wynosi łącznie najwyżej 50 zł[\s\S]*Saldo nie łączy się z innym kodem rabatowym ani z karnetem\. O każdym naliczeniu salda Klient otrzymuje e-mail[\s\S]*w całości zwrócone, naliczone za nie 10 zł odejmuje się od salda/],
     ['en', /PLN 10 credit\. The credit totals no more than PLN 50[\s\S]*cannot be combined with another discount code or with a pass/], ['de', /Guthaben von 10 PLN[\s\S]*höchstens 50 PLN[\s\S]*nicht mit einem anderen Rabattcode oder einem Pass kombinierbar/],
     ['uk', /10 zł на баланс\. Баланс становить загалом не більше 50 zł[\s\S]*не поєднується з іншим кодом знижки чи з абонементом/]]) assert.match(legalBody('regulamin', l), re, l);
-  assert.match(legalBody('regulamin', 'pl'), /Regulamin obowiązuje od 25 października 2026 r\. Historia zmian: 25 października 2026 r\. – program poleceń/);
+  assert.match(legalBody('regulamin', 'pl'), /Regulamin obowiązuje od 25 października 2026 r\. Historia zmian: (?:[^;]*; )*25 października 2026 r\. – program poleceń/);
   assert.match(legalBody('regulamin', 'de'), /gelten ab dem 25\. Oktober 2026/); assert.match(legalBody('regulamin', 'en'), /effective from 25 October 2026/); assert.match(legalBody('regulamin', 'uk'), /діють з 25 жовтня 2026/);
   // kwoty w regulaminie zgodne z kodem
   assert.equal(REF_REWARD, 1000); assert.equal(REF_CAP, 5000);

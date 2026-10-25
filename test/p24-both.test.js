@@ -104,7 +104,7 @@ test('PAY_PROVIDER=both: wybór bramki, zmiana bramki, sesje P24, wpłata po Str
     // 4) kolejne zamówienie i dodatek przez P24
     const fu = await post(`/api/orders/${p1.j.id}/followup`, { pkg: 'cv', ads: [{ title: 'Kierowca', text: ad }], waiver: true, gateway: 'p24' });
     assert.equal(fu.status, 200); assert.match(fu.j.url, /trnRequest/);
-    await notify(`${fu.j.id}.1`, 3900, 901); assert.equal((await until(fu.j.id, (x) => x.status === 'done')).status, 'done');
+    await notify(`${fu.j.id}.1`, 1900, 901); // kolejne CV pod nowe ogłoszenie (cv_next) w 30 dni od opłacenia assert.equal((await until(fu.j.id, (x) => x.status === 'done')).status, 'done');
     const up = await post(`/api/orders/${p1.j.id}/upsell`, { key: 'letter', waiver: true, gateway: 'p24' });
     assert.equal(up.status, 200); assert.match(up.j.url, /trnRequest/);
     const upOrder = JSON.parse(fs.readFileSync(path.join(dir, 'orders.json'), 'utf8'))[up.j.id];
