@@ -65,7 +65,7 @@ import { seoReportRoutes, seoWeekly } from './lib/seo-report.js';
 import { logEvent, cleanupEvents } from './lib/events.js';
 import { recordStatsSafe } from './lib/stats-agg.js';
 import { leadRoutes, cleanupLeads } from './lib/leads.js';
-import { emailHash, codeDiscount, applyPaidCode, isOwner, CODE_TTL, REF_CAP, reserveCode, releaseCode, staleReservations, CodeError } from './lib/referral.js';
+import { emailHash, codeDiscount, myCodeView, applyPaidCode, isOwner, CODE_TTL, REF_CAP, reserveCode, releaseCode, staleReservations, CodeError } from './lib/referral.js';
 
 const PORT = process.env.PORT || 3000;
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
@@ -733,11 +733,7 @@ app.get('/api/orders/:id', async (req, res) => {
   // Kod klienta (program poleceń): rabat dla znajomych, liczba poleceń i saldo do wykorzystania przez właściciela.
   let myCode = null;
   if (o.status === 'done' && o.myCode) {
-    const c = await codes.get(o.myCode);
-    if (c && Date.now() < c.expires) {
-      const d = codeDiscount(c, o.profile.email), mine = d.error ? 0 : (d.base + d.credit) / 100;
-      myCode = { code: c.id, discount: c.amount / 100, expires: c.expires, uses: (c.usedBy || []).length, referrals: c.referrals || 0, credit: (c.credit || 0) / 100, earned: (c.earned || 0) / 100, mine, usedByMe: !mine };
-    }
+    myCode = myCodeView(await codes.get(o.myCode), o.profile.email);
   }
   const rv = await reviews.get(o.id);
   res.json(view(o, { myCode, review: rv ? { rating: rv.rating, text: rv.text } : null, upsells: offers.map(({ key, name, price, includes }) => ({ key, name, price: price / 100, includes })), upsellBusy }));

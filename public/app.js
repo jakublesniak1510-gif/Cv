@@ -1796,10 +1796,11 @@ function drawUpsell() {
       } })))));
 }
 // Kod klienta: −10 zł dla niego na kolejne zamówienie i dla znajomych (każda osoba raz).
-function drawMyCode() {
-  const box = $('#referral'), k = data.myCode;
+function drawMyCode() { refCard($('#referral'), data.myCode); }
+// Karta poleceń (strona dokumentów i /konto, PR S).
+function refCard(box, k) {
   box.hidden = !k;
-  if (!k) return;
+  if (!k) return box;
   const link = cfg.preview ? `https://twojadomena.pl/?ref=${k.code}` : `${location.origin}/?ref=${k.code}`;
   const uk = (window.I18N?.lang || document.documentElement.lang) === 'uk';
   const share = uk ? `У мене резюме під конкретну вакансію з cvpodogloszenie.pl – з моїм кодом ${k.code} у тебе на ${k.discount} зл дешевше: ${link}` : `Mam CV dopasowane do konkretnego ogłoszenia z cvpodogloszenie.pl – z moim kodem ${k.code} masz ${k.discount} zł taniej: ${link}`;
@@ -1811,6 +1812,7 @@ function drawMyCode() {
       el('div', {}, el('b', { textContent: `${k.mine || 0} zł` }), el('span', { textContent: 'mniej przy Twoim kolejnym zamówieniu' }))),
     el('div', { className: 'refrow' }, el('code', { textContent: k.code }), el('input', { type: 'text', readOnly: true, value: link, ariaLabel: 'Link z kodem dla znajomych', onfocus: (e) => e.target.select() }),
       el('button', { type: 'button', className: 'btn sm', textContent: 'Kopiuj link', onclick: async (e) => { track('refshare'); try { await navigator.clipboard.writeText(link); e.target.textContent = 'Skopiowano'; } catch { e.target.previousSibling.select(); e.target.textContent = 'Zaznaczono, skopiuj'; } } })),
+    el('p', { className: 'ref-friend' }, el('b', { textContent: 'Znajomy też szuka pracy?' }), ' ', el('span', { className: 'hint', textContent: 'Wyślij mu gotową wiadomość z Twoim kodem.' })),
     el('div', { className: 'refshare', onclick: (e) => { if (e.target.closest('a,button')) track('refshare'); } },
       navigator.share ? el('button', { type: 'button', className: 'btn ghost sm', textContent: 'Udostępnij', onclick: () => navigator.share({ title: 'CV Pod Ogłoszenie', text: share, url: link }).catch(() => {}) }) : null,
       el('a', { className: 'btn ghost sm', href: `https://wa.me/?text=${encodeURIComponent(share)}`, target: '_blank', rel: 'noopener', textContent: 'WhatsApp' }),
@@ -1822,6 +1824,7 @@ function drawMyCode() {
       el('a', { className: 'btn ghost sm', href: `mailto:?subject=${encodeURIComponent('CV pod ogłoszenie taniej o ' + k.discount + ' zł')}&body=${encodeURIComponent(share)}`, textContent: 'E-mail' }),
       el('button', { type: 'button', className: 'btn ghost sm', textContent: 'Kopiuj wiadomość', onclick: async (e) => { try { await navigator.clipboard.writeText(share); e.target.textContent = 'Skopiowano'; } catch { e.target.textContent = share; } } }),
       pageLink('program-polecen', { className: 'link', textContent: 'Zasady programu' })));
+  return box;
 }
 
 // Konto jest opcjonalne: po zakupie można je założyć jednym kliknięciem (albo założy się samo, jeśli klient zaznaczył to w zamówieniu).
@@ -2634,6 +2637,7 @@ function accDash(d) {
   wrap.append(
     el('div', { className: 'acct-head' }, el('div', {}, el('h1', { textContent: 'Moje konto' }), el('p', { className: 'hint', textContent: d.email })), out),
     passBox,
+    d.myCode ? refCard(el('section', { className: 'referral acct-card' }), d.myCode) : null,
     el('div', { className: 'acct-card' }, el('h2', { textContent: 'Twoje zamówienia' }), el('p', { className: 'hint', textContent: 'Zamówienia z ostatnich 30 dni (starsze usuwamy automatycznie razem z dokumentami).' }),
       // Kolejne CV z danymi z ostatniego zamówienia (formularz „Masz kolejne ogłoszenia?” na stronie dokumentów, z prefillem).
       d.orders.length ? el('p', {}, el('a', { className: 'btn sm', href: `/?id=${d.orders[0].id}#kolejne`, textContent: 'Zrób kolejne CV pod nowe ogłoszenie w 2 minuty – dane już są' })) : null,
