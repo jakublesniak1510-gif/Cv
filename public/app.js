@@ -1296,17 +1296,22 @@ function toolCheck(box, ats) {
   };
   box.classList.remove('tool-box'); box.append(form, result, scanBox);
 }
+// Test A/B „scanner” (lib/ab.js): w wariancie B serwer zwraca tylko 3 pierwsze braki (missingMore = reszta) i bez wskazówek.
+const scanCta = () => { track('scancta'); fromScan(); };
+const moreReqs = (n) => (n === 1 ? 'kolejne wymaganie uwzględnimy w CV pod to ogłoszenie' : n >= 2 && n <= 4 ? 'kolejne wymagania uwzględnimy w CV pod to ogłoszenie' : 'kolejnych wymagań uwzględnimy w CV pod to ogłoszenie');
 function renderScan(j, box = $('#scanResult')) {
-  const total = j.found.length + j.missing.length, pct = j.score ?? 0;
-  box.replaceChildren(
+  const more = j.missingMore || 0, total = j.found.length + j.missing.length + more, pct = j.score ?? 0, b = j.variant === 'B';
+  box.replaceChildren(...[ // null (brak wskazówek, brak scanId) pomijamy – replaceChildren wstawiłby tekst „null”
     el('div', { className: 'ring-col' }, el('div', { className: 'ring', style: `--p:${pct}` }, el('b', { textContent: `${pct}%` })),
-      el('button', { type: 'button', className: 'btn sm scan-cta', onclick: fromScan }, el('span', { textContent: 'Zrób CV dopasowane do tego ogłoszenia – od' }), ` ${PRICE.cv} zł`)),
+      el('button', { type: 'button', className: 'btn sm scan-cta', onclick: scanCta }, el('span', { textContent: 'Zrób CV dopasowane do tego ogłoszenia – od' }), ` ${PRICE.cv} zł`)),
     el('div', { className: 'mcol ok' }, el('h3', { textContent: `Spełniasz ${j.found.length} z ${total} wymagań${j.position ? ': ' + j.position : ''}` }), el('ul', {}, ...j.found.map((x) => el('li', { textContent: x })))),
-    el('div', { className: 'mcol miss' }, el('h3', { textContent: j.missing.length ? 'Czego nie widać w Twoim CV' : 'Niczego nie brakuje' }), el('ul', {}, ...j.missing.map((m) => el('li', {}, el('b', { textContent: m.keyword }), el('small', { textContent: m.hint }))))),
+    el('div', { className: 'mcol miss' }, el('h3', { textContent: j.missing.length ? 'Czego nie widać w Twoim CV' : 'Niczego nie brakuje' }), el('ul', {}, ...j.missing.map((m) => el('li', {}, el('b', { textContent: m.keyword }), el('small', { textContent: m.hint })))),
+      more ? el('p', { className: 'scan-more' }, `+${more} `, el('span', { textContent: moreReqs(more) })) : null),
     j.tips?.length ? el('div', { className: 'tips' }, el('h3', { textContent: 'Co poprawić' }), el('ol', {}, ...j.tips.map((t) => el('li', { textContent: t })))) : null,
+    b ? el('div', { className: 'tips scan-tips-b' }, el('p', {}, el('span', { textContent: 'Wskazówki i gotowe sformułowania dostaniesz razem z CV pod to ogłoszenie – od' }), ` ${PRICE.cv} zł`), el('button', { type: 'button', className: 'btn sm scan-cta', onclick: scanCta }, el('span', { textContent: 'Zrób CV dopasowane do tego ogłoszenia – od' }), ` ${PRICE.cv} zł`)) : null,
     el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Zrób CV pisane pod to ogłoszenie' }), el('p', { className: 'hint', textContent: 'Uzupełnimy formularz danymi z Twojego pliku, ułożymy CV pod te wymagania, a brakujące rzeczy, które masz, dopiszesz jednym kliknięciem. Od 39 zł, z darmową poprawką.' })),
-      el('button', { type: 'button', className: 'btn', textContent: 'Zrób CV pod to ogłoszenie', onclick: fromScan })),
-    j.scanId ? scanShare(j.scanId) : null, j.scanId ? scanMailForm(j.scanId) : null);
+      el('button', { type: 'button', className: 'btn', textContent: 'Zrób CV pod to ogłoszenie', onclick: scanCta })),
+    j.scanId ? scanShare(j.scanId) : null, j.scanId ? scanMailForm(j.scanId) : null].filter(Boolean));
   box.hidden = false; box.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
 }
 // Karta wyniku do udostępnienia (/wynik/<id>): procent bierze serwer z zapamiętanego wyniku (scanId), z przeglądarki idzie tylko

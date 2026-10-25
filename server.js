@@ -35,6 +35,7 @@ import { b2bMonthly } from './lib/b2b-monthly.js';
 import { crmHourly } from './lib/crm.js';
 import { growthRoutes, welcomeSeries, telegramHourly, rememberScan } from './lib/growth.js';
 import { tpCsp } from './lib/trustpilot.js';
+import { scannerVariant, scanForVariant } from './lib/ab.js';
 import { shareImgRoute } from './lib/share-img.js';
 import { shareRoutes, cleanupShareCards } from './lib/share.js';
 import { sendPurchase, adContext } from './lib/capi.js';
@@ -55,7 +56,7 @@ import { officialRoutes } from './lib/official.js';
 import { employerRoutes } from './lib/employers.js';
 import { fairRoutes } from './lib/fairs.js';
 import { previewRoutes, previewFor, cleanupPreviews } from './lib/preview.js';
-import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText, visitInfo, funnelPaid, countEvent } from './lib/analytics.js';
+import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText, visitInfo, funnelPaid, countEvent, funnelOrder, abExpose } from './lib/analytics.js';
 import { seoReportRoutes, seoWeekly } from './lib/seo-report.js';
 import { logEvent, cleanupEvents } from './lib/events.js';
 import { recordStatsSafe } from './lib/stats-agg.js';
@@ -180,10 +181,13 @@ app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
       cvText = await extractText(buf);
     }
     if (cvText.length < 60) return res.status(400).json({ error: 'CV jest za krótkie, żeby je ocenić.' });
-    const { company, ...result } = await scanCv({ cvText, adText });
-    res.json({ ...result, scanId: rememberScan({ ...result, company }) });
+    const { company, ...full } = await scanCv({ cvText, adText });
+    // Test A/B „scanner” (lib/ab.js): w wariancie B obcięty wynik już w odpowiedzi i w pamięci (e-mail, karta).
+    const variant = scannerVariant(req), result = scanForVariant(full, variant);
+    res.json({ ...result, scanId: rememberScan({ ...result, company }), ...(variant ? { variant } : {}) });
+    if (variant) abExpose(req, { scanner: variant }, 'scan_done').catch(() => {});
     // Anonimowe liczniki wymagań (bez treści CV i ogłoszenia); firma służy tylko do odfiltrowania jej nazwy.
-    recordStatsSafe({ title: `${result.position} | ${adText.split('\n').find((l) => l.trim()) || ''}`.slice(0, 200), company, found: result.found, missing: result.missing });
+    recordStatsSafe({ title: `${full.position} | ${adText.split('\n').find((l) => l.trim()) || ''}`.slice(0, 200), company, found: full.found, missing: full.missing });
   } catch (e) { console.error('Skaner', e.message); logEvent('skaner', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się ocenić CV. Spróbuj ponownie.' }); }
 });
 
@@ -636,6 +640,7 @@ app.post('/api/orders', async (req, res) => {
     }
     if (draftToken) { const ref = await draftOrdered(String(draftToken)).catch(() => null); if (ref) order.draftRef = ref; } // bez przypomnienia o szkicu po złożeniu zamówienia
     await saveOrder(order);
+    funnelOrder(order).catch(() => {}); // test „scanner”: etap „zamówienie” per wariant
     res.json(await openPayment(order, req.body?.gateway));
   } catch (e) { if (!(e instanceof PayOpenError)) console.error(e); res.status(e instanceof PayOpenError ? 502 : 400).json({ error: e.message || 'Błąd' }); }
 });
