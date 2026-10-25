@@ -839,6 +839,10 @@ main[tabindex="-1"]:focus,[role=main][tabindex="-1"]:focus{outline:none}
 .hw-report td:last-child,.hw-report th:last-child{text-align:center;color:#0B6B4E;font-weight:700}
 .hw-list{padding-left:20px;display:grid;gap:6px}
 .more-link{margin-top:18px}.more-link a{font-weight:600;color:var(--brand)}
+/* Film demo w „Jak to działa”: bez autoodtwarzania, preload="none" (nie wpływa na LCP); notka o polskich napisach tylko w EN/DE/UK. */
+.demo-film{margin:22px 0 0}.demo-film figcaption{margin-bottom:8px}.demo-film figcaption a{font-weight:600;color:var(--brand)}
+.demo-film .nopl{color:var(--mute);font-size:.9em}html[lang="pl"] .demo-film .nopl{display:none}
+.demo-film video{display:block;width:100%;max-width:760px;height:auto;aspect-ratio:16/9;border-radius:12px;background:#0f172a}
 .hw .tbl-wrap{overflow-x:auto;margin:12px 0 8px}
 .hero-rating{display:inline-flex;align-items:center;gap:4px;margin-top:14px;font-size:15px;color:var(--ink);text-decoration:none}.hero-rating .stars{color:#E8A400;letter-spacing:1px}.hero-rating:hover b{text-decoration:underline}
 .hw .lead .hw-tag{display:inline-block;vertical-align:middle;margin:0 8px 2px 0}

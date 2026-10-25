@@ -639,6 +639,8 @@ function drawExView() {
 }
 function openEx(i = 0, d) { exI = i; exDoc = 'cv'; if (d) Object.assign(exDesign, d); designPicker($('#exDesign'), exDesign, () => drawExView(), { thumbs: false }); drawExView(); modal(true); $('#exview').hidden = false; $('.exv-body').scrollTop = 0; setTimeout(() => $('#exClose').focus(), 0); }
 const closeEx = () => { $('#exview').hidden = true; modal(false); };
+// Film demo („Jak to działa”): link nad filmem przewija do niego i uruchamia odtwarzanie (bez autoodtwarzania).
+document.addEventListener('click', (e) => { if (!e.target.closest('#demoFilmLink')) return; e.preventDefault(); const v = $('#demoFilm'); v.scrollIntoView({ behavior: 'smooth', block: 'center' }); v.play().catch(() => {}); });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-example]'); if (b) openEx(+b.dataset.example || 0); });
 $('#exClose').onclick = closeEx;
 $('#exCta').onclick = () => { closeEx(); lastFocus = null; openWiz(); };
