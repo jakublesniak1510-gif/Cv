@@ -1632,5 +1632,13 @@
 "CV pod zawód (bez ogłoszenia) zamawiasz jako jedno CV bez listu. Gdy znajdziesz ogłoszenie, zamów CV z listem pod tę ofertę.": "Резюме під професію (без оголошення) замовляється як одне резюме без листа. Коли знайдете оголошення, замовте резюме з листом під цю вакансію.",
 "Typowe wymagania w ogłoszeniach: {0}. Odznacz to, czego nie dotyczy – CV i tak pokaże tylko to, co wpiszesz o sobie.": "Типові вимоги в оголошеннях: {0}. Зніміть позначки з того, що вас не стосується – резюме все одно покаже лише те, що ви напишете про себе.",
 "Nie mamy listy dla „{0}”. Typowe wymagania tego zawodu dobierzemy przy pisaniu CV.": "Для «{0}» у нас немає списку. Типові вимоги цієї професії доберемо під час написання резюме.",
-"To CV nie jest dopasowane do konkretnego pracodawcy – gdy znajdziesz ogłoszenie, zamów CV pod ofertę.": "Це резюме не адаптоване до конкретного роботодавця – коли знайдете оголошення, замовте резюме під вакансію."
+"To CV nie jest dopasowane do konkretnego pracodawcy – gdy znajdziesz ogłoszenie, zamów CV pod ofertę.": "Це резюме не адаптоване до конкретного роботодавця – коли знайдете оголошення, замовте резюме під вакансію.",
+"Obrazek z wynikiem: procent i po 3 wymagania z ogłoszenia, bez danych z Twojego CV.": "Зображення з результатом: відсоток і по 3 вимоги з оголошення, без даних з вашого резюме.",
+"Udostępnij obrazek (post)": "Поділитися зображенням (допис)",
+"Udostępnij obrazek (relacja)": "Поділитися зображенням (сторіс)",
+"Pobierz obrazek (post)": "Завантажити зображення (допис)",
+"Pobierz obrazek (relacja)": "Завантажити зображення (сторіс)",
+"Obrazek zapisany. Dodaj go do posta albo relacji.": "Зображення збережено. Додайте його до допису або сторіс.",
+"Nie udało się przygotować obrazka.": "Не вдалося підготувати зображення.",
+"Limit obrazków na godzinę. Spróbuj później.": "Ліміт зображень на годину. Спробуйте пізніше."
 }

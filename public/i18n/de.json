@@ -1632,5 +1632,13 @@
 "CV pod zawód (bez ogłoszenia) zamawiasz jako jedno CV bez listu. Gdy znajdziesz ogłoszenie, zamów CV z listem pod tę ofertę.": "Einen Lebenslauf für einen Beruf (ohne Anzeige) bestellen Sie als einen Lebenslauf ohne Anschreiben. Wenn Sie eine Anzeige finden, bestellen Sie Lebenslauf und Anschreiben für dieses Angebot.",
 "Typowe wymagania w ogłoszeniach: {0}. Odznacz to, czego nie dotyczy – CV i tak pokaże tylko to, co wpiszesz o sobie.": "Typische Anforderungen in Stellenanzeigen: {0}. Entfernen Sie die Haken bei allem, was nicht zutrifft – der Lebenslauf zeigt ohnehin nur, was Sie über sich angeben.",
 "Nie mamy listy dla „{0}”. Typowe wymagania tego zawodu dobierzemy przy pisaniu CV.": "Für „{0}“ haben wir keine Liste. Die typischen Anforderungen dieses Berufs wählen wir beim Schreiben des Lebenslaufs.",
-"To CV nie jest dopasowane do konkretnego pracodawcy – gdy znajdziesz ogłoszenie, zamów CV pod ofertę.": "Dieser Lebenslauf ist nicht auf einen bestimmten Arbeitgeber zugeschnitten – wenn Sie eine Anzeige finden, bestellen Sie einen Lebenslauf für dieses Angebot."
+"To CV nie jest dopasowane do konkretnego pracodawcy – gdy znajdziesz ogłoszenie, zamów CV pod ofertę.": "Dieser Lebenslauf ist nicht auf einen bestimmten Arbeitgeber zugeschnitten – wenn Sie eine Anzeige finden, bestellen Sie einen Lebenslauf für dieses Angebot.",
+"Obrazek z wynikiem: procent i po 3 wymagania z ogłoszenia, bez danych z Twojego CV.": "Ergebnisbild: Prozentwert und je 3 Anforderungen aus der Anzeige, ohne Daten aus Ihrem Lebenslauf.",
+"Udostępnij obrazek (post)": "Bild teilen (Beitrag)",
+"Udostępnij obrazek (relacja)": "Bild teilen (Story)",
+"Pobierz obrazek (post)": "Bild herunterladen (Beitrag)",
+"Pobierz obrazek (relacja)": "Bild herunterladen (Story)",
+"Obrazek zapisany. Dodaj go do posta albo relacji.": "Bild gespeichert. Fügen Sie es einem Beitrag oder einer Story hinzu.",
+"Nie udało się przygotować obrazka.": "Das Bild konnte nicht erstellt werden.",
+"Limit obrazków na godzinę. Spróbuj później.": "Stündliches Bildlimit erreicht. Bitte später erneut versuchen."
 }
