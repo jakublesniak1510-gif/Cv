@@ -35,6 +35,6 @@ test('Serwer, strona dokumentów, cennik, raport sprzedaży i regulamin (4 języ
   assert.match(read('lib/ops.js'), /x\.key === 'cv_next' \? 'Kolejne CV pod nowe ogłoszenie'/);
   assert.match(legalBody('regulamin', 'pl'), /Pozycja nie łączy się z kodami rabatowymi ani saldem programu poleceń i nie obejmuje pakietu „Pewna rozmowa”/);
   for (const [l, re] of [['pl', /Kolejne CV pod nowe ogłoszenie – 19 zł \(z listem motywacyjnym – 29 zł\): stała pozycja cennika/], ['en', /Another CV for a new job advertisement – PLN 19 \(with a cover letter – PLN 29\): a standard price-list item/], ['de', /Weiterer Lebenslauf für eine neue Stellenanzeige – 19 PLN \(mit Anschreiben – 29 PLN\)/], ['uk', /Наступне резюме під нове оголошення — 19 zł \(із супровідним листом — 29 zł\)/]]) assert.match(legalBody('regulamin', l), re, l);
-  assert.match(legalBody('regulamin', 'pl'), /Historia zmian: 25 października 2026 r\. – nowa pozycja cennika „Kolejne CV pod nowe ogłoszenie” \(§4 ust\. 1\)/);
+  assert.match(legalBody('regulamin', 'pl'), /Historia zmian: (?:[^;]*; )*25 października 2026 r\. – nowa pozycja cennika „Kolejne CV pod nowe ogłoszenie” \(§4 ust\. 1\)/);
   for (const l of ['en', 'de', 'uk']) assert.ok(JSON.parse(read(`public/i18n/${l}.json`))['Kolejne CV pod nowe ogłoszenie dla klientów:'], l);
 });

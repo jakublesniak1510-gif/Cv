@@ -14,6 +14,7 @@ import { nextEligible, hasBundle, calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOU
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads, removeOrder } from './lib/store.js';
 import { heardInput } from './lib/heard.js';
 import { docFile } from './lib/doc-names.js';
+import { cvToText } from './lib/cv-text.js';
 import { generateForAd, generateFreeQs, generateMessages, linkedinChecked, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
 import { checkResult, hasCritical, recordQa, QA_LABELS } from './lib/qa.js';
@@ -1024,6 +1025,13 @@ const doneOrder = async (req, res) => {
   if (!(i >= 0 && i < o.results.length)) { res.status(400).json({ error: 'Nieznany dokument.' }); return null; }
   return { o, i };
 };
+
+// Wersja ATS .txt (PR Q): bezpłatna przy każdym gotowym CV, także w wersjach językowych.
+app.get('/api/orders/:id/txt/:i', async (req, res) => {
+  const d = await doneOrder(req, res); if (!d) return;
+  const base = d.o.results[d.i], r = base.variants?.[str(req.query.lang, 5)] || base;
+  res.set({ 'Content-Type': 'text/plain; charset=utf-8', 'Content-Disposition': `attachment; filename="${docFile('cv', r.cv?.name || d.o.profile?.name, base.position, r.lang, 'txt')}"` }).send(cvToText(r));
+});
 
 // Dodatek „Word”: edytowalne CV lub list (.docx) dla wybranego dokumentu i wersji językowej.
 app.get('/api/orders/:id/docx/:i', async (req, res) => {

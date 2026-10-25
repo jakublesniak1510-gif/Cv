@@ -867,6 +867,8 @@
 "Strona główna": "Головна",
 "CV dla zawodów": "Резюме для професій",
 "Słowa kluczowe z ogłoszeń": "Ключові слова з оголошень",
+"Oferty pracy": "Вакансії",
+"Linki prowadzą do wyników wyszukiwania na portalach z ofertami pracy i otwierają się w nowej karcie. Nie odpowiadamy za treść ogłoszeń.": "Посилання ведуть до результатів пошуку на польських порталах вакансій і відкриваються в новій вкладці. Ми не відповідаємо за зміст оголошень.",
 "Te sformułowania często pojawiają się w ofertach. Jeśli to prawda o Tobie, użyj ich w CV w takim samym brzmieniu.": "Ці формулювання часто трапляються у вакансіях. Якщо це правда про вас, використайте їх у резюме саме в такому вигляді.",
 "Wskazówki do CV": "Поради до резюме",
 "Przykładowe CV": "Приклад резюме",
@@ -1694,5 +1696,7 @@
 "CV dla zawodu: {0}": "Резюме для професії: {0}",
 "Skanujesz CV na:": "Ви перевіряєте резюме на посаду:",
 "Jak napisać CV dla tego zawodu": "Як написати резюме для цієї професії",
-"Wiadomość do rekrutera na LinkedIn i gotowy e-mail z aplikacją pod każde CV z tego zamówienia.": "Повідомлення рекрутеру в LinkedIn і готовий лист із заявкою до кожного резюме з цього замовлення."
+"Wiadomość do rekrutera na LinkedIn i gotowy e-mail z aplikacją pod każde CV z tego zamówienia.": "Повідомлення рекрутеру в LinkedIn і готовий лист із заявкою до кожного резюме з цього замовлення.",
+"Pobierz .txt (ATS)": "Завантажити .txt (ATS)",
+"W podglądzie pobieranie pliku .txt jest wyłączone.": "У попередньому перегляді завантаження файлу .txt вимкнено."
 }
