@@ -1632,5 +1632,13 @@
 "CV pod zawód (bez ogłoszenia) zamawiasz jako jedno CV bez listu. Gdy znajdziesz ogłoszenie, zamów CV z listem pod tę ofertę.": "A CV for a job type (without an ad) is ordered as one CV without a cover letter. When you find an ad, order a CV with a cover letter for that offer.",
 "Typowe wymagania w ogłoszeniach: {0}. Odznacz to, czego nie dotyczy – CV i tak pokaże tylko to, co wpiszesz o sobie.": "Typical requirements in job ads: {0}. Untick anything that does not apply – the CV will only show what you enter about yourself anyway.",
 "Nie mamy listy dla „{0}”. Typowe wymagania tego zawodu dobierzemy przy pisaniu CV.": "We do not have a list for “{0}”. We will choose the typical requirements of this job when writing the CV.",
-"To CV nie jest dopasowane do konkretnego pracodawcy – gdy znajdziesz ogłoszenie, zamów CV pod ofertę.": "This CV is not tailored to a specific employer – when you find a job ad, order a CV for that offer."
+"To CV nie jest dopasowane do konkretnego pracodawcy – gdy znajdziesz ogłoszenie, zamów CV pod ofertę.": "This CV is not tailored to a specific employer – when you find a job ad, order a CV for that offer.",
+"Obrazek z wynikiem: procent i po 3 wymagania z ogłoszenia, bez danych z Twojego CV.": "Result image: the percentage and 3 requirements from the job ad each, no data from your CV.",
+"Udostępnij obrazek (post)": "Share image (post)",
+"Udostępnij obrazek (relacja)": "Share image (story)",
+"Pobierz obrazek (post)": "Download image (post)",
+"Pobierz obrazek (relacja)": "Download image (story)",
+"Obrazek zapisany. Dodaj go do posta albo relacji.": "Image saved. Add it to a post or story.",
+"Nie udało się przygotować obrazka.": "Could not prepare the image.",
+"Limit obrazków na godzinę. Spróbuj później.": "Hourly image limit reached. Please try again later."
 }
