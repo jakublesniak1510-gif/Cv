@@ -1086,6 +1086,7 @@ $('#wantAlerts').onchange = () => {
 $('#wantInv').onchange = () => { $('#invBox').hidden = !$('#wantInv').checked; if ($('#wantInv').checked) $('#invName').focus(); };
 function validate(n) {
   const v = (id) => $('#' + id).value.trim();
+  if (n === 3 && $('#careerOn').checked && !v('careerTo')) return 'Wpisz docelową branżę albo odznacz „Zmieniam branżę”.';
   if (n === 2 && $('#rewriteMode').checked && !imported) return 'Wgraj swoje CV (PDF lub Word): w trybie „Mam już CV” zachowujemy jego treść i kolejność.';
   if (n === 2) { if (!v('name')) return 'Podaj imię i nazwisko.'; if (!/^\S+@\S+\.\S+$/.test(v('email'))) return 'Podaj poprawny adres e-mail.'; }
   if (n === 4 && !rows('exp').some((e) => e.title || e.company) && !rows('edu').some((e) => e.school)) return 'Dodaj co najmniej jedno stanowisko (krok 3) lub szkołę.';
@@ -1143,7 +1144,7 @@ $('#wizForm').onsubmit = async (e) => {
   const body = {
     draftToken: srvToken() || undefined,
     ...($('#rewriteMode').checked ? { mode: 'rewrite' } : {}), usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, ...(CHECKOUT_B ? { consentForm: 'compact' } : {}), gateway: gwValue($('#gwBox')), outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
-    profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
+    profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), ...($('#careerOn').checked ? { career: { from: v('careerFrom'), to: v('careerTo'), fit: v('careerFit') } } : {}), experience: rows('exp'), education: rows('edu'), photo },
   };
   // Zgoda na cookies reklamowe (baner): tylko wtedy serwer zgłosi zakup do Meta (Conversions API) z identyfikatorami piksela.
   try { if (localStorage.getItem('cvpo-consent') === 'granted') { const ck = (n) => (document.cookie.match(new RegExp('(?:^|; )' + n + '=([^;]*)')) || [])[1]; Object.assign(body, { adConsent: true, fbp: ck('_fbp'), fbc: ck('_fbc') }); } } catch {}
@@ -1195,6 +1196,7 @@ $('#importFile').onchange = async (e) => {
 };
 // Tryb „Mam już CV” (PR T): wymaga wgranego CV; zamówienie z mode: 'rewrite' (generator zachowuje treść i kolejność).
 let imported = false;
+$('#careerOn').onchange = () => { $('#careerBox').hidden = !$('#careerOn').checked; };
 $('#rewriteMode').onchange = () => { $('#rewriteNote').hidden = !$('#rewriteMode').checked; };
 async function importData(b64) {
   const st = $('#importStatus'); st.className = 'fstatus';
