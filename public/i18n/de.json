@@ -1640,5 +1640,6 @@
 "Pobierz obrazek (relacja)": "Bild herunterladen (Story)",
 "Obrazek zapisany. Dodaj go do posta albo relacji.": "Bild gespeichert. Fügen Sie es einem Beitrag oder einer Story hinzu.",
 "Nie udało się przygotować obrazka.": "Das Bild konnte nicht erstellt werden.",
-"Limit obrazków na godzinę. Spróbuj później.": "Stündliches Bildlimit erreicht. Bitte später erneut versuchen."
+"Limit obrazków na godzinę. Spróbuj później.": "Stündliches Bildlimit erreicht. Bitte später erneut versuchen.",
+"Na karcie pokażemy procent dopasowania, to stanowisko, datę i po 3 ogólne wymagania z ogłoszenia (do obrazka). Bez treści CV i danych kontaktowych. Link działa 30 dni.": "Die Karte zeigt den Prozentwert, diese Stellenbezeichnung, das Datum und je 3 allgemeine Anforderungen aus der Anzeige (für das Bild). Ohne Lebenslauftext und Kontaktdaten. Der Link gilt 30 Tage."
 }
