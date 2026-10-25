@@ -53,6 +53,7 @@ import { accountRoutes, accountHourly } from './lib/account.js';
 import { templateRoutes } from './lib/templates.js';
 import { abroadRoutes } from './lib/abroad.js';
 import { officialRoutes } from './lib/official.js';
+import { portalRoutes } from './lib/portals.js';
 import { employerRoutes } from './lib/employers.js';
 import { fairRoutes } from './lib/fairs.js';
 import { previewRoutes, previewFor, cleanupPreviews } from './lib/preview.js';
@@ -257,6 +258,7 @@ landingRoutes(app, BASE_URL); // /kreator-cv i case study „Jedno CV, dwa ogło
 templateRoutes(app, BASE_URL);
 abroadRoutes(app, BASE_URL);
 officialRoutes(app, BASE_URL);
+portalRoutes(app, BASE_URL); // „CV pod ogłoszenie z <portal>” (lib/portals.js)
 employerRoutes(app, BASE_URL);
 // Stary adres oferty dla instytucji (z ulotek i wyszukiwarek) → strona dla firm i instytucji.
 app.get('/dla-instytucji', (_req, res) => res.redirect(301, '/dla-firm'));
