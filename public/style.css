@@ -986,3 +986,6 @@ ul.checklist{list-style:none;padding-left:0}
 @media (max-width:600px){.b2b-prices tr:first-child{display:none}.b2b-prices,.b2b-prices tbody{display:block}.b2b-prices tr{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:12px 0;border-bottom:1px solid var(--line)}.b2b-prices td{display:block;border:0;padding:0}.b2b-prices td:first-child{grid-column:1/-1;font-weight:600}.b2b-prices .m-tier{display:block;font-size:12px;color:var(--mute)}}
 .hero-today{margin:12px 0 0;font-size:15px;font-weight:600;color:var(--ink)}
 .wiz-today{margin:0 0 12px;font-size:14px;font-weight:600}
+.heard{margin:14px 0;text-align:left}.heard p{margin:0 0 8px}.heard-opts{display:flex;flex-wrap:wrap;gap:8px}.heard input{width:100%;max-width:360px;margin:0 0 10px}
+.heard.card-lite{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--card,#fff)}
+.tool-scan{margin:20px 0}.tool-scan .prof-cta{margin:0;display:flex;flex-wrap:wrap;gap:8px}.tool-ctx{margin:0 0 12px;font-size:15px}

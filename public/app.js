@@ -1456,6 +1456,22 @@ function startResult(id) {
   $('#genTitle').textContent = 'Piszemy Twoje dokumenty'; window.scrollTo(0, 0);
   clearTimeout(timer); poll();
 }
+// „Skąd nas znasz?” (PR O, lib/heard.js): po płatności, jedno kliknięcie, opcjonalne; raz na zamówienie.
+const HEARD = [['google', 'Google'], ['reklama', 'Reklama (Facebook, Instagram)'], ['tiktok_youtube', 'TikTok / YouTube'], ['znajomy', 'Od znajomego'], ['pinterest', 'Pinterest'], ['inne', 'Inne']];
+function drawHeard(box) {
+  const other = ['#heardGen', '#heardRes'].map((x) => $(x)).filter((x) => x && x !== box);
+  if (!data || data.heard || data.status === 'pending' || data.upsellOf || cfg.preview) { box.hidden = true; return; }
+  if (box.dataset.ready) { box.hidden = false; return; }
+  box.dataset.ready = '1'; box.hidden = false; other.forEach((x) => { x.hidden = true; x.dataset.ready = ''; });
+  const text = el('input', { type: 'text', maxLength: 80, placeholder: 'Dopisz, jeśli chcesz (opcjonalnie)', ariaLabel: 'Dopisek (opcjonalnie)' });
+  const send = async (src) => {
+    box.querySelectorAll('button').forEach((b) => (b.disabled = true));
+    try { await fetch(`/api/orders/${orderId}/heard`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ src, text: text.value }) }); } catch {}
+    data.heard = true; box.replaceChildren(el('p', { className: 'hint', textContent: 'Dziękujemy za odpowiedź!' }));
+  };
+  box.replaceChildren(el('p', {}, el('b', { textContent: 'Skąd nas znasz?' }), ' ', el('span', { className: 'hint', textContent: 'Jedno kliknięcie, pytanie opcjonalne.' })),
+    text, el('div', { className: 'heard-opts' }, ...HEARD.map(([k, t]) => el('button', { type: 'button', className: 'btn ghost sm', textContent: t, onclick: () => send(k) }))));
+}
 async function poll() {
   let r; try { r = await fetch(`/api/orders/${orderId}`); } catch { r = null; }
   if (!r || !r.ok) { $('#genTitle').textContent = 'Nie znaleziono zamówienia'; $('#genMsg').textContent = 'Sprawdź link lub wróć na stronę główną.'; return; }
@@ -1464,6 +1480,7 @@ async function poll() {
   // Zakup do statystyk reklam (tylko za zgodą na cookie, raz na zamówienie, tuż po płatności).
   if (data.status !== 'pending' && data.total > 0 && data.paidAt && Date.now() - data.paidAt < 864e5) window.CONSENT?.purchase(data.id, data.total / 100);
   if (data.status === 'done') { $('#gen').hidden = true; return showResult(); }
+  drawHeard($('#heardGen'));
   if (data.status === 'paid') { $('#genTitle').textContent = 'Dokumenty są w przygotowaniu'; $('#genMsg').textContent = 'Mamy chwilowe opóźnienie. Płatność jest zachowana, a gotowe dokumenty wyślemy na Twój e-mail, zwykle w ciągu kilku godzin. Możesz zamknąć tę stronę albo spróbować ponownie.'; $('#retry').hidden = false; timer = setTimeout(poll, 60000); return; }
   if (data.status === 'pending' && data.canPay && ++pendingPolls >= 4) { $('#genTitle').textContent = 'Płatność nie jest jeszcze potwierdzona'; $('#genMsg').textContent = 'Jeśli przerwałeś płatność albo zamknąłeś okno banku, możesz ją dokończyć. Jeśli zapłaciłeś, poczekaj chwilę: potwierdzenie może przyjść z opóźnieniem.'; $('#payAgain').hidden = false; if (!$('#payAgainGw').childElementCount) gwPicker($('#payAgainGw'), 'gwa', data.gateway || undefined); timer = setTimeout(poll, 5000); return; }
   $('#genMsg').textContent = data.status === 'pending' ? 'Czekamy na potwierdzenie płatności…' : 'To zajmie około minuty. Nie zamykaj tej strony. Gotowe dokumenty wyślemy też na Twój e-mail.';
@@ -1847,6 +1864,8 @@ let redraw = () => {};
 function showResult() {
   clearDraft(); try { localStorage.removeItem(REF_KEY); } catch {}
   $('#result').hidden = false; window.scrollTo(0, 0);
+  // Pytanie na stronie dokumentów tylko w pierwszej dobie po płatności (później nie wraca).
+  if (data.paidAt && Date.now() - data.paidAt < 864e5) drawHeard($('#heardRes')); else $('#heardRes').hidden = true;
   curAd = Math.min(curAd, data.results.length - 1);
   const draw = () => {
     const base = data.results[curAd], vl = Object.keys(base.variants || {});
@@ -2234,6 +2253,7 @@ function toolQuiz(box, out, C) {
       el('div', { className: 'quiz-res' }, ...ranked.map(({ p, v, s }, i) => el('div', { className: 'quiz-card' }, el('small', { textContent: `${i + 1}. dopasowanie ${Math.round(s * 100)}%` }), el('b', { textContent: p.name }),
         el('p', { className: 'hint', textContent: 'Ten zawód to: ' + Object.keys(v).map((k) => TRAITS[k]).join(', ') + '.' }), pageLink(`cv/${p.slug}`, { className: 'btn ghost sm', textContent: 'Jak napisać CV' })))),
       el('p', { className: 'hint', textContent: 'Wynik to podpowiedź, a nie test psychologiczny. Sprawdź ogłoszenia w tych zawodach i wybierz to, co Cię ciekawi.' }));
+    window.__toolCtx?.(ranked[0]?.p); // najlepiej dopasowany zawód → blok „Sprawdź też swoje CV”
     out.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   box.append(...qs, el('div', {}, el('button', { type: 'button', className: 'btn', textContent: 'Pokaż wynik', onclick: show })), status, out);
@@ -2281,6 +2301,23 @@ Z poważaniem,
 ${n}`;
 }
 // --- koniec thankYouText ---
+// PR H: blok „Sprawdź też swoje CV” na narzędziach (poza skanerem i narzędziami do CV, które mają własne linki).
+// Zawód znany z narzędzia (quiz „Jaki zawód”) trafia do skanera (?zawod=) i daje link do strony zawodu. Klik → beacon „toolscan”.
+const NO_SCAN_BLOCK = new Set(['skaner-cv', 'sprawdz-cv', 'test-cv-ats']);
+function toolScanBlock(slug) {
+  const links = el('p', { className: 'prof-cta' });
+  const draw = (p) => links.replaceChildren(
+    el('a', { className: 'btn ghost', href: pageHref('narzedzia/skaner-cv') + (p ? `?zawod=${encodeURIComponent(p.slug)}` : ''), textContent: 'Sprawdź CV za darmo', onclick: () => track('toolscan', { t: slug }) }),
+    ...(p ? [' ', pageLink(`cv/${p.slug}`, { className: 'btn ghost', textContent: `CV dla zawodu: ${p.name}` })] : []));
+  draw(null);
+  window.__toolCtx = draw;
+  return el('div', { className: 'cta-box tool-scan' }, el('div', {}, el('b', { textContent: 'Sprawdź też swoje CV' }), el('p', { className: 'hint', textContent: 'Darmowy skaner porówna Twoje CV z ogłoszeniem o pracę i pokaże, których wymagań z ogłoszenia nie widać w CV.' })), links);
+}
+// Skaner otwarty z narzędzia z zawodem (?zawod=<slug>): tylko podpowiedź i link do strony zawodu, skanowanie bez zmian.
+function scanCtxHint(C) {
+  const z = new URLSearchParams(location.search).get('zawod'), p = z && (C.INDEX || []).find((x) => x.slug === z);
+  return p ? el('p', { className: 'tool-ctx' }, 'Skanujesz CV na: ', el('b', { textContent: p.name }), ' · ', pageLink(`cv/${p.slug}`, { textContent: 'Jak napisać CV dla tego zawodu' })) : null;
+}
 function toolPage(slug, C, item) {
   const t = item || C.TOOLS[slug], box = el('div', { className: 'tool-box' });
   // Generowane dokumenty są po polsku (do polskiego pracodawcy): w wersjach obcych mówimy to nad wynikiem.
@@ -2328,7 +2365,8 @@ function toolPage(slug, C, item) {
   // data-i18n: interfejs narzędzia tłumaczy się słownikiem (wynik w .tool-out zostaje po polsku).
   const root = el('div', { className: 'inner narrow' },
     el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', el('a', { href: '#poradnik', textContent: 'Darmowe narzędzia' }), '›', el('span', { textContent: t.title })),
-    el('h1', { textContent: t.title }), el('p', { className: 'lead', textContent: t.lead }), plNote(), box,
+    el('h1', { textContent: t.title }), el('p', { className: 'lead', textContent: t.lead }), plNote(), ...(slug === 'skaner-cv' ? [scanCtxHint(C)].filter(Boolean) : []), box,
+    ...(NO_SCAN_BLOCK.has(slug) ? [] : [toolScanBlock(slug)]),
     ...(t.about || []).map((x) => el('p', { textContent: x })),
     // rozszerzone wersje EN/DE (seo-data/ext-*.json): te same sekcje i źródła co w wersji z serwera
     ...(t.sections || []).flatMap((s) => [el('h2', { textContent: s.h }), ...s.p.map((x) => el('p', { textContent: x }))]),
