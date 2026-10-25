@@ -30,3 +30,17 @@ test('Strona główna: sekcja „Kontakt” z danymi firmy, menu i stopka prowad
   const about = await (await fetch(`${U}/o-serwisie`)).text();
   for (const t of ['522084292', '+48 577 151 435', 'href="/kontakt"']) assert.ok(about.includes(t), t);
 });
+
+test('Stopka (wszystkie strony, 4 języki): bez NIP i telefonu, link „Dane firmy” do /kontakt#dane-firmy obok „Kontakt”', async () => {
+  for (const p of ['/', '/en', '/de', '/uk', '/cv/kierowca', '/kreator-cv', '/regulamin']) {
+    const h = await (await fetch(U + p)).text(); if (!h.includes('<footer')) continue;
+    const f = h.slice(h.indexOf('<footer'), h.indexOf('</footer>'));
+    assert.doesNotMatch(f, /NIP|9731085406|577 151 435|Tel\. /, `${p}: stopka bez NIP i telefonu`);
+    assert.ok(f.includes('<a href="/kontakt">Kontakt</a><a href="/kontakt#dane-firmy" data-i18n-key="Dane firmy (stopka)">Dane firmy</a>'), `${p}: link „Dane firmy”`);
+  }
+  const k = await (await fetch(`${U}/kontakt`)).text();
+  assert.ok(k.includes('<h2 id="dane-firmy">Dane firmy</h2>'));
+  for (const t of MUST) assert.ok(k.includes(t), `/kontakt: ${t}`);
+  const fs = await import('node:fs');
+  for (const [l, v] of [['en', 'Company details'], ['de', 'Impressum / Anbieterdaten'], ['uk', 'Дані компанії']]) assert.equal(JSON.parse(fs.readFileSync(new URL(`../public/i18n/${l}.json`, import.meta.url), 'utf8'))['Dane firmy (stopka)'], v, l);
+});
