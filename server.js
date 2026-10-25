@@ -28,7 +28,7 @@ import { checkCv } from './lib/cv-check.js';
 import { profReqs } from './lib/prof-ad.js';
 import { landingRoutes } from './lib/landing.js';
 import { outcomes, outcomeRoutes, startOutcome, outcomeLinks, anonymizeOutcomes, publicOutcome, OUTCOME_CONSENT, OUTCOME_AFTER, OT } from './lib/outcomes.js';
-import { mailEnabled, sendOrderMail, sendReminder, sendFollowUp, sendReviewAsk, sendOutcomeAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail, sendOwnerMail } from './lib/mail.js';
+import { mailEnabled, sendReferralMail, sendOrderMail, sendReminder, sendFollowUp, sendReviewAsk, sendOutcomeAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail, sendOwnerMail } from './lib/mail.js';
 import { socialRoutes, cleanupChats, botStatus } from './lib/social.js';
 import { b2bRoutes, b2bOrders, fulfillB2b, b2bRefunded, cleanupPartnerApps } from './lib/b2b.js';
 import { b2bMonthly } from './lib/b2b-monthly.js';
@@ -59,7 +59,7 @@ import { seoReportRoutes, seoWeekly } from './lib/seo-report.js';
 import { logEvent, cleanupEvents } from './lib/events.js';
 import { recordStatsSafe } from './lib/stats-agg.js';
 import { leadRoutes, cleanupLeads } from './lib/leads.js';
-import { emailHash, codeDiscount, applyPaidCode, isOwner, CODE_TTL, reserveCode, releaseCode, staleReservations, CodeError } from './lib/referral.js';
+import { emailHash, codeDiscount, applyPaidCode, isOwner, CODE_TTL, REF_CAP, reserveCode, releaseCode, staleReservations, CodeError } from './lib/referral.js';
 
 const PORT = process.env.PORT || 3000;
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
@@ -146,7 +146,7 @@ app.post('/api/stripe/webhook', express.raw({ type: '*/*', limit: '1mb' }), asyn
     if (String(ch?.metadata?.orderId || '').startsWith('PASS-')) { passRefunded(ch.metadata.orderId, ch.amount_refunded || 0).catch((e) => logEvent('płatność', `Zwrot karnetu: ${e.message}`)); return; }
     if (String(ch?.metadata?.orderId || '').startsWith('B2B-')) { b2bRefunded(ch.metadata.orderId, ch.amount_refunded || 0).catch((e) => logEvent('płatność', `Zwrot B2B: ${e.message}`)); return; }
     if (ch?.payment_intent) setRefunded({ orderId: ch.metadata?.orderId, paymentIntent: ch.payment_intent, total: ch.amount_refunded || 0, source: 'stripe' })
-      .then((r) => r?.changed && r.code && commissionBack(r.code, r.delta)).catch((e) => logEvent('płatność', `Zwrot: ${e.message}`));
+      .then((r) => r?.changed && r.code && commissionBack(r.code, r.delta, r)).catch((e) => logEvent('płatność', `Zwrot: ${e.message}`));
     return;
   }
   if (!['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(ev.type)) return;
@@ -790,6 +790,14 @@ async function trySend(order) {
   catch (e) { console.error('Wysyłka e-mail nie powiodła się', order.id, e.message); logEvent('e-mail', e.message, { orderId: order.id }); return { status: 'failed', to, at: Date.now() }; }
 }
 
+// Mail do polecającego przy naliczeniu 10 zł: adres z zamówienia, przy którym dostał kod (kody trzymają tylko skrót e-maila);
+// gdy to zamówienie jest już usunięte (po 30 dniach), maila nie wysyłamy – saldo i tak widać na stronie dokumentów i przy zamówieniu.
+async function referralMail(c) {
+  if (!mailEnabled() || !c.ownerOrderId) return;
+  const owner = await getOrder(c.ownerOrderId);
+  if (!owner?.profile?.email || !isOwner(c, owner.profile.email)) return;
+  await sendReferralMail(owner.profile.email, c, owner.uiLang || 'pl', BASE_URL, REF_CAP);
+}
 // Po opłaceniu: zapisujemy użycie kodu i dajemy klientowi jego kod (jeden na klienta, także przy kolejnych zamówieniach).
 async function afterPaid(o) {
   try {
@@ -801,7 +809,9 @@ async function afterPaid(o) {
       }
       const selfRef = await selfReferral(o).catch(() => false);
       if (selfRef) logEvent('kody', `Samopolecenie: kod ${o.code} bez nagrody`, { orderId: o.id });
-      await codes.update(o.code, (c) => applyPaidCode(c, { email: o.profile.email, creditUsed: o.creditUsed || 0, total: o.total || 0, order: o.id, selfRef }));
+      const before = await codes.get(o.code);
+      const after = await codes.update(o.code, (c) => applyPaidCode(c, { email: o.profile.email, creditUsed: o.creditUsed || 0, total: o.total || 0, order: o.id, selfRef }));
+      if (after && (after.referrals || 0) > (before?.referrals || 0)) referralMail(after).catch((e) => logEvent('e-mail', `Polecenie: ${e.message}`));
     }
     const root = o.rootId || o.parentId || o.id;
     const existing = Object.values(await codes.all()).find((c) => c.ownerOrderId === root);
