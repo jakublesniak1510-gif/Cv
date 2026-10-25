@@ -57,7 +57,7 @@ test('Regulamin (4 języki): CV pod zawód w §2, wyjątek w §3, data 24.10.202
     const b = legalBody('regulamin', l);
     assert.match(b, re, l); assert.match(b, /24[ .]/, l);
   }
-  assert.match(legalBody('regulamin', 'pl'), /Historia zmian: (?:[^;]*; )?24 października 2026 r\. – CV bez konkretnego ogłoszenia/);
+  assert.match(legalBody('regulamin', 'pl'), /Historia zmian: (?:[^;]*; )*24 października 2026 r\. – CV bez konkretnego ogłoszenia/);
 });
 
 test('API: /api/prof-reqs; zamówienie CV pod zawód tylko jako jedno CV bez listu; rodzaj zapisany w zamówieniu', { timeout: 60_000 }, async () => {
@@ -92,7 +92,7 @@ test('Panel i raport sprzedaży rozróżniają CV pod zawód; kreator mówi, że
   assert.match(read('lib/admin.js'), /prof: \(o\.ads \|\| \[\]\)\.some\(\(a\) => a\.kind === 'profession'\)/);
   assert.match(adm, /o\.prof \? el\('span', \{ className: 'tag', textContent: 'pod zawód'/);
   const ops = read('lib/ops.js');
-  assert.match(ops, /prof: \(o\.ads \|\| \[\]\)\.some\(\(a\) => a\.kind === 'profession'\)/); assert.match(ops, /s\.prof \? 'cv_prof' : s\.pkg/);
+  assert.match(ops, /prof: \(o\.ads \|\| \[\]\)\.some\(\(a\) => a\.kind === 'profession'\)/); assert.match(ops, /s\.prof \? 'cv_prof' : s\.next \? `\$\{s\.pkg\}_next` : s\.pkg/);
 });
 
 test('Strona główna: wysoko w hero informacja o zwykłym CV bez ogłoszenia, otwiera kreator w trybie „Bez ogłoszenia” (4 języki)', () => {

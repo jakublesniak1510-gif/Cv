@@ -851,7 +851,7 @@ function restoreDraft(from) {
 }
 function refresh() {
   if ($('#langPick').children.length) syncLangPick();
-  $('#letterDiff').textContent = `${PRICE.cv_letter - PRICE.cv} zł`; // „Polecany”: dopłata za list do tego samego ogłoszenia, z cennika
+  $('#letterDiff').textContent = `${PRICE.cv_letter - PRICE.cv} zł`; $('#nextPrice').textContent = `${PRICE.cv_next} zł`; $('#nextLetterPrice').textContent = `${PRICE.cv_next + PRICE.cv_letter - PRICE.cv} zł`; // „Polecany”: dopłata za list do tego samego ogłoszenia, z cennika
   saveDraft();
   $('#total').textContent = total() + ' zł'; if (CHECKOUT_B) $('#totalTop').textContent = total() + ' zł'; if (step === 6) payTrust(6);
   $('#bundleTip').textContent = pkg() === 'cv' ? '' : bundleOn() ? `Masz pakiet „Pewna rozmowa”: ${PRICE.bundleOff} zł taniej.` : `Pakiet „Pewna rozmowa”: zaznacz przygotowanie do rozmowy i symulator, a zapłacisz ${PRICE.bundleOff} zł mniej.`;
@@ -1684,7 +1684,10 @@ function drawPaper() {
 
 // Kolejne zamówienie: 3 pakiety + „Pewna rozmowa” (CV z listem, przygotowanie do rozmowy i symulator, taniej o PRICE.bundleOff).
 const FU_NAME = (k) => (k === 'bundle' ? 'Pewna rozmowa' : PKG_NAME[k]);
-const FU_PRICE = (k) => (k === 'bundle' ? PRICE.cv_letter + PRICE.interview + PRICE.sim - PRICE.bundleOff : PRICE[k]);
+// Kolejne CV pod nowe ogłoszenie (cv_next) przez 30 dni od opłacenia zamówienia; list +różnica jak zwykle (lib/pricing.js: nextEligible).
+const fuNext = () => !!data?.paidAt && Date.now() - data.paidAt <= 30 * 864e5 && !!PRICE.cv_next;
+const fuBase = (k) => (fuNext() && (k === 'cv' || k === 'cv_letter' || k === 'bundle') ? PRICE.cv_next + (k === 'cv' ? 0 : PRICE.cv_letter - PRICE.cv) : PRICE[k === 'bundle' ? 'cv_letter' : k]);
+const FU_PRICE = (k) => (k === 'bundle' ? fuBase(k) + PRICE.interview + PRICE.sim - PRICE.bundleOff : fuBase(k));
 const FU_ADS = (k) => (k === 'bundle' ? 1 : PKG_ADS[k]);
 function drawFollowup() {
   const box = $('#followup');
@@ -1701,6 +1704,7 @@ function drawFollowup() {
     if ($('#fuInfo')) $('#fuInfo').textContent = fpkg === 'bundle' ? 'CV i list motywacyjny, przygotowanie do rozmowy (12 pytań z odpowiedziami) i symulator rozmowy.' : '';
   };
   box.replaceChildren(el('h3', { textContent: 'Masz kolejne ogłoszenia?' }),
+    fuNext() ? el('p', { className: 'perk small' }, el('span', { textContent: 'Kolejne CV pod nowe ogłoszenie:' }), ` ${PRICE.cv_next} zł `, el('span', { textContent: '(z listem motywacyjnym' }), ` ${PRICE.cv_next + PRICE.cv_letter - PRICE.cv} zł) `, el('span', { textContent: 'przez 30 dni od opłacenia zamówienia.' })) : null,
     el('p', { className: 'hint' }, el('span', { textContent: 'Twoje dane już mamy, więc nie wpisujesz ich ponownie. Dokumenty powstaną w tym samym wyglądzie.' }), data.myCode && !data.myCode.usedByMe ? el('span', { textContent: ` Twój kod ${data.myCode.code} obniży cenę o ${data.myCode.mine} zł.` }) : ''),
     pick, el('p', { className: 'hint', id: 'fuInfo' }), el('div', { id: 'fuAds' }),
     el('button', { type: 'button', className: 'btn ghost sm', id: 'fuAdd', textContent: '+ Dodaj ogłoszenie (w pakiecie do 3)', onclick: () => { addRow('fuAds'); drawPick(); } }),
