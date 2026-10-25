@@ -50,5 +50,5 @@ test('Pobieranie /api/orders/:id/txt/:i, przycisk przy CV, regulamin §5 i histo
   assert.match(read('public/index.html'), /id="txtBtn"[^>]*>Pobierz \.txt \(ATS\)<\/a>/); assert.match(read('public/app.js'), /\$\('#txtBtn'\)\.hidden = curDoc !== 'cv';/);
   const reg = read('public/legal/regulamin.html');
   for (const re of [/Do każdego CV Klient otrzymuje bezpłatnie także wersję w czystym tekście \(\.txt\)/, /auch eine Fassung als reinen Text \(\.txt\)/, /a plain-text version \(\.txt\) for job portal forms/, /версію простим текстом \(\.txt\)/,
-    /Historia zmian: 25 października 2026 r\. – wersja CV w czystym tekście \(\.txt\) bez dopłaty \(§5 ust\. 1\)/, /Änderungshistorie: 25\. Oktober 2026 – Lebenslauf als reiner Text/, /Change history: 25 October 2026 – plain-text CV version/, /Історія змін: 25 жовтня 2026 р\. – версія резюме простим текстом/]) assert.match(reg, re);
+    /Historia zmian: (?:[^;]*; )*25 października 2026 r\. – wersja CV w czystym tekście \(\.txt\) bez dopłaty \(§5 ust\. 1\)/, /Änderungshistorie: (?:[^;]*; )*25\. Oktober 2026 – Lebenslauf als reiner Text/, /Change history: (?:[^;]*; )*25 October 2026 – plain-text CV version/, /Історія змін: (?:[^;]*; )*25 жовтня 2026 р\. – версія резюме простим текстом/]) assert.match(reg, re);
 });
