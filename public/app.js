@@ -1123,7 +1123,11 @@ const openWiz = (p) => {
   track('start'); modal(true); $('#wiz').hidden = false; $('#mcta').hidden = true; document.body.classList.remove('mcta-on'); go(step === 7 ? 6 : step);
   setTimeout(() => $('#wizClose').focus(), 0);
 };
-const closeWiz = () => { $('#wiz').hidden = true; modal(false); };
+// Wyjście z kreatora (lejek kreatora, PR N): zamknięcie albo opuszczenie strony na kroku; nie przy przejściu do płatności.
+let leavingToPay = false;
+const wizExit = () => { if (!$('#wiz').hidden && !leavingToPay && step >= 1 && step <= 6) track('wizexit', { s: step }); };
+addEventListener('pagehide', wizExit);
+const closeWiz = () => { wizExit(); $('#wiz').hidden = true; modal(false); };
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (!b) return; e.preventDefault(); if (b.dataset.addon) { b.dataset.addon.split(',').forEach((a) => ($('#ad' + a).checked = true)); saveDraft(); } openWiz(b.dataset.pkg); if ('prof' in b.dataset) profStart(); });
 $('#wizClose').onclick = closeWiz;
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#wiz').hidden) closeWiz(); });
@@ -1149,7 +1153,7 @@ $('#wizForm').onsubmit = async (e) => {
     if (!r.ok) throw new Error(j.error);
     orderId = j.id;
     if (!j.free) track('checkout');
-    if (j.free) { closeWiz(); startResult(j.id); } else if (j.demo) go(7); else location.href = j.url;
+    if (j.free) { leavingToPay = true; closeWiz(); startResult(j.id); } else if (j.demo) go(7); else { leavingToPay = true; location.href = j.url; }
   } catch (x) { $('#werr').textContent = x.message; }
   $('#next').disabled = false;
 };
