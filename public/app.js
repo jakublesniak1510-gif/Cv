@@ -852,6 +852,7 @@ function restoreDraft(from) {
 function refresh() {
   if ($('#langPick').children.length) syncLangPick();
   $('#letterDiff').textContent = `${PRICE.cv_letter - PRICE.cv} zł`; // „Polecany”: dopłata za list do tego samego ogłoszenia, z cennika
+  $('#pack3Each').textContent = `${(PRICE.pack3 / 3).toFixed(2).replace('.', ',')} zł`; // Pakiet 3: cena za jedno ogłoszenie (79 / 3)
   saveDraft();
   $('#total').textContent = total() + ' zł'; if (CHECKOUT_B) $('#totalTop').textContent = total() + ' zł'; if (step === 6) payTrust(6);
   $('#bundleTip').textContent = pkg() === 'cv' ? '' : bundleOn() ? `Masz pakiet „Pewna rozmowa”: ${PRICE.bundleOff} zł taniej.` : `Pakiet „Pewna rozmowa”: zaznacz przygotowanie do rozmowy i symulator, a zapłacisz ${PRICE.bundleOff} zł mniej.`;
