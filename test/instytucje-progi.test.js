@@ -49,3 +49,13 @@ test('Oferta do zapytania z formularza: treść z progami, przykład dla liczby 
   await assert.rejects(() => b2b.sendLeadOffer('L1', BASE), /już wysłana/);
   await assert.rejects(() => b2b.sendLeadOffer('nie-ma', BASE), /Nie ma takiego/);
 });
+
+test('Panel: POST /leads/:id/offer wysyła ofertę, drugi raz 400', async () => {
+  await leads.save({ id: 'L2', org: 'Fundacja Test', name: 'Ola', email: 'ola@example.test', count: 12, created: 1 });
+  const app = express(), api = express.Router(); api.use(express.json()); b2b.b2bAdmin(api, { BASE_URL: BASE }); app.use('/api/admin', api);
+  const srv = app.listen(0), U = `http://127.0.0.1:${srv.address().port}/api/admin/leads/L2/offer`;
+  try {
+    const r1 = await fetch(U, { method: 'POST' }); assert.equal(r1.status, 200); assert.ok((await r1.json()).lead.offerSentAt);
+    assert.equal((await fetch(U, { method: 'POST' })).status, 400);
+  } finally { srv.close(); }
+});
