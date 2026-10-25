@@ -12,7 +12,8 @@ import { wizardDraftRoutes, wizardDraftsHourly, draftOrdered, draftPaid } from '
 import { offerRoutes, feedSources } from './lib/jobfeed.js';
 import { nextEligible, hasBundle, calcTotal, MAX_ADS, PRICES, LANGS, CODE_DISCOUNT, PACKAGES, ADDONS, BUNDLE_OFF, withLetter as hasLetter, upsellOffers, upsellPlan } from './lib/pricing.js';
 import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, reviews, stats, leads, removeOrder } from './lib/store.js';
-import { generateForAd, linkedinChecked, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
+import { docFile } from './lib/doc-names.js';
+import { generateForAd, generateMessages, linkedinChecked, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
 import { checkResult, hasCritical, recordQa, QA_LABELS } from './lib/qa.js';
 import { renderCv } from './lib/pdf.js';
@@ -916,7 +917,7 @@ async function applyUpsell(o) {
     if (paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: o.id }));
     countEvent('upsell_paid').catch(() => {});
   }
-  const u = o.upsell, letter = hasLetter(u.pkg) && !hasLetter(p.pkg), interview = !!u.addons.interview && !p.addons?.interview, linkedin = !!u.addons.linkedin && !p.addons?.linkedin;
+  const u = o.upsell, letter = hasLetter(u.pkg) && !hasLetter(p.pkg), interview = !!u.addons.interview && !p.addons?.interview, linkedin = !!u.addons.linkedin && !p.addons?.linkedin, messages = !!u.addons.messages && !p.addons?.messages;
   // Generujemy tylko nowe części; tłumaczymy też tylko je (CV w innych językach zostaje bez zmian).
   const parts = (letter || interview) ? await Promise.all(p.ads.map(async (ad, i) => {
     const r = await generateForAd({ profile: p.profile, ad, withLetter: hasLetter(u.pkg), addons: u.addons });
@@ -940,11 +941,21 @@ async function applyUpsell(o) {
     }));
     if (bad.length) qaAlert(p.id, bad);
   }
+  // Wiadomości do rekrutera dokupione po zakupie: na podstawie gotowego CV, tłumaczone do każdej wersji językowej.
+  if (messages) {
+    await Promise.all(p.ads.map(async (ad, i) => {
+      const r = p.results?.[i]; if (!r) return;
+      const m = await generateMessages({ profile: p.profile, ad, result: r });
+      const tr = { ...(parts[i]?.tr || {}) };
+      for (const l of Object.keys(r.variants || {})) { const t = await translateResult({ lang: r.lang, cv: { name: r.cv?.name || '' }, messages: m }, l); tr[l] = { ...(tr[l] || {}), messages: t.messages }; }
+      parts[i] = { add: { ...(parts[i]?.add || {}), messages: m }, tr };
+    }));
+  }
   // Scalanie na aktualnym stanie zamówienia (poprawki klienta i równoległy drugi dodatek zostają); pakietu nigdy nie obniżamy.
   const next = await updateOrder(p.id, (x) => ({ ...x, pkg: hasLetter(x.pkg) ? x.pkg : u.pkg, addons: { ...x.addons, ...u.addons },
     results: parts.some(Boolean) ? (x.results || []).map((r, i) => (parts[i] ? { ...r, ...parts[i].add, ...(r.variants ? { variants: Object.fromEntries(Object.entries(r.variants).map(([l, v]) => [l, { ...v, ...(parts[i].tr[l] || {}) }])) } : {}) } : r)) : x.results }));
   await updateOrder(o.id, { status: 'done' });
-  if (letter || interview || linkedin) trySend({ ...next, myCode: next.myCode }).then((mail) => updateOrder(p.id, { mail })).catch((e) => logEvent('e-mail', `Dodatek: ${e.message}`, { orderId: p.id }));
+  if (letter || interview || linkedin || messages) trySend({ ...next, myCode: next.myCode }).then((mail) => updateOrder(p.id, { mail })).catch((e) => logEvent('e-mail', `Dodatek: ${e.message}`, { orderId: p.id }));
 }
 
 // Faktura bez VAT na życzenie klienta: numer, PDF w e-mailu i na stronie dokumentów (wyłączane w panelu → Ustawienia).
@@ -1007,7 +1018,7 @@ app.get('/api/orders/:id/docx/:i', async (req, res) => {
   const d = await doneOrder(req, res); if (!d) return;
   if (!d.o.addons?.docx) return res.status(403).json({ error: 'Wersja Word nie była zamówiona.' });
   const base = d.o.results[d.i], r = base.variants?.[str(req.query.lang, 5)] || base, doc = req.query.doc === 'letter' && hasLetter(d.o.pkg) ? 'letter' : 'cv';
-  const name = `${doc === 'letter' ? 'List-motywacyjny' : 'CV'}-${(r.cv?.name || 'dokument').normalize('NFD').replace(/[^\w ]/g, '').trim().replace(/\s+/g, '-')}${r.lang && r.lang !== 'pl' ? '-' + r.lang.toUpperCase() : ''}.docx`;
+  const name = docFile(doc, r.cv?.name || d.o.profile?.name, base.position, r.lang, 'docx');
   res.set({ 'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'Content-Disposition': `attachment; filename="${name}"` }).send(await renderDocx(r, doc, d.o.design));
 });
 

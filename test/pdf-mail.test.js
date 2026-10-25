@@ -15,5 +15,5 @@ test('mail ma załączniki PDF dla każdego ogłoszenia', async () => {
   const info = await sendOrderMail({ id: 'abc', pkg: 'cv_letter', profile, results: [res, res] }, 'https://x.pl');
   const m = JSON.parse(info.message);
   assert.equal(m.to[0].address, 'z@x.pl'); assert.equal(m.attachments.length, 4);
-  assert.match(m.attachments[0].filename, /^CV-Zaneta-Lacka-Kasjer\.pdf$/);
+  assert.match(m.attachments[0].filename, /^Zaneta_Lacka_CV_Kasjer\.pdf$/);
 });
