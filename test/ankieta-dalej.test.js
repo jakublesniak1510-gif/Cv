@@ -22,9 +22,12 @@ test('Po odpowiedzi: „Tak” → symulator + opinia, „Jeszcze nie” → apl
   assert.doesNotMatch(await nextStep({ ...r, orderId: 'o2' }, 'yes', OT.pl, {}), /symulator/, 'symulator już kupiony');
   const wait = await nextStep(r, 'not_yet', OT.pl, {});
   assert.match(wait, /przypomnienie o follow-up/); assert.match(wait, /href="\/konto"/); assert.match(wait, /Twój kod polecający: KOD-AB12/);
+  assert.match(wait, /<a href="\/poradnik\/follow-up-po-wyslaniu-cv">Jak napisać follow-up/, 'link do poradnika o follow-upie');
+  assert.match(await nextStep({ ...r, lang: 'de' }, 'not_yet', OT.de, {}), /href="\/de\/ratgeber\/nachfassen-nach-bewerbung"/);
+  assert.match(await nextStep({ ...r, lang: 'uk' }, 'not_yet', OT.uk, {}), /href="\/uk\/porady\/nahaduvannia-pislia-nadsylannia-reziume"/);
   assert.match(await nextStep(r, 'not_applied', OT.pl, {}), /href="\/narzedzia\/skaner-cv"/);
   assert.match(await nextStep({ ...r, lang: 'en' }, 'not_applied', OT.en, {}), /href="\/en\/[^"]+"/);
-  for (const l of ['en', 'uk', 'de']) for (const k of ['yesBtn', 'review', 'wait', 'waitBtn', 'none', 'noneBtn']) assert.ok(OT[l].next[k], `${l}.${k}`);
+  for (const l of ['en', 'uk', 'de']) for (const k of ['yesBtn', 'review', 'wait', 'waitBtn', 'fuLink', 'none', 'noneBtn']) assert.ok(OT[l].next[k], `${l}.${k}`);
 
   const app = express(); outcomeRoutes(app, { BASE_URL: 'https://example.test' });
   const srv = app.listen(0), U = `http://127.0.0.1:${srv.address().port}`;
