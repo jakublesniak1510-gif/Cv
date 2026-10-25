@@ -671,7 +671,7 @@ loaders.partners = async () => {
       }
       const adv = a.kind === 'advisor';
       return el('tr', {}, el('td', { className: 'num', textContent: dd(a.created) }),
-        el('td', {}, a.name, adv ? el('span', { className: 'tag', style: 'margin-left:6px', textContent: 'doradca, kod 0 zł' }) : null, el('div', { className: 'mute', style: 'font-size:12px' }, el('a', { href: 'mailto:' + a.email, textContent: a.email }))),
+        el('td', {}, a.name, adv ? el('span', { className: 'tag', style: 'margin-left:6px', textContent: a.type === 'uczelnia' ? 'uczelnia, kod 0 zł' : 'doradca, kod 0 zł' }) : null, el('div', { className: 'mute', style: 'font-size:12px' }, el('a', { href: 'mailto:' + a.email, textContent: a.email }))),
         el('td', {}, adv ? `${a.org}${a.role ? ` (${a.role})` : ''}` : el('a', { href: a.channel, target: '_blank', rel: 'noopener noreferrer', textContent: a.platform || 'link' })),
         el('td', { className: 'r', textContent: (adv ? a.group : a.followers) ? (adv ? a.group : a.followers).toLocaleString('pl-PL') : '—' }), el('td', { className: 'mute', textContent: adv ? 'grupa uczniów / studentów' : a.audience || '—' }),
         el('td', {}, el('span', { className: 'tag', textContent: ST2[a.status] || a.status }), a.code ? el('div', { className: 'mono', style: 'font-size:12px', textContent: a.code }) : null), acts);
