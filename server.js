@@ -35,6 +35,7 @@ import { b2bMonthly } from './lib/b2b-monthly.js';
 import { crmHourly } from './lib/crm.js';
 import { growthRoutes, welcomeSeries, telegramHourly, rememberScan } from './lib/growth.js';
 import { tpCsp } from './lib/trustpilot.js';
+import { shareImgRoute } from './lib/share-img.js';
 import { shareRoutes, cleanupShareCards } from './lib/share.js';
 import { sendPurchase, adContext } from './lib/capi.js';
 import { draftRoutes } from './lib/drafts.js';
@@ -126,7 +127,7 @@ app.use((req, res, next) => (ALIAS_HOSTS.has(req.hostname) && BASE_URL.startsWit
 
 // Prosty limit zapytań na adres IP.
 const limiter = (max, windowMs) => { const hits = new Map(); return (req) => { const now = Date.now(), h = (hits.get(req.ip) || []).filter((t) => now - t < windowMs); if (h.length >= max) return false; hits.set(req.ip, [...h, now]); return true; }; };
-const photoLimit = limiter(5, 3600_000), answerLimit = limiter(8, 3600_000), importLimit = limiter(10, 600_000), fetchLimit = limiter(20, 600_000), scanLimit = limiter(6, 3600_000), cvCheckLimit = limiter(12, 3600_000), chatLimit = limiter(30, 3600_000), adKwLimit = limiter(20, 3600_000);
+const photoLimit = limiter(5, 3600_000), answerLimit = limiter(8, 3600_000), importLimit = limiter(10, 600_000), fetchLimit = limiter(20, 600_000), scanLimit = limiter(6, 3600_000), cvCheckLimit = limiter(12, 3600_000), shareImgLimit = limiter(12, 3600_000), chatLimit = limiter(30, 3600_000), adKwLimit = limiter(20, 3600_000);
 const FOLLOWUP_AFTER = 29 * 24 * 3600 * 1000, REMINDER_AFTER = 7 * 24 * 3600 * 1000, REVIEW_AFTER = 4 * 24 * 3600 * 1000;
 
 // Bot AI na Messengerze i Instagramie (podpis Meta wymaga surowej treści, więc przed globalnym parserem JSON).
@@ -164,6 +165,8 @@ app.post('/api/import', express.json({ limit: '8mb' }), async (req, res) => {
   catch (e) { console.error('Import CV', e.message); logEvent('import', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się odczytać pliku. Wpisz dane ręcznie.' }); }
 });
 
+shareImgRoute(app, shareImgLimit); // obrazek wyniku skanera do udostępnienia (GET /api/scan/:id/share.png)
+
 // --- Darmowy skaner CV: plik CV + treść ogłoszenia -> raport dopasowania (bez zapisywania) ---
 app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
   if (!scanLimit(req)) return res.status(429).json({ error: 'Wykorzystano limit darmowych skanów na godzinę. Spróbuj później.' });
@@ -178,7 +181,7 @@ app.post('/api/scan', express.json({ limit: '8mb' }), async (req, res) => {
     }
     if (cvText.length < 60) return res.status(400).json({ error: 'CV jest za krótkie, żeby je ocenić.' });
     const { company, ...result } = await scanCv({ cvText, adText });
-    res.json({ ...result, scanId: rememberScan(result) });
+    res.json({ ...result, scanId: rememberScan({ ...result, company }) });
     // Anonimowe liczniki wymagań (bez treści CV i ogłoszenia); firma służy tylko do odfiltrowania jej nazwy.
     recordStatsSafe({ title: `${result.position} | ${adText.split('\n').find((l) => l.trim()) || ''}`.slice(0, 200), company, found: result.found, missing: result.missing });
   } catch (e) { console.error('Skaner', e.message); logEvent('skaner', e.message); res.status(422).json({ error: e instanceof ImportError ? e.message : 'Nie udało się ocenić CV. Spróbuj ponownie.' }); }
