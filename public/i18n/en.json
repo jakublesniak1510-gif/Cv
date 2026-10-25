@@ -1640,5 +1640,6 @@
 "Pobierz obrazek (relacja)": "Download image (story)",
 "Obrazek zapisany. Dodaj go do posta albo relacji.": "Image saved. Add it to a post or story.",
 "Nie udało się przygotować obrazka.": "Could not prepare the image.",
-"Limit obrazków na godzinę. Spróbuj później.": "Hourly image limit reached. Please try again later."
+"Limit obrazków na godzinę. Spróbuj później.": "Hourly image limit reached. Please try again later.",
+"Na karcie pokażemy procent dopasowania, to stanowisko, datę i po 3 ogólne wymagania z ogłoszenia (do obrazka). Bez treści CV i danych kontaktowych. Link działa 30 dni.": "The card will show the match percentage, this job title, the date and 3 general requirements from the job ad each (for the image). No CV text or contact details. The link works for 30 days."
 }

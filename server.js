@@ -221,7 +221,7 @@ app.use('/api/admin/contacts/import', express.json({ limit: '3mb' }));
 draftRoutes(app);
 app.use(express.json({ limit: '700kb' }));
 growthRoutes(app, { BASE_URL });
-shareRoutes(app, { BASE_URL }); // karta wyniku skanera do udostępnienia (/wynik/<id>, 30 dni)
+shareRoutes(app, { BASE_URL, imgLimit: shareImgLimit }); // karta wyniku skanera do udostępnienia (/wynik/<id>, 30 dni, obrazki 1080×1080 i 1080×1920)
 // Instytucje i partnerzy: zamówienie paczki kodów, zgłoszenie do programu partnerskiego, raporty kodów (przed stronami SEO).
 b2bRoutes(app, {
   BASE_URL, demo: DEMO && !SALES_CLOSED, closedFor: (req) => salesClosedFor(req),

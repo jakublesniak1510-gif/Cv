@@ -1317,7 +1317,7 @@ function scanShare(scanId) {
   const msg = el('p', { className: 'fstatus', role: 'status' }), links = el('div', { className: 'share-btns', hidden: true });
   const form = el('form', { className: 'scan-share-form', hidden: true, noValidate: true },
     el('label', { className: 'f' }, 'Stanowisko na karcie (opcjonalnie)', el('div', { className: 'filerow' }, title, make)),
-    el('p', { className: 'hint small', textContent: 'Na karcie pokażemy tylko procent dopasowania, to stanowisko i datę. Bez treści CV i ogłoszenia. Link działa 30 dni.' }), msg, links);
+    el('p', { className: 'hint small', textContent: 'Na karcie pokażemy procent dopasowania, to stanowisko, datę i po 3 ogólne wymagania z ogłoszenia (do obrazka). Bez treści CV i danych kontaktowych. Link działa 30 dni.' }), msg, links);
   open.onclick = () => { open.hidden = true; form.hidden = false; title.focus(); };
   const out = (text, href) => el('a', { className: 'btn ghost sm', href, target: '_blank', rel: 'noopener', textContent: text });
   form.onsubmit = async (e) => {
