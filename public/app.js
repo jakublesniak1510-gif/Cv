@@ -1086,6 +1086,7 @@ $('#wantAlerts').onchange = () => {
 $('#wantInv').onchange = () => { $('#invBox').hidden = !$('#wantInv').checked; if ($('#wantInv').checked) $('#invName').focus(); };
 function validate(n) {
   const v = (id) => $('#' + id).value.trim();
+  if (n === 2 && $('#rewriteMode').checked && !imported) return 'Wgraj swoje CV (PDF lub Word): w trybie „Mam już CV” zachowujemy jego treść i kolejność.';
   if (n === 2) { if (!v('name')) return 'Podaj imię i nazwisko.'; if (!/^\S+@\S+\.\S+$/.test(v('email'))) return 'Podaj poprawny adres e-mail.'; }
   if (n === 4 && !rows('exp').some((e) => e.title || e.company) && !rows('edu').some((e) => e.school)) return 'Dodaj co najmniej jedno stanowisko (krok 3) lub szkołę.';
   if ((n === 5 || (ORDER_B && n === 6)) && passOn() && nAds() > Math.min(3, myPass.left.matches)) return `W karnecie ${plural(myPass.left.matches, 'zostało', 'zostały', 'zostało')} ${myPass.left.matches} ${plural(myPass.left.matches, 'dopasowanie', 'dopasowania', 'dopasowań')}. Usuń dodatkowe ogłoszenia albo odznacz „Użyj karnetu”.`;
@@ -1141,7 +1142,7 @@ $('#wizForm').onsubmit = async (e) => {
   const v = (id) => $('#' + id).value;
   const body = {
     draftToken: srvToken() || undefined,
-    usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, ...(CHECKOUT_B ? { consentForm: 'compact' } : {}), gateway: gwValue($('#gwBox')), outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    ...($('#rewriteMode').checked ? { mode: 'rewrite' } : {}), usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, ...(CHECKOUT_B ? { consentForm: 'compact' } : {}), gateway: gwValue($('#gwBox')), outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   // Zgoda na cookies reklamowe (baner): tylko wtedy serwer zgłosi zakup do Meta (Conversions API) z identyfikatorami piksela.
@@ -1192,6 +1193,9 @@ $('#importFile').onchange = async (e) => {
   if (file.size > 5 * 1024 * 1024) { st.textContent = 'Plik musi mieć do 5 MB.'; st.classList.add('bad'); return; }
   importData(await fileB64(file));
 };
+// Tryb „Mam już CV” (PR T): wymaga wgranego CV; zamówienie z mode: 'rewrite' (generator zachowuje treść i kolejność).
+let imported = false;
+$('#rewriteMode').onchange = () => { $('#rewriteNote').hidden = !$('#rewriteMode').checked; };
 async function importData(b64) {
   const st = $('#importStatus'); st.className = 'fstatus';
   st.textContent = 'Czytam Twoje CV…';
@@ -1203,7 +1207,7 @@ async function importData(b64) {
     const empty = (b) => !rows(b).some((x) => Object.values(x).some(Boolean));
     if (p.experience?.length && empty('exp')) { $('#exp').replaceChildren(); p.experience.forEach((x) => addRow('exp', x)); }
     if (p.education?.length && empty('edu')) { $('#edu').replaceChildren(); p.education.forEach((x) => addRow('edu', x)); }
-    saveDraft();
+    saveDraft(); imported = true;
     st.textContent = j.ai ? 'Gotowe. Uzupełniliśmy formularz danymi z CV (także w kolejnych krokach). Sprawdź je i popraw, jeśli trzeba.' : 'Odczytaliśmy dane kontaktowe. Resztę uzupełnij ręcznie.';
     if (cfg.preview) st.textContent += ' Podgląd: zamiast odczytu pliku wstawiamy przykładowe dane.';
     st.classList.add('good');
@@ -1864,6 +1868,7 @@ let redraw = () => {};
 function showResult() {
   clearDraft(); try { localStorage.removeItem(REF_KEY); } catch {}
   $('#result').hidden = false; window.scrollTo(0, 0);
+  $('#rewriteDone').hidden = data.mode !== 'rewrite';
   // Pytanie na stronie dokumentów tylko w pierwszej dobie po płatności (później nie wraca).
   if (data.paidAt && Date.now() - data.paidAt < 864e5) drawHeard($('#heardRes')); else $('#heardRes').hidden = true;
   curAd = Math.min(curAd, data.results.length - 1);
