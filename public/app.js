@@ -1137,7 +1137,7 @@ $('#wizForm').onsubmit = async (e) => {
   const v = (id) => $('#' + id).value;
   const body = {
     draftToken: srvToken() || undefined,
-    usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, ...(CHECKOUT_B ? { consentForm: 'compact' } : {}), gateway: gwValue($('#gwBox')), outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, ...(CHECKOUT_B ? { consentForm: 'compact' } : {}), gateway: gwValue($('#gwBox')), outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   // Zgoda na cookies reklamowe (baner): tylko wtedy serwer zgłosi zakup do Meta (Conversions API) z identyfikatorami piksela.
@@ -1867,6 +1867,8 @@ function showResult() {
   draw();
   if (location.hash === '#ocena') setTimeout(() => $('#rate').scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
   if (location.hash === '#kolejne') setTimeout(() => $('#followup').scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+  // Linki z e-maila z gotowym CV: propozycja dodatku i założenia konta.
+  if (['#upsell', '#acctOffer'].includes(location.hash)) setTimeout(() => { const t = $(location.hash); if (t && !t.hidden) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 600);
 }
 $('#newOrder').onclick = () => {
   try { history.replaceState(null, '', location.pathname); } catch {}
@@ -2564,6 +2566,8 @@ function accDash(d) {
     el('div', { className: 'acct-head' }, el('div', {}, el('h1', { textContent: 'Moje konto' }), el('p', { className: 'hint', textContent: d.email })), out),
     passBox,
     el('div', { className: 'acct-card' }, el('h2', { textContent: 'Twoje zamówienia' }), el('p', { className: 'hint', textContent: 'Zamówienia z ostatnich 30 dni (starsze usuwamy automatycznie razem z dokumentami).' }),
+      // Kolejne CV z danymi z ostatniego zamówienia (formularz „Masz kolejne ogłoszenia?” na stronie dokumentów, z prefillem).
+      d.orders.length ? el('p', {}, el('a', { className: 'btn sm', href: `/?id=${d.orders[0].id}#kolejne`, textContent: 'Zrób kolejne CV pod nowe ogłoszenie w 2 minuty – dane już są' })) : null,
       ...(d.orders.length ? d.orders.map((o) => el('div', { className: 'acct-order' },
         el('div', {}, el('b', { textContent: o.pkg }), el('small', { textContent: ` · ${new Date(o.created).toLocaleDateString('pl-PL')}` })),
         el('div', { className: 'acct-pos' }, ...o.positions.map((p, i) => el('span', {}, p.position, ' ', el('button', { className: 'link', type: 'button', textContent: '+ do aplikacji', onclick: () => { addBox.replaceChildren(el('h2', { textContent: 'Dodaj aplikację' }), appForm({ position: p.position, company: p.company, orderId: o.id, resultIndex: i })); addBox.scrollIntoView({ behavior: 'smooth', block: 'center' }); } })))),

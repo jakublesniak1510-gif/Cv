@@ -21,7 +21,7 @@ test('Formularze i zgody na telefonie: pola 16px, checkbox 22px, cele dotykowe 4
   for (const r of [/details>summary\{min-height:44px/, /\.rm\{min-height:44px/, /#toPack\{min-height:44px\}/, /\.chipsel button,\.more a,\.prof-results a\{min-height:44px\}/, /\.foot-cols a\{display:flex;align-items:center;min-height:44px\}/]) assert.match(css, r);
   const step6 = /<section data-step="6"[\s\S]*?<\/section>/.exec(html)[0], opt = /<details class="optbox" id="optMail">[\s\S]*?<\/details>/.exec(step6)[0];
   assert.match(opt, /<summary>Powiadomienia e-mail \(opcjonalnie\)<\/summary>/);
-  for (const id of ['createAccount', 'reviewAsk', 'payRem', 'reminder', 'wantAlerts', 'followUp']) assert.ok(opt.includes(`id="${id}"`), `${id} w zwiniętej sekcji`);
+  for (const id of ['reviewAsk', 'payRem', 'reminder', 'wantAlerts', 'followUp']) assert.ok(opt.includes(`id="${id}"`), `${id} w zwiniętej sekcji`);
   for (const id of ['wantInv', 'consent', 'waiver']) assert.ok(step6.includes(`id="${id}"`) && !opt.includes(`id="${id}"`), `${id} na wierzchu`);
   assert.match(step6, /Akceptuję <a href="\/regulamin"[^>]*>Regulamin<\/a> i <a href="\/polityka-prywatnosci"[^>]*>Politykę prywatności<\/a>\./);
   assert.match(step6, /raz w tygodniu/); assert.doesNotMatch(html, /co poniedziałek|zapoznałem|zapomniałeś wpisać/);
