@@ -550,6 +550,8 @@
     </section>
     <section data-step="2" hidden>
       <div class="import"><div><b>Masz stare CV?</b><span>Wgraj PDF lub Word, a uzupełnimy formularz za Ciebie. Pliku nie zapisujemy.</span></div><label class="btn ghost sm filebtn">Wgraj CV<input type="file" id="importFile" accept=".pdf,.docx,.txt" hidden></label></div>
+      <label class="check rewrite-mode"><input type="checkbox" id="rewriteMode"> <span>Mam już CV – popraw je pod ogłoszenie, zachowując jego treść</span></label>
+      <p class="hint" id="rewriteNote" hidden>Zachowujemy treść i kolejność Twojego CV; wygląd w naszym szablonie. Nic nie dopisujemy: wymagania z ogłoszenia, których nie ma w Twoim CV, pokażemy w raporcie dopasowania w części „Brakuje w CV” – do uzupełnienia przez Ciebie, jeśli są prawdą.</p>
       <p class="fstatus" id="importStatus" role="status"></p>
       <div class="grid2">
         <label class="f">Imię i nazwisko *<input type="text" id="name" autocomplete="name"></label>
@@ -660,6 +662,7 @@
     <a class="btn ghost" id="docxBtn" hidden download>Pobierz Word</a> <a class="btn ghost" id="txtBtn" href="#" download hidden>Pobierz .txt (ATS)</a>
   </div>
   <p class="mailnote noprint" id="mailNote" hidden></p>
+  <p class="hint noprint" id="rewriteDone" hidden>Tryb „Mam już CV”: zachowaliśmy treść i kolejność Twojego CV, wygląd jest w naszym szablonie. Wymagania, których nie ma w Twoim CV, znajdziesz w raporcie dopasowania w części „Brakuje w CV”.</p>
   <div class="heard card-lite noprint" id="heardRes" hidden></div>
   <p class="note noprint" id="printNote" hidden>W podglądzie nie można pobierać plików. Na działającej stronie ten przycisk zapisuje dokument jako PDF.</p>
   <p class="note noprint" id="simNote" hidden>Podgląd używa uproszczonego dopasowania. Na działającej stronie CV i list pisze Claude, pełniej i pod treść ogłoszenia.</p>
