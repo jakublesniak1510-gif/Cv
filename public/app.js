@@ -1339,7 +1339,27 @@ function scanShare(scanId) {
     } catch (x) { msg.className = 'fstatus err'; msg.textContent = x.message; }
     make.disabled = false;
   };
-  return el('div', { className: 'scan-share' }, open, form);
+  return el('div', { className: 'scan-share' }, open, form, scanImg(scanId));
+}
+// Obrazek wyniku (PNG z serwera: procent i po 3 wymagania, bez treści CV): na telefonie systemowe „Udostępnij” z plikiem,
+// a gdy przeglądarka nie udostępnia plików – pobranie obrazka.
+function scanImg(scanId) {
+  const msg = el('p', { className: 'fstatus', role: 'status' });
+  const get = async (f, b) => {
+    b.disabled = true; msg.className = 'fstatus'; msg.textContent = '';
+    try {
+      const r = await fetch(`/api/scan/${encodeURIComponent(scanId)}/share.png?f=${f}&lang=${window.I18N?.lang || 'pl'}`);
+      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'Nie udało się przygotować obrazka.');
+      const blob = await r.blob(), file = new File([blob], `wynik-cv-${f === 'story' ? '1080x1920' : '1080x1080'}.png`, { type: 'image/png' });
+      if (navigator.canShare?.({ files: [file] })) { await navigator.share({ files: [file] }).catch(() => {}); }
+      else { const a = el('a', { href: URL.createObjectURL(blob), download: file.name }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); msg.className = 'fstatus ok'; msg.textContent = 'Obrazek zapisany. Dodaj go do posta albo relacji.'; }
+    } catch (x) { msg.className = 'fstatus err'; msg.textContent = x.message; }
+    b.disabled = false;
+  };
+  const btn = (f, t) => { const b = el('button', { type: 'button', className: 'btn ghost sm', textContent: t }); b.onclick = () => get(f, b); return b; };
+  const share = !!navigator.canShare && matchMedia('(pointer:coarse)').matches;
+  return el('div', { className: 'scan-img' }, el('p', { className: 'hint small', textContent: 'Obrazek z wynikiem: procent i po 3 wymagania z ogłoszenia, bez danych z Twojego CV.' }),
+    el('div', { className: 'share-btns' }, btn('square', share ? 'Udostępnij obrazek (post)' : 'Pobierz obrazek (post)'), btn('story', share ? 'Udostępnij obrazek (relacja)' : 'Pobierz obrazek (relacja)')), msg);
 }
 // Wynik skanera na e-mail (usługa na prośbę, bez zgody marketingowej); newsletter tylko po osobnym, niezaznaczonym polu.
 function scanMailForm(scanId) {
