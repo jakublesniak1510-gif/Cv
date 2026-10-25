@@ -2249,6 +2249,7 @@ function toolQuiz(box, out, C) {
       el('div', { className: 'quiz-res' }, ...ranked.map(({ p, v, s }, i) => el('div', { className: 'quiz-card' }, el('small', { textContent: `${i + 1}. dopasowanie ${Math.round(s * 100)}%` }), el('b', { textContent: p.name }),
         el('p', { className: 'hint', textContent: 'Ten zawód to: ' + Object.keys(v).map((k) => TRAITS[k]).join(', ') + '.' }), pageLink(`cv/${p.slug}`, { className: 'btn ghost sm', textContent: 'Jak napisać CV' })))),
       el('p', { className: 'hint', textContent: 'Wynik to podpowiedź, a nie test psychologiczny. Sprawdź ogłoszenia w tych zawodach i wybierz to, co Cię ciekawi.' }));
+    window.__toolCtx?.(ranked[0]?.p); // najlepiej dopasowany zawód → blok „Sprawdź też swoje CV”
     out.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   box.append(...qs, el('div', {}, el('button', { type: 'button', className: 'btn', textContent: 'Pokaż wynik', onclick: show })), status, out);
@@ -2296,6 +2297,23 @@ Z poważaniem,
 ${n}`;
 }
 // --- koniec thankYouText ---
+// PR H: blok „Sprawdź też swoje CV” na narzędziach (poza skanerem i narzędziami do CV, które mają własne linki).
+// Zawód znany z narzędzia (quiz „Jaki zawód”) trafia do skanera (?zawod=) i daje link do strony zawodu. Klik → beacon „toolscan”.
+const NO_SCAN_BLOCK = new Set(['skaner-cv', 'sprawdz-cv', 'test-cv-ats']);
+function toolScanBlock(slug) {
+  const links = el('p', { className: 'prof-cta' });
+  const draw = (p) => links.replaceChildren(
+    el('a', { className: 'btn ghost', href: pageHref('narzedzia/skaner-cv') + (p ? `?zawod=${encodeURIComponent(p.slug)}` : ''), textContent: 'Sprawdź CV za darmo', onclick: () => track('toolscan', { t: slug }) }),
+    ...(p ? [' ', pageLink(`cv/${p.slug}`, { className: 'btn ghost', textContent: `CV dla zawodu: ${p.name}` })] : []));
+  draw(null);
+  window.__toolCtx = draw;
+  return el('div', { className: 'cta-box tool-scan' }, el('div', {}, el('b', { textContent: 'Sprawdź też swoje CV' }), el('p', { className: 'hint', textContent: 'Darmowy skaner porówna Twoje CV z ogłoszeniem o pracę i pokaże, których wymagań z ogłoszenia nie widać w CV.' })), links);
+}
+// Skaner otwarty z narzędzia z zawodem (?zawod=<slug>): tylko podpowiedź i link do strony zawodu, skanowanie bez zmian.
+function scanCtxHint(C) {
+  const z = new URLSearchParams(location.search).get('zawod'), p = z && (C.INDEX || []).find((x) => x.slug === z);
+  return p ? el('p', { className: 'tool-ctx' }, 'Skanujesz CV na: ', el('b', { textContent: p.name }), ' · ', pageLink(`cv/${p.slug}`, { textContent: 'Jak napisać CV dla tego zawodu' })) : null;
+}
 function toolPage(slug, C, item) {
   const t = item || C.TOOLS[slug], box = el('div', { className: 'tool-box' });
   // Generowane dokumenty są po polsku (do polskiego pracodawcy): w wersjach obcych mówimy to nad wynikiem.
@@ -2343,7 +2361,8 @@ function toolPage(slug, C, item) {
   // data-i18n: interfejs narzędzia tłumaczy się słownikiem (wynik w .tool-out zostaje po polsku).
   const root = el('div', { className: 'inner narrow' },
     el('nav', { className: 'crumbs', ariaLabel: 'Ścieżka' }, pageLink('', { textContent: 'Strona główna' }), '›', el('a', { href: '#poradnik', textContent: 'Darmowe narzędzia' }), '›', el('span', { textContent: t.title })),
-    el('h1', { textContent: t.title }), el('p', { className: 'lead', textContent: t.lead }), plNote(), box,
+    el('h1', { textContent: t.title }), el('p', { className: 'lead', textContent: t.lead }), plNote(), ...(slug === 'skaner-cv' ? [scanCtxHint(C)].filter(Boolean) : []), box,
+    ...(NO_SCAN_BLOCK.has(slug) ? [] : [toolScanBlock(slug)]),
     ...(t.about || []).map((x) => el('p', { textContent: x })),
     // rozszerzone wersje EN/DE (seo-data/ext-*.json): te same sekcje i źródła co w wersji z serwera
     ...(t.sections || []).flatMap((s) => [el('h2', { textContent: s.h }), ...s.p.map((x) => el('p', { textContent: x }))]),
