@@ -15,7 +15,7 @@ import { getOrder, saveOrder, updateOrder, deleteOlderThan, allOrders, codes, re
 import { heardInput } from './lib/heard.js';
 import { docFile } from './lib/doc-names.js';
 import { cvToText } from './lib/cv-text.js';
-import { generateForAd, generateMessages, linkedinChecked, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
+import { generateForAd, generateFreeQs, generateMessages, linkedinChecked, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
 import { checkResult, hasCritical, recordQa, QA_LABELS } from './lib/qa.js';
 import { renderCv } from './lib/pdf.js';
@@ -889,6 +889,8 @@ async function markPaidAndGenerate(id) {
       r.qa = qa;
       const langs = (o.extraLangs || []).filter((l) => l !== r.lang);
       if (langs.length) r.variants = Object.fromEntries(await Promise.all(langs.map(async (l) => [l, await translateResult(r, l)])));
+      // 3 pytania za darmo w mailu (PR R): tylko pod pierwsze ogłoszenie, gdy nie ma dodatku przygotowania; błąd nie blokuje zamówienia.
+      if (i === 0 && !o.addons?.interview && !o.pass) r.freeQs = await generateFreeQs({ profile: o.profile, ad, result: r }).catch(() => null);
       return r;
     }));
     const qaScores = results.map((r) => r.qa.score).filter((x) => x != null);
