@@ -1641,5 +1641,9 @@
 "Obrazek zapisany. Dodaj go do posta albo relacji.": "Image saved. Add it to a post or story.",
 "Nie udało się przygotować obrazka.": "Could not prepare the image.",
 "Limit obrazków na godzinę. Spróbuj później.": "Hourly image limit reached. Please try again later.",
-"Na karcie pokażemy procent dopasowania, to stanowisko, datę i po 3 ogólne wymagania z ogłoszenia (do obrazka). Bez treści CV i danych kontaktowych. Link działa 30 dni.": "The card will show the match percentage, this job title, the date and 3 general requirements from the job ad each (for the image). No CV text or contact details. The link works for 30 days."
+"Na karcie pokażemy procent dopasowania, to stanowisko, datę i po 3 ogólne wymagania z ogłoszenia (do obrazka). Bez treści CV i danych kontaktowych. Link działa 30 dni.": "The card will show the match percentage, this job title, the date and 3 general requirements from the job ad each (for the image). No CV text or contact details. The link works for 30 days.",
+"Wskazówki i gotowe sformułowania dostaniesz razem z CV pod to ogłoszenie – od": "You will get tips and ready-made wording together with the CV for this job ad – from",
+"kolejne wymaganie uwzględnimy w CV pod to ogłoszenie": "more requirement will be covered in the CV for this job ad",
+"kolejne wymagania uwzględnimy w CV pod to ogłoszenie": "more requirements will be covered in the CV for this job ad",
+"kolejnych wymagań uwzględnimy w CV pod to ogłoszenie": "more requirements will be covered in the CV for this job ad"
 }

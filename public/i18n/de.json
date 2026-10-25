@@ -1641,5 +1641,9 @@
 "Obrazek zapisany. Dodaj go do posta albo relacji.": "Bild gespeichert. Fügen Sie es einem Beitrag oder einer Story hinzu.",
 "Nie udało się przygotować obrazka.": "Das Bild konnte nicht erstellt werden.",
 "Limit obrazków na godzinę. Spróbuj później.": "Stündliches Bildlimit erreicht. Bitte später erneut versuchen.",
-"Na karcie pokażemy procent dopasowania, to stanowisko, datę i po 3 ogólne wymagania z ogłoszenia (do obrazka). Bez treści CV i danych kontaktowych. Link działa 30 dni.": "Die Karte zeigt den Prozentwert, diese Stellenbezeichnung, das Datum und je 3 allgemeine Anforderungen aus der Anzeige (für das Bild). Ohne Lebenslauftext und Kontaktdaten. Der Link gilt 30 Tage."
+"Na karcie pokażemy procent dopasowania, to stanowisko, datę i po 3 ogólne wymagania z ogłoszenia (do obrazka). Bez treści CV i danych kontaktowych. Link działa 30 dni.": "Die Karte zeigt den Prozentwert, diese Stellenbezeichnung, das Datum und je 3 allgemeine Anforderungen aus der Anzeige (für das Bild). Ohne Lebenslauftext und Kontaktdaten. Der Link gilt 30 Tage.",
+"Wskazówki i gotowe sformułowania dostaniesz razem z CV pod to ogłoszenie – od": "Tipps und fertige Formulierungen erhalten Sie zusammen mit dem Lebenslauf für diese Anzeige – ab",
+"kolejne wymaganie uwzględnimy w CV pod to ogłoszenie": "weitere Anforderung berücksichtigen wir im Lebenslauf für diese Anzeige",
+"kolejne wymagania uwzględnimy w CV pod to ogłoszenie": "weitere Anforderungen berücksichtigen wir im Lebenslauf für diese Anzeige",
+"kolejnych wymagań uwzględnimy w CV pod to ogłoszenie": "weitere Anforderungen berücksichtigen wir im Lebenslauf für diese Anzeige"
 }

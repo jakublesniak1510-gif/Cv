@@ -73,7 +73,7 @@ test('Strona główna: „Przed i po” jako druga sekcja, nowy podtytuł i mikr
 test('Skaner: zakładka „Wklej tekst CV” i CTA pod wynikiem; ogłoszenie w kreatorze na telefonie domyślnie „Wklej treść”; ?zawod', () => {
   assert.match(app, /\[\['file', 'Wybierz plik'\], \['text', 'Wklej tekst CV'\]\]/);
   assert.match(app, /const b64 = file \? await fileB64\(file\) : textB64\(pasted\);/);
-  assert.match(app, /className: 'btn sm scan-cta', onclick: fromScan \}, el\('span', \{ textContent: 'Zrób CV dopasowane do tego ogłoszenia – od' \}\)/);
+  assert.match(app, /className: 'btn sm scan-cta', onclick: scanCta \}, el\('span', \{ textContent: 'Zrób CV dopasowane do tego ogłoszenia – od' \}\)/);
   assert.match(app, /matchMedia\('\(max-width: 640px\)'\)\.matches \? 'paste' : 'link'/);
   assert.match(html, /Jeśli link się nie wczyta, wklej treść ogłoszenia – zajmie to chwilę\./);
   assert.match(app, /const zaw = q\.get\('zawod'\)/);
