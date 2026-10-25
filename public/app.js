@@ -817,7 +817,7 @@ $('#usePass').onchange = () => refresh();
 
 const DKEY = 'cvpo-draft-v1', FIELDS = ['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'];
 let saveT, restoring = false;
-const draftData = () => ({ design, photo, addons: { ...addons(), linkedinEn: $('#adLinkedinEn').checked }, langs: extraLangs(), pkg: pkg(), f: Object.fromEntries(FIELDS.map((k) => [k, $('#' + k).value])), exp: rows('exp'), edu: rows('edu'), ads: rows('ads') });
+const draftData = () => ({ step, design, photo, addons: { ...addons(), linkedinEn: $('#adLinkedinEn').checked }, langs: extraLangs(), pkg: pkg(), f: Object.fromEntries(FIELDS.map((k) => [k, $('#' + k).value])), exp: rows('exp'), edu: rows('edu'), ads: rows('ads') });
 // Szkic na serwerze („Wyślij mi link do dokończenia”, lib/wizard-drafts.js): po wysłaniu linku formularz synchronizuje się z nim (bez zdjęcia).
 const SKEY = 'cvpo-srv-draft';
 const srvToken = () => { try { return localStorage.getItem(SKEY) || ''; } catch { return ''; } };
@@ -851,6 +851,7 @@ function restoreDraft(from) {
 }
 function refresh() {
   if ($('#langPick').children.length) syncLangPick();
+  $('#letterDiff').textContent = `${PRICE.cv_letter - PRICE.cv} zł`; // „Polecany”: dopłata za list do tego samego ogłoszenia, z cennika
   saveDraft();
   $('#total').textContent = total() + ' zł'; if (CHECKOUT_B) $('#totalTop').textContent = total() + ' zł'; if (step === 6) payTrust(6);
   $('#bundleTip').textContent = pkg() === 'cv' ? '' : bundleOn() ? `Masz pakiet „Pewna rozmowa”: ${PRICE.bundleOff} zł taniej.` : `Pakiet „Pewna rozmowa”: zaznacz przygotowanie do rozmowy i symulator, a zapłacisz ${PRICE.bundleOff} zł mniej.`;
@@ -967,13 +968,21 @@ const gwValue = (root) => root?.querySelector('input[type=radio]:checked')?.valu
 function payTrust(n) {
   const box = $('#payTrust'), on = n === 6 && total() > 0;
   $('.wiz-foot').classList.toggle('pay', n === 6);
-  box.hidden = !on;
+  box.hidden = !on; $('#payTrustList').hidden = !on;
   if (n === 6 && total() > 0) { if (!$('#gwBox').childElementCount) gwPicker($('#gwBox'), 'gw'); } else $('#gwBox').hidden = true;
   if (!on) return;
   const g = payGateways().find((x) => x.id === gwValue($('#gwBox'))) || cfg.pay;
   const parts = CHECKOUT_B ? (g?.methods || []).map((m) => el('span', { className: 'payico', textContent: m })) : [...(g?.methods || []).map((m, i, a) => [el('span', { textContent: m }), i < a.length - 1 ? ', ' : '']).flat()];
   const items = [parts.length ? parts : null, g ? [el('span', { textContent: `bezpieczna płatność przez ${g.provider}` })] : null, [el('span', { textContent: 'dokumenty zwykle gotowe w kilka minut' })], [el('span', { textContent: 'PDF także na e-mail' })]].filter(Boolean);
   box.replaceChildren(...items.flatMap((x, i) => (i ? [' · ', ...x] : x)));
+  // Blok zaufania nad przyciskiem płatności (tak samo w obu wariantach testu „checkout”): metody płatności tekstem (bez logotypów), poprawki, czas, dane, faktura.
+  const rev = cfg.maxRevisions || 5;
+  $('#payTrustList').replaceChildren(...[
+    g?.methods?.length ? el('li', { className: 'pt-methods' }, ...g.methods.map((m) => el('span', { className: 'payico', textContent: m }))) : null,
+    el('li', {}, `${rev} `, el('span', { textContent: plural(rev, 'poprawka w cenie', 'poprawki w cenie', 'poprawek w cenie') })),
+    el('li', { textContent: 'Gotowe zwykle w kilka minut – e-mailem i na stronie' }),
+    el('li', { textContent: 'Dane usuwane automatycznie po 30 dniach' }),
+    el('li', { textContent: 'Faktura na życzenie' })].filter(Boolean));
 }
 const nextLabel = () => ($('#next').textContent = step === 6 ? (total() === 0 ? 'Zamów bez opłaty' : cfg.demo ? `Przejdź do płatności · ${total()} zł` : `Zapłać ${total()} zł`) : 'Dalej');
 function go(n) {
@@ -992,13 +1001,13 @@ function go(n) {
   $('.wiz-body').scrollTop = 0;
 }
 // Podgląd przed płatnością: na prośbę klienta, raz na sesję kreatora; reszta CV jako rozmazany szkielet z fikcyjnym tekstem.
-let pvSid = '', pvShown = null;
+let pvSid = '', pvShown = null, pvOff = false;
 const PV_FAKE = ['Doświadczenie zawodowe', 'Stanowisko, nazwa firmy · 2021 – obecnie', 'Punkt opisujący zakres obowiązków i rezultaty pracy', 'Kolejny punkt dopasowany do wymagań z ogłoszenia', 'Wykształcenie', 'Nazwa szkoły, kierunek · rok ukończenia', 'Umiejętności', 'Umiejętność, umiejętność, umiejętność, umiejętność'];
 const pvSig = () => JSON.stringify([['headline', 'summary', 'skills'].map((k) => $('#' + k).value), rows('exp'), rows('edu'), rows('ads')[0]?.text || '']);
 function drawPreview(r) {
   $('#pvOut').replaceChildren(el('div', { className: 'pv-doc' },
     el('div', { className: 'pv-name', textContent: $('#name').value }), el('div', { className: 'pv-hl', textContent: r.headline }),
-    el('p', { textContent: r.summary }),
+    el('p', { textContent: (r.summary.match(/[^.!?]+[.!?]+(\s|$)/g) || [r.summary]).slice(0, 3).join('').trim() }), // 2–3 zdania podsumowania
     el('div', { className: 'pv-kw' }, el('span', { className: 'hint', textContent: 'Słowa kluczowe z ogłoszenia w Twoim CV:' }), ...r.keywords.map((k) => el('span', { className: 'chip', textContent: k }))),
     el('div', { className: 'pv-blur', ariaHidden: 'true' }, ...PV_FAKE.map((t, i) => el(i % 4 === 0 ? 'b' : 'p', { textContent: t }))),
     el('p', { className: 'hint', textContent: 'Pełne CV, dopasowane do ogłoszenia, dostaniesz po płatności. Nagłówek i podsumowanie będą spójne z tym podglądem.' })));
@@ -1011,13 +1020,37 @@ $('#pvBtn').onclick = async () => {
   try {
     const profile = { ...Object.fromEntries(['headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu') };
     const r = await (await fetch('/api/preview', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: pvSid, profile, ad }) })).json();
-    if (r.off || !r.summary) { $('#pvOut').replaceChildren(el('p', { className: 'hint', textContent: r.reason === 'limit' ? 'Limit podglądów został wykorzystany. Możesz od razu przejść do zamówienia.' : 'Podgląd jest chwilowo niedostępny. Możesz od razu przejść do zamówienia.' })); b.hidden = true; return; }
+    if (r.off || !r.summary) { pvOff = true; $('#pvBox').hidden = true; return; } // AI niedostępne albo limit: blok znika bez komunikatu o błędzie
     pvShown = { ...r, sig: pvSig() }; drawPreview(r); // zdarzenie preview_shown liczy serwer
-  } catch { $('#pvOut').replaceChildren(el('p', { className: 'hint', textContent: 'Podgląd jest chwilowo niedostępny. Możesz od razu przejść do zamówienia.' })); b.hidden = true; }
+  } catch { pvOff = true; $('#pvBox').hidden = true; }
   finally { b.disabled = false; b.textContent = 'Pokaż podgląd'; }
 };
+// Podgląd dopasowania (krok podsumowania): wymagania z każdego ogłoszenia (silnik skanera bez AI, /api/wizard-match)
+// i które z nich widać w danych z formularza; bez doświadczenia – sama liczba wymagań. Przy kilku ogłoszeniach zwinięte.
+let matchSig = '';
+async function drawWizMatch() {
+  const box = $('#wizMatch'), ads = rows('ads').filter((a) => a.text);
+  const cv = [$('#headline').value, $('#summary').value, $('#skills').value, $('#certificates').value, ...rows('exp').flatMap((e) => [e.title, e.company, e.description])].filter(Boolean).join('\n'), hasExp = rows('exp').some((e) => e.title || e.description);
+  const sig = JSON.stringify([cv, hasExp, ads.map((a) => a.text)]);
+  if (!ads.length) { box.hidden = true; matchSig = ''; return; }
+  if (sig === matchSig) return; matchSig = sig;
+  try {
+    const r = await fetch('/api/wizard-match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cv: hasExp ? cv : '', ads: ads.map((a) => a.text) }) });
+    if (!r.ok) throw new Error(); const j = await r.json(); if (sig !== matchSig) return;
+    const chips = (xs, c) => el('div', { className: 'pv-kw' }, ...xs.map((k) => el('span', { className: `chip ${c}`, textContent: k })));
+    const one = (m) => [el('p', {}, `Z ogłoszenia wyciągnęliśmy ${m.n} ${plural(m.n, 'wymaganie', 'wymagania', 'wymagań')}${hasExp ? '.' : m.n === 1 ? ', z którym dopasujemy CV.' : ', z którymi dopasujemy CV.'}`),
+      ...(hasExp ? [el('p', {}, `Twoje doświadczenie pokrywa ${m.found.length} z nich:`), m.found.length ? chips(m.found, 'ok') : null, m.missing.length ? el('p', { textContent: 'W CV ujmiemy też:' }) : null, m.missing.length ? chips(m.missing, '') : null] : [])].filter(Boolean);
+    const parts = j.ads.map((m, i) => (m && m.n ? [m, i] : null)).filter(Boolean);
+    if (!parts.length) { box.hidden = true; return; }
+    box.replaceChildren(el('h3', { className: 'sh', textContent: 'Dopasowanie do ogłoszenia' }),
+      ...(parts.length === 1 && ads.length === 1 ? one(parts[0][0]) : parts.map(([m, i]) => el('details', { className: 'optbox' }, el('summary', {}, `${i + 1}. ${ads[i].title || ''}`.trim()), ...one(m)))),
+      el('p', { className: 'hint small', textContent: 'Wstępne porównanie tekstu z formularza z wymaganiami z ogłoszenia, bez AI. Nic nie zapisujemy.' }));
+    box.hidden = false;
+  } catch { box.hidden = true; matchSig = ''; }
+}
 function drawSummary() {
-  $('#pvBox').hidden = !cfg.aiPreview || !rows('ads')[0]?.text;
+  $('#pvBox').hidden = !cfg.aiPreview || pvOff || !rows('ads')[0]?.text;
+  drawWizMatch();
   if (pvShown && pvShown.sig !== pvSig()) pvShown = null; // dane zmienione po podglądzie: podgląd nieaktualny
   if (!pvShown) { $('#pvOut').replaceChildren(); $('#pvBtn').hidden = false; }
   const ads = rows('ads');
@@ -1104,7 +1137,7 @@ $('#wizForm').onsubmit = async (e) => {
   const v = (id) => $('#' + id).value;
   const body = {
     draftToken: srvToken() || undefined,
-    usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, ...(CHECKOUT_B ? { consentForm: 'compact' } : {}), gateway: gwValue($('#gwBox')), outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, createAccount: $('#createAccount').checked, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, ...(CHECKOUT_B ? { consentForm: 'compact' } : {}), gateway: gwValue($('#gwBox')), outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu'), photo },
   };
   // Zgoda na cookies reklamowe (baner): tylko wtedy serwer zgłosi zakup do Meta (Conversions API) z identyfikatorami piksela.
@@ -1834,6 +1867,8 @@ function showResult() {
   draw();
   if (location.hash === '#ocena') setTimeout(() => $('#rate').scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
   if (location.hash === '#kolejne') setTimeout(() => $('#followup').scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+  // Linki z e-maila z gotowym CV: propozycja dodatku i założenia konta.
+  if (['#upsell', '#acctOffer'].includes(location.hash)) setTimeout(() => { const t = $(location.hash); if (t && !t.hidden) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 600);
 }
 $('#newOrder').onclick = () => {
   try { history.replaceState(null, '', location.pathname); } catch {}
@@ -2531,6 +2566,8 @@ function accDash(d) {
     el('div', { className: 'acct-head' }, el('div', {}, el('h1', { textContent: 'Moje konto' }), el('p', { className: 'hint', textContent: d.email })), out),
     passBox,
     el('div', { className: 'acct-card' }, el('h2', { textContent: 'Twoje zamówienia' }), el('p', { className: 'hint', textContent: 'Zamówienia z ostatnich 30 dni (starsze usuwamy automatycznie razem z dokumentami).' }),
+      // Kolejne CV z danymi z ostatniego zamówienia (formularz „Masz kolejne ogłoszenia?” na stronie dokumentów, z prefillem).
+      d.orders.length ? el('p', {}, el('a', { className: 'btn sm', href: `/?id=${d.orders[0].id}#kolejne`, textContent: 'Zrób kolejne CV pod nowe ogłoszenie w 2 minuty – dane już są' })) : null,
       ...(d.orders.length ? d.orders.map((o) => el('div', { className: 'acct-order' },
         el('div', {}, el('b', { textContent: o.pkg }), el('small', { textContent: ` · ${new Date(o.created).toLocaleDateString('pl-PL')}` })),
         el('div', { className: 'acct-pos' }, ...o.positions.map((p, i) => el('span', {}, p.position, ' ', el('button', { className: 'link', type: 'button', textContent: '+ do aplikacji', onclick: () => { addBox.replaceChildren(el('h2', { textContent: 'Dodaj aplikację' }), appForm({ position: p.position, company: p.company, orderId: o.id, resultIndex: i })); addBox.scrollIntoView({ behavior: 'smooth', block: 'center' }); } })))),
@@ -2682,6 +2719,8 @@ async function loadSrvDraft(t) {
   try { localStorage.setItem(SKEY, t); } catch {}
   restoreDraft(d.data); $('#draftNote').hidden = true;
   openWiz(); flash('Wczytaliśmy zapisany szkic. Możesz dokończyć zamówienie.');
+  // Link z e-maila (także z przypomnienia) wraca dokładnie do kroku, na którym zapisano szkic.
+  const st = Number(d.data?.step); if (ORDER.includes(st) && st !== ORDER[0]) go(st);
 }
 if (q.get('szkic') && !q.get('id')) loadSrvDraft(q.get('szkic'));
 
