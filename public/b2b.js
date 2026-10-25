@@ -40,6 +40,13 @@
     st.className = 'fstatus ok'; st.textContent = 'Dziękujemy! Kod, plakat i link do raportu wyślemy e-mailem po zatwierdzeniu, zwykle w ciągu 1 dnia roboczego.';
     f.querySelector('button[type=submit]').disabled = false;
   });
+  // Zapytanie agencji pracy (/dla-agencji): to samo /api/b2b co formularz „Dla firm”, rodzaj agencji w treści (Panel → Firmy).
+  const agency = document.getElementById('agencyForm');
+  if (agency) agency.addEventListener('formdata', (e) => { e.formData.set('msg', `[${e.formData.get('orgType')}] ${e.formData.get('msg') || ''}`.trim()); });
+  wire(agency, '/api/b2b', (_j, st) => {
+    agency.reset(); st.className = 'fstatus ok'; st.textContent = 'Dziękujemy! Odpowiemy z propozycją, zwykle w ciągu jednego dnia roboczego.';
+    agency.querySelector('button[type=submit]').disabled = false;
+  });
   const bank = document.getElementById('bankForm');
   wire(bank, bank ? `/api/b2b/report/${bank.dataset.token}/bank` : '', (_j, st) => { st.className = 'fstatus ok'; st.textContent = 'Zapisano.'; bank.querySelector('button[type=submit]').disabled = false; });
 })();

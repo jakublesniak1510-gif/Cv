@@ -710,7 +710,7 @@ $('#ctBulkGo').addEventListener('click', async () => {
 });
 $('#ctImport').addEventListener('submit', async (e) => {
   e.preventDefault(); const f = $('#ctFile').files[0]; if (!f) return toast('Wybierz plik CSV.');
-  try { const r = await post('/contacts/import', { csv: await f.text() }); $('#ctMsg').textContent = `Dodano ${r.added} z ${r.rows}. Duplikaty: ${r.dupes}, na liście blokad: ${r.blocked}, bez e-maila i adresu: ${r.invalid}.${r.noEmail ? ` Bez e-maila (tylko list): ${r.noEmail}.` : ''}`; $('#ctFile').value = ''; loaders.contacts(); }
+  try { const r = await post('/contacts/import', { csv: await f.text() }); $('#ctMsg').textContent = `Dodano ${r.added} z ${r.rows}. Duplikaty: ${r.dupes}, na liście blokad: ${r.blocked}, bez e-maila i adresu: ${r.invalid}.${r.noEmail ? ` Bez e-maila (tylko list): ${r.noEmail}.` : ''}${r.noSource ? ` Bez źródła danych: ${r.noSource} – uzupełnij kolumnę zrodlo.` : ''}`; $('#ctFile').value = ''; loaders.contacts(); }
   catch (x) { toast(x.message); }
 });
 ['#ctStatus', '#ctSeg', '#ctPrio', '#ctQ'].forEach((s) => $(s).addEventListener('input', () => drawContacts()));
