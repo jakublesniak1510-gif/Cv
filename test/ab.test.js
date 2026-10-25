@@ -30,7 +30,7 @@ test('Przydział: stały dla odwiedzającego, ok. 50/50, niezależny między tes
 
 test('Warianty B zmieniają aktualną stronę główną (strażnik na zmiany w index.html)', () => {
   const html = fs.readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
-  for (const [k, e] of Object.entries(EXPERIMENTS)) assert.notEqual(e.apply(html), html, `${k}: wariant B nie znalazł elementu`);
+  for (const [k, e] of Object.entries(EXPERIMENTS)) if (!e.scope) assert.notEqual(e.apply(html), html, `${k}: wariant B nie znalazł elementu`); // „scanner” zmienia odpowiedź /api/scan, nie HTML
 });
 
 test('Test z dwóch proporcji', () => {
