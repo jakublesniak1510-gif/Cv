@@ -60,6 +60,7 @@ import { portalRoutes } from './lib/portals.js';
 import { employerRoutes } from './lib/employers.js';
 import { fairRoutes } from './lib/fairs.js';
 import { previewRoutes, previewFor, cleanupPreviews } from './lib/preview.js';
+import { fullPreviewRoutes, fullPreviewFor, cleanupFullPreviews, reusesWhole } from './lib/full-preview.js';
 import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText, visitInfo, funnelPaid, countEvent, funnelOrder, abExpose } from './lib/analytics.js';
 import { seoReportRoutes, seoWeekly } from './lib/seo-report.js';
 import { logEvent, cleanupEvents } from './lib/events.js';
@@ -628,6 +629,7 @@ function cleanInvoice(v) {
 }
 
 previewRoutes(app, { cleanProfile, cleanAds });
+fullPreviewRoutes(app, { cleanProfile, cleanAds, prices: () => PRICES });
 
 app.post('/api/orders', async (req, res) => {
   if (salesClosedFor(req)) return res.status(503).json({ error: CLOSED_MSG });
@@ -660,7 +662,8 @@ app.post('/api/orders', async (req, res) => {
     // Art. 38 pkt 13 ustawy o prawach konsumenta: płatne zamówienie tylko ze zgodą na wykonanie od razu (karnet i 0 zł bez blokady).
     if (total > 0 && waiver !== true) { if (passUse) await releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {}); return res.status(400).json({ error: 'Zaznacz zgodę na wykonanie usługi od razu po płatności.' }); }
     const shown = await previewFor(p, a[0]).catch(() => null); // podgląd z ostatniego kroku kreatora, jeśli był
-    const order = { ...(mode === 'rewrite' ? { mode: 'rewrite' } : {}), preview: shown, visit: visitInfo(req), refCtx: refCtx(req), invoice: total > 0 ? inv : null, id: orderId, ...(passUse ? { pass: { id: passUse.passId, use: passUse.use, items: passUse.items } } : {}), pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, deleteNotice: { consent: !!deleteNotice, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, outcomeAsk: outcomeAsk === true ? { consent: true, text: OUTCOME_CONSENT, at: Date.now(), sent: false } : { consent: false, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, ...(waiver === true ? { waiver: { text: WAIVER, at: Date.now(), ...(CHECKOUT_FORMS.has(consentForm) ? { form: consentForm } : {}) } } : {}), status: 'pending', results: [], revisions: 0, maxRevisions: MAX_REVISIONS, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
+    const fullShown = await fullPreviewFor(p, a[0], mode).catch(() => null); // pełne CV z podglądu (C1): po płatności klient dostaje dokładnie to
+    const order = { ...(mode === 'rewrite' ? { mode: 'rewrite' } : {}), preview: shown, ...(fullShown ? { fullPreview: fullShown } : {}), visit: visitInfo(req), refCtx: refCtx(req), invoice: total > 0 ? inv : null, id: orderId, ...(passUse ? { pass: { id: passUse.passId, use: passUse.use, items: passUse.items } } : {}), pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, deleteNotice: { consent: !!deleteNotice, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, outcomeAsk: outcomeAsk === true ? { consent: true, text: OUTCOME_CONSENT, at: Date.now(), sent: false } : { consent: false, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, ...(waiver === true ? { waiver: { text: WAIVER, at: Date.now(), ...(CHECKOUT_FORMS.has(consentForm) ? { form: consentForm } : {}) } } : {}), status: 'pending', results: [], revisions: 0, maxRevisions: MAX_REVISIONS, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
     try { await reserveOrderCode(order, c.base); } catch (e) {
       if (passUse) await releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {});
       if (e instanceof CodeError) return res.status(409).json({ error: e.message }); throw e;
@@ -901,10 +904,15 @@ async function markPaidAndGenerate(id) {
     if (!o.paidAt && paidO.adConsent) sendPurchase(paidO, BASE_URL).then((r) => r && updateOrder(id, { capi: r })).catch((e) => logEvent('reklamy', `Meta CAPI: ${e.message}`, { orderId: id }));
     const withLetter = hasLetter(o.pkg);
     const results = await Promise.all(o.ads.map(async (ad, i) => {
-      const gen = () => generateForAd({ profile: o.profile, ad, withLetter, addons: o.addons, preview: i === 0 ? o.preview : null, rewrite: o.mode === 'rewrite' });
+      // Pełny podgląd (C1) dotyczy pierwszego ogłoszenia: samo CV → wynik z podglądu bez generowania; z listem/dodatkami →
+      // generujemy resztę, a CV podmieniamy na to z podglądu (klient dostaje CV, które widział).
+      const full = i === 0 ? o.fullPreview : null;
+      const gen = full && reusesWhole(o) ? async () => structuredClone(full)
+        : async () => { const r = await generateForAd({ profile: o.profile, ad, withLetter, addons: o.addons, preview: full ? { headline: full.cv?.headline, summary: full.cv?.summary, keywords: full.keywords || [] } : i === 0 ? o.preview : null, rewrite: o.mode === 'rewrite' }); return full ? { ...r, cv: structuredClone(full.cv), match: full.match ?? r.match, keywords: full.keywords ?? r.keywords, position: full.position || r.position } : r; };
       let r = await gen(), qa = await qaOf(r, o, ad, withLetter);
       // Błąd krytyczny (placeholder, firma spoza profilu, zły język, klauzula…): jedna ponowna generacja, zostaje lepsza wersja.
-      if (hasCritical(qa) && aiEnabled()) {
+      // Nie przy CV z pełnego podglądu – klient zapłacił za to, co widział (alert do właściciela i tak idzie).
+      if (hasCritical(qa) && aiEnabled() && !full) {
         const r2 = await gen().catch(() => null), qa2 = r2 && (await qaOf(r2, o, ad, withLetter));
         if (r2 && crit(qa2) <= crit(qa)) { r = r2; qa = qa2; }
         qa = { ...qa, retried: true };
@@ -1174,6 +1182,7 @@ async function hourly() {
     await cleanupEvents(RETENTION_MS);
     await cleanupChats().catch(() => {});
     await cleanupPreviews().catch(() => {});
+    await cleanupFullPreviews().catch(() => {});
     await cleanupShareCards().catch(() => {});
     await cleanupPartnerApps().catch(() => {});
     await crmHourly(BASE_URL).catch((e) => logEvent('kontakty', e.message));
