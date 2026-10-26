@@ -601,8 +601,9 @@
       <div class="sum-top" id="sumTop" hidden><span>Do zapłaty</span> <b id="totalTop"></b> <small>jednorazowo, bez abonamentu</small></div>
       <div id="wizMatch" class="wiz-match" hidden></div>
       <div id="pvBox" class="pv" hidden><div class="pv-head"><b>Tak zacznie się Twoje CV pod to ogłoszenie</b><p class="hint">Pokażemy nagłówek, podsumowanie zawodowe i 5 słów kluczowych z ogłoszenia, które znajdą się w CV. W tym celu Twoje dane i ogłoszenie trafią do dostawcy AI, tak jak przy zamówieniu.</p><button class="btn ghost sm" type="button" id="pvBtn">Pokaż podgląd</button></div><div id="pvOut" aria-live="polite"></div></div>
+      <p class="pv-ex" id="pvEx" hidden><button type="button" class="btn ghost sm" data-example="0">Zobacz przykład gotowego CV</button> <span class="hint">Przykładowe ogłoszenie i CV, bez Twoich danych.</span></p>
       <div id="sum"></div>
-      <div class="codebox"><label class="f">Kod rabatowy<span class="urlrow"><input type="text" id="codeInput" autocomplete="off" placeholder="np. KOD-AB12CD"><button type="button" class="btn ghost sm" id="codeApply">Zastosuj</button></span></label><p class="fstatus" id="codeMsg" role="status"></p></div>
+      <details class="codebox" id="codeBox"><summary>Mam kod rabatowy</summary><label class="f">Kod rabatowy<span class="urlrow"><input type="text" id="codeInput" autocomplete="off" placeholder="np. KOD-AB12CD"><button type="button" class="btn ghost sm" id="codeApply">Zastosuj</button></span></label><p class="fstatus" id="codeMsg" role="status"></p></details>
       <label class="check"><input type="checkbox" id="wantInv"> <span>Potrzebuję faktury (bez VAT – sprzedawca jest zwolniony z VAT).</span></label>
       <div class="invbox" id="invBox" hidden>
        <label class="f">Nazwa firmy albo imię i nazwisko<input type="text" id="invName" maxlength="200" autocomplete="organization"></label>
@@ -626,11 +627,13 @@
       </details>
       <p class="perk small">Po opłaceniu dostaniesz <b>swój kod −10 zł</b> (ważny 90 dni): na kolejne zamówienie dla Ciebie i dla Twoich znajomych.</p>
       <p class="hint trust-mini">W cenie: raport dopasowania, darmowa poprawka i edycja tekstu. Dane usuwamy automatycznie po 30 dniach.</p>
-      <label class="check"><input type="checkbox" id="consent"> <span>Akceptuję <a href="/regulamin" target="_blank" rel="noopener">Regulamin</a> i <a href="/polityka-prywatnosci" target="_blank" rel="noopener">Politykę prywatności</a>. Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów.</span></label>
       <div id="gwBox" class="gw-box" hidden></div>
-      <label class="check"><input type="checkbox" id="waiver"> <span>Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.</span></label>
       <ul class="pay-trust" id="payTrustList" hidden></ul>
       <!--tp-mini-->
+      <div class="consent-box" id="consentBox">
+      <label class="check"><input type="checkbox" id="consent"> <span>Akceptuję <a href="/regulamin" target="_blank" rel="noopener">Regulamin</a> i <a href="/polityka-prywatnosci" target="_blank" rel="noopener">Politykę prywatności</a>. Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów.</span></label>
+      <label class="check"><input type="checkbox" id="waiver"> <span>Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.</span></label>
+      </div>
     </section>
     <section data-step="7" hidden>
       <div class="note"><b>Tryb DEMO.</b> Tutaj otworzyłaby się płatność Przelewy24 (BLIK / karta / przelew). Kliknij, aby zasymulować udaną płatność.</div>
@@ -638,7 +641,7 @@
     </section>
     <div class="err" id="werr" role="alert"></div>
    </div>
-   <div class="wiz-foot"><p class="werr-foot" id="werrFoot" aria-hidden="true" hidden></p><button type="button" class="btn ghost" id="back">Wstecz</button><div class="tot">Razem <strong id="total">49 zł</strong><small id="brk"></small></div><button type="submit" class="btn" id="next">Dalej</button><p class="paytrust" id="payTrust" hidden></p></div>
+   <div class="wiz-foot"><p class="werr-foot" id="werrFoot" aria-hidden="true" hidden></p><p class="get-line" id="getLine" hidden></p><button type="button" class="btn ghost" id="back">Wstecz</button><div class="tot">Razem <strong id="total">49 zł</strong><small id="brk"></small></div><button type="submit" class="btn" id="next">Dalej</button><p class="paytrust" id="payTrust" hidden></p></div>
   </form>
  </div>
 </div>

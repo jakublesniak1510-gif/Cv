@@ -37,7 +37,7 @@ test('Kreator: panel dopasowania w podsumowaniu (per ogłoszenie zwinięty), pod
   assert.match(app, /fetch\('\/api\/wizard-match'/); assert.match(app, /el\('details', \{ className: 'optbox' \}/);
   assert.match(app, /Z ogłoszenia wyciągnęliśmy \$\{m\.n\} \$\{plural\(m\.n, 'wymaganie', 'wymagania', 'wymagań'\)\}/);
   assert.match(app, /textContent: firstSentences\(r\.summary, 3\) \}\), \/\/ 2–3 zdania/, 'podgląd: 3 pierwsze zdania (test/podglad-zdania.test.js)');
-  assert.match(app, /if \(r\.off \|\| !r\.summary\) \{ pvOff = true; \$\('#pvBox'\)\.hidden = true; return; \}/);
+  assert.match(app, /if \(r\.off \|\| !r\.summary\) \{ pvOff = true; \$\('#pvBox'\)\.hidden = true; \$\('#pvEx'\)\.hidden = false; return; \}/);
   assert.match(app, /PV_FAKE/, 'rozmyty fragment to przykładowa treść, nie dane klienta');
 });
 

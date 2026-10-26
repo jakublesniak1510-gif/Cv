@@ -948,6 +948,11 @@ details>summary{min-height:44px;padding-block:11px;box-sizing:border-box}
 /* Błąd walidacji widoczny przy przycisku (raport 26.10): kopia komunikatu nad stopką kreatora i zaznaczone pole. */
 .werr-foot{flex:1 0 100%;order:-1;margin:0;color:var(--err);font-size:.9rem;font-weight:600;line-height:1.3}
 label.need{outline:2px solid var(--err);outline-offset:4px;border-radius:8px}
+/* Ostatni krok (decyzja 26.10): zgody w jednej ramce tuż nad przyciskiem, kod rabatowy zwinięty, „Dostajesz” nad przyciskiem, przykład CV bez AI. */
+.consent-box{margin:14px 0 4px;padding:10px 12px;border:2px solid var(--brand);border-radius:12px;background:var(--surface)}.consent-box .check{margin:4px 0}
+details.codebox>summary{cursor:pointer;color:var(--brand);font-weight:600;margin:8px 0}details.codebox[open]>summary{margin-bottom:4px}
+.get-line{flex:1 0 100%;order:-1;margin:0;font-size:.85rem;color:var(--mute);line-height:1.3}.get-line b{color:var(--ink)}
+.pv-ex{margin:10px 0}
 .paytrust{flex-basis:100%;margin:0;font-size:12.5px;line-height:1.4;color:var(--mute);text-align:center}
 @media(max-width:640px){.wiz-foot.pay{gap:8px;padding:10px 12px}.wiz-foot.pay #back{font-size:0;padding:0;width:44px;min-height:44px;flex:none}.wiz-foot.pay #back::before{content:"←";font-size:20px}.wiz-foot.pay .tot{display:none}.wiz-foot.pay #next{flex:1}}
 .sumrow span:last-child{white-space:nowrap}
