@@ -18,13 +18,13 @@ test('Notatka dla generatora: branże i odpowiedź kandydata, przenoszalne tylko
   assert.match(read('lib/generate.js'), /\$\{profile\.career\?\.to \? `\\n\$\{careerNote\(profile\.career\)\}\\n` : ''\}/);
 });
 
-test('Kreator: przełącznik i 3 pola w kroku 3, walidacja, profile.career; serwer zapisuje tylko z docelową branżą', async () => {
+test('Kreator: przełącznik i 3 pola w ekranie danych („Więcej danych”, C3), walidacja, profile.career; serwer zapisuje tylko z docelową branżą', async () => {
   const html = read('public/index.html'), app = read('public/app.js');
   assert.match(html, /<input type="checkbox" id="careerOn"> <span>Zmieniam branżę<\/span>/);
   for (const id of ['careerFrom', 'careerTo', 'careerFit']) assert.ok(html.includes(`id="${id}"`), id);
   assert.match(html, /href="\/poradnik\/cv-przy-zmianie-branzy"/);
-  const s3 = html.slice(html.indexOf('<section data-step="3"'), html.indexOf('<section data-step="4"')); assert.ok(s3.includes('careerOn'), 'krok 3');
-  assert.match(app, /if \(n === 3 && \$\('#careerOn'\)\.checked && !v\('careerTo'\)\) return/);
+  const more = html.slice(html.indexOf('<details class="optbox more-data" id="moreData">'), html.indexOf('</details>', html.indexOf('id="moreData"'))); assert.ok(more.includes('careerOn'), 'ekran 2, „Więcej danych”');
+  assert.match(app, /if \(n === 2 && \$\('#careerOn'\)\.checked && !v\('careerTo'\)\) \{ \$\('#moreData'\)\.open = true; return/);
   assert.match(app, /career: \{ from: v\('careerFrom'\), to: v\('careerTo'\), fit: v\('careerFit'\) \}/);
   for (const l of ['en', 'de', 'uk']) assert.ok(JSON.parse(read(`public/i18n/${l}.json`))['Zmieniam branżę'], l);
   const port = 6200 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-career-'));

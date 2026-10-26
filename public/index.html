@@ -519,29 +519,18 @@
 <label class="check"><input type="checkbox" id="usePass" checked> <span id="passUseTxt">Użyj karnetu</span></label>
 <p class="hint">Każde ogłoszenie w tym zamówieniu zużyje 1 dopasowanie (CV + list motywacyjny, jeden dodatkowy język w cenie). Symulator i przygotowanie do rozmowy – z limitów karnetu, a gdy się skończą, płatne jak zwykle. Pozostałe dodatki płatne jak zwykle.</p>
 </div>
+<p class="hint">Wklej link, wgraj zdjęcie ogłoszenia albo wklej jego treść. Dla <b>każdego</b> ogłoszenia powstanie osobne CV. Jeśli link się nie wczyta, wklej treść ogłoszenia – zajmie to chwilę.</p>
+<div id="ads"></div><button type="button" class="btn ghost sm" id="addAd">+ Dodaj ogłoszenie (w pakiecie do 3)</button>
+<p class="note" id="packTip" hidden>Masz więcej ogłoszeń w tym samym zawodzie? <button type="button" class="link" id="toPack">Wybierz Pakiet 3 za 79 zł</button>: trzy CV i list do każdego.</p>
+<h3 class="sh">Pakiet</h3>
 <p class="wiz-today">Aplikujesz dziś? CV i list będą gotowe zwykle w kilka minut.</p>
-<p class="trust1" id="trust1" hidden></p>
-<div class="prof-ex" id="profEx" hidden><label class="f">Zobacz przykład CV dla Twojego zawodu<span class="urlrow"><select id="profExSel"><option value="">Wybierz zawód</option></select><button type="button" class="btn ghost sm" id="profExGo">Zobacz przykład</button></span></label></div>
 <div class="opts" id="pkgOpts">
-<label class="opt"><input type="radio" name="pkg" value="cv"><span class="o-t">Samo CV<b>39 zł</b></span><span class="o-d">CV dopasowane do ogłoszenia</span></label>
-<label class="opt"><input type="radio" name="pkg" value="cv_letter" checked><span class="o-t">CV + list motywacyjny<b>49 zł</b></span><span class="o-d">Komplet dokumentów pod ogłoszenie</span><span class="o-d rec-note"><span>list motywacyjny pod to samo ogłoszenie za</span> <span id="letterDiff">10 zł</span> <span>więcej</span></span></label>
+<label class="opt"><input type="radio" name="pkg" value="cv" checked><span class="o-t">Samo CV<b>39 zł</b></span><span class="o-d">CV dopasowane do ogłoszenia</span></label>
+<label class="opt"><input type="radio" name="pkg" value="cv_letter"><span class="o-t">CV + list motywacyjny<b>49 zł</b></span><span class="o-d">Komplet dokumentów pod ogłoszenie</span><span class="o-d rec-note"><span>list motywacyjny pod to samo ogłoszenie za</span> <span id="letterDiff">10 zł</span> <span>więcej</span></span></label>
 <label class="opt"><input type="radio" name="pkg" value="pack3"><span class="o-t">Pakiet 3 CV + listy<b>79 zł</b></span><span class="o-d">3 CV pod ten sam zawód, każde pod inne ogłoszenie, i list do każdego</span><span class="o-d unit"><span class="pack3Unit">79 zł = 26,33 zł</span> <span>za CV</span></span></label>
 </div>
-<h3 class="sh">Dodatki <span class="h">(opcjonalnie, raz na całe zamówienie)</span></h3>
-<div class="opts addons">
-<label class="opt"><input type="checkbox" id="adInterview"><span class="o-t">Przygotowanie do rozmowy<b data-price="interview">+50 zł</b></span><span class="o-d">12 pytań do tego ogłoszenia z przykładowymi odpowiedziami z Twojego doświadczenia, gotowe „Opowiedz o sobie”, pytania do pracodawcy, rozmowa o pieniądzach i lista kontrolna. PDF.</span></label>
-<label class="opt"><input type="checkbox" id="adSim"><span class="o-t">Symulator rozmowy kwalifikacyjnej<b data-price="sim">+29 zł</b></span><span class="o-d">Próbna rozmowa z AI-rekruterem pod to ogłoszenie: do 8 pytań, ocena każdej odpowiedzi i wskazówki, na koniec podsumowanie</span></label>
-<label class="opt"><input type="checkbox" id="adMessages"><span class="o-t">Wiadomość do rekrutera<b data-price="messages">+9 zł</b></span><span class="o-d">Krótka wiadomość na LinkedIn i gotowy e-mail z aplikacją</span></label>
-<label class="opt"><input type="checkbox" id="adLinkedin"><span class="o-t">Profil LinkedIn<b data-price="linkedin">+19 zł</b></span><span class="o-d">Nagłówek (do 220 znaków), sekcja „Informacje” (do 2600 znaków), do 15 umiejętności, opisy do 3 stanowisk i wskazówki do profilu, w języku CV, do skopiowania</span><span class="o-d tm">LinkedIn jest znakiem towarowym LinkedIn Corp.; serwis nie jest z nim powiązany.</span></label>
-<label class="check li-en" id="liEnBox" hidden><input type="checkbox" id="adLinkedinEn"> <span>Profil LinkedIn także po angielsku (bez dopłaty)</span></label>
-<p class="perk small" id="bundleTip"></p>
-<label class="opt"><input type="checkbox" id="adDocx"><span class="o-t">Wersja Word (.docx)<b data-price="docx">+9 zł</b></span><span class="o-d">CV i list w edytowalnym pliku Word, gdy pracodawca prosi o .doc/.docx</span></label>
-</div>
-<h3 class="sh">Tłumaczenie na inny język <span class="h">(+5 zł za każdy język, dla wszystkich ogłoszeń)</span></h3>
-<p class="hint">Dokumenty powstają w języku ogłoszenia i ten język jest w cenie: polskie ogłoszenie to CV po polsku, angielskie to CV po angielsku. Tutaj dokupisz drugą wersję w innym języku, np. po niemiecku do pracy za granicą.</p>
-<div class="langpick" id="langPick"></div>
-<h3 class="sh">Wygląd CV <span class="h">(możesz go zmienić także po zakupie)</span></h3>
-<div id="wizDesign"></div>
+<p class="trust1" id="trust1" hidden></p>
+<div class="prof-ex" id="profEx" hidden><label class="f">Zobacz przykład CV dla Twojego zawodu<span class="urlrow"><select id="profExSel"><option value="">Wybierz zawód</option></select><button type="button" class="btn ghost sm" id="profExGo">Zobacz przykład</button></span></label></div>
 <p class="perk small">Po zakupie dostaniesz <b>swój kod −10 zł</b> na kolejne zamówienie, który możesz też dać znajomym.</p>
 <details class="save-later" id="saveLater">
 <summary>Nie masz teraz czasu? Wyślij sobie link do dokończenia</summary>
@@ -561,9 +550,16 @@
 <label class="check rewrite-mode"><input type="checkbox" id="rewriteMode"> <span>Mam już CV – popraw je pod ogłoszenie, zachowując jego treść</span></label>
 <p class="hint" id="rewriteNote" hidden>Zachowujemy treść i kolejność Twojego CV; wygląd w naszym szablonie. Nic nie dopisujemy: wymagania z ogłoszenia, których nie ma w Twoim CV, pokażemy w raporcie dopasowania w części „Brakuje w CV” – do uzupełnienia przez Ciebie, jeśli są prawdą.</p>
 <p class="fstatus" id="importStatus" role="status"></p>
+<p class="scan-hint" id="scanHint" hidden></p>
 <div class="grid2">
 <label class="f">Imię i nazwisko *<input type="text" id="name" autocomplete="name"></label>
 <label class="f">E-mail *<input type="email" id="email" autocomplete="email"></label>
+</div>
+<h3 class="sh">Doświadczenie</h3>
+<p class="hint">Dodaj prace od najnowszej. Każdy punkt obowiązków w nowej linii. Im konkretniej (liczby, wyniki), tym lepsze CV.</p>
+<div id="exp"></div><button type="button" class="btn ghost sm" id="addExp">+ Dodaj stanowisko</button>
+<details class="optbox more-data" id="moreData"><summary>Więcej danych <span class="h">(opcjonalnie: kontakt, zdjęcie, wykształcenie, umiejętności)</span></summary>
+<div class="grid2">
 <label class="f">Telefon<input type="tel" id="phone" autocomplete="tel"></label>
 <label class="f">Miasto<input type="text" id="city"></label>
 <label class="f">Link <span class="h">LinkedIn, portfolio</span><input type="text" id="link"></label>
@@ -571,11 +567,6 @@
 </div>
 <label class="f">Krótko o sobie <span class="h">opcjonalnie</span><textarea id="summary"></textarea></label>
 <div class="photo-row"><div class="photo-prev" id="photoPrev" aria-hidden="true"></div><div><b>Zdjęcie</b> <span class="h">opcjonalnie</span><p class="hint">Pojawi się w każdym szablonie, a gdy go nie dodasz, CV wygląda dobrze także bez niego. Zdjęcie nie trafia do AI.</p><label class="btn ghost sm filebtn">Dodaj zdjęcie<input type="file" id="photoFile" accept="image/jpeg,image/png,image/webp" hidden></label> <button type="button" class="link" id="photoDel" hidden>Usuń zdjęcie</button></div></div>
-</section>
-<section data-step="3" hidden>
-<p class="scan-hint" id="scanHint" hidden></p>
-<p class="hint">Dodaj prace od najnowszej. Każdy punkt obowiązków w nowej linii. Im konkretniej (liczby, wyniki), tym lepsze CV.</p>
-<div id="exp"></div><button type="button" class="btn ghost sm" id="addExp">+ Dodaj stanowisko</button>
 <label class="check career-on"><input type="checkbox" id="careerOn"> <span>Zmieniam branżę</span></label>
 <div class="career" id="careerBox" hidden>
 <p class="hint">Napiszemy CV pod nową branżę: wyżej pokażemy umiejętności, które przenosisz z dotychczasowej pracy. Niczego nie dopisujemy. <a href="/poradnik/cv-przy-zmianie-branzy" target="_blank" rel="noopener">Poradnik: CV przy zmianie branży</a></p>
@@ -583,8 +574,6 @@
 <label class="f">Docelowa branża<input type="text" id="careerTo" maxlength="120" placeholder="np. logistyka"></label>
 <label class="f">Co z obecnych zadań pasuje do nowej pracy?<textarea id="careerFit" rows="3" maxlength="600" placeholder="np. planowanie grafików, przyjmowanie dostaw, rozliczanie kasy"></textarea></label>
 </div>
-</section>
-<section data-step="4" hidden>
 <h3 class="sh">Wykształcenie</h3><div id="edu"></div><button type="button" class="btn ghost sm" id="addEdu">+ Dodaj szkołę</button>
 <h3 class="sh">Umiejętności i dodatki</h3>
 <label class="f">Umiejętności <span class="h">po przecinku: im więcej, tym lepsze dopasowanie</span><textarea id="skills"></textarea></label>
@@ -594,12 +583,7 @@
 </div>
 <label class="f">Zainteresowania <span class="h">opcjonalnie</span><input type="text" id="interests"></label>
 <label class="f">Uwagi dla autora <span class="h">np. zmiana branży, przerwa w pracy</span><textarea id="notes"></textarea></label>
-</section>
-<section data-step="5" hidden>
-<p class="hint">Dla <b>każdego</b> ogłoszenia powstanie osobne CV. Wklej link, wgraj zdjęcie ogłoszenia albo wklej jego treść.</p>
-<p class="hint">Jeśli link się nie wczyta, wklej treść ogłoszenia – zajmie to chwilę.</p>
-<div id="ads"></div><button type="button" class="btn ghost sm" id="addAd">+ Dodaj ogłoszenie (w pakiecie do 3)</button>
-<p class="note" id="packTip" hidden>Masz więcej ogłoszeń w tym samym zawodzie? <button type="button" class="link" id="toPack">Wybierz Pakiet 3 za 79 zł</button>: trzy CV i list do każdego.</p>
+</details>
 </section>
 <section data-step="6" hidden>
 <div class="sum-top" id="sumTop" hidden><span>Do zapłaty</span> <b id="totalTop"></b> <small>jednorazowo, bez abonamentu</small></div>
@@ -607,6 +591,23 @@
 <div id="wizMatch" class="wiz-match" hidden></div>
 <div id="pvBox" class="pv" hidden><div class="pv-head"><b id="pvTitle">Tak zacznie się Twoje CV pod to ogłoszenie</b><p class="hint" id="pvHint">Pokażemy nagłówek, podsumowanie zawodowe i 5 słów kluczowych z ogłoszenia, które znajdą się w CV. W tym celu Twoje dane i ogłoszenie trafią do dostawcy AI, tak jak przy zamówieniu.</p><button class="btn ghost sm" type="button" id="pvBtn">Pokaż podgląd</button></div><div id="pvOut" aria-live="polite"></div></div>
 <p class="pv-ex" id="pvEx" hidden><button type="button" class="btn ghost sm" data-example="0">Zobacz przykład gotowego CV</button> <span class="hint">Przykładowe ogłoszenie i CV, bez Twoich danych.</span></p>
+<h3 class="sh">Wygląd CV <span class="h">(możesz go zmienić także po zakupie)</span></h3>
+<div id="wizDesign"></div>
+<details class="optbox" id="moreOpts"><summary>Dodatki i tłumaczenie <span class="h">(opcjonalnie)</span></summary>
+<h3 class="sh">Dodatki <span class="h">(opcjonalnie, raz na całe zamówienie)</span></h3>
+<div class="opts addons">
+<label class="opt"><input type="checkbox" id="adInterview"><span class="o-t">Przygotowanie do rozmowy<b data-price="interview">+50 zł</b></span><span class="o-d">12 pytań do tego ogłoszenia z przykładowymi odpowiedziami z Twojego doświadczenia, gotowe „Opowiedz o sobie”, pytania do pracodawcy, rozmowa o pieniądzach i lista kontrolna. PDF.</span></label>
+<label class="opt"><input type="checkbox" id="adSim"><span class="o-t">Symulator rozmowy kwalifikacyjnej<b data-price="sim">+29 zł</b></span><span class="o-d">Próbna rozmowa z AI-rekruterem pod to ogłoszenie: do 8 pytań, ocena każdej odpowiedzi i wskazówki, na koniec podsumowanie</span></label>
+<label class="opt"><input type="checkbox" id="adMessages"><span class="o-t">Wiadomość do rekrutera<b data-price="messages">+9 zł</b></span><span class="o-d">Krótka wiadomość na LinkedIn i gotowy e-mail z aplikacją</span></label>
+<label class="opt"><input type="checkbox" id="adLinkedin"><span class="o-t">Profil LinkedIn<b data-price="linkedin">+19 zł</b></span><span class="o-d">Nagłówek (do 220 znaków), sekcja „Informacje” (do 2600 znaków), do 15 umiejętności, opisy do 3 stanowisk i wskazówki do profilu, w języku CV, do skopiowania</span><span class="o-d tm">LinkedIn jest znakiem towarowym LinkedIn Corp.; serwis nie jest z nim powiązany.</span></label>
+<label class="check li-en" id="liEnBox" hidden><input type="checkbox" id="adLinkedinEn"> <span>Profil LinkedIn także po angielsku (bez dopłaty)</span></label>
+<p class="perk small" id="bundleTip"></p>
+<label class="opt"><input type="checkbox" id="adDocx"><span class="o-t">Wersja Word (.docx)<b data-price="docx">+9 zł</b></span><span class="o-d">CV i list w edytowalnym pliku Word, gdy pracodawca prosi o .doc/.docx</span></label>
+</div>
+<h3 class="sh">Tłumaczenie na inny język <span class="h">(+5 zł za każdy język, dla wszystkich ogłoszeń)</span></h3>
+<p class="hint">Dokumenty powstają w języku ogłoszenia i ten język jest w cenie: polskie ogłoszenie to CV po polsku, angielskie to CV po angielsku. Tutaj dokupisz drugą wersję w innym języku, np. po niemiecku do pracy za granicą.</p>
+<div class="langpick" id="langPick"></div>
+</details>
 <div id="sum"></div>
 <details class="codebox" id="codeBox"><summary>Mam kod rabatowy</summary><label class="f">Kod rabatowy<span class="urlrow"><input type="text" id="codeInput" autocomplete="off" placeholder="np. KOD-AB12CD"><button type="button" class="btn ghost sm" id="codeApply">Zastosuj</button></span></label><p class="fstatus" id="codeMsg" role="status"></p></details>
 <label class="check"><input type="checkbox" id="wantInv"> <span>Potrzebuję faktury (bez VAT – sprzedawca jest zwolniony z VAT).</span></label>

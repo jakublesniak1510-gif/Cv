@@ -11,13 +11,13 @@ const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const strip = (h) => h.replace(/<[^>]+>/g, '');
 
-test('Eksperyment „checkout”: włączany EXPERIMENTS, wariant B oznacza kreator (także razem z „wizard_order”)', () => {
+test('Eksperyment „checkout”: włączany EXPERIMENTS, wariant B oznacza kreator; „wizard_order” zakończony (C3)', () => {
   assert.deepEqual(activeExperiments('{"checkout":50}'), { checkout: 50 });
   assert.deepEqual(activeExperiments(''), {}, 'domyślnie wyłączony');
   const html = read('public/index.html');
   assert.match(EXPERIMENTS.checkout.apply(html), /<div id="wiz" class="wiz" data-checkout="b" hidden/);
-  const both = EXPERIMENTS.checkout.apply(EXPERIMENTS.wizard_order.apply(html));
-  assert.match(both, /<div id="wiz" class="wiz" data-checkout="b" data-order="b" hidden/);
+  assert.equal(EXPERIMENTS.wizard_order, undefined, 'kreator na 3 ekrany zastąpił test kolejności');
+  assert.deepEqual(activeExperiments('{"wizard_order":50,"checkout":50}'), { checkout: 50 }, 'stara wartość w EXPERIMENTS jest pomijana');
 });
 
 test('Wariant B: cena na górze, zgody kompaktowo, ale nadal DWA osobne pola (art. 38 pkt 13 osobno, odznaczone), marketing bez zmian', () => {

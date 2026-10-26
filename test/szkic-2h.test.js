@@ -43,7 +43,7 @@ test('Temat przypomnienia ze stanowiskiem (4 języki), link z wypisem', async ()
 test('Kreator: szkic zapamiętuje krok, link wraca do niego; zgoda i polityka (4 języki) mówią o 2 godzinach', () => {
   const app = read('public/app.js');
   assert.match(app, /const draftData = \(\) => \(\{ step, design,/);
-  assert.match(app, /const st = Number\(d\.data\?\.step\); if \(ORDER\.includes\(st\) && st !== ORDER\[0\]\) go\(st\);/);
+  assert.match(app, /const st = stepOf\(Number\(d\.data\?\.step\)\); if \(st !== ORDER\[0\]\) go\(st\);/);
   assert.match(read('public/index.html'), /jeden e-mail za 2 godziny, opcjonalnie/);
   for (const l of ['en', 'de', 'uk']) assert.ok(JSON.parse(read(`public/i18n/${l}.json`))['Przypomnij mi raz, jeśli nie dokończę (jeden e-mail za 2 godziny, opcjonalnie).'], l);
   for (const [l, re] of [['pl', /Jedno przypomnienie po 2 godzinach \(przy zgodach udzielonych przed 25 października 2026 r\. – po 24 godzinach\)/], ['de', /nach 2 Stunden \(bei Einwilligungen vor dem 25\. Oktober 2026 nach 24 Stunden\)/], ['en', /after 2 hours \(for consents given before 25 October 2026: after 24 hours\)/], ['uk', /через 2 години \(для згод, наданих до 25 жовтня 2026 р\., – через 24 години\)/]]) assert.match(legalBody('prywatnosc', l), re, l);
