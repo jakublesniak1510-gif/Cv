@@ -11,7 +11,7 @@ const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')
 
 test('„Aplikujesz dziś?”: pod CTA i w kroku 1 kreatora, 4 języki, bez powtórzenia „kilka minut” w hero', async () => {
   const h = read('public/index.html'), hero = h.slice(h.indexOf('<section class="hero"'), h.indexOf('</section>', h.indexOf('<section class="hero"')));
-  assert.match(hero, new RegExp(`</div>\\n    <p class="hero-today">${L.replace('?', '\\?')}</p>`), 'zaraz pod przyciskami');
+  assert.match(hero, new RegExp(`</form>\\n    <p class="hero-today">${L.replace('?', '\\?')}</p>`), 'zaraz pod przyciskami');
   assert.equal(hero.match(/kilka minut/g).length, 1, 'jedna wzmianka o czasie w hero');
   const s1 = h.slice(h.indexOf('<section data-step="1">'), h.indexOf('id="pkgOpts"'));
   assert.ok(s1.includes(`<p class="wiz-today">${L}</p>`), 'krok 1 kreatora, nad pakietami');

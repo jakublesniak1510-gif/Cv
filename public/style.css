@@ -1031,6 +1031,13 @@ ul.checklist{list-style:none;padding-left:0}
 .prof-ex select{flex:1;min-width:0}
 .exv.ex-prof #exDocTabs{display:none}
 
+/* C4: pole na ogłoszenie w hero */
+.hero-ad{margin:18px 0 0;display:grid;gap:10px;max-width:560px}
+.hero-ad textarea{width:100%;min-height:64px;resize:vertical;font:inherit;font-size:16px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}
+.hero-ad textarea:focus{outline:none;border-color:var(--brand)}.hero-ad textarea.err{border-color:var(--err)}
+.hero-ad .btn{width:100%}
+.hero-line{margin:0;font-size:13.5px;color:var(--mute)}
+@media(min-width:701px){.hero-ad .btn{width:auto;justify-self:start}}
 /* C1: pełny podgląd CV – oczekiwanie na generowanie */
 .pv-wait{display:flex;align-items:center;gap:10px;padding:18px 4px;color:var(--mute)}
 .spinner.sm{width:22px;height:22px;border-width:3px;margin:0}
