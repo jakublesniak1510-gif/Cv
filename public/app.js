@@ -1009,8 +1009,10 @@ function getLine(on) {
   const prof = rows('ads')[0]?.kind === 'profession', p = orderPkg();
   const what = prof ? 'CV pod Twój zawód' : p === 'pack3' ? 'CV z listami motywacyjnymi, każde pod swoje ogłoszenie' : p === 'cv_letter' ? 'CV i list motywacyjny pod to ogłoszenie' : 'CV pod to ogłoszenie';
   const parts = [what, addons().docx ? 'w PDF i Word' : 'w PDF', 'poprawki w cenie', 'faktura na życzenie'].map(tr); // każdy kawałek osobno w słowniku i18n
-  g.replaceChildren(el('b', { textContent: tr('Dostajesz:') }), ` ${parts[0]} ${parts[1]}, ${parts[2]}, ${parts[3]}.`);
+  g.replaceChildren(el('b', { textContent: tr('Dostajesz:') }), ` ${parts[0]} ${parts[1]}, ${parts[2]}, ${parts[3]}. `, guarLink());
 }
+// Gwarancja dopasowania (C5): link do §7a regulaminu w języku strony.
+const guarLink = () => el('a', { href: `${legalUrl('regulamin', window.I18N?.lang || 'pl')}#gwarancja`, textContent: tr('Nie pasuje po poprawkach? Zwracamy pieniądze.') });
 // Krok 1 (B7): kompaktowy pasek zaufania – metody płatności z bramek (/api/config → pay), faktura, usuwanie danych, poprawki, sprzedawca z NIP.
 function drawTrust1() {
   const box = $('#trust1'), ms = [...new Set(payGateways().length ? payGateways().flatMap((g) => g.methods || []) : cfg.pay?.methods || [])].filter((m) => m !== 'Przelewy24');
@@ -1020,7 +1022,7 @@ function drawTrust1() {
     el('span', { textContent: 'faktura na życzenie' }),
     el('span', { textContent: 'dane usuwane po 30 dniach' }),
     el('span', {}, `${rev} `, el('span', { textContent: plural(rev, 'poprawka w cenie', 'poprawki w cenie', 'poprawek w cenie') })),
-    s?.nip ? el('a', { href: '/o-serwisie', textContent: `${s.name}, NIP ${s.nip}` }) : null].filter(Boolean);
+    s?.nip ? el('a', { href: '/o-serwisie', textContent: `${s.name}, NIP ${s.nip}` }) : null, guarLink()].filter(Boolean);
   box.replaceChildren(...items.flatMap((x, i) => (i ? [' · ', x] : [x]))); box.hidden = false;
 }
 function payTrust(n) {
@@ -2179,7 +2181,7 @@ async function loadContent() {
     try { CONTENT = await (await fetch('/content.json')).json(); } catch { CONTENT = { INDEX: [], POPULAR: [], ARTICLES: [], CITIES: [] }; }
     // Kafelki narzędzi i linki w stopce: adresy w języku strony (serwer robi to samo dla wersji /en, /uk, /de).
     const l = window.I18N?.lang;
-    if (l && l !== 'pl') $$('a[href="/regulamin"]:not([data-lang]),a[href="/polityka-prywatnosci"]:not([data-lang])').forEach((a) => a.setAttribute('href', legalUrl(a.getAttribute('href') === '/regulamin' ? 'regulamin' : 'prywatnosc', l)));
+    if (l && l !== 'pl') $$('a[href="/regulamin"]:not([data-lang]),a[href^="/regulamin#"]:not([data-lang]),a[href="/polityka-prywatnosci"]:not([data-lang])').forEach((a) => { const [h, hash] = a.getAttribute('href').split('#'); a.setAttribute('href', legalUrl(h === '/regulamin' ? 'regulamin' : 'prywatnosc', l) + (hash ? `#${hash}` : '')); });
     if (TOOL_SEG[l]) $$('a[data-page^="narzedzia/"]').forEach((a) => { const k = a.dataset.page.slice(10), ts = CONTENT.TOOLS?.[k]?.slugs?.[l]; if (ts) a.setAttribute('href', `/${l}/${TOOL_SEG[l]}/${ts}`); });
   }
   // Poradnik w języku strony (EN / UA / DE): tłumaczenia artykułów ładujemy tylko dla tego języka.

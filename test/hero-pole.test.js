@@ -15,7 +15,7 @@ const dict = (l) => JSON.parse(read(`public/i18n/${l}.json`));
 
 test('Hero: pole na ogłoszenie i przycisk zaraz pod nagłówkiem, linia warunków, skaner niżej jako druga ścieżka', () => {
   const hero = html.slice(html.indexOf('<section class="hero"'), html.indexOf('</section>', html.indexOf('<section class="hero"')));
-  assert.match(hero, /<p class="lead">[^<]+<\/p>\s*<form class="hero-ad" id="heroAd" novalidate><textarea id="heroAdIn" rows="2" aria-label="Link albo treść ogłoszenia" placeholder="Wklej link albo treść ogłoszenia"><\/textarea><button class="btn lg" type="submit">Zrób CV pod to ogłoszenie – 39 zł<\/button><p class="hero-line">39 zł jednorazowo · bez abonamentu · BLIK w 10 sekund · 5 poprawek w cenie<\/p><\/form>/);
+  assert.match(hero, /<p class="lead">[^<]+<\/p>\s*<form class="hero-ad" id="heroAd" novalidate><textarea id="heroAdIn" rows="2" aria-label="Link albo treść ogłoszenia" placeholder="Wklej link albo treść ogłoszenia"><\/textarea><button class="btn lg" type="submit">Zrób CV pod to ogłoszenie – 39 zł<\/button><p class="hero-line">39 zł jednorazowo · bez abonamentu · BLIK w 10 sekund · 5 poprawek w cenie<br><a href="\/regulamin#gwarancja">Nie pasuje po poprawkach\? Zwracamy pieniądze\.<\/a><\/p><\/form>/);
   assert.ok(hero.indexOf('id="heroAd"') < hero.indexOf('hero-scan'), 'skaner pod polem');
   assert.doesNotMatch(hero, /data-open>Zamów CV od 39 zł/, 'jeden główny przycisk');
   assert.ok(html.indexOf('id="skaner"') > html.indexOf('id="heroAd"'));
