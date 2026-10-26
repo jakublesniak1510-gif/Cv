@@ -683,7 +683,7 @@ const rowT = {
 <div class="profbox" hidden><p class="hint">Nie masz jeszcze ogłoszenia? Przygotujemy CV pod typowe wymagania zawodu. Odznacz to, czego nie dotyczy. Gdy znajdziesz ofertę, dopasuj CV do niej.</p><label class="f">Zawód<span class="urlrow"><input type="text" class="profq" list="profList" autocomplete="off" placeholder="np. magazynier, kasjerka"><button type="button" class="btn sm profbtn">Pokaż wymagania</button></span></label><div class="profreqs"></div><input type="hidden" data-k="kind"></div>
 <div class="photobox" hidden><b class="flabel">Zdjęcie lub zrzut ekranu ogłoszenia</b><label class="btn ghost filebtn"><span>Wybierz zdjęcie</span><input type="file" class="adphoto" accept="image/*"></label><p class="hint">Zrób zdjęcie ogłoszenia albo wgraj zrzut ekranu, np. z Facebooka, OLX lub grupy z ofertami. Odczytamy z niego treść.</p><div class="pstatus" role="status"></div></div>
 <div class="linkbox"><label class="f">Adres ogłoszenia<span class="urlrow"><input type="text" data-k="url" inputmode="url" placeholder="https://…"><button type="button" class="btn sm fetchbtn">Pobierz</button></span></label><div class="fstatus" role="status"></div></div>
-<div class="adfields"><label class="adlang">Język dokumentów <select data-k="lang"><option value="auto">jak w ogłoszeniu</option><option value="pl">polski</option><option value="en">angielski</option><option value="de">niemiecki</option><option value="uk">ukraiński</option><option value="es">hiszpański</option><option value="fr">francuski</option></select></label><label class="f">Nazwa stanowiska<input type="text" data-k="title" placeholder="np. Kasjer / Sprzedawca"></label><label class="f">Treść ogłoszenia <span class="h">sprawdź i w razie potrzeby popraw</span><textarea data-k="text" style="min-height:150px"></textarea></label></div>`,
+<div class="adfields"><label class="adlang">Język dokumentów <select data-k="lang"><option value="auto">jak w ogłoszeniu</option><option value="pl">polski</option><option value="en">angielski</option><option value="de">niemiecki</option><option value="uk">ukraiński</option><option value="es">hiszpański</option><option value="fr">francuski</option></select></label><label class="f">Nazwa stanowiska<input type="text" data-k="title" placeholder="np. Kasjer / Sprzedawca"></label><p class="hint title-auto" hidden>Uzupełnimy stanowisko z ogłoszenia.</p><label class="f">Treść ogłoszenia <span class="h">sprawdź i w razie potrzeby popraw</span><textarea data-k="text" style="min-height:150px"></textarea></label></div>`,
 };
 const label = { exp: 'Stanowisko', edu: 'Szkoła', ads: 'Ogłoszenie', fuAds: 'Ogłoszenie' };
 function addRow(box, v = {}) {
@@ -774,7 +774,7 @@ function initAd(e, mode) {
       const r = await fetch('/api/fetch-ad', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error);
-      $('[data-k=title]', e).value = j.title || ''; $('[data-k=text]', e).value = j.text;
+      $('[data-k=title]', e).value = j.title || ''; $('[data-k=text]', e).value = j.text; if (!j.title) fillTitle(e);
       e.dataset.fetched = '1'; setMode(e, 'link');
       status.textContent = `Pobrano${j.title ? ': „' + j.title + '”' : ''}${j.company ? ' (' + j.company + ')' : ''}, ${j.text.length} znaków. Sprawdź treść poniżej.`;
       status.classList.add('good');
@@ -795,7 +795,7 @@ function initAd(e, mode) {
       const r = await fetch('/api/ad-image', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image }) });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error);
-      $('[data-k=title]', e).value = j.title || ''; $('[data-k=text]', e).value = j.text;
+      $('[data-k=title]', e).value = j.title || ''; $('[data-k=text]', e).value = j.text; if (!j.title) fillTitle(e);
       e.dataset.fetched = '1'; setMode(e, 'photo'); refresh();
       ps.replaceChildren(el('span', { textContent: 'Odczytano ogłoszenie ze zdjęcia.' }), ' ', el('span', { textContent: 'Sprawdź treść poniżej i popraw, jeśli coś się nie zgadza.' }), j.demo ? el('span', { textContent: ' Podgląd: wstawiamy przykładowe ogłoszenie.' }) : '');
       ps.classList.add('good');
@@ -918,6 +918,29 @@ function syncLangPick() {
   }));
 }
 $('#ads').addEventListener('input', refresh);
+// C6: stanowisko z treści ogłoszenia (ta sama funkcja co lib/ad-title.js). Pole wypełnione automatycznie zmienia się razem z treścią,
+// wpisane ręcznie zostaje. Puste stanowisko nie blokuje „Dalej” – uzupełni je serwer (cleanAds) i AI z treści ogłoszenia.
+function guessTitle(text) {
+  const PORTALS = /\b(?:pracuj\.pl|olx praca|olx(?:\.pl)?|indeed(?:\.com)?|linkedin|jooble|gowork(?:\.pl)?|aplikuj\.pl|praca\.pl|infopraca(?:\.pl)?|nofluffjobs|justjoin\.it|theprotocol\.it|facebook)\b/gi;
+  const PREFIX = /^(?:ogłoszenie|oferta pracy|oferta|praca|stanowisko|nazwa stanowiska|job title|position|stelle)\s*[:–-]\s*/i;
+  for (const raw of String(text || '').split(/\r?\n/)) {
+    let line = raw.replace(PORTALS, '').replace(/^[\s|•·:–-]+|[\s|•·:–-]+$/g, '').replace(PREFIX, '').replace(/^(?:poszukujemy|szukamy|zatrudnimy|zatrudni[mę]?|zatrudni)\s+/i, '').trim();
+    line = line.split(/[.!?](?=\s+\p{Lu}\p{Ll})|[.!?]$/u)[0].trim(); // koniec zdania, nie skrót („ds. obsługi”, „kat. C”)
+    if (line.length >= 3 && /\p{L}{2}/u.test(line)) return (line.charAt(0).toUpperCase() + line.slice(1)).slice(0, 60).trim();
+  }
+  return '';
+}
+function fillTitle(e) {
+  const t = $('[data-k=title]', e), text = $('[data-k=text]', e)?.value || '';
+  if (!t) return;
+  if (!t.value.trim() || t.dataset.auto) { const g = guessTitle(text); t.value = g; if (g) t.dataset.auto = '1'; else delete t.dataset.auto; }
+  const h = $('.title-auto', e); if (h) h.hidden = !!t.value.trim() || !text.trim();
+}
+$('#ads').addEventListener('input', (ev) => {
+  const e = ev.target.closest('.entry'); if (!e) return;
+  if (ev.target.matches('[data-k=title]')) { delete ev.target.dataset.auto; const h = $('.title-auto', e); if (h) h.hidden = !!ev.target.value.trim() || !$('[data-k=text]', e).value.trim(); }
+  else if (ev.target.matches('[data-k=text]')) fillTitle(e);
+});
 $('#ads').addEventListener('change', refresh);
 
 /* kod rabatowy */
@@ -1199,7 +1222,6 @@ function validate(n) {
     if (a.kind === 'profession' && !a.text) return `Ogłoszenie ${i + 1}: wpisz zawód i kliknij „Pokaż wymagania”.`;
     if (a.kind === 'profession' && (rows('ads').length > 1 || (!passOn() && pkg() !== 'cv'))) return 'CV pod zawód (bez ogłoszenia) to jedno CV bez listu. Usuń pozostałe ogłoszenia i wybierz pakiet „CV”.';
     if (!a.text) return `Ogłoszenie ${i + 1}: kliknij „Pobierz” przy linku albo wklej treść oferty.`;
-    if (!a.title) return `Ogłoszenie ${i + 1}: podaj nazwę stanowiska.`;
     if (a.text.length < 80) return `Ogłoszenie ${i + 1}: wklej pełną treść oferty (min. 80 znaków).`;
   }
   if (n === 6 && $('#wantInv').checked) {
@@ -1245,7 +1267,7 @@ $('#heroAd')?.addEventListener('submit', (e) => {
   openWiz('cv'); track('heroad');
   const first = $('#ads .entry'); if (!first) return;
   if (/^https?:\/\/\S+$/i.test(v)) { setMode(first, 'link'); $('[data-k=url]', first).value = v; $('.fetchbtn', first).click(); }
-  else { setMode(first, 'paste'); $('[data-k=text]', first).value = v.slice(0, 10000); }
+  else { setMode(first, 'paste'); $('[data-k=text]', first).value = v.slice(0, 10000); fillTitle(first); }
   saveDraft();
 });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#wiz').hidden && ($('#exitOffer')?.hidden ?? true)) userCloseWiz(); });
@@ -2979,7 +3001,7 @@ if ((q.get('zamow') || LANGS[q.get('jezyk')]) && !q.get('id') && !q.get('draft')
   // Ogłoszenie wklejone na stronie /kreator-cv (lite.js → pamięć tej karty): trafia do pierwszego ogłoszenia w kreatorze.
   try {
     const ad = sessionStorage.getItem('cvpo-wiz-ad'), first = $('#ads .entry');
-    if (ad && first) { sessionStorage.removeItem('cvpo-wiz-ad'); const ta = $('[data-k=text]', first); if (ta && !ta.value.trim()) { ta.value = ad; setMode(first, 'paste'); saveDraft(); } }
+    if (ad && first) { sessionStorage.removeItem('cvpo-wiz-ad'); const ta = $('[data-k=text]', first); if (ta && !ta.value.trim()) { ta.value = ad; setMode(first, 'paste'); fillTitle(first); saveDraft(); } }
   } catch {}
   if (q.get('tryb') === 'zawod' && !q.get('zawod')) profStart();
   // ?zawod=<slug> (przycisk na stronie zawodu): nazwa zawodu jako ogólne stanowisko, jeśli pole jest puste.

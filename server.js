@@ -26,6 +26,7 @@ import { samplePdf } from './lib/sample.js';
 import { importCv, extractText, ImportError } from './lib/importCv.js';
 import { scanFallback } from './lib/tailor.js';
 import { adKeywords } from './lib/ad-keywords.js';
+import { guessTitle } from './lib/ad-title.js';
 import { letterRoutes } from './lib/letter-landing.js';
 import { checkCv } from './lib/cv-check.js';
 import { profReqs } from './lib/prof-ad.js';
@@ -297,7 +298,8 @@ function cleanProfile(p = {}) {
     photo: typeof p.photo === 'string' && p.photo.length < 400_000 && PHOTO.test(p.photo) ? p.photo : '',
   };
 }
-const cleanAds = (ads) => arr(ads, MAX_ADS).map((a) => ({ title: str(a?.title, 100), text: str(a?.text, 10000), lang: a?.lang in LANGS ? a.lang : 'auto', ...(a?.kind === 'profession' ? { kind: 'profession' } : {}) })).filter((a) => a.text.length >= 80);
+// Puste stanowisko (C6): uzupełniamy z treści ogłoszenia – nie blokuje zamówienia ani podglądu; AI i tak ustala stanowisko z treści.
+const cleanAds = (ads) => arr(ads, MAX_ADS).map((a) => ({ title: str(a?.title, 100) || guessTitle(str(a?.text, 10000)), text: str(a?.text, 10000), lang: a?.lang in LANGS ? a.lang : 'auto', ...(a?.kind === 'profession' ? { kind: 'profession' } : {}) })).filter((a) => a.text.length >= 80);
 // „CV pod zawód” (lib/prof-ad.js): jedno CV bez listu – list motywacyjny i Pakiet 3 mają sens tylko przy prawdziwych ogłoszeniach.
 const PROF_ONLY_CV = 'CV pod zawód (bez ogłoszenia) zamawiasz jako jedno CV bez listu. Gdy znajdziesz ogłoszenie, zamów CV z listem pod tę ofertę.';
 const profMixError = (a, pkg) => (a.some((x) => x.kind === 'profession') && (a.length > 1 || pkg !== 'cv') ? PROF_ONLY_CV : null);
