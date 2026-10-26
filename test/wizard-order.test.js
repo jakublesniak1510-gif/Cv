@@ -23,7 +23,7 @@ test('wizard_order: kolejność w app.js – ogłoszenie, dane, doświadczenie, 
   assert.match(app, /\['saveLater', 'draftNote', 'fill'\]/, '„Wyślij mi link” zostaje w pierwszym kroku');
   assert.match(app, /s6\.prepend\(\.\.\.\[\.\.\.s1\.childNodes\], head\)/, 'pakiet, dodatki, języki, wygląd i karnet w podsumowaniu');
   assert.match(app, /\$\('#back'\)\.onclick = \(\) => go\(ORDER\[ORDER\.indexOf\(step\) - 1\]/);
-  assert.match(app, /if \(ORDER\.indexOf\(step\) < ORDER\.length - 1\) return go\(ORDER\[ORDER\.indexOf\(step\) \+ 1\]\);/);
+  assert.match(app, /const last = ORDER\.indexOf\(step\) === ORDER\.length - 1;[\s\S]{0,200}if \(!last\) return go\(ORDER\[ORDER\.indexOf\(step\) \+ 1\]\);/);
   assert.match(app, /\(n === 5 \|\| \(ORDER_B && n === 6\)\) && !passOn\(\) && nAds\(\) > PKG_ADS\[pkg\(\)\]/, 'pakiet a liczba ogłoszeń sprawdzane też w podsumowaniu');
   assert.doesNotMatch(app, /go\(1\)/, 'bez sztywnego kroku 1');
 });

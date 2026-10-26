@@ -1139,11 +1139,24 @@ $('#wizClose').onclick = closeWiz;
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#wiz').hidden) closeWiz(); });
 $('#back').onclick = () => go(ORDER[ORDER.indexOf(step) - 1] ?? ORDER[0]);
 
+// Błąd walidacji (raport 26.10): na telefonie komunikat był ~600 px pod przyciskiem, więc „Zapłać” wyglądał na martwy.
+// Przewijamy do pola, którego dotyczy błąd (albo do komunikatu), zaznaczamy je i powtarzamy komunikat nad przyciskiem (#werrFoot).
+const PAY_BLOCK = [[/Regulamin/, 'consent', '#consent'], [/wykonanie usługi/, 'waiver', '#waiver'], [/faktur|NIP/, 'invoice', '#invName'], [/ofert pracy/, 'alerts', '#alJob'], [/ogłosze|karnet|pakiet/i, 'ads', null]];
+const payBlockOf = (err) => PAY_BLOCK.find(([re]) => re.test(err)) || [null, 'inne', null];
+function showWizErr(err) {
+  $('#werr').textContent = err;
+  const [, , sel] = payBlockOf(err), f = sel && $(sel), box = f?.closest('label.check, label.f') || $('#werr');
+  if (f) { box.classList.add('need'); f.addEventListener('change', () => box.classList.remove('need'), { once: true }); }
+  box.scrollIntoView({ behavior: 'smooth', block: 'center' }); try { f?.focus({ preventScroll: true }); } catch {}
+}
+new MutationObserver(() => { const t = $('#werr').textContent.trim(); $('#werrFoot').textContent = t; $('#werrFoot').hidden = !t; }).observe($('#werr'), { childList: true, characterData: true, subtree: true });
 $('#wizForm').onsubmit = async (e) => {
   e.preventDefault();
+  const last = ORDER.indexOf(step) === ORDER.length - 1;
+  if (last) track('payclick');
   const err = validate(step);
-  if (err) return ($('#werr').textContent = err);
-  if (ORDER.indexOf(step) < ORDER.length - 1) return go(ORDER[ORDER.indexOf(step) + 1]);
+  if (err) { if (last) track('payblock', { why: payBlockOf(err)[1] }); return showWizErr(err); }
+  if (!last) return go(ORDER[ORDER.indexOf(step) + 1]);
   const v = (id) => $('#' + id).value;
   const body = {
     draftToken: srvToken() || undefined,
@@ -1160,7 +1173,7 @@ $('#wizForm').onsubmit = async (e) => {
     orderId = j.id;
     if (!j.free) track('checkout');
     if (j.free) { leavingToPay = true; closeWiz(); startResult(j.id); } else if (j.demo) go(7); else { leavingToPay = true; location.href = j.url; }
-  } catch (x) { $('#werr').textContent = x.message; }
+  } catch (x) { track('payerr'); showWizErr(x.message); }
   $('#next').disabled = false;
 };
 const demoPay = async () => { await fetch(`/api/orders/${orderId}/demo-pay`, { method: 'POST' }); closeWiz(); startResult(orderId); };

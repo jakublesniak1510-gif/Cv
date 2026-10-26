@@ -29,7 +29,7 @@ test('Minione wydarzenia znikają z nadchodzących; seria pokazuje tylko przysz�
 });
 
 test('Strony: hub i miasta 200, miasto bez wydarzeń noindex i poza mapą, link do źródła nofollow, bez „nie podano”', async () => {
-  setFairs(RAW);
+  setFairs(RAW.filter((e) => e.miasto !== 'Bydgoszcz')); // Bydgoszcz ma już wpisy w danych – tu sprawdzamy miasto bez wydarzeń (strona z EXTRA_CITIES)
   const app = express(); fairRoutes(app, 'https://example.test'); app.use((_q, r) => r.sendStatus(404));
   const srv = app.listen(0), U = `http://127.0.0.1:${srv.address().port}`, get = async (p) => { const r = await fetch(U + p); return { s: r.status, t: await r.text() }; };
   try {
