@@ -638,7 +638,7 @@ function drawExView() {
   $('#exSample').replaceChildren(sampleLink(exDesign, 'Pobierz przykładowe CV (PDF)'));
 }
 function openEx(i = 0, d) { exI = i; exDoc = 'cv'; if (d) Object.assign(exDesign, d); designPicker($('#exDesign'), exDesign, () => drawExView(), { thumbs: false }); drawExView(); modal(true); $('#exview').hidden = false; $('.exv-body').scrollTop = 0; setTimeout(() => $('#exClose').focus(), 0); }
-const closeEx = () => { $('#exview').hidden = true; modal(false); };
+const closeEx = () => { $('#exview').hidden = true; if ($('#wiz').hidden) modal(false); else lastFocus?.focus?.(); }; // przykład otwarty z kreatora: kreator zostaje modalem
 // Film demo („Jak to działa”): link nad filmem przewija do niego i uruchamia odtwarzanie (bez autoodtwarzania).
 document.addEventListener('click', (e) => { if (!e.target.closest('#demoFilmLink')) return; e.preventDefault(); const v = $('#demoFilm'); v.scrollIntoView({ behavior: 'smooth', block: 'center' }); v.play().catch(() => {}); });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-example]'); if (b) openEx(+b.dataset.example || 0); });
@@ -967,8 +967,17 @@ function gwPicker(box, name, pick = payGateways()[0]?.id) {
 }
 const gwValue = (root) => root?.querySelector('input[type=radio]:checked')?.value || undefined;
 // Pod przyciskiem płatności: metody faktycznie włączone u operatora (/api/config → pay), bezpieczeństwo, czas i e-mail.
+// „Dostajesz” nad przyciskiem płatności (decyzja 26.10): co obejmuje zamówienie – z pakietu i dodatku Word, bez obietnic.
+function getLine(on) {
+  const g = $('#getLine'); g.hidden = !on; if (!on) return;
+  const prof = rows('ads')[0]?.kind === 'profession', p = orderPkg();
+  const what = prof ? 'CV pod Twój zawód' : p === 'pack3' ? 'CV z listami motywacyjnymi, każde pod swoje ogłoszenie' : p === 'cv_letter' ? 'CV i list motywacyjny pod to ogłoszenie' : 'CV pod to ogłoszenie';
+  const parts = [what, addons().docx ? 'w PDF i Word' : 'w PDF', 'poprawki w cenie', 'faktura na życzenie'].map(tr); // każdy kawałek osobno w słowniku i18n
+  g.replaceChildren(el('b', { textContent: tr('Dostajesz:') }), ` ${parts[0]} ${parts[1]}, ${parts[2]}, ${parts[3]}.`);
+}
 function payTrust(n) {
   const box = $('#payTrust'), on = n === 6 && total() > 0;
+  getLine(on);
   $('.wiz-foot').classList.toggle('pay', n === 6);
   box.hidden = !on; $('#payTrustList').hidden = !on;
   if (n === 6 && total() > 0) { if (!$('#gwBox').childElementCount) gwPicker($('#gwBox'), 'gw'); } else $('#gwBox').hidden = true;
@@ -998,7 +1007,7 @@ function go(n) {
   $('#back').hidden = idx === 0 || n === 7;
   $('#next').hidden = n === 7;
   nextLabel(); payTrust(n);
-  if (n === 6) { if ($('#codeInput').value && !promo) applyCode($('#codeInput').value, true); drawSummary(); }
+  if (n === 6) { if ($('#codeInput').value && !promo) applyCode($('#codeInput').value, true); $('#codeBox').open ||= !!$('#codeInput').value.trim() || !!promo; drawSummary(); }
   $('#werr').textContent = '';
   $('.wiz-body').scrollTop = 0;
 }
@@ -1024,9 +1033,9 @@ $('#pvBtn').onclick = async () => {
   try {
     const profile = { ...Object.fromEntries(['headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu') };
     const r = await (await fetch('/api/preview', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: pvSid, profile, ad }) })).json();
-    if (r.off || !r.summary) { pvOff = true; $('#pvBox').hidden = true; return; } // AI niedostępne albo limit: blok znika bez komunikatu o błędzie
+    if (r.off || !r.summary) { pvOff = true; $('#pvBox').hidden = true; $('#pvEx').hidden = false; return; } // AI niedostępne albo limit: blok znika bez komunikatu o błędzie
     pvShown = { ...r, sig: pvSig() }; drawPreview(r); // zdarzenie preview_shown liczy serwer
-  } catch { pvOff = true; $('#pvBox').hidden = true; }
+  } catch { pvOff = true; $('#pvBox').hidden = true; $('#pvEx').hidden = false; }
   finally { b.disabled = false; b.textContent = 'Pokaż podgląd'; }
 };
 // Podgląd dopasowania (krok podsumowania): wymagania z każdego ogłoszenia (silnik skanera bez AI, /api/wizard-match)
@@ -1054,6 +1063,7 @@ async function drawWizMatch() {
 }
 function drawSummary() {
   $('#pvBox').hidden = !cfg.aiPreview || pvOff || !rows('ads')[0]?.text;
+  $('#pvEx').hidden = !$('#pvBox').hidden; // bez podglądu AI: przykład gotowego CV w modalu (openEx)
   drawWizMatch();
   if (pvShown && pvShown.sig !== pvSig()) pvShown = null; // dane zmienione po podglądzie: podgląd nieaktualny
   if (!pvShown) { $('#pvOut').replaceChildren(); $('#pvBtn').hidden = false; }
