@@ -253,7 +253,7 @@ function hl(text, kws) {
 }
 
 fetch('/api/config').then((r) => r.json()).then((c) => {
-  cfg = c; if (c.chromeExt) { $('#chromeExt').href = c.chromeExt; $('#chromeExtBox').hidden = false; } window.CONSENT?.init(c.ads); track('pv'); trackLater.splice(0).forEach(([e, x]) => track(e, x)); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; drawPromo(c.promo); if (c.salesClosed) $('#demoBar').textContent = 'Strona w przygotowaniu – zamówienia ruszą za kilka dni.'; $('#soonNote').hidden = !c.salesClosed; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
+  cfg = c; if (c.chromeExt) { $('#chromeExt').href = c.chromeExt; $('#chromeExtBox').hidden = false; } window.CONSENT?.init(c.ads); track('pv'); trackLater.splice(0).forEach(([e, x]) => track(e, x)); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; drawPromo(c.promo); drawTrust1(); if (c.salesClosed) $('#demoBar').textContent = 'Strona w przygotowaniu – zamówienia ruszą za kilka dni.'; $('#soonNote').hidden = !c.salesClosed; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
 }).catch(() => drawLists().catch(() => {})); // bez internetu (aplikacja na telefonie): treści z pamięci
 
 /* ---------- Przykład dopasowania ---------- */
@@ -519,7 +519,10 @@ Anna Nowak` },
 const EX_UI = { pl: ['Ogłoszenie', 'Słowa kluczowe, których szuka rekruter'], en: ['Job ad', 'Keywords the recruiter is looking for'], uk: ['Оголошення', 'Ключові слова, які шукає рекрутер'], de: ['Stellenanzeige', 'Schlüsselwörter, nach denen der Recruiter sucht'] };
 const EX_LANG = EX_LOC[window.I18N?.lang] ? window.I18N.lang : 'pl';
 if (EX_LANG !== 'pl') { Object.assign(BASE, EX_LOC[EX_LANG].base); EX_LOC[EX_LANG].ex.forEach((x, i) => Object.assign(EX[i], x)); }
+// Przykład dla zawodu (B10): gdy ustawiony (dane z /content/cv/<slug>.json), okno przykładu pokazuje CV fikcyjnej osoby z tego zawodu.
+let exProf = null;
 const exResult = (i) => {
+  if (exProf) return profResult(exProf);
   const e = EX[i];
   return { position: e.title, lang: EX_LANG, keywords: e.kws, letter: e.letter, cv: {
     name: BASE.name, headline: e.title, contact: BASE.contact, summary: e.sum,
@@ -625,6 +628,13 @@ let exI = 0, exDoc = 'cv';
 const exDesign = { tpl: 'nowoczesny', color: 'niebieski' };
 function drawExView() {
   const e = EX[exI], r = exResult(exI);
+  $('#exview').classList.toggle('ex-prof', !!exProf);
+  if (exProf) {
+    $('#exSide').replaceChildren(el('h3', {}, el('span', { textContent: 'Przykład dla zawodu:' }), ' ', exProf.name), el('p', { className: 'hint', textContent: 'Fikcyjna osoba. Twoje CV powstanie z Twoich danych i zostanie dopasowane do wymagań z Twojego ogłoszenia.' }));
+    $('#exDocTabs').replaceChildren(); $('#exChanges').replaceChildren(); $('#exSample').replaceChildren();
+    $('#exPaper').replaceChildren(cvNode(r, true, exDesign));
+    return;
+  }
   $('#exSide').replaceChildren(
     el('details', { className: 'exdet', open: matchMedia('(min-width: 901px)').matches }, el('summary', { textContent: '1. Dane, które podajesz raz' }), el('div', { className: 'exbase' }, el('b', { textContent: BASE.name }), el('div', { textContent: BASE.contact.join(' · ') }),
       ...BASE.jobs.map((j) => el('div', {}, el('b', { textContent: j.title }), ` · ${j.company} (${j.period})`)),
@@ -644,8 +654,31 @@ const closeEx = () => { $('#exview').hidden = true; if ($('#wiz').hidden) modal(
 // Film demo („Jak to działa”): link nad filmem przewija do niego i uruchamia odtwarzanie (bez autoodtwarzania).
 document.addEventListener('click', (e) => { if (!e.target.closest('#demoFilmLink')) return; e.preventDefault(); const v = $('#demoFilm'); v.scrollIntoView({ behavior: 'smooth', block: 'center' }); v.play().catch(() => {}); });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-example]'); if (b) openEx(+b.dataset.example || 0); });
-$('#exClose').onclick = closeEx;
-$('#exCta').onclick = () => { closeEx(); lastFocus = null; openWiz(); };
+$('#exClose').onclick = () => closeEx();
+// Po zamknięciu przykładu zawodu okno wraca do zwykłego przykładu (trzy ogłoszenia).
+new MutationObserver(() => { if ($('#exview').hidden && exProf) { exProf = null; exHead(); } }).observe($('#exview'), { attributes: true, attributeFilter: ['hidden'] });
+// Nagłówek i stopka okna: przykład zawodu ma własny tytuł i przycisk „Zrób takie dla mojego ogłoszenia” (wraca do kreatora).
+const EX_HEAD = [$('#exview h2').textContent, $('.exv-cta-txt').textContent, $('#exCta').textContent];
+function exHead() {
+  $('#exview h2').textContent = tr(exProf ? 'Przykład CV dla Twojego zawodu' : EX_HEAD[0]);
+  $('.exv-cta-txt').textContent = tr(exProf ? 'Twoje CV powstanie pod Twoje ogłoszenie, z Twoich danych.' : EX_HEAD[1]);
+  $('#exCta').textContent = tr(exProf ? 'Zrób takie dla mojego ogłoszenia' : EX_HEAD[2]);
+}
+$('#exCta').onclick = () => { const fromProf = !!exProf; closeEx(); if (fromProf && !$('#wiz').hidden) { track('profexcta'); $('#profExSel').blur(); return; } lastFocus = null; openWiz(); };
+// Krok 1 (B10): lista zawodów z content.json (tylko po polsku – przykłady CV zawodów są w języku polskim).
+async function profExInit() {
+  if ((window.I18N?.lang || 'pl') !== 'pl' || $('#profExSel').options.length > 1) return;
+  const C = await loadContent().catch(() => null); if (!C?.INDEX?.length) return;
+  $('#profExSel').append(...[...C.INDEX].sort((a, b) => a.name.localeCompare(b.name, 'pl')).map((p) => el('option', { value: p.slug, textContent: p.name })));
+  $('#profEx').hidden = false;
+}
+$('#profExGo').onclick = async () => {
+  const slug = $('#profExSel').value; if (!slug) return $('#profExSel').focus();
+  try {
+    exProf = await loadProf(slug); if (!exProf?.sample) throw new Error();
+    exHead(); lastFocus = $('#profExGo'); track('profex'); openEx(0);
+  } catch { exProf = null; }
+};
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#exview').hidden) closeEx(); });
 whenNear('#szablony', drawGallery);
 
@@ -978,6 +1011,18 @@ function getLine(on) {
   const parts = [what, addons().docx ? 'w PDF i Word' : 'w PDF', 'poprawki w cenie', 'faktura na życzenie'].map(tr); // każdy kawałek osobno w słowniku i18n
   g.replaceChildren(el('b', { textContent: tr('Dostajesz:') }), ` ${parts[0]} ${parts[1]}, ${parts[2]}, ${parts[3]}.`);
 }
+// Krok 1 (B7): kompaktowy pasek zaufania – metody płatności z bramek (/api/config → pay), faktura, usuwanie danych, poprawki, sprzedawca z NIP.
+function drawTrust1() {
+  const box = $('#trust1'), ms = [...new Set(payGateways().length ? payGateways().flatMap((g) => g.methods || []) : cfg.pay?.methods || [])].filter((m) => m !== 'Przelewy24');
+  const rev = cfg.maxRevisions || 5, s = cfg.seller;
+  const items = [
+    el('span', { textContent: (ms.length ? ms : ['BLIK', 'karta', 'Apple Pay / Google Pay']).map(tr).join(' / ') }),
+    el('span', { textContent: 'faktura na życzenie' }),
+    el('span', { textContent: 'dane usuwane po 30 dniach' }),
+    el('span', {}, `${rev} `, el('span', { textContent: plural(rev, 'poprawka w cenie', 'poprawki w cenie', 'poprawek w cenie') })),
+    s?.nip ? el('a', { href: '/o-serwisie', textContent: `${s.name}, NIP ${s.nip}` }) : null].filter(Boolean);
+  box.replaceChildren(...items.flatMap((x, i) => (i ? [' · ', x] : [x]))); box.hidden = false;
+}
 function payTrust(n) {
   const box = $('#payTrust'), on = n === 6 && total() > 0;
   getLine(on);
@@ -1133,7 +1178,9 @@ const openWiz = (p) => {
   loadMyPass();
   if (p) { $(`input[name=pkg][value=${p}]`).checked = true; refresh(); }
   if (!$('#wizDesign').children.length) drawWizDesign();
+  profExInit();
   if (!pvSid) { const r = new Uint8Array(12); crypto.getRandomValues(r); pvSid = [...r].map((x) => x.toString(16).padStart(2, '0')).join(''); }
+  if (touchUi && !wizPushed && !$('#landing').hidden && $('#page').hidden && $('#result').hidden) { try { history.pushState({ ...(history.state || {}), wiz: 1 }, '', location.href); wizPushed = true; } catch {} }
   track('start'); modal(true); $('#wiz').hidden = false; $('#mcta').hidden = true; document.body.classList.remove('mcta-on'); go(step === 7 ? 6 : step);
   setTimeout(() => $('#wizClose').focus(), 0);
 };
@@ -1143,8 +1190,49 @@ const wizExit = () => { if (!$('#wiz').hidden && !leavingToPay && step >= 1 && s
 addEventListener('pagehide', wizExit);
 const closeWiz = () => { wizExit(); $('#wiz').hidden = true; modal(false); };
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (!b) return; e.preventDefault(); if (b.dataset.addon) { b.dataset.addon.split(',').forEach((a) => ($('#ad' + a).checked = true)); saveDraft(); } openWiz(b.dataset.pkg); if ('prof' in b.dataset) profStart(); });
-$('#wizClose').onclick = closeWiz;
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#wiz').hidden) closeWiz(); });
+// Zamknięcie przez użytkownika (×, Escape): na telefonie zdejmujemy też wpis historii dodany przy otwarciu kreatora (B8).
+const userCloseWiz = () => { closeWiz(); if (wizPushed) { wizPushed = false; silentBack = true; history.back(); } };
+$('#wizClose').onclick = userCloseWiz;
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#wiz').hidden && ($('#exitOffer')?.hidden ?? true)) userCloseWiz(); });
+
+// Exit-intent (B8): raz na 7 dni okno „Zanim wyjdziesz” z darmowym skanerem – bez rabatu i bez licznika czasu.
+// Komputer: kursor wyjeżdża górą poza okno. Telefon: „wstecz” w przeglądarce z kreatora otwartego na stronie głównej
+// (przy otwarciu kreatora dodajemy wpis historii, więc „wstecz” zamyka kreator zamiast opuszczać stronę).
+const EXIT_KEY = 'cvpo-exit', EXIT_EVERY = 7 * 864e5, touchUi = matchMedia('(pointer: coarse)').matches;
+let wizPushed = false, silentBack = false, exitShown = false;
+const exitDue = () => { if (exitShown || !$('#result').hidden || scanData) return false; try { return Date.now() - (+localStorage.getItem(EXIT_KEY) || 0) > EXIT_EVERY; } catch { return true; } };
+// Okno budujemy dopiero przy pierwszym pokazaniu (index.html ma budżet rozmiaru); teksty przez słownik i18n.
+function exitBox() {
+  if ($('#exitOffer')) return;
+  const box = el('div', { id: 'exitOffer', className: 'exit-offer', hidden: true }, el('div', { className: 'eo-box' },
+    el('button', { className: 'x', id: 'exitX', ariaLabel: tr('Zamknij'), textContent: '×' }),
+    el('h2', { id: 'exitTitle', textContent: tr('Zanim wyjdziesz: sprawdź za darmo, ile wymagań z ogłoszenia spełnia Twoje CV') }),
+    el('p', { textContent: tr('Wgraj obecne CV i wklej ogłoszenie. Skaner pokaże, które wymagania spełniasz i czego brakuje.') }),
+    el('div', { className: 'eo-act' }, el('button', { type: 'button', className: 'btn', id: 'exitGo', textContent: tr('Sprawdź moje CV za darmo') }), el('button', { type: 'button', className: 'link', id: 'exitNo', textContent: tr('Nie, dziękuję') }))));
+  box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-labelledby', 'exitTitle');
+  document.body.append(box);
+  $('#exitX').onclick = exitClose; $('#exitNo').onclick = exitClose;
+  box.addEventListener('click', (e) => { if (e.target === box) exitClose(); });
+  $('#exitGo').onclick = () => {
+    track('exitclick'); box.dataset.wiz = ''; exitClose(); if (!$('#wiz').hidden) userCloseWiz();
+    $('#skaner').scrollIntoView({ block: 'start' }); setTimeout(() => $('#scanAd')?.focus({ preventScroll: true }), 0);
+  };
+}
+function exitOffer(src) {
+  if (!exitDue()) return;
+  exitBox();
+  exitShown = true; try { localStorage.setItem(EXIT_KEY, String(Date.now())); } catch {}
+  const wizOpen = !$('#wiz').hidden; if (!wizOpen) modal(true);
+  $('#exitOffer').hidden = false; $('#exitOffer').dataset.wiz = wizOpen ? '1' : ''; track('exitoffer', { t: src }); setTimeout(() => $('#exitGo').focus(), 0);
+}
+const exitClose = () => { $('#exitOffer').hidden = true; if (!$('#exitOffer').dataset.wiz) modal(false); };
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#exitOffer') && !$('#exitOffer').hidden) exitClose(); });
+document.addEventListener('mouseout', (e) => { if (!touchUi && !e.relatedTarget && e.clientY <= 0 && !$('#landing').hidden && $('#page').hidden && $('#exview').hidden) exitOffer('desk'); });
+window.addEventListener('popstate', (e) => {
+  if (silentBack) { silentBack = false; e.stopImmediatePropagation(); return; }
+  if (wizPushed && !$('#wiz').hidden && !e.state?.wiz) { wizPushed = false; e.stopImmediatePropagation(); closeWiz(); exitOffer('back'); return; }
+  wizPushed = false;
+});
 $('#back').onclick = () => go(ORDER[ORDER.indexOf(step) - 1] ?? ORDER[0]);
 
 // Błąd walidacji (raport 26.10): na telefonie komunikat był ~600 px pod przyciskiem, więc „Zapłać” wyglądał na martwy.
