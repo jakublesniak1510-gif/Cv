@@ -1030,3 +1030,10 @@ ul.checklist{list-style:none;padding-left:0}
 .prof-ex{margin:0 0 16px}
 .prof-ex select{flex:1;min-width:0}
 .exv.ex-prof #exDocTabs{display:none}
+
+/* C2: duże pole importu starego CV na górze kroku danych */
+.import.big{flex-wrap:wrap;padding:18px 16px;border:2px dashed color-mix(in srgb,var(--brand) 45%,transparent);margin-bottom:10px}
+.import.big>div{flex:1 1 260px}.import.big b{font-size:16.5px;line-height:1.35}
+.import.big .link{flex-basis:100%;text-align:left;font-size:14px}
+.import.big.drag{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 12%,var(--soft-b))}
+.import.big.small{padding:10px 14px;border-style:solid;border-width:1px}.import.big.small b{font-size:14.5px}.import.big.small span,.import.big.small .link{display:none}
