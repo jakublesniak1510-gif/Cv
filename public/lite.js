@@ -24,7 +24,14 @@
   if (ref()) for (const a of document.querySelectorAll('a[href*="?zamow=1"]')) { const u = new URL(a.href); if (!u.searchParams.has('ref')) { u.searchParams.set('ref', ref()); a.href = u.pathname + u.search; } }
   // Pasek „Zacznij” na telefonie (jak na stronie głównej): po przewinięciu, schowany przy otwartym menu.
   const mcta = $('#mcta');
-  if (mcta) addEventListener('scroll', () => { const show = scrollY > 500 && (nav?.hidden ?? true); mcta.hidden = !show; document.body.classList.toggle('mcta-on', show); }, { passive: true });
+  // B1 (26.10): tylko na stronach zawodów (także EN/UK/DE i zawód × miasto), po przewinięciu 40% strony; × chowa pasek na 24 h.
+  const PROF = /^\/(?:cv|en\/cv|uk\/rezyume|de\/lebenslauf)\/[\w-]+(?:\/[\w-]+)?$/.test(location.pathname), MCTA_KEY = 'cvpo-mcta-x';
+  const off = () => { try { return Date.now() - Number(localStorage.getItem(MCTA_KEY) || 0) < 864e5; } catch { return false; } };
+  const set = (show) => { mcta.hidden = !show; document.body.classList.toggle('mcta-on', show); };
+  if (mcta && PROF) {
+    addEventListener('scroll', () => set(!off() && scrollY >= 0.4 * Math.max(1, document.documentElement.scrollHeight - innerHeight) && (nav?.hidden ?? true)), { passive: true });
+    $('#mctaX')?.addEventListener('click', () => { try { localStorage.setItem(MCTA_KEY, String(Date.now())); } catch {} set(false); });
+  }
   // Widżety poradników (lib/widgets.js): słowa kluczowe z ogłoszenia, szkic podsumowania i kalkulator czasu.
   const adWords = async (f) => {
     const out = f.querySelector('.fstatus'); let ad = f.querySelector('textarea').value.trim();

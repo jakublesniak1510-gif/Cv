@@ -30,6 +30,7 @@
 <a class="skip" href="#landing">Przejdź do treści</a>
 <div id="demoBar" class="demobar" role="status" hidden>Tryb DEMO: płatność jest symulowana.</div>
 <div id="promoBar" class="promobar" hidden></div>
+<div id="resumeBar" class="refbar resume-bar" hidden><span id="resumeTxt"></span> <button type="button" class="btn sm" id="resumeGo">Dokończ</button></div>
 <div id="refBanner" class="refbar" hidden>Masz kod −10 zł od znajomego. Wpiszemy go automatycznie w podsumowaniu zamówienia.</div>
 
 <header class="nav" id="nav"><div class="inner">
@@ -496,7 +497,7 @@
 <details><summary>Czy znajomy musi coś robić?</summary><p>Wystarczy, że otworzy Twój link albo wpisze kod w podsumowaniu zamówienia. Każda osoba może użyć kodu raz.</p></details>
 <p class="hint">Pełne zasady: <a href="/regulamin">regulamin, §5b</a>.</p>
 </div></template>
-<div class="mcta" id="mcta" hidden><div><b>CV pod ogłoszenie</b><span>od 39 zł · bez abonamentu</span></div><button class="btn sm" data-open>Zacznij</button></div>
+<div class="mcta" id="mcta" hidden><div><b>CV pod to ogłoszenie – 39 zł</b><span>bez abonamentu, PDF na e-mail</span></div><button class="btn sm" data-open>Zamów</button><button type="button" class="mcta-x" id="mctaX" aria-label="Zamknij pasek">×</button></div>
 
 
 
@@ -570,6 +571,7 @@
       <div class="photo-row"><div class="photo-prev" id="photoPrev" aria-hidden="true"></div><div><b>Zdjęcie</b> <span class="h">opcjonalnie</span><p class="hint">Pojawi się w każdym szablonie, a gdy go nie dodasz, CV wygląda dobrze także bez niego. Zdjęcie nie trafia do AI.</p><label class="btn ghost sm filebtn">Dodaj zdjęcie<input type="file" id="photoFile" accept="image/jpeg,image/png,image/webp" hidden></label> <button type="button" class="link" id="photoDel" hidden>Usuń zdjęcie</button></div></div>
     </section>
     <section data-step="3" hidden>
+      <p class="scan-hint" id="scanHint" hidden></p>
       <p class="hint">Dodaj prace od najnowszej. Każdy punkt obowiązków w nowej linii. Im konkretniej (liczby, wyniki), tym lepsze CV.</p>
       <div id="exp"></div><button type="button" class="btn ghost sm" id="addExp">+ Dodaj stanowisko</button>
       <label class="check career-on"><input type="checkbox" id="careerOn"> <span>Zmieniam branżę</span></label>
