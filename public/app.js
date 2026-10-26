@@ -637,7 +637,9 @@ function drawExView() {
   $('#exChanges').replaceChildren(...changesList(e));
   $('#exSample').replaceChildren(sampleLink(exDesign, 'Pobierz przykładowe CV (PDF)'));
 }
-function openEx(i = 0, d) { exI = i; exDoc = 'cv'; if (d) Object.assign(exDesign, d); designPicker($('#exDesign'), exDesign, () => drawExView(), { thumbs: false }); drawExView(); modal(true); $('#exview').hidden = false; $('.exv-body').scrollTop = 0; setTimeout(() => $('#exClose').focus(), 0); }
+// Znak wodny „PRZYKŁAD” na przykładowych dokumentach (blok A, 26.10), jak w /api/sample.pdf: zrzut ekranu nie wygląda jak gotowe CV.
+const wmUrl = (t) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='340' height='220'><text x='20' y='150' transform='rotate(-28 170 110)' font-family='Inter,Arial,sans-serif' font-size='44' font-weight='700' fill='#2548E8' fill-opacity='0.16'>${t}</text></svg>`)}")`;
+function openEx(i = 0, d) { $('#exPaper').style.setProperty('--wm', wmUrl(tr('PRZYKŁAD'))); exI = i; exDoc = 'cv'; if (d) Object.assign(exDesign, d); designPicker($('#exDesign'), exDesign, () => drawExView(), { thumbs: false }); drawExView(); modal(true); $('#exview').hidden = false; $('.exv-body').scrollTop = 0; setTimeout(() => $('#exClose').focus(), 0); }
 const closeEx = () => { $('#exview').hidden = true; if ($('#wiz').hidden) modal(false); else lastFocus?.focus?.(); }; // przykład otwarty z kreatora: kreator zostaje modalem
 // Film demo („Jak to działa”): link nad filmem przewija do niego i uruchamia odtwarzanie (bez autoodtwarzania).
 document.addEventListener('click', (e) => { if (!e.target.closest('#demoFilmLink')) return; e.preventDefault(); const v = $('#demoFilm'); v.scrollIntoView({ behavior: 'smooth', block: 'center' }); v.play().catch(() => {}); });
@@ -1013,27 +1015,22 @@ function go(n) {
 }
 // Podgląd przed płatnością: na prośbę klienta, raz na sesję kreatora; reszta CV jako rozmazany szkielet z fikcyjnym tekstem.
 let pvSid = '', pvShown = null, pvOff = false;
-const PV_FAKE = ['Doświadczenie zawodowe', 'Stanowisko, nazwa firmy · 2021 – obecnie', 'Punkt opisujący zakres obowiązków i rezultaty pracy', 'Kolejny punkt dopasowany do wymagań z ogłoszenia', 'Wykształcenie', 'Nazwa szkoły, kierunek · rok ukończenia', 'Umiejętności', 'Umiejętność, umiejętność, umiejętność, umiejętność'];
 const pvSig = () => JSON.stringify([['headline', 'summary', 'skills'].map((k) => $('#' + k).value), rows('exp'), rows('edu'), rows('ads')[0]?.text || '']);
-// Pierwsze n zdań bez gubienia początku: dzielimy tylko po kropce/!/? ze spacją (więc „01.2021” nie ucina tekstu), a nie po skrótach (ok., np., m.in.).
-function firstSentences(t, n) { return String(t || '').trim().split(/(?<=[.!?])\s+/).reduce((a, x) => (a.length && /(^|\s)(ok|np|m\.in|tj|tzw|ds|ul|nr|dr|mgr|inż|godz|r)\.$/i.test(a[a.length - 1]) ? [...a.slice(0, -1), `${a[a.length - 1]} ${x}`] : [...a, x]), []).slice(0, n).join(' '); }
+// Podgląd jako obrazek z serwera (blok A, 26.10): tekst podsumowania nie trafia do DOM; obrazka nie da się zaznaczyć ani przeciągnąć.
 function drawPreview(r) {
-  $('#pvOut').replaceChildren(el('div', { className: 'pv-doc' },
-    el('div', { className: 'pv-name', textContent: $('#name').value }), el('div', { className: 'pv-hl', textContent: r.headline }),
-    el('p', { textContent: firstSentences(r.summary, 3) }), // 2–3 zdania podsumowania
-    el('div', { className: 'pv-kw' }, el('span', { className: 'hint', textContent: 'Słowa kluczowe z ogłoszenia w Twoim CV:' }), ...r.keywords.map((k) => el('span', { className: 'chip', textContent: k }))),
-    el('div', { className: 'pv-blur', ariaHidden: 'true' }, ...PV_FAKE.map((t, i) => el(i % 4 === 0 ? 'b' : 'p', { textContent: t }))),
-    el('p', { className: 'hint', textContent: 'Pełne CV, dopasowane do ogłoszenia, dostaniesz po płatności. Nagłówek i podsumowanie będą spójne z tym podglądem.' })));
+  $('#pvOut').replaceChildren(el('img', { className: 'pv-img', src: r.image, alt: tr('Podgląd początku CV ze znakiem wodnym'), draggable: false }),
+    el('p', { className: 'hint', textContent: 'Pełne CV, dopasowane do ogłoszenia, dostaniesz po płatności. Nagłówek i podsumowanie będą spójne z tym podglądem.' }));
   $('#pvBtn').hidden = true;
 }
+['copy', 'cut', 'contextmenu', 'dragstart'].forEach((ev) => $('#pvOut').addEventListener(ev, (e) => e.preventDefault()));
 $('#pvBtn').onclick = async () => {
   const b = $('#pvBtn'), ad = rows('ads')[0], v = (id) => $('#' + id).value;
   if (!ad?.text) return;
   b.disabled = true; b.textContent = 'Przygotowuję podgląd…';
   try {
-    const profile = { ...Object.fromEntries(['headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu') };
-    const r = await (await fetch('/api/preview', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: pvSid, profile, ad }) })).json();
-    if (r.off || !r.summary) { pvOff = true; $('#pvBox').hidden = true; $('#pvEx').hidden = false; return; } // AI niedostępne albo limit: blok znika bez komunikatu o błędzie
+    const profile = { ...Object.fromEntries(['name', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), experience: rows('exp'), education: rows('edu') };
+    const r = await (await fetch('/api/preview', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: pvSid, profile, ad, lang: window.I18N?.lang || 'pl', narrow: matchMedia('(max-width: 640px)').matches }) })).json();
+    if (r.off || !r.image) { pvOff = true; $('#pvBox').hidden = true; $('#pvEx').hidden = false; return; } // AI niedostępne albo limit: blok znika bez komunikatu o błędzie
     pvShown = { ...r, sig: pvSig() }; drawPreview(r); // zdarzenie preview_shown liczy serwer
   } catch { pvOff = true; $('#pvBox').hidden = true; $('#pvEx').hidden = false; }
   finally { b.disabled = false; b.textContent = 'Pokaż podgląd'; }
