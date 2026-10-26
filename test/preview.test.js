@@ -33,12 +33,12 @@ test('Podgląd przed płatnością: tani model, bez danych kontaktowych, pamię�
     // ta sama sesja, zmienione dane: limit 1 na sesję
     assert.deepEqual(await post({ sid: 'sesja-aaaa-1', profile: { ...PROFILE, skills: 'inne' }, ad: AD }), { off: true, reason: 'limit' });
     // 3 nowe podglądy na IP na godzinę (pierwszy już był)
-    for (let i = 2; i <= 3; i++) assert.ok((await post({ sid: `sesja-ip-${i}xx`, profile: { ...PROFILE, skills: `s${i}` }, ad: AD })).summary);
+    for (let i = 2; i <= 3; i++) assert.ok((await post({ sid: `sesja-ip-${i}xx`, profile: { ...PROFILE, skills: `s${i}` }, ad: AD })).image);
     assert.deepEqual(await post({ sid: 'sesja-ip-4xx', profile: { ...PROFILE, skills: 's4' }, ad: AD }), { off: true, reason: 'limit' });
-    assert.ok((await post({ sid: 'sesja-ip-5xx', profile: { ...PROFILE, skills: 's5' }, ad: AD }, '2.2.2.2')).summary, 'inne IP');
+    assert.ok((await post({ sid: 'sesja-ip-5xx', profile: { ...PROFILE, skills: 's5' }, ad: AD }, '2.2.2.2')).image, 'inne IP');
     // awaria AI: krok bez podglądu, ale nieudana próba nie zużywa limitu sesji, IP ani dziennego
     assert.deepEqual(await post({ sid: 'sesja-err-1', profile: { ...PROFILE, skills: 'AWARIA' }, ad: AD }, '3.3.3.3'), { off: true });
-    assert.ok((await post({ sid: 'sesja-err-1', profile: { ...PROFILE, skills: 'po awarii' }, ad: AD }, '3.3.3.3')).summary, 'ta sama sesja może spróbować ponownie');
+    assert.ok((await post({ sid: 'sesja-err-1', profile: { ...PROFILE, skills: 'po awarii' }, ad: AD }, '3.3.3.3')).image, 'ta sama sesja może spróbować ponownie');
     // dzienny limit dla całej strony (tu 5 nowych podglądów): kolejny nowy → limit przed wywołaniem AI; z pamięci podręcznej dalej działa
     const before = calls.length;
     assert.deepEqual(await post({ sid: 'sesja-day-1', profile: { ...PROFILE, skills: 'dzień' }, ad: AD }, '6.6.6.6'), { off: true, reason: 'limit' });
@@ -52,7 +52,8 @@ test('Podgląd przed płatnością: tani model, bez danych kontaktowych, pamię�
     assert.deepEqual(await post({ sid: 'sesja-short', profile: PROFILE, ad: { text: 'krótko' } }, '5.5.5.5'), { off: true });
     // wynik zapamiętany do pełnej generacji po płatności (ten sam skrót danych)
     const saved = await pv.previewFor(cleanProfile(PROFILE), cleanAds([AD])[0]);
-    assert.equal(saved.summary, r.summary);
+    assert.match(saved.summary, /^Od trzech lat/, 'pełne podsumowanie zostaje na serwerze (do CV po płatności)');
+    assert.equal(r.summary, undefined, 'tekst podsumowania nie trafia do przeglądarki'); assert.match(r.image, /^data:image\/png;base64,/);
     assert.equal(await pv.previewFor(cleanProfile({ ...PROFILE, headline: 'zmiana' }), cleanAds([AD])[0]), null);
     assert.equal(pv.previewKey(cleanProfile(PROFILE), AD), pv.previewKey(cleanProfile({ ...PROFILE, name: 'Inna', email: 'x@y.z', photo: '' }), AD), 'kontakt i zdjęcie nie zmieniają skrótu');
   } finally { srv.close(); }
