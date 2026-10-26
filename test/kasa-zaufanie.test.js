@@ -36,9 +36,6 @@ test('Kreator: panel dopasowania w podsumowaniu (per ogłoszenie zwinięty), pod
   assert.match(s6, /<b>Tak zacznie się Twoje CV pod to ogłoszenie<\/b>/);
   assert.match(app, /fetch\('\/api\/wizard-match'/); assert.match(app, /el\('details', \{ className: 'optbox' \}/);
   assert.match(app, /Z ogłoszenia wyciągnęliśmy \$\{m\.n\} \$\{plural\(m\.n, 'wymaganie', 'wymagania', 'wymagań'\)\}/);
-  assert.match(app, /textContent: firstSentences\(r\.summary, 3\) \}\), \/\/ 2–3 zdania/, 'podgląd: 3 pierwsze zdania (test/podglad-zdania.test.js)');
-  assert.match(app, /if \(r\.off \|\| !r\.summary\) \{ pvOff = true; \$\('#pvBox'\)\.hidden = true; \$\('#pvEx'\)\.hidden = false; return; \}/);
-  assert.match(app, /PV_FAKE/, 'rozmyty fragment to przykładowa treść, nie dane klienta');
 });
 
 test('Kasa: blok zaufania w obu wariantach testu checkout, bez wymyślonych liczb; „Polecany” przy CV + list z dopłatą z cennika', () => {

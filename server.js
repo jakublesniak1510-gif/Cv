@@ -74,6 +74,8 @@ const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\
 const PROVIDER = process.env.PAY_PROVIDER === 'both' && stripeEnabled() && p24Enabled() ? 'both'
   : process.env.PAY_PROVIDER === 'p24' && p24Enabled() ? 'p24' : stripeEnabled() ? 'stripe' : p24Enabled() ? 'p24' : 'demo';
 const DEMO = PROVIDER === 'demo';
+// Bezpiecznik (blok A, 26.10): tryb DEMO (płatność symulowana, /demo-pay) nie może wystartować pod adresem produkcyjnym.
+if (process.env.PAY_PROVIDER === 'demo' && /cvpodogloszenie\.pl/i.test(BASE_URL)) { console.error('BŁĄD KONFIGURACJI: PAY_PROVIDER=demo przy BASE_URL produkcji (cvpodogloszenie.pl). Ustaw bramkę płatności (Stripe / Przelewy24) albo zmień PAY_PROVIDER. Serwer nie startuje.'); process.exit(1); }
 const GATEWAYS = PROVIDER === 'both' ? ['stripe', 'p24'] : DEMO ? [] : [PROVIDER];
 // Bramka wybrana przez klienta: brak pola → domyślna (pierwsza); nieznana albo niewłączona → błąd (null).
 const pickGateway = (g) => (g == null || g === '' ? GATEWAYS[0] || null : GATEWAYS.includes(g) ? g : null);
@@ -407,7 +409,10 @@ app.get('/api/config', (req, res) => res.json({
   prices: { ...Object.fromEntries(Object.entries(PRICES).map(([k, v]) => [k, v / 100])), bundleOff: BUNDLE_OFF / 100 },
 }));
 
+// Sprawdzanie kodów: najwyżej 10 prób na IP w 10 minut (zgadywanie kodów polecających i kodów instytucji).
+const codeLimit = limiter(10, 600_000);
 app.get('/api/code/:code', async (req, res) => {
+  if (!codeLimit(req)) return res.status(429).json({ error: 'Za dużo prób sprawdzenia kodu. Spróbuj ponownie za kilka minut.' });
   const r = await checkCode(req.params.code, req.query.email);
   if (r.error) return res.status(404).json({ error: r.error });
   // Kod promocji z kalendarza: do podsumowania zamówienia dołączamy najniższą cenę z 30 dni przed obniżką (Omnibus).
@@ -692,7 +697,7 @@ app.post('/api/orders/:id/followup', async (req, res) => {
 });
 
 const view = (o, extra = {}) => ({
-  ...extra, id: o.id, pkg: o.pkg, addons: o.addons || {}, extraLangs: o.extraLangs || [], total: o.total, status: o.status, results: (o.results || []).map(({ qa, ...r }) => r), error: o.error, mail: o.mail,
+  ...extra, id: o.id, pkg: o.pkg, addons: o.addons || {}, extraLangs: o.extraLangs || [], total: o.total, status: o.status, results: o.status === 'done' ? (o.results || []).map(({ qa, ...r }) => r) : [], // dokumenty tylko po opłaceniu i wygenerowaniu (blok A, 26.10) error: o.error, mail: o.mail,
   design: cleanDesign(o.design), photo: o.profile.photo || '', email: o.profile.email, parentId: o.parentId || null,
   paidAt: o.paidAt || null, gateway: o.gateway || null, createAccount: !!o.createAccount, canPay: o.status === 'pending' && !DEMO, revisionsLeft: revLimit(o) - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
   invoice: o.invoice?.pdf ? { number: o.invoice.number } : null, mode: o.mode || null, heard: !!o.heard,
