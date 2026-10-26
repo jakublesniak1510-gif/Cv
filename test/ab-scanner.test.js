@@ -75,7 +75,7 @@ test('Raport A/B „scanner”: etapy i konwersje od skanu, tekst do raportu, pa
 
 test('Widok wyniku: wariant B z dopiskiem o kolejnych wymaganiach i akapitem zamiast wskazówek, klik liczony; tłumaczenia', () => {
   const app = read('public/app.js');
-  assert.match(app, /const scanCta = \(\) => \{ track\('scancta'\); fromScan\(\); \};/);
+  assert.match(app, /const scanCta = \(\) => \{ track\('scancta'\); track\('scantowiz'\); fromScan\(\); \};/, 'klik liczony (cta_click w teście scanner, scan_to_wiz od B3)');
   assert.match(app, /more \? el\('p', \{ className: 'scan-more' \}, `\+\$\{more\} `, el\('span', \{ textContent: moreReqs\(more\) \}\)\) : null/);
   assert.match(app, /'Wskazówki i gotowe sformułowania dostaniesz razem z CV pod to ogłoszenie – od' \}\), ` \$\{PRICE\.cv\} zł`/);
   assert.doesNotMatch(app, /onclick: fromScan/, 'wszystkie przyciski CTA wyniku liczą klik');

@@ -1285,7 +1285,7 @@ function bindScan(ui) {
       const j = await r.json(); if (!r.ok) throw new Error(j.error);
       // Nazwa stanowiska: z linku, z oceny AI albo z pierwszego zdania ogłoszenia.
       const guess = ad.split(/[.\n]/)[0].replace(/^(poszukujemy|szukamy|zatrudnimy|zatrudni[mę]?)\s+/i, '').trim().slice(0, 60);
-      scanData = { b64, adText: ad, title: title || j.position || guess.charAt(0).toUpperCase() + guess.slice(1) };
+      scanData = { b64, adText: ad, title: title || j.position || guess.charAt(0).toUpperCase() + guess.slice(1), missing: (j.missing || []).map((m) => m.keyword) };
       msg.textContent = ''; renderScan(j, ui.result);
     } catch (x) { fail(x.message); }
     ui.btn.disabled = false;
@@ -1359,7 +1359,7 @@ function toolCheck(box, ats) {
         msg.textContent = 'Porównujemy CV z ogłoszeniem…';
         const s = await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: b64, adText }) });
         const k = await s.json(); if (!s.ok) throw new Error(k.error);
-        scanData = { b64, adText, title: k.position || '' }; renderScan(k, scanBox); scanBox.hidden = false; msg.textContent = '';
+        scanData = { b64, adText, title: k.position || '', missing: (k.missing || []).map((m) => m.keyword) }; renderScan(k, scanBox); scanBox.hidden = false; msg.textContent = '';
       } else if (ats && adText) fail('Wklej pełną treść ogłoszenia (min. 80 znaków), żeby porównać słowa kluczowe.');
     } catch (x) { fail(x.message); }
     btn.disabled = false;
@@ -1367,7 +1367,7 @@ function toolCheck(box, ats) {
   box.classList.remove('tool-box'); box.append(form, result, scanBox);
 }
 // Test A/B „scanner” (lib/ab.js): w wariancie B serwer zwraca tylko 3 pierwsze braki (missingMore = reszta) i bez wskazówek.
-const scanCta = () => { track('scancta'); fromScan(); };
+const scanCta = () => { track('scancta'); track('scantowiz'); fromScan(); }; // scan_to_wiz (B3): przejście ze skanera do kreatora
 const moreReqs = (n) => (n === 1 ? 'kolejne wymaganie uwzględnimy w CV pod to ogłoszenie' : n >= 2 && n <= 4 ? 'kolejne wymagania uwzględnimy w CV pod to ogłoszenie' : 'kolejnych wymagań uwzględnimy w CV pod to ogłoszenie');
 function renderScan(j, box = $('#scanResult')) {
   const more = j.missingMore || 0, total = j.found.length + j.missing.length + more, pct = j.score ?? 0, b = j.variant === 'B';
@@ -1380,7 +1380,7 @@ function renderScan(j, box = $('#scanResult')) {
     j.tips?.length ? el('div', { className: 'tips' }, el('h3', { textContent: 'Co poprawić' }), el('ol', {}, ...j.tips.map((t) => el('li', { textContent: t })))) : null,
     b ? el('div', { className: 'tips scan-tips-b' }, el('p', {}, el('span', { textContent: 'Wskazówki i gotowe sformułowania dostaniesz razem z CV pod to ogłoszenie – od' }), ` ${PRICE.cv} zł`), el('button', { type: 'button', className: 'btn sm scan-cta', onclick: scanCta }, el('span', { textContent: 'Zrób CV dopasowane do tego ogłoszenia – od' }), ` ${PRICE.cv} zł`)) : null,
     el('div', { className: 'cta-box' }, el('div', {}, el('b', { textContent: 'Zrób CV pisane pod to ogłoszenie' }), el('p', { className: 'hint', textContent: 'Uzupełnimy formularz danymi z Twojego pliku, ułożymy CV pod te wymagania, a brakujące rzeczy, które masz, dopiszesz jednym kliknięciem. Od 39 zł, z darmową poprawką.' })),
-      el('button', { type: 'button', className: 'btn', textContent: 'Zrób CV pod to ogłoszenie', onclick: scanCta })),
+      el('button', { type: 'button', className: 'btn', onclick: scanCta }, el('span', { textContent: 'Zamów CV, które pokryje te wymagania –' }), ` ${PRICE.cv} zł`)),
     j.scanId ? scanShare(j.scanId) : null, j.scanId ? scanMailForm(j.scanId) : null].filter(Boolean));
   box.hidden = false; box.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
 }
@@ -1463,6 +1463,9 @@ function fromScan() {
     $('[data-k=title]', first).value = scanData.title || ''; $('[data-k=text]', first).value = scanData.adText;
     first.dataset.fetched = '1'; setMode(first, 'paste');
   }
+  // B3 (26.10): wymagania, których skaner nie znalazł w CV, jako podpowiedź w kroku 3 (dopisz tylko to, co jest prawdą).
+  const miss = (scanData.missing || []).filter(Boolean).slice(0, 8);
+  $('#scanHint').hidden = !miss.length; if (miss.length) $('#scanHint').replaceChildren(el('b', { textContent: tr('Ogłoszenie wymaga:') }), ` ${miss.join(', ')} – `, el('span', { textContent: tr('dopisz, jeśli to prawda o Tobie.') }));
   openWiz(); go(2); importData(scanData.b64);
 }
 
@@ -2013,7 +2016,12 @@ loadReviews();
 } catch {} })();
 
 // Pasek „Zacznij” na telefonie: po przewinięciu strony, gdy nie jest otwarte okno ani wynik.
-addEventListener('scroll', () => { const show = scrollY > 500 && $('#result').hidden && ($('#account')?.hidden ?? true) && $('#wiz').hidden && document.body.style.overflow !== 'hidden'; $('#mcta').hidden = !show; document.body.classList.toggle('mcta-on', show); }, { passive: true });
+// B1 (26.10): pasek „CV pod to ogłoszenie” na telefonie po przewinięciu 40% strony głównej; zamknięty (×) nie wraca przez 24 h.
+const MCTA_KEY = 'cvpo-mcta-x', mctaOff = () => { try { return Date.now() - Number(localStorage.getItem(MCTA_KEY) || 0) < 864e5; } catch { return false; } };
+const scrolled40 = () => scrollY >= 0.4 * Math.max(1, document.documentElement.scrollHeight - innerHeight);
+const mctaShow = (show) => { $('#mcta').hidden = !show; document.body.classList.toggle('mcta-on', show); };
+addEventListener('scroll', () => mctaShow(!mctaOff() && scrolled40() && !$('#landing').hidden && $('#page').hidden && $('#result').hidden && ($('#account')?.hidden ?? true) && $('#wiz').hidden && document.body.style.overflow !== 'hidden'), { passive: true });
+$('#mctaX').onclick = () => { try { localStorage.setItem(MCTA_KEY, String(Date.now())); } catch {} mctaShow(false); };
 
 async function loadContent() {
   if (!CONTENT) {
@@ -2749,6 +2757,16 @@ $('.skip').addEventListener('click', (e) => {
 
 addRow('exp'); addRow('edu'); addRow('ads');
 if (restoreDraft()) $('#draftNote').hidden = false;
+// B2 (26.10): powrót z niedokończonym kreatorem – baner na stronie głównej z nazwą stanowiska i krokiem; „Dokończ” otwiera ten krok.
+{
+  let d = null; try { d = JSON.parse(localStorage.getItem(DKEY)); } catch {}
+  const p = new URLSearchParams(location.search), st = Number(d?.step), label = (d?.f?.headline || d?.ads?.find((a) => a.title)?.title || '').trim().slice(0, 60);
+  if (d && $('#draftNote').hidden === false && ORDER.includes(st) && !window.__ROUTE && !['zamow', 'id', 'draft', 'szkic'].some((k) => p.get(k))) {
+    $('#resumeTxt').textContent = `${tr('Masz niedokończone CV')}${label ? `: ${label}` : ''} · ${tr('krok {0} z {1}').replace('{0}', ORDER.indexOf(st) + 1).replace('{1}', ORDER.length)}`;
+    $('#resumeBar').hidden = false;
+    $('#resumeGo').onclick = () => { track('draftresume'); $('#resumeBar').hidden = true; openWiz(); go(st); };
+  }
+}
 refresh(); go(ORDER[0]);
 $('#clearDraft').onclick = () => { clearDraft(); resetWizard(); $('#draftNote').hidden = true; };
 const q = new URLSearchParams(location.search);
