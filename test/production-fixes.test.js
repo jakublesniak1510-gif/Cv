@@ -32,7 +32,7 @@ test('Strony zawodów: po wstępie „Masz ogłoszenie?” (skaner), potem przyc
 
 test('Lekkie strony: lite.js pokazuje pasek „Zacznij” po przewinięciu; kreator kończy się nad banerem cookies', () => {
   const lite = fs.readFileSync('public/lite.js', 'utf8'), css = fs.readFileSync('public/style.css', 'utf8'), consent = fs.readFileSync('public/consent.js', 'utf8');
-  assert.match(lite, /#mcta[\s\S]*scrollY > 500[\s\S]*mcta-on/);
+  assert.match(lite, /#mcta[\s\S]*mcta-on[\s\S]*scrollY >= 0\.4 \* Math\.max/, 'B1: pasek po 40% strony zawodu');
   assert.match(css, /\.wiz\{padding-bottom:calc\(16px \+ var\(--consent-h,0px\)\)\}/);
   assert.match(css, /@media\(max-width:640px\)\{\.wiz\{padding:0 0 var\(--consent-h,0px\)\}\}/);
   assert.match(css, /body:has\(\.wiz:not\(\[hidden\]\)\) \.consent p span\{display:none\}/);
