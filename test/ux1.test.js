@@ -53,7 +53,7 @@ test('Strona główna: „Przed i po” jako druga sekcja, nowy podtytuł i mikr
     const secs = [...h.matchAll(/<section class="[^"]*" id="([\w-]+)"/g)].map((m) => m[1]);
     assert.deepEqual(secs.slice(0, 3), ['top', 'przed-po', 'skaner']);
     assert.match(h, /<p class="lead">Wklejasz ogłoszenie i swoje doświadczenie – dostajesz CV i list ze słowami, których szuka rekruter\.<\/p>/);
-    assert.match(h, /<p class="hero-line">39 zł jednorazowo · bez abonamentu · BLIK w 10 sekund · 5 poprawek w cenie<\/p>/); // C4: linia pod polem w hero zamiast mikrotekstu
+    assert.match(h, /<p class="hero-line">39 zł jednorazowo · bez abonamentu · BLIK w 10 sekund · 5 poprawek w cenie<br>/); // C4: linia pod polem w hero zamiast mikrotekstu
     assert.match(h, /<p class="eyebrow">Zobacz więcej przykładów<\/p>\s*<h2>To samo doświadczenie, trzy różne CV/);
     assert.match(h, /W cenie: PDF\. Wersja Word \(\.docx\): \+9 zł\./);
     // Słownik UA: hero po ukraińsku zgodnie z ustaleniem.

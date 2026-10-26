@@ -109,12 +109,15 @@ test('Zwrot zrobiony poza panelem: „Oznacz jako zwrócone” zapisuje zwrot be
     assert.equal((await call('POST', `/api/admin/orders/${o.j.id}/refund-manual`, { amount: '50' }, H)).status, 400, 'ponad kwotę');
     const before = calls.length;
     const r1 = await call('POST', `/api/admin/orders/${o.j.id}/refund-manual`, { amount: '10' }, H); assert.equal(r1.status, 200); assert.equal(r1.j.amount, 10);
-    const r2 = await call('POST', `/api/admin/orders/${o.j.id}/refund-manual`, {}, H); assert.equal(r2.status, 200); assert.equal(r2.j.amount, 29);
+    const r2 = await call('POST', `/api/admin/orders/${o.j.id}/refund-manual`, { reason: 'gwarancja' }, H); assert.equal(r2.status, 200); assert.equal(r2.j.amount, 29); // C5: zwrot z gwarancji
     assert.equal((await call('POST', `/api/admin/orders/${o.j.id}/refund-manual`, {}, H)).status, 409, 'już zwrócone');
     assert.equal(calls.length, before, 'bez wywołań P24');
     const ord = read('orders.json')[o.j.id];
     assert.equal(ord.refunded, 3900); assert.deepEqual(ord.refunds.map((q) => q.source), ['manual', 'manual']);
+    assert.deepEqual(ord.refunds.map((q) => q.reason || null), [null, 'gwarancja'], 'powód zwrotu w historii');
+    assert.equal((await call('GET', '/api/admin/stats', null, H)).j.guaranteeRefunds30, 1, 'statystyka: zwroty z gwarancji w 30 dni');
     await wait(200); assert.ok(Object.values(read('events.json')).some((e) => /oznaczony ręcznie/.test(e.message)));
+    assert.ok(Object.values(read('events.json')).some((e) => /oznaczony ręcznie \(zrobiony poza panelem, powód: gwarancja\)/.test(e.message)), 'log zamówienia: powód gwarancja');
     const adm = fs.readFileSync(new URL('../public/admin.js', import.meta.url), 'utf8');
     assert.match(adm, /'Oznacz jako zwrócone'/); assert.match(adm, /\/refund-manual`/); assert.match(adm, /oznaczony ręcznie \(zwrot poza panelem\)/);
   } finally { srv.kill(); p24.close(); }

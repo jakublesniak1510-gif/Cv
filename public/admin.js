@@ -66,6 +66,7 @@ loaders.dash = async () => {
     ['Z dodatkami', `${s.addonsShare}%`], ['Z kodem rabatowym', `${s.codesShare}%`],
     ['Czeka na płatność', String(s.pending)],
     ['Faktury do wystawienia', String(s.invoicesTodo || 0)],
+    ['Zwroty z gwarancji (30 dni)', String(s.guaranteeRefunds30 || 0)],
     ['Przygotowane CV (od startu)', `${s.totals.cvs}${s.totals.cvs < 1000 ? ` · licznik na stronie od 1000` : ' · licznik widoczny na stronie'}`],
     ['Konta klientów', String(s.accounts)],
     ['Ocena klientów', s.reviews.count ? `${String(s.reviews.avg).replace('.', ',')} / 5 (${s.reviews.count})` : 'brak ocen'], [`Koszt AI (${s.ai.month})`, `$${s.ai.usd.toFixed(2)} · ${s.ai.calls} wywołań`],
@@ -259,38 +260,42 @@ async function openOrder(id) {
   x.focus();
 }
 // Zwrot przez Stripe albo Przelewy24: całość albo podana kwota, z potwierdzeniem. Pieniądze wracają do klienta w kilka dni.
+// Zwrot z gwarancji dopasowania (regulamin §7a, C5): ten sam zwrot Stripe/Przelewy24/ręczny, z powodem „gwarancja” w historii i logu.
+const guarBox = () => { const c = el('input', { type: 'checkbox' }); return { c, row: el('label', { className: 'check', style: 'font-size:14px' }, c, ' Zwrot z gwarancji dopasowania (§7a regulaminu)') }; };
+const reasonBody = (g, amount) => ({ amount, ...(g.c.checked ? { reason: 'gwarancja' } : {}) });
 // Zwrot zrobiony poza panelem (Przelewy24 albo przelew): tylko oznaczenie w zamówieniu, z potwierdzeniem.
 function manualRefund(o, reload) {
   if (o.provider !== 'przelewy24' || !o.manualLeft) return null;
-  const box = el('div', { className: 'confirm', hidden: true });
+  const box = el('div', { className: 'confirm', hidden: true }), g = guarBox();
   const b = el('button', { className: 'btn ghost sm', textContent: 'Oznacz jako zwrócone' });
   b.onclick = () => {
     const v = (prompt(`Kwota zwrotu zrobionego poza panelem (zł), najwyżej ${String(o.manualLeft).replace('.', ',')}:`, String(o.manualLeft).replace('.', ',')) || '').trim();
     if (!v) return;
     const ok = el('button', { className: 'btn danger solid sm', textContent: `Tak, oznacz ${v} zł` }), no = el('button', { className: 'btn ghost sm', textContent: 'Anuluj' });
     no.onclick = () => { box.hidden = true; };
-    ok.onclick = async () => { ok.disabled = no.disabled = true; try { const r = await post(`/orders/${o.id}/refund-manual`, { amount: v }); toast(`Oznaczono zwrot ${zl(r.amount)}.`); reload(); } catch (x) { toast(x.message); ok.disabled = no.disabled = false; } };
+    ok.onclick = async () => { ok.disabled = no.disabled = true; try { const r = await post(`/orders/${o.id}/refund-manual`, reasonBody(g, v)); toast(`Oznaczono zwrot ${zl(r.amount)}${g.c.checked ? ' (gwarancja)' : ''}.`); reload(); } catch (x) { toast(x.message); ok.disabled = no.disabled = false; } };
     box.replaceChildren(el('strong', { textContent: `Oznaczyć ${v} zł jako zwrócone?` }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: 'Użyj tylko wtedy, gdy zwrot jest już zrobiony w panelu Przelewy24 albo przelewem. Panel nie wyśle pieniędzy, zapisze tylko zwrot w zamówieniu i w sprzedaży.' }), el('div', { className: 'actions' }, ok, no));
     box.hidden = false; ok.focus();
   };
-  return el('div', {}, b, box);
+  return el('div', {}, g.row, b, box);
 }
 function refundBox(o, reload) {
   if (!['stripe', 'przelewy24'].includes(o.provider) && !o.refunds.length) return null;
-  const hist = o.refunds.length ? el('ul', { className: 'list' }, o.refunds.map((r) => el('li', { textContent: `${zl(r.amount)} · ${dt(r.at)} · ${r.source === 'stripe' ? 'w panelu Stripe' : r.source === 'panel-p24' ? 'z tego panelu (Przelewy24)' : r.source === 'manual' ? 'oznaczony ręcznie (zwrot poza panelem)' : 'z tego panelu'}` }))) : null;
+  const hist = o.refunds.length ? el('ul', { className: 'list' }, o.refunds.map((r) => el('li', { textContent: `${zl(r.amount)} · ${dt(r.at)} · ${r.source === 'stripe' ? 'w panelu Stripe' : r.source === 'panel-p24' ? 'z tego panelu (Przelewy24)' : r.source === 'manual' ? 'oznaczony ręcznie (zwrot poza panelem)' : 'z tego panelu'}${r.reason === 'gwarancja' ? ' · zwrot z gwarancji' : ''}` }))) : null;
   if (!o.refundable) return el('div', {}, el('h3', { textContent: 'Zwrot' }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: o.refunded >= o.total ? 'Zamówienie zwrócone w całości.' : o.provider === 'przelewy24' ? 'Zwrot niedostępny (brak konfiguracji Przelewy24 albo numeru transakcji) – zrób go w panelu Przelewy24, a potem oznacz tutaj.' : 'Zwrot niedostępny (brak klucza Stripe).' }), manualRefund(o, reload), hist);
   const amt = el('input', { type: 'text', inputMode: 'decimal', value: String(o.refundable).replace('.', ','), ariaLabel: 'Kwota zwrotu w zł' });
-  const box = el('div', { className: 'confirm', hidden: true });
+  const box = el('div', { className: 'confirm', hidden: true }), g = guarBox();
   const b = el('button', { className: 'btn danger sm', textContent: 'Zwróć pieniądze' });
+  g.c.onchange = () => { if (g.c.checked) amt.value = String(o.refundable).replace('.', ','); }; // gwarancja: pełna zapłacona kwota
   b.onclick = () => {
     const v = amt.value.trim();
     const ok = el('button', { className: 'btn danger solid sm', textContent: `Tak, zwróć ${v} zł` }), no = el('button', { className: 'btn ghost sm', textContent: 'Anuluj' });
     no.onclick = () => { box.hidden = true; };
-    ok.onclick = async () => { ok.disabled = no.disabled = true; try { const r = await post(`/orders/${o.id}/refund`, { amount: v }); toast(o.provider === 'przelewy24' ? `Zlecono zwrot ${zl(r.amount)} w Przelewy24 (status potwierdza panel P24).` : `Zwrot ${zl(r.amount)} zlecony w Stripe.`); reload(); } catch (x) { toast(x.message); ok.disabled = no.disabled = false; } };
+    ok.onclick = async () => { ok.disabled = no.disabled = true; try { const r = await post(`/orders/${o.id}/refund`, reasonBody(g, v)); toast(o.provider === 'przelewy24' ? `Zlecono zwrot ${zl(r.amount)} w Przelewy24 (status potwierdza panel P24).` : `Zwrot ${zl(r.amount)} zlecony w Stripe.`); reload(); } catch (x) { toast(x.message); ok.disabled = no.disabled = false; } };
     box.replaceChildren(el('strong', { textContent: `Zwrócić klientowi ${v} zł?` }), el('p', { className: 'mute', style: 'margin:0;font-size:14px', textContent: 'Stripe odda pieniądze tą samą metodą, którą klient zapłacił (zwykle 5–10 dni). Opłaty Stripe za transakcję nie wracają. Tego nie da się cofnąć.' }), el('div', { className: 'actions' }, ok, no));
     box.hidden = false; ok.focus();
   };
-  return el('div', {}, el('h3', { textContent: 'Zwrot' }), el('div', { className: 'refund' }, el('label', { className: 'mute', style: 'font-size:14px' }, 'Kwota (zł) ', amt), b), box, manualRefund(o, reload), hist,
+  return el('div', {}, el('h3', { textContent: 'Zwrot' }), el('div', { className: 'refund' }, el('label', { className: 'mute', style: 'font-size:14px' }, 'Kwota (zł) ', amt), b), g.row, box, manualRefund(o, reload), hist,
     el('p', { className: 'help', textContent: `Do zwrotu zostało ${zl(o.refundable)}. Dokumenty klienta zostają; jeśli trzeba, usuń dane przyciskiem „Usuń dane”.` }));
 }
 // Faktura bez VAT na życzenie: dane nabywcy do przepisania w programie do faktur i odhaczenie z numerem.
