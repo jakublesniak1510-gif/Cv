@@ -508,146 +508,146 @@
 
 <!-- Kreator -->
 <div id="wiz" class="wiz" hidden role="dialog" aria-modal="true" aria-labelledby="wizTitle">
- <div class="wiz-box">
-  <div class="wiz-head"><div><div class="wiz-kicker" id="wizKicker"></div><h2 id="wizTitle"></h2></div><button class="x" id="wizClose" aria-label="Zamknij">×</button></div>
-  <ol class="stepper" id="stepper"></ol>
-  <p class="soon" id="soonNote" hidden>Zamówienia ruszą za kilka dni. Możesz obejrzeć formularz, ale nie da się jeszcze zamówić. Zapisz się do newslettera na dole strony, a damy znać o starcie.</p>
-  <form id="wizForm" novalidate>
-   <div class="wiz-body">
-    <section data-step="1">
-      <div class="pass-use" id="passUse" hidden>
-        <label class="check"><input type="checkbox" id="usePass" checked> <span id="passUseTxt">Użyj karnetu</span></label>
-        <p class="hint">Każde ogłoszenie w tym zamówieniu zużyje 1 dopasowanie (CV + list motywacyjny, jeden dodatkowy język w cenie). Symulator i przygotowanie do rozmowy – z limitów karnetu, a gdy się skończą, płatne jak zwykle. Pozostałe dodatki płatne jak zwykle.</p>
-      </div>
-      <p class="wiz-today">Aplikujesz dziś? CV i list będą gotowe zwykle w kilka minut.</p>
-      <p class="trust1" id="trust1" hidden></p>
-      <div class="prof-ex" id="profEx" hidden><label class="f">Zobacz przykład CV dla Twojego zawodu<span class="urlrow"><select id="profExSel"><option value="">Wybierz zawód</option></select><button type="button" class="btn ghost sm" id="profExGo">Zobacz przykład</button></span></label></div>
-      <div class="opts" id="pkgOpts">
-        <label class="opt"><input type="radio" name="pkg" value="cv"><span class="o-t">Samo CV<b>39 zł</b></span><span class="o-d">CV dopasowane do ogłoszenia</span></label>
-        <label class="opt"><input type="radio" name="pkg" value="cv_letter" checked><span class="o-t">CV + list motywacyjny<b>49 zł</b></span><span class="o-d">Komplet dokumentów pod ogłoszenie</span><span class="o-d rec-note"><span>list motywacyjny pod to samo ogłoszenie za</span> <span id="letterDiff">10 zł</span> <span>więcej</span></span></label>
-        <label class="opt"><input type="radio" name="pkg" value="pack3"><span class="o-t">Pakiet 3 CV + listy<b>79 zł</b></span><span class="o-d">3 CV pod ten sam zawód, każde pod inne ogłoszenie, i list do każdego</span><span class="o-d unit"><span class="pack3Unit">79 zł = 26,33 zł</span> <span>za CV</span></span></label>
-      </div>
-      <h3 class="sh">Dodatki <span class="h">(opcjonalnie, raz na całe zamówienie)</span></h3>
-      <div class="opts addons">
-        <label class="opt"><input type="checkbox" id="adInterview"><span class="o-t">Przygotowanie do rozmowy<b data-price="interview">+50 zł</b></span><span class="o-d">12 pytań do tego ogłoszenia z przykładowymi odpowiedziami z Twojego doświadczenia, gotowe „Opowiedz o sobie”, pytania do pracodawcy, rozmowa o pieniądzach i lista kontrolna. PDF.</span></label>
-        <label class="opt"><input type="checkbox" id="adSim"><span class="o-t">Symulator rozmowy kwalifikacyjnej<b data-price="sim">+29 zł</b></span><span class="o-d">Próbna rozmowa z AI-rekruterem pod to ogłoszenie: do 8 pytań, ocena każdej odpowiedzi i wskazówki, na koniec podsumowanie</span></label>
-        <label class="opt"><input type="checkbox" id="adMessages"><span class="o-t">Wiadomość do rekrutera<b data-price="messages">+9 zł</b></span><span class="o-d">Krótka wiadomość na LinkedIn i gotowy e-mail z aplikacją</span></label>
-        <label class="opt"><input type="checkbox" id="adLinkedin"><span class="o-t">Profil LinkedIn<b data-price="linkedin">+19 zł</b></span><span class="o-d">Nagłówek (do 220 znaków), sekcja „Informacje” (do 2600 znaków), do 15 umiejętności, opisy do 3 stanowisk i wskazówki do profilu, w języku CV, do skopiowania</span><span class="o-d tm">LinkedIn jest znakiem towarowym LinkedIn Corp.; serwis nie jest z nim powiązany.</span></label>
-        <label class="check li-en" id="liEnBox" hidden><input type="checkbox" id="adLinkedinEn"> <span>Profil LinkedIn także po angielsku (bez dopłaty)</span></label>
-        <p class="perk small" id="bundleTip"></p>
-        <label class="opt"><input type="checkbox" id="adDocx"><span class="o-t">Wersja Word (.docx)<b data-price="docx">+9 zł</b></span><span class="o-d">CV i list w edytowalnym pliku Word, gdy pracodawca prosi o .doc/.docx</span></label>
-      </div>
-      <h3 class="sh">Tłumaczenie na inny język <span class="h">(+5 zł za każdy język, dla wszystkich ogłoszeń)</span></h3>
-      <p class="hint">Dokumenty powstają w języku ogłoszenia i ten język jest w cenie: polskie ogłoszenie to CV po polsku, angielskie to CV po angielsku. Tutaj dokupisz drugą wersję w innym języku, np. po niemiecku do pracy za granicą.</p>
-      <div class="langpick" id="langPick"></div>
-      <h3 class="sh">Wygląd CV <span class="h">(możesz go zmienić także po zakupie)</span></h3>
-      <div id="wizDesign"></div>
-      <p class="perk small">Po zakupie dostaniesz <b>swój kod −10 zł</b> na kolejne zamówienie, który możesz też dać znajomym.</p>
-      <details class="save-later" id="saveLater">
-        <summary>Nie masz teraz czasu? Wyślij sobie link do dokończenia</summary>
-        <div class="sl-body">
-          <label class="f">Adres e-mail<input type="email" id="slEmail" autocomplete="email" inputmode="email" placeholder="np. anna@example.com"></label>
-          <label class="check"><input type="checkbox" id="slRemind"> <span>Przypomnij mi raz, jeśli nie dokończę (jeden e-mail za 2 godziny, opcjonalnie).</span></label>
-          <p class="hint">Wyślemy jeden e-mail z linkiem, który otworzysz na dowolnym urządzeniu. Szkic (bez zdjęcia) przechowamy 7 dni i będzie się aktualizował, gdy dalej wypełniasz formularz. Przypomnienie wyślemy tylko, jeśli zaznaczysz pole powyżej.</p>
-          <button type="button" class="btn sm" id="slSend">Wyślij link</button>
-          <div class="fstatus" id="slStatus" role="status"></div>
-        </div>
-      </details>
-      <p class="note" id="draftNote" hidden>Przywróciliśmy dane wpisane wcześniej na tym urządzeniu. <button type="button" class="link" id="clearDraft">Zacznij od nowa</button></p>
-      <button type="button" class="link" id="fill" hidden>Wstaw dane przykładowe</button>
-    </section>
-    <section data-step="2" hidden>
-      <div class="import"><div><b>Masz stare CV?</b><span>Wgraj PDF lub Word, a uzupełnimy formularz za Ciebie. Pliku nie zapisujemy.</span></div><label class="btn ghost sm filebtn">Wgraj CV<input type="file" id="importFile" accept=".pdf,.docx,.txt" hidden></label></div>
-      <label class="check rewrite-mode"><input type="checkbox" id="rewriteMode"> <span>Mam już CV – popraw je pod ogłoszenie, zachowując jego treść</span></label>
-      <p class="hint" id="rewriteNote" hidden>Zachowujemy treść i kolejność Twojego CV; wygląd w naszym szablonie. Nic nie dopisujemy: wymagania z ogłoszenia, których nie ma w Twoim CV, pokażemy w raporcie dopasowania w części „Brakuje w CV” – do uzupełnienia przez Ciebie, jeśli są prawdą.</p>
-      <p class="fstatus" id="importStatus" role="status"></p>
-      <div class="grid2">
-        <label class="f">Imię i nazwisko *<input type="text" id="name" autocomplete="name"></label>
-        <label class="f">E-mail *<input type="email" id="email" autocomplete="email"></label>
-        <label class="f">Telefon<input type="tel" id="phone" autocomplete="tel"></label>
-        <label class="f">Miasto<input type="text" id="city"></label>
-        <label class="f">Link <span class="h">LinkedIn, portfolio</span><input type="text" id="link"></label>
-        <label class="f">Ogólny zawód <span class="h">gdy ogłoszenie nie ma nazwy</span><input type="text" id="headline"></label>
-      </div>
-      <label class="f">Krótko o sobie <span class="h">opcjonalnie</span><textarea id="summary"></textarea></label>
-      <div class="photo-row"><div class="photo-prev" id="photoPrev" aria-hidden="true"></div><div><b>Zdjęcie</b> <span class="h">opcjonalnie</span><p class="hint">Pojawi się w każdym szablonie, a gdy go nie dodasz, CV wygląda dobrze także bez niego. Zdjęcie nie trafia do AI.</p><label class="btn ghost sm filebtn">Dodaj zdjęcie<input type="file" id="photoFile" accept="image/jpeg,image/png,image/webp" hidden></label> <button type="button" class="link" id="photoDel" hidden>Usuń zdjęcie</button></div></div>
-    </section>
-    <section data-step="3" hidden>
-      <p class="scan-hint" id="scanHint" hidden></p>
-      <p class="hint">Dodaj prace od najnowszej. Każdy punkt obowiązków w nowej linii. Im konkretniej (liczby, wyniki), tym lepsze CV.</p>
-      <div id="exp"></div><button type="button" class="btn ghost sm" id="addExp">+ Dodaj stanowisko</button>
-      <label class="check career-on"><input type="checkbox" id="careerOn"> <span>Zmieniam branżę</span></label>
-      <div class="career" id="careerBox" hidden>
-        <p class="hint">Napiszemy CV pod nową branżę: wyżej pokażemy umiejętności, które przenosisz z dotychczasowej pracy. Niczego nie dopisujemy. <a href="/poradnik/cv-przy-zmianie-branzy" target="_blank" rel="noopener">Poradnik: CV przy zmianie branży</a></p>
-        <label class="f">Dotychczasowa branża<input type="text" id="careerFrom" maxlength="120" placeholder="np. gastronomia"></label>
-        <label class="f">Docelowa branża<input type="text" id="careerTo" maxlength="120" placeholder="np. logistyka"></label>
-        <label class="f">Co z obecnych zadań pasuje do nowej pracy?<textarea id="careerFit" rows="3" maxlength="600" placeholder="np. planowanie grafików, przyjmowanie dostaw, rozliczanie kasy"></textarea></label>
-      </div>
-    </section>
-    <section data-step="4" hidden>
-      <h3 class="sh">Wykształcenie</h3><div id="edu"></div><button type="button" class="btn ghost sm" id="addEdu">+ Dodaj szkołę</button>
-      <h3 class="sh">Umiejętności i dodatki</h3>
-      <label class="f">Umiejętności <span class="h">po przecinku: im więcej, tym lepsze dopasowanie</span><textarea id="skills"></textarea></label>
-      <div class="grid2">
-        <label class="f">Języki<input type="text" id="languages" placeholder="angielski B2, niemiecki A2"></label>
-        <label class="f">Certyfikaty i kursy<input type="text" id="certificates"></label>
-      </div>
-      <label class="f">Zainteresowania <span class="h">opcjonalnie</span><input type="text" id="interests"></label>
-      <label class="f">Uwagi dla autora <span class="h">np. zmiana branży, przerwa w pracy</span><textarea id="notes"></textarea></label>
-    </section>
-    <section data-step="5" hidden>
-      <p class="hint">Dla <b>każdego</b> ogłoszenia powstanie osobne CV. Wklej link, wgraj zdjęcie ogłoszenia albo wklej jego treść.</p>
-      <p class="hint">Jeśli link się nie wczyta, wklej treść ogłoszenia – zajmie to chwilę.</p>
-      <div id="ads"></div><button type="button" class="btn ghost sm" id="addAd">+ Dodaj ogłoszenie (w pakiecie do 3)</button>
-      <p class="note" id="packTip" hidden>Masz więcej ogłoszeń w tym samym zawodzie? <button type="button" class="link" id="toPack">Wybierz Pakiet 3 za 79 zł</button>: trzy CV i list do każdego.</p>
-    </section>
-    <section data-step="6" hidden>
-      <div class="sum-top" id="sumTop" hidden><span>Do zapłaty</span> <b id="totalTop"></b> <small>jednorazowo, bez abonamentu</small></div>
-      <p class="live-stats" id="liveStats6" hidden></p>
-      <div id="wizMatch" class="wiz-match" hidden></div>
-      <div id="pvBox" class="pv" hidden><div class="pv-head"><b id="pvTitle">Tak zacznie się Twoje CV pod to ogłoszenie</b><p class="hint" id="pvHint">Pokażemy nagłówek, podsumowanie zawodowe i 5 słów kluczowych z ogłoszenia, które znajdą się w CV. W tym celu Twoje dane i ogłoszenie trafią do dostawcy AI, tak jak przy zamówieniu.</p><button class="btn ghost sm" type="button" id="pvBtn">Pokaż podgląd</button></div><div id="pvOut" aria-live="polite"></div></div>
-      <p class="pv-ex" id="pvEx" hidden><button type="button" class="btn ghost sm" data-example="0">Zobacz przykład gotowego CV</button> <span class="hint">Przykładowe ogłoszenie i CV, bez Twoich danych.</span></p>
-      <div id="sum"></div>
-      <details class="codebox" id="codeBox"><summary>Mam kod rabatowy</summary><label class="f">Kod rabatowy<span class="urlrow"><input type="text" id="codeInput" autocomplete="off" placeholder="np. KOD-AB12CD"><button type="button" class="btn ghost sm" id="codeApply">Zastosuj</button></span></label><p class="fstatus" id="codeMsg" role="status"></p></details>
-      <label class="check"><input type="checkbox" id="wantInv"> <span>Potrzebuję faktury (bez VAT – sprzedawca jest zwolniony z VAT).</span></label>
-      <div class="invbox" id="invBox" hidden>
-       <label class="f">Nazwa firmy albo imię i nazwisko<input type="text" id="invName" maxlength="200" autocomplete="organization"></label>
-       <label class="f">Adres<input type="text" id="invAddr" maxlength="250" placeholder="ulica i numer, kod pocztowy, miasto" autocomplete="street-address"></label>
-       <label class="f">NIP (pomiń, jeśli kupujesz prywatnie)<input type="text" id="invNip" maxlength="16" inputmode="numeric" placeholder="np. 1234563218"></label>
-       <p class="hint">Fakturę wyślemy na e-mail podany w zamówieniu.</p>
-      </div>
-      <details class="optbox" id="optMail"><summary>Powiadomienia e-mail (opcjonalnie)</summary>
-      <label class="check"><input type="checkbox" id="reviewAsk"> <span>Poproś mnie raz o ocenę dokumentów (jeden e-mail po 4 dniach, opcjonalnie).</span></label>
-      <label class="check"><input type="checkbox" id="outcomeAsk"> <span>Zapytajcie mnie za 14 dni, czy dostałem(-am) zaproszenie na rozmowę (1 wiadomość).</span></label>
-      <label class="check"><input type="checkbox" id="payRem"> <span>Jeśli nie dokończę płatności, przypomnijcie mi raz e-mailem (opcjonalnie).</span></label>
-      <label class="check"><input type="checkbox" id="reminder"> <span>Przypomnij mi raz po 7 dniach o możliwości zamówienia CV pod kolejne ogłoszenie (opcjonalnie, jedna wiadomość e-mail).</span></label>
-      <label class="check"><input type="checkbox" id="wantAlerts"> <span><b>Oferty pracy na e-mail:</b> wysyłaj mi raz w tygodniu linki do nowych ofert w moim zawodzie i mieście (za darmo, przez 12 tygodni, opcjonalnie).</span></label>
-      <div class="invbox" id="alertBox" hidden>
-       <label class="f">Zawód lub stanowisko<input type="text" id="alJob" maxlength="60" placeholder="np. magazynier"></label>
-       <label class="f">Miasto<input type="text" id="alCity" maxlength="40" placeholder="np. Zielona Góra (opcjonalnie)"></label>
-       <p class="hint">Linki do Pracuj.pl, OLX i Indeed przyjdą na e-mail z zamówienia. Wypiszesz się jednym kliknięciem w każdej wiadomości.</p>
-      </div>
-      <label class="check"><input type="checkbox" id="followUp"> <span>Zapytajcie mnie raz po miesiącu, jak poszła rekrutacja (jeden e-mail, opcjonalnie).</span></label>
-      <label class="check"><input type="checkbox" id="deleteNotice"> <span>Przypomnijcie mi 5 dni przed usunięciem moich danych i dokumentów (jeden e-mail, opcjonalnie).</span></label>
-      </details>
-      <p class="perk small">Po opłaceniu dostaniesz <b>swój kod −10 zł</b> (ważny 90 dni): na kolejne zamówienie dla Ciebie i dla Twoich znajomych.</p>
-      <p class="hint trust-mini">W cenie: raport dopasowania, darmowa poprawka i edycja tekstu. Dane usuwamy automatycznie po 30 dniach.</p>
-      <div id="gwBox" class="gw-box" hidden></div>
-      <ul class="pay-trust" id="payTrustList" hidden></ul>
-      <!--tp-mini-->
-      <div class="consent-box" id="consentBox">
-      <label class="check"><input type="checkbox" id="consent"> <span>Akceptuję <a href="/regulamin" target="_blank" rel="noopener">Regulamin</a> i <a href="/polityka-prywatnosci" target="_blank" rel="noopener">Politykę prywatności</a>. Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów.</span></label>
-      <label class="check"><input type="checkbox" id="waiver"> <span>Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.</span></label>
-      </div>
-    </section>
-    <section data-step="7" hidden>
-      <div class="note"><b>Tryb DEMO.</b> Tutaj otworzyłaby się płatność Przelewy24 (BLIK / karta / przelew). Kliknij, aby zasymulować udaną płatność.</div>
-      <div class="payrow"><button type="button" class="btn lg" id="payBlik">Zapłać BLIK-iem</button><button type="button" class="btn ghost lg" id="payCard">Zapłać kartą</button></div>
-    </section>
-    <div class="err" id="werr" role="alert"></div>
-   </div>
-   <div class="wiz-foot"><p class="werr-foot" id="werrFoot" aria-hidden="true" hidden></p><p class="get-line" id="getLine" hidden></p><button type="button" class="btn ghost" id="back">Wstecz</button><div class="tot">Razem <strong id="total">49 zł</strong><small id="brk"></small></div><button type="submit" class="btn" id="next">Dalej</button><p class="paytrust" id="payTrust" hidden></p></div>
-  </form>
+<div class="wiz-box">
+<div class="wiz-head"><div><div class="wiz-kicker" id="wizKicker"></div><h2 id="wizTitle"></h2></div><button class="x" id="wizClose" aria-label="Zamknij">×</button></div>
+<ol class="stepper" id="stepper"></ol>
+<p class="soon" id="soonNote" hidden>Zamówienia ruszą za kilka dni. Możesz obejrzeć formularz, ale nie da się jeszcze zamówić. Zapisz się do newslettera na dole strony, a damy znać o starcie.</p>
+<form id="wizForm" novalidate>
+<div class="wiz-body">
+<section data-step="1">
+<div class="pass-use" id="passUse" hidden>
+<label class="check"><input type="checkbox" id="usePass" checked> <span id="passUseTxt">Użyj karnetu</span></label>
+<p class="hint">Każde ogłoszenie w tym zamówieniu zużyje 1 dopasowanie (CV + list motywacyjny, jeden dodatkowy język w cenie). Symulator i przygotowanie do rozmowy – z limitów karnetu, a gdy się skończą, płatne jak zwykle. Pozostałe dodatki płatne jak zwykle.</p>
+</div>
+<p class="wiz-today">Aplikujesz dziś? CV i list będą gotowe zwykle w kilka minut.</p>
+<p class="trust1" id="trust1" hidden></p>
+<div class="prof-ex" id="profEx" hidden><label class="f">Zobacz przykład CV dla Twojego zawodu<span class="urlrow"><select id="profExSel"><option value="">Wybierz zawód</option></select><button type="button" class="btn ghost sm" id="profExGo">Zobacz przykład</button></span></label></div>
+<div class="opts" id="pkgOpts">
+<label class="opt"><input type="radio" name="pkg" value="cv"><span class="o-t">Samo CV<b>39 zł</b></span><span class="o-d">CV dopasowane do ogłoszenia</span></label>
+<label class="opt"><input type="radio" name="pkg" value="cv_letter" checked><span class="o-t">CV + list motywacyjny<b>49 zł</b></span><span class="o-d">Komplet dokumentów pod ogłoszenie</span><span class="o-d rec-note"><span>list motywacyjny pod to samo ogłoszenie za</span> <span id="letterDiff">10 zł</span> <span>więcej</span></span></label>
+<label class="opt"><input type="radio" name="pkg" value="pack3"><span class="o-t">Pakiet 3 CV + listy<b>79 zł</b></span><span class="o-d">3 CV pod ten sam zawód, każde pod inne ogłoszenie, i list do każdego</span><span class="o-d unit"><span class="pack3Unit">79 zł = 26,33 zł</span> <span>za CV</span></span></label>
+</div>
+<h3 class="sh">Dodatki <span class="h">(opcjonalnie, raz na całe zamówienie)</span></h3>
+<div class="opts addons">
+<label class="opt"><input type="checkbox" id="adInterview"><span class="o-t">Przygotowanie do rozmowy<b data-price="interview">+50 zł</b></span><span class="o-d">12 pytań do tego ogłoszenia z przykładowymi odpowiedziami z Twojego doświadczenia, gotowe „Opowiedz o sobie”, pytania do pracodawcy, rozmowa o pieniądzach i lista kontrolna. PDF.</span></label>
+<label class="opt"><input type="checkbox" id="adSim"><span class="o-t">Symulator rozmowy kwalifikacyjnej<b data-price="sim">+29 zł</b></span><span class="o-d">Próbna rozmowa z AI-rekruterem pod to ogłoszenie: do 8 pytań, ocena każdej odpowiedzi i wskazówki, na koniec podsumowanie</span></label>
+<label class="opt"><input type="checkbox" id="adMessages"><span class="o-t">Wiadomość do rekrutera<b data-price="messages">+9 zł</b></span><span class="o-d">Krótka wiadomość na LinkedIn i gotowy e-mail z aplikacją</span></label>
+<label class="opt"><input type="checkbox" id="adLinkedin"><span class="o-t">Profil LinkedIn<b data-price="linkedin">+19 zł</b></span><span class="o-d">Nagłówek (do 220 znaków), sekcja „Informacje” (do 2600 znaków), do 15 umiejętności, opisy do 3 stanowisk i wskazówki do profilu, w języku CV, do skopiowania</span><span class="o-d tm">LinkedIn jest znakiem towarowym LinkedIn Corp.; serwis nie jest z nim powiązany.</span></label>
+<label class="check li-en" id="liEnBox" hidden><input type="checkbox" id="adLinkedinEn"> <span>Profil LinkedIn także po angielsku (bez dopłaty)</span></label>
+<p class="perk small" id="bundleTip"></p>
+<label class="opt"><input type="checkbox" id="adDocx"><span class="o-t">Wersja Word (.docx)<b data-price="docx">+9 zł</b></span><span class="o-d">CV i list w edytowalnym pliku Word, gdy pracodawca prosi o .doc/.docx</span></label>
+</div>
+<h3 class="sh">Tłumaczenie na inny język <span class="h">(+5 zł za każdy język, dla wszystkich ogłoszeń)</span></h3>
+<p class="hint">Dokumenty powstają w języku ogłoszenia i ten język jest w cenie: polskie ogłoszenie to CV po polsku, angielskie to CV po angielsku. Tutaj dokupisz drugą wersję w innym języku, np. po niemiecku do pracy za granicą.</p>
+<div class="langpick" id="langPick"></div>
+<h3 class="sh">Wygląd CV <span class="h">(możesz go zmienić także po zakupie)</span></h3>
+<div id="wizDesign"></div>
+<p class="perk small">Po zakupie dostaniesz <b>swój kod −10 zł</b> na kolejne zamówienie, który możesz też dać znajomym.</p>
+<details class="save-later" id="saveLater">
+<summary>Nie masz teraz czasu? Wyślij sobie link do dokończenia</summary>
+<div class="sl-body">
+<label class="f">Adres e-mail<input type="email" id="slEmail" autocomplete="email" inputmode="email" placeholder="np. anna@example.com"></label>
+<label class="check"><input type="checkbox" id="slRemind"> <span>Przypomnij mi raz, jeśli nie dokończę (jeden e-mail za 2 godziny, opcjonalnie).</span></label>
+<p class="hint">Wyślemy jeden e-mail z linkiem, który otworzysz na dowolnym urządzeniu. Szkic (bez zdjęcia) przechowamy 7 dni i będzie się aktualizował, gdy dalej wypełniasz formularz. Przypomnienie wyślemy tylko, jeśli zaznaczysz pole powyżej.</p>
+<button type="button" class="btn sm" id="slSend">Wyślij link</button>
+<div class="fstatus" id="slStatus" role="status"></div>
+</div>
+</details>
+<p class="note" id="draftNote" hidden>Przywróciliśmy dane wpisane wcześniej na tym urządzeniu. <button type="button" class="link" id="clearDraft">Zacznij od nowa</button></p>
+<button type="button" class="link" id="fill" hidden>Wstaw dane przykładowe</button>
+</section>
+<section data-step="2" hidden>
+<div class="import big" id="importBox"><div><b>Masz już CV? Wgraj plik (PDF/Word), uzupełnimy pola za Ciebie</b><span>Ty tylko sprawdzasz. Pliku nie zapisujemy.</span></div><label class="btn filebtn">Wgraj CV<input type="file" id="importFile" accept=".pdf,.docx,.txt" hidden></label><button type="button" class="link" id="importManual">Nie mam CV – wpiszę ręcznie</button></div>
+<label class="check rewrite-mode"><input type="checkbox" id="rewriteMode"> <span>Mam już CV – popraw je pod ogłoszenie, zachowując jego treść</span></label>
+<p class="hint" id="rewriteNote" hidden>Zachowujemy treść i kolejność Twojego CV; wygląd w naszym szablonie. Nic nie dopisujemy: wymagania z ogłoszenia, których nie ma w Twoim CV, pokażemy w raporcie dopasowania w części „Brakuje w CV” – do uzupełnienia przez Ciebie, jeśli są prawdą.</p>
+<p class="fstatus" id="importStatus" role="status"></p>
+<div class="grid2">
+<label class="f">Imię i nazwisko *<input type="text" id="name" autocomplete="name"></label>
+<label class="f">E-mail *<input type="email" id="email" autocomplete="email"></label>
+<label class="f">Telefon<input type="tel" id="phone" autocomplete="tel"></label>
+<label class="f">Miasto<input type="text" id="city"></label>
+<label class="f">Link <span class="h">LinkedIn, portfolio</span><input type="text" id="link"></label>
+<label class="f">Ogólny zawód <span class="h">gdy ogłoszenie nie ma nazwy</span><input type="text" id="headline"></label>
+</div>
+<label class="f">Krótko o sobie <span class="h">opcjonalnie</span><textarea id="summary"></textarea></label>
+<div class="photo-row"><div class="photo-prev" id="photoPrev" aria-hidden="true"></div><div><b>Zdjęcie</b> <span class="h">opcjonalnie</span><p class="hint">Pojawi się w każdym szablonie, a gdy go nie dodasz, CV wygląda dobrze także bez niego. Zdjęcie nie trafia do AI.</p><label class="btn ghost sm filebtn">Dodaj zdjęcie<input type="file" id="photoFile" accept="image/jpeg,image/png,image/webp" hidden></label> <button type="button" class="link" id="photoDel" hidden>Usuń zdjęcie</button></div></div>
+</section>
+<section data-step="3" hidden>
+<p class="scan-hint" id="scanHint" hidden></p>
+<p class="hint">Dodaj prace od najnowszej. Każdy punkt obowiązków w nowej linii. Im konkretniej (liczby, wyniki), tym lepsze CV.</p>
+<div id="exp"></div><button type="button" class="btn ghost sm" id="addExp">+ Dodaj stanowisko</button>
+<label class="check career-on"><input type="checkbox" id="careerOn"> <span>Zmieniam branżę</span></label>
+<div class="career" id="careerBox" hidden>
+<p class="hint">Napiszemy CV pod nową branżę: wyżej pokażemy umiejętności, które przenosisz z dotychczasowej pracy. Niczego nie dopisujemy. <a href="/poradnik/cv-przy-zmianie-branzy" target="_blank" rel="noopener">Poradnik: CV przy zmianie branży</a></p>
+<label class="f">Dotychczasowa branża<input type="text" id="careerFrom" maxlength="120" placeholder="np. gastronomia"></label>
+<label class="f">Docelowa branża<input type="text" id="careerTo" maxlength="120" placeholder="np. logistyka"></label>
+<label class="f">Co z obecnych zadań pasuje do nowej pracy?<textarea id="careerFit" rows="3" maxlength="600" placeholder="np. planowanie grafików, przyjmowanie dostaw, rozliczanie kasy"></textarea></label>
+</div>
+</section>
+<section data-step="4" hidden>
+<h3 class="sh">Wykształcenie</h3><div id="edu"></div><button type="button" class="btn ghost sm" id="addEdu">+ Dodaj szkołę</button>
+<h3 class="sh">Umiejętności i dodatki</h3>
+<label class="f">Umiejętności <span class="h">po przecinku: im więcej, tym lepsze dopasowanie</span><textarea id="skills"></textarea></label>
+<div class="grid2">
+<label class="f">Języki<input type="text" id="languages" placeholder="angielski B2, niemiecki A2"></label>
+<label class="f">Certyfikaty i kursy<input type="text" id="certificates"></label>
+</div>
+<label class="f">Zainteresowania <span class="h">opcjonalnie</span><input type="text" id="interests"></label>
+<label class="f">Uwagi dla autora <span class="h">np. zmiana branży, przerwa w pracy</span><textarea id="notes"></textarea></label>
+</section>
+<section data-step="5" hidden>
+<p class="hint">Dla <b>każdego</b> ogłoszenia powstanie osobne CV. Wklej link, wgraj zdjęcie ogłoszenia albo wklej jego treść.</p>
+<p class="hint">Jeśli link się nie wczyta, wklej treść ogłoszenia – zajmie to chwilę.</p>
+<div id="ads"></div><button type="button" class="btn ghost sm" id="addAd">+ Dodaj ogłoszenie (w pakiecie do 3)</button>
+<p class="note" id="packTip" hidden>Masz więcej ogłoszeń w tym samym zawodzie? <button type="button" class="link" id="toPack">Wybierz Pakiet 3 za 79 zł</button>: trzy CV i list do każdego.</p>
+</section>
+<section data-step="6" hidden>
+<div class="sum-top" id="sumTop" hidden><span>Do zapłaty</span> <b id="totalTop"></b> <small>jednorazowo, bez abonamentu</small></div>
+<p class="live-stats" id="liveStats6" hidden></p>
+<div id="wizMatch" class="wiz-match" hidden></div>
+<div id="pvBox" class="pv" hidden><div class="pv-head"><b id="pvTitle">Tak zacznie się Twoje CV pod to ogłoszenie</b><p class="hint" id="pvHint">Pokażemy nagłówek, podsumowanie zawodowe i 5 słów kluczowych z ogłoszenia, które znajdą się w CV. W tym celu Twoje dane i ogłoszenie trafią do dostawcy AI, tak jak przy zamówieniu.</p><button class="btn ghost sm" type="button" id="pvBtn">Pokaż podgląd</button></div><div id="pvOut" aria-live="polite"></div></div>
+<p class="pv-ex" id="pvEx" hidden><button type="button" class="btn ghost sm" data-example="0">Zobacz przykład gotowego CV</button> <span class="hint">Przykładowe ogłoszenie i CV, bez Twoich danych.</span></p>
+<div id="sum"></div>
+<details class="codebox" id="codeBox"><summary>Mam kod rabatowy</summary><label class="f">Kod rabatowy<span class="urlrow"><input type="text" id="codeInput" autocomplete="off" placeholder="np. KOD-AB12CD"><button type="button" class="btn ghost sm" id="codeApply">Zastosuj</button></span></label><p class="fstatus" id="codeMsg" role="status"></p></details>
+<label class="check"><input type="checkbox" id="wantInv"> <span>Potrzebuję faktury (bez VAT – sprzedawca jest zwolniony z VAT).</span></label>
+<div class="invbox" id="invBox" hidden>
+<label class="f">Nazwa firmy albo imię i nazwisko<input type="text" id="invName" maxlength="200" autocomplete="organization"></label>
+<label class="f">Adres<input type="text" id="invAddr" maxlength="250" placeholder="ulica i numer, kod pocztowy, miasto" autocomplete="street-address"></label>
+<label class="f">NIP (pomiń, jeśli kupujesz prywatnie)<input type="text" id="invNip" maxlength="16" inputmode="numeric" placeholder="np. 1234563218"></label>
+<p class="hint">Fakturę wyślemy na e-mail podany w zamówieniu.</p>
+</div>
+<details class="optbox" id="optMail"><summary>Powiadomienia e-mail (opcjonalnie)</summary>
+<label class="check"><input type="checkbox" id="reviewAsk"> <span>Poproś mnie raz o ocenę dokumentów (jeden e-mail po 4 dniach, opcjonalnie).</span></label>
+<label class="check"><input type="checkbox" id="outcomeAsk"> <span>Zapytajcie mnie za 14 dni, czy dostałem(-am) zaproszenie na rozmowę (1 wiadomość).</span></label>
+<label class="check"><input type="checkbox" id="payRem"> <span>Jeśli nie dokończę płatności, przypomnijcie mi raz e-mailem (opcjonalnie).</span></label>
+<label class="check"><input type="checkbox" id="reminder"> <span>Przypomnij mi raz po 7 dniach o możliwości zamówienia CV pod kolejne ogłoszenie (opcjonalnie, jedna wiadomość e-mail).</span></label>
+<label class="check"><input type="checkbox" id="wantAlerts"> <span><b>Oferty pracy na e-mail:</b> wysyłaj mi raz w tygodniu linki do nowych ofert w moim zawodzie i mieście (za darmo, przez 12 tygodni, opcjonalnie).</span></label>
+<div class="invbox" id="alertBox" hidden>
+<label class="f">Zawód lub stanowisko<input type="text" id="alJob" maxlength="60" placeholder="np. magazynier"></label>
+<label class="f">Miasto<input type="text" id="alCity" maxlength="40" placeholder="np. Zielona Góra (opcjonalnie)"></label>
+<p class="hint">Linki do Pracuj.pl, OLX i Indeed przyjdą na e-mail z zamówienia. Wypiszesz się jednym kliknięciem w każdej wiadomości.</p>
+</div>
+<label class="check"><input type="checkbox" id="followUp"> <span>Zapytajcie mnie raz po miesiącu, jak poszła rekrutacja (jeden e-mail, opcjonalnie).</span></label>
+<label class="check"><input type="checkbox" id="deleteNotice"> <span>Przypomnijcie mi 5 dni przed usunięciem moich danych i dokumentów (jeden e-mail, opcjonalnie).</span></label>
+</details>
+<p class="perk small">Po opłaceniu dostaniesz <b>swój kod −10 zł</b> (ważny 90 dni): na kolejne zamówienie dla Ciebie i dla Twoich znajomych.</p>
+<p class="hint trust-mini">W cenie: raport dopasowania, darmowa poprawka i edycja tekstu. Dane usuwamy automatycznie po 30 dniach.</p>
+<div id="gwBox" class="gw-box" hidden></div>
+<ul class="pay-trust" id="payTrustList" hidden></ul>
+<!--tp-mini-->
+<div class="consent-box" id="consentBox">
+<label class="check"><input type="checkbox" id="consent"> <span>Akceptuję <a href="/regulamin" target="_blank" rel="noopener">Regulamin</a> i <a href="/polityka-prywatnosci" target="_blank" rel="noopener">Politykę prywatności</a>. Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów.</span></label>
+<label class="check"><input type="checkbox" id="waiver"> <span>Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.</span></label>
+</div>
+</section>
+<section data-step="7" hidden>
+<div class="note"><b>Tryb DEMO.</b> Tutaj otworzyłaby się płatność Przelewy24 (BLIK / karta / przelew). Kliknij, aby zasymulować udaną płatność.</div>
+<div class="payrow"><button type="button" class="btn lg" id="payBlik">Zapłać BLIK-iem</button><button type="button" class="btn ghost lg" id="payCard">Zapłać kartą</button></div>
+</section>
+<div class="err" id="werr" role="alert"></div>
+</div>
+<div class="wiz-foot"><p class="werr-foot" id="werrFoot" aria-hidden="true" hidden></p><p class="get-line" id="getLine" hidden></p><button type="button" class="btn ghost" id="back">Wstecz</button><div class="tot">Razem <strong id="total">49 zł</strong><small id="brk"></small></div><button type="submit" class="btn" id="next">Dalej</button><p class="paytrust" id="payTrust" hidden></p></div>
+</form>
  </div>
 </div>
 

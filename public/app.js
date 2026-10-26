@@ -1365,6 +1365,20 @@ $('#importFile').onchange = async (e) => {
   if (file.size > 5 * 1024 * 1024) { st.textContent = 'Plik musi mieć do 5 MB.'; st.classList.add('bad'); return; }
   importData(await fileB64(file));
 };
+// C2: duże pole „Masz już CV?” na górze kroku danych – także upuszczenie pliku; „Nie mam CV” zwija je i przechodzi do pól.
+{
+  const box = $('#importBox');
+  ['dragenter', 'dragover'].forEach((ev) => box.addEventListener(ev, (e) => { e.preventDefault(); box.classList.add('drag'); }));
+  ['dragleave', 'drop'].forEach((ev) => box.addEventListener(ev, () => box.classList.remove('drag')));
+  box.addEventListener('drop', async (e) => {
+    e.preventDefault(); const file = e.dataTransfer?.files?.[0]; if (!file) return;
+    const st = $('#importStatus'); st.className = 'fstatus';
+    if (!/\.(pdf|docx|txt)$/i.test(file.name)) { st.textContent = 'Wgraj plik PDF, Word (.docx) albo TXT.'; st.classList.add('bad'); return; }
+    if (file.size > 5 * 1024 * 1024) { st.textContent = 'Plik musi mieć do 5 MB.'; st.classList.add('bad'); return; }
+    importData(await fileB64(file));
+  });
+  $('#importManual').onclick = () => { box.classList.add('small'); $('#name').focus(); };
+}
 // Tryb „Mam już CV” (PR T): wymaga wgranego CV; zamówienie z mode: 'rewrite' (generator zachowuje treść i kolejność).
 let imported = false;
 $('#careerOn').onchange = () => { $('#careerBox').hidden = !$('#careerOn').checked; };
@@ -1380,7 +1394,7 @@ async function importData(b64) {
     const empty = (b) => !rows(b).some((x) => Object.values(x).some(Boolean));
     if (p.experience?.length && empty('exp')) { $('#exp').replaceChildren(); p.experience.forEach((x) => addRow('exp', x)); }
     if (p.education?.length && empty('edu')) { $('#edu').replaceChildren(); p.education.forEach((x) => addRow('edu', x)); }
-    saveDraft(); imported = true;
+    saveDraft(); imported = true; $('#importBox').classList.add('small'); track('cvimport');
     st.textContent = j.ai ? 'Gotowe. Uzupełniliśmy formularz danymi z CV (także w kolejnych krokach). Sprawdź je i popraw, jeśli trzeba.' : 'Odczytaliśmy dane kontaktowe. Resztę uzupełnij ręcznie.';
     if (cfg.preview) st.textContent += ' Podgląd: zamiast odczytu pliku wstawiamy przykładowe dane.';
     st.classList.add('good');
