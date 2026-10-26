@@ -79,6 +79,6 @@ test('Strona główna z wariantem, lejek per wariant, wariant w zamówieniu, rap
     const home = await plain.text();
     assert.equal(plain.headers.get('cache-control'), null, 'bez EXPERIMENTS: nagłówki jak dotąd');
     assert.equal(home, (await (await fetch(U + '/', { headers: ua(3) })).text()), 'bez EXPERIMENTS: ta sama strona dla każdego');
-    assert.ok(home.includes('<h1>Jedno ogłoszenie. Jedno CV pisane właśnie pod nie.</h1>') && home.includes('<button class="btn lg" data-open>Zamów CV od 39 zł</button>'), 'bez EXPERIMENTS: obecna strona');
+    assert.ok(home.includes('<h1>Jedno ogłoszenie. Jedno CV pisane właśnie pod nie.</h1>') && home.includes('<form class="hero-ad" id="heroAd" novalidate>'), 'bez EXPERIMENTS: obecna strona');
   } finally { srv.close(); delete process.env.EXPERIMENTS; }
 });
