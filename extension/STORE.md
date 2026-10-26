@@ -3,6 +3,7 @@
 Paczka: `npm run build:extension` → `extension.zip` (bez folderu `store/` i tego pliku).
 Zrzuty 1280×800: `extension/store/1-ogloszenie.png`, `2-kreator.png`, `3-skaner.png`.
 Ikona sklepu 128×128: `extension/icons/128.png`.
+**Uwaga:** bez nazw innych portali i marek w opisie i na zrzutach (odrzucenie Yellow Argon, 24.10.2026). Zrzut 1 pokazuje neutralny adres `https://przyklad-ogloszenia.pl/praca/magazynier-poznan`.
 Kategoria: **Productivity → Tools** (Produktywność → Narzędzia). Język domyślny: polski (dodatkowo uk, en, de).
 Strona: https://cvpodogloszenie.pl · Polityka prywatności: https://cvpodogloszenie.pl/polityka-prywatnosci (punkt 12) · Kontakt: kontakt@cvpodogloszenie.pl
 
@@ -19,7 +20,7 @@ Jedno kliknięcie na stronie ogłoszenia o pracę: zrób CV pod tę ofertę albo
 Szukasz pracy i wysyłasz CV na konkretne ogłoszenia? To rozszerzenie oszczędza kopiowanie.
 
 Jak działa:
-1. Otwórz ogłoszenie o pracę (np. pracuj.pl, OLX Praca, justjoin.it, No Fluff Jobs, Indeed, LinkedIn albo dowolną inną stronę z ofertą).
+1. Otwórz dowolne ogłoszenie o pracę w przeglądarce.
 2. Kliknij ikonę CV Pod Ogłoszenie.
 3. Wybierz „Zrób CV pod to ogłoszenie” albo „Sprawdź moje CV (skaner)”.
 4. Sprawdź podgląd odczytanego tekstu i kliknij „Wyślij”.
@@ -62,7 +63,7 @@ One click on a job ad page: get a CV tailored to this offer or check your CV wit
 Looking for a job in Poland and sending your CV to specific job ads? This extension saves you the copying.
 
 How it works:
-1. Open a job ad (e.g. pracuj.pl, OLX Praca, justjoin.it, No Fluff Jobs, Indeed, LinkedIn or any other page with an offer).
+1. Open any job ad in your browser.
 2. Click the CV Pod Ogłoszenie icon.
 3. Choose “Make a CV for this job ad” or “Check my CV (scanner)”.
 4. Check the preview of the text that was read and click “Send”.
