@@ -1230,6 +1230,17 @@ document.addEventListener('click', (e) => { const b = e.target.closest('[data-op
 // Zamknięcie przez użytkownika (×, Escape): na telefonie zdejmujemy też wpis historii dodany przy otwarciu kreatora (B8).
 const userCloseWiz = () => { closeWiz(); if (wizPushed) { wizPushed = false; silentBack = true; history.back(); } };
 $('#wizClose').onclick = userCloseWiz;
+// C4: pole w hero – link albo treść ogłoszenia od razu do kreatora (pierwsze ogłoszenie, pakiet „Samo CV”). Link pobieramy jak w kreatorze.
+$('#heroAd')?.addEventListener('submit', (e) => {
+  e.preventDefault(); const ta = $('#heroAdIn'), v = ta.value.trim();
+  if (!v) { ta.focus(); ta.classList.add('err'); return; }
+  ta.classList.remove('err');
+  openWiz('cv'); track('heroad');
+  const first = $('#ads .entry'); if (!first) return;
+  if (/^https?:\/\/\S+$/i.test(v)) { setMode(first, 'link'); $('[data-k=url]', first).value = v; $('.fetchbtn', first).click(); }
+  else { setMode(first, 'paste'); $('[data-k=text]', first).value = v.slice(0, 10000); }
+  saveDraft();
+});
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#wiz').hidden && ($('#exitOffer')?.hidden ?? true)) userCloseWiz(); });
 
 // Exit-intent (B8): raz na 7 dni okno „Zanim wyjdziesz” z darmowym skanerem – bez rabatu i bez licznika czasu.
