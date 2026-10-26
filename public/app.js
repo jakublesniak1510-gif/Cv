@@ -1064,16 +1064,17 @@ function go(n) {
 // Podgląd przed płatnością: na prośbę klienta, raz na sesję kreatora; reszta CV jako rozmazany szkielet z fikcyjnym tekstem.
 let pvSid = '', pvShown = null, pvOff = false;
 const pvSig = () => JSON.stringify([['headline', 'summary', 'skills'].map((k) => $('#' + k).value), rows('exp'), rows('edu'), rows('ads')[0]?.text || '']);
-// Pełne CV przed płatnością (C1): po wejściu na ostatni krok, bez przycisku. Serwer generuje całe CV i oddaje tylko obrazek strony 1
+// Pełne CV przed płatnością (C1): po kliknięciu „Pokaż moje CV” (działanie na żądanie – dane idą do AI dopiero wtedy). Serwer generuje całe CV i oddaje tylko obrazek strony 1
 // (górne 40% czytelne, reszta rozmyta). Generowanie trwa ok. minuty: serwer odpowiada „pending”, pytamy ponownie co 3 s.
 // Po limicie (1 na sesję, 2 na IP dziennie, dzienny limit strony) albo błędzie – lekki podgląd poniżej (A1).
 let fullPv = null, fullOff = false, fullRun = '';
 const fullOn = () => !!fullPv && fullPv.sig === fullSig();
 const fullSig = () => JSON.stringify([pvSig(), design, orderPkg(), $('#rewriteMode').checked, ...['name', 'email', 'phone', 'city', 'link'].map((k) => $('#' + k).value)]);
 const pvProfile = () => ({ ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, $('#' + k).value])), experience: rows('exp'), education: rows('edu') });
+const fullAvail = () => !fullOff && !!cfg.aiPreview && !!rows('ads')[0]?.text && (rows('exp').length > 0 || rows('edu').length > 0);
 async function fullPreview() {
   const ad = rows('ads')[0], sig = fullSig();
-  if (fullOff || !cfg.aiPreview || !ad?.text || (!rows('exp').length && !rows('edu').length) || fullRun === sig) return;
+  if (!fullAvail() || fullRun === sig) return;
   if (fullPv?.sig === sig) return drawFull(fullPv);
   fullRun = sig;
   $('#pvBox').hidden = false; $('#pvEx').hidden = true; $('#pvBtn').hidden = true; $('#pvTitle').textContent = tr('Twoje CV pod to ogłoszenie');
@@ -1089,17 +1090,23 @@ async function fullPreview() {
       fullPv = { ...r, sig }; fullRun = ''; drawFull(fullPv); nextLabel(); return;
     }
   } catch {}
-  // Limit albo błąd: lekki podgląd (A1) – ten sam blok, dotychczasowy przycisk uruchamiamy od razu.
+  // Limit albo błąd: od razu lekki podgląd (A1) – klient już poprosił o podgląd.
   fullOff = true; fullRun = ''; fullPv = null; pvHead(); nextLabel();
-  if (!pvShown && step === 6) $('#pvBtn').click();
+  if (!pvShown && step === 6) lightPreview();
 }
 function drawFull(r) {
   $('#pvBox').hidden = false; $('#pvEx').hidden = true; $('#pvBtn').hidden = true; $('#pvTitle').textContent = tr('Twoje CV pod to ogłoszenie');
   $('#pvHint').textContent = tr('Tak wygląda Twoje CV. Po płatności dostaniesz dokładnie to CV w PDF, bez znaku wodnego i rozmycia.');
   $('#pvOut').replaceChildren(el('img', { className: 'pv-img', src: r.image, alt: tr('Podgląd Twojego CV ze znakiem wodnym, dolna część rozmyta'), draggable: false }));
 }
+// Nagłówek bloku przed kliknięciem: pełne CV (z notką o AI) albo – po limicie / bez danych – lekki podgląd A1.
 const PV_HEAD = [$('#pvTitle').textContent, $('#pvHint').textContent];
-const pvHead = () => { $('#pvTitle').textContent = tr(PV_HEAD[0]); $('#pvHint').textContent = tr(PV_HEAD[1]); };
+const pvHead = () => {
+  const f = fullAvail();
+  $('#pvTitle').textContent = tr(f ? 'Zobacz swoje CV przed płatnością' : PV_HEAD[0]);
+  $('#pvHint').textContent = tr(f ? 'Twoje dane trafią do dostawcy AI tylko po to, żeby przygotować ten podgląd.' : PV_HEAD[1]);
+  $('#pvBtn').textContent = tr(f ? 'Pokaż moje CV' : 'Pokaż podgląd'); $('#pvBtn').classList.toggle('ghost', !f); // pełny podgląd: wyraźny przycisk
+};
 // Podgląd jako obrazek z serwera (blok A, 26.10): tekst podsumowania nie trafia do DOM; obrazka nie da się zaznaczyć ani przeciągnąć.
 function drawPreview(r) {
   $('#pvOut').replaceChildren(el('img', { className: 'pv-img', src: r.image, alt: tr('Podgląd początku CV ze znakiem wodnym'), draggable: false }),
@@ -1107,7 +1114,8 @@ function drawPreview(r) {
   $('#pvBtn').hidden = true;
 }
 ['copy', 'cut', 'contextmenu', 'dragstart'].forEach((ev) => $('#pvOut').addEventListener(ev, (e) => e.preventDefault()));
-$('#pvBtn').onclick = async () => {
+$('#pvBtn').onclick = () => (fullAvail() ? fullPreview() : lightPreview());
+async function lightPreview() {
   const b = $('#pvBtn'), ad = rows('ads')[0], v = (id) => $('#' + id).value;
   if (!ad?.text) return;
   b.disabled = true; b.textContent = 'Przygotowuję podgląd…';
@@ -1117,8 +1125,8 @@ $('#pvBtn').onclick = async () => {
     if (r.off || !r.image) { pvOff = true; $('#pvBox').hidden = true; $('#pvEx').hidden = false; return; } // AI niedostępne albo limit: blok znika bez komunikatu o błędzie
     pvShown = { ...r, sig: pvSig() }; drawPreview(r); // zdarzenie preview_shown liczy serwer
   } catch { pvOff = true; $('#pvBox').hidden = true; $('#pvEx').hidden = false; }
-  finally { b.disabled = false; b.textContent = 'Pokaż podgląd'; }
-};
+  finally { b.disabled = false; b.textContent = tr('Pokaż podgląd'); }
+}
 // Podgląd dopasowania (krok podsumowania): wymagania z każdego ogłoszenia (silnik skanera bez AI, /api/wizard-match)
 // i które z nich widać w danych z formularza; bez doświadczenia – sama liczba wymagań. Przy kilku ogłoszeniach zwinięte.
 let matchSig = '';
@@ -1147,8 +1155,8 @@ function drawSummary() {
   $('#pvEx').hidden = !$('#pvBox').hidden; // bez podglądu AI: przykład gotowego CV w modalu (openEx)
   drawWizMatch();
   if (pvShown && pvShown.sig !== pvSig()) pvShown = null; // dane zmienione po podglądzie: podgląd nieaktualny
-  if (!pvShown && !fullOn() && !fullRun) { $('#pvOut').replaceChildren(); $('#pvBtn').hidden = false; }
-  fullPreview();
+  if (fullOn()) drawFull(fullPv);
+  else if (!pvShown && !fullRun) { $('#pvOut').replaceChildren(); $('#pvBtn').hidden = false; pvHead(); }
   const ads = rows('ads');
   if (passOn()) {
     const q = passQuote, u = q?.use || { matches: nAds(), sim: 0, interview: 0 };
