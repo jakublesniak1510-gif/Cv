@@ -1030,3 +1030,7 @@ ul.checklist{list-style:none;padding-left:0}
 .prof-ex{margin:0 0 16px}
 .prof-ex select{flex:1;min-width:0}
 .exv.ex-prof #exDocTabs{display:none}
+
+/* C1: pełny podgląd CV – oczekiwanie na generowanie */
+.pv-wait{display:flex;align-items:center;gap:10px;padding:18px 4px;color:var(--mute)}
+.spinner.sm{width:22px;height:22px;border-width:3px;margin:0}

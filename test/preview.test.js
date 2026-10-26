@@ -62,7 +62,7 @@ test('Podgląd przed płatnością: tani model, bez danych kontaktowych, pamię�
 test('Pełna generacja po płatności dostaje podgląd w poleceniu (spójność)', () => {
   const src = fs.readFileSync(new URL('../lib/generate.js', import.meta.url), 'utf8'), srv = fs.readFileSync(new URL('../server.js', import.meta.url), 'utf8');
   assert.match(src, /<podglad_pokazany_klientowi>/);
-  assert.match(srv, /preview: i === 0 \? o\.preview : null/);
+  assert.match(srv, /preview: full \? \{ headline: full\.cv\?\.headline, summary: full\.cv\?\.summary, keywords: full\.keywords \|\| \[\] \} : i === 0 \? o\.preview : null/);
   assert.match(srv, /previewFor\(p, a\[0\]\)/);
 });
 
