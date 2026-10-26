@@ -65,6 +65,7 @@ import { seoReportRoutes, seoWeekly } from './lib/seo-report.js';
 import { logEvent, cleanupEvents } from './lib/events.js';
 import { recordStatsSafe } from './lib/stats-agg.js';
 import { leadRoutes, cleanupLeads } from './lib/leads.js';
+import { liveStats } from './lib/live-stats.js';
 import { emailHash, codeDiscount, myCodeView, applyPaidCode, isOwner, CODE_TTL, REF_CAP, reserveCode, releaseCode, staleReservations, CodeError } from './lib/referral.js';
 
 const PORT = process.env.PORT || 3000;
@@ -822,9 +823,12 @@ app.get('/api/reviews', async (_req, res) => {
 
 // Licznik na stronę główną: pokazujemy go dopiero od 1000 przygotowanych CV.
 const COUNTER_FROM = 1000;
+// B4/B5 (26.10): liczby z zamówień liczone najwyżej raz na 10 minut; poniżej progów pola są null i strona nic nie pokazuje.
+let liveCache = { at: 0, v: { week: null, popular: null } };
+const liveNow = async () => { if (Date.now() - liveCache.at > 600_000) liveCache = { at: Date.now(), v: liveStats(Object.values(await allOrders())) }; return liveCache.v; };
 app.get('/api/public-stats', async (_req, res) => {
-  const t = (await stats.get('totals')) || {};
-  res.set('Cache-Control', 'public, max-age=600').json({ cvs: (t.cvs || 0) >= COUNTER_FROM ? t.cvs : null, outcome: await publicOutcome().catch(() => null) });
+  const t = (await stats.get('totals')) || {}, live = await liveNow().catch(() => ({ week: null, popular: null }));
+  res.set('Cache-Control', 'public, max-age=600').json({ cvs: (t.cvs || 0) >= COUNTER_FROM ? t.cvs : null, outcome: await publicOutcome().catch(() => null), ...live });
 });
 
 // Tylko tryb DEMO: symulacja płatności.
@@ -918,7 +922,7 @@ async function markPaidAndGenerate(id) {
     const myCode = await afterPaid(o);
     if (o.jobAlerts) addAlertFromOrder({ email: o.profile.email, ...o.jobAlerts, lang: o.uiLang }).catch((e) => logEvent('oferty', e.message, { orderId: id }));
     const mail = await trySend({ ...o, results, myCode });
-    await updateOrder(id, { status: 'done', results, mail, myCode, qa: qaSum });
+    await updateOrder(id, { status: 'done', results, mail, myCode, qa: qaSum, doneAt: Date.now() }); // doneAt: czas dostarczenia (lib/live-stats.js)
     results.forEach((r, i) => recordStatsSafe({ title: `${o.ads[i]?.title || ''} | ${r.position || ''}`, company: [r.company, o.ads[i]?.company], found: r.match?.found, missing: r.match?.missing }));
     stats.upsert('totals', (p = {}) => ({ cvs: (p.cvs || 0) + results.length, orders: (p.orders || 0) + 1 })).catch(() => {});
   } catch (e) {
