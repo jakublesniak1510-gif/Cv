@@ -7,7 +7,7 @@ import { spawn } from 'node:child_process';
 import { PACKAGES, PRICES, PASSES, B2B_MIN } from '../lib/pricing.js';
 import { PROFESSIONS } from '../lib/content.js';
 import { PROF_LANGS } from '../lib/professions-i18n.js';
-import { profSeo, profName, ART_SEO } from '../lib/seo-titles.js';
+import { profSeo, profName, ART_SEO, CTR_SEO } from '../lib/seo-titles.js';
 
 // Tytuły i opisy wszystkich stron z mapy strony: długość, unikalność, bez obietnic; dane strukturalne strony głównej.
 const port = 4600 + Math.floor(Math.random() * 300), U = `http://localhost:${port}`;
@@ -90,10 +90,12 @@ test('JSON-LD strony głównej: poprawna składnia, SoftwareApplication z Aggreg
 const NOT_PERSON = ['obsluga-klienta', 'specjalista-kadr-i-plac'];
 test('Strony zawodów: tytuł z szablonu z odmianą z danych, opis ze słowami kluczowymi i skanerem, bez błędów odmiany', () => {
   const t = (u) => pages.find((p) => p.u === u)?.title, d = (u) => pages.find((p) => p.u === u)?.desc;
-  assert.equal(t('/cv/hydraulik'), 'CV hydraulika pod ogłoszenie – wzór i generator online');
+  assert.equal(t('/cv/kasjer'), 'CV kasjera pod ogłoszenie – wzór i generator online');
+  // Strony z raportu GSC 26.10 (pozycje 8–20, 0 kliknięć) mają ręczne tytuły i opisy: lib/seo-titles.js CTR_SEO.
+  for (const [u, x] of Object.entries(CTR_SEO)) { if (x.title) assert.equal(t('/' + u), x.title, u); assert.equal(d('/' + u), x.desc, u); assert.ok((!x.title || x.title.length <= 60) && x.desc.length <= 155, u); }
   assert.equal(t(`/uk/${PROF_LANGS.uk.seg}/${PROF_LANGS.uk.prof.hydraulik.slugLang}`), 'Резюме сантехніка під вакансію – зразок і генератор онлайн');
   assert.ok(pages.every((p) => !/5 minut|5 minutes|5 Minuten|5 хвилин/i.test(`${p.title} ${p.desc}`)), 'bez „5 minut” w tytułach i opisach');
-  assert.match(d('/cv/hydraulik'), /^Wzór CV hydraulika ze słowami kluczowymi z ogłoszeń: .+\. Wygeneruj CV pod ogłoszenie lub sprawdź swoje darmowym skanerem\.$/);
+  assert.match(d('/cv/kasjer'), /^Wzór CV kasjera ze słowami kluczowymi z ogłoszeń: .+\. Wygeneruj CV pod ogłoszenie lub sprawdź swoje darmowym skanerem\.$/);
   assert.equal(t('/en/cv/plumber'), 'Plumber CV for a job ad – template and generator');
   assert.match(t(`/de/lebenslauf/${PROF_LANGS.de.prof.hydraulik.slugLang}`), /^Lebenslauf Installateur zur Stellenanzeige/);
   for (const p of PROFESSIONS) {
@@ -117,9 +119,9 @@ test('Poradniki z GSC: czasownik + korzyść, rok z daty treści przy klauzuli R
   assert.equal(t('/poradnik/jak-dopasowac-cv-do-ogloszenia'), ART_SEO.pl['jak-dopasowac-cv-do-ogloszenia']);
   assert.match(t('/poradnik/klauzula-rodo-w-cv'), /^Klauzula RODO w CV 20\d\d: /);
   assert.match(t('/de/ratgeber/dsgvo-klausel-im-lebenslauf'), /^DSGVO-Klausel im Lebenslauf 20\d\d: /);
-  assert.match(t('/en/guides/gdpr-clause-on-a-cv'), /^GDPR \(RODO\) clause on a CV 20\d\d: /);
+  assert.match(t('/en/guides/gdpr-clause-on-a-cv'), /^GDPR clause for a CV in Poland 20\d\d: /);
   assert.doesNotMatch(t('/poradnik/przerwa-w-zatrudnieniu-w-cv'), y, 'rok tylko przy treści rocznej');
-  assert.equal(t('/narzedzia/podziekowanie-po-rozmowie'), 'Napisz podziękowanie po rozmowie kwalifikacyjnej – generator');
+  assert.equal(t('/narzedzia/podziekowanie-po-rozmowie'), 'Podziękowanie po rozmowie kwalifikacyjnej – darmowy wzór');
   const ch = JSON.parse(fs.readFileSync(new URL('../seo-data/title-changes.json', import.meta.url), 'utf8')).at(-1);
   assert.equal(ch.variantB.title, 'Dopasuj CV do ogłoszenia – darmowy skaner CV i list motywacyjny');
   for (const u of ['/poradnik/cv-dla-studenta', '/poradnik/podsumowanie-zawodowe-w-cv', '/poradnik/zdjecie-w-cv', '/de/tools/dsgvo-klausel-lebenslauf']) assert.ok(ch.pages.includes(u) && t(u).length <= 60, u);
