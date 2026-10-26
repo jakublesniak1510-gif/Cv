@@ -17,13 +17,15 @@ test('/api/wizard-match: wymagania z ogłoszenia i pokrycie z danych formularza;
   const U = `http://localhost:${port}`, post = (b) => fetch(U + '/api/wizard-match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) });
   try {
     for (let i = 0; i < 60; i++) { try { await fetch(U + '/api/config'); break; } catch { await wait(150); } }
-    const before = fs.readdirSync(dir).sort();
+    // Raport SEO zapisywany przez harmonogram przy starcie serwera (seo-reports.json, także *.tmp) pomijamy – liczy się, czy endpoint coś zapisał.
+    const files = () => fs.readdirSync(dir).filter((f) => !/^seo-reports\.json/.test(f)).sort();
+    const before = files();
     const r = await post({ cv: 'Magazynier: obsługa wózka widłowego, inwentaryzacja', ads: [AD, 'za krótkie'] }), j = await r.json();
     assert.equal(r.headers.get('cache-control'), 'no-store');
     assert.equal(j.ads[0].n, 5); assert.deepEqual(j.ads[0].found, ['obsługa wózka widłowego']); assert.equal(j.ads[0].missing.length, 4); assert.equal(j.ads[1], null);
     const e = await (await post({ cv: '', ads: [AD] })).json();
     assert.deepEqual(e.ads[0], { n: 5, found: [], missing: [] });
-    assert.deepEqual(fs.readdirSync(dir).sort(), before, 'bez zapisu');
+    assert.deepEqual(files(), before, 'bez zapisu');
   } finally { srv.kill(); }
 });
 
