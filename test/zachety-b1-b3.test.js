@@ -25,11 +25,11 @@ test('B1: pasek „CV pod to ogłoszenie – 39 zł” + „Zamów” + ×; 40% 
 
 test('B2: baner szkicu z nazwą stanowiska i krokiem, „Dokończ” otwiera ten krok; B3: przycisk z ceną, podpowiedź braków w kroku 3', () => {
   assert.match(html, /<div id="resumeBar" class="refbar resume-bar" hidden><span id="resumeTxt"><\/span> <button type="button" class="btn sm" id="resumeGo">Dokończ<\/button><\/div>/);
-  assert.match(app, /\$\('#resumeGo'\)\.onclick = \(\) => \{ track\('draftresume'\); \$\('#resumeBar'\)\.hidden = true; openWiz\(\); go\(st\); \};/);
-  assert.match(app, /tr\('krok \{0\} z \{1\}'\)\.replace\('\{0\}', ORDER\.indexOf\(st\) \+ 1\)\.replace\('\{1\}', ORDER\.length\)/);
+  assert.match(app, /\$\('#resumeGo'\)\.onclick = \(\) => \{ track\('draftresume'\); \$\('#resumeBar'\)\.hidden = true; openWiz\(\); go\(stepOf\(st\)\); \};/);
+  assert.match(app, /tr\('krok \{0\} z \{1\}'\)\.replace\('\{0\}', ORDER\.indexOf\(stepOf\(st\)\) \+ 1\)\.replace\('\{1\}', ORDER\.length\)/);
   assert.match(app, /el\('span', \{ textContent: 'Zamów CV, które pokryje te wymagania –' \}\), ` \$\{PRICE\.cv\} zł`/);
   assert.match(app, /missing: \(j\.missing \|\| \[\]\)\.map\(\(m\) => m\.keyword\)/); assert.match(app, /missing: \(k\.missing \|\| \[\]\)\.map\(\(m\) => m\.keyword\)/);
-  assert.match(html, /<section data-step="3" hidden>\s*<p class="scan-hint" id="scanHint" hidden><\/p>/);
+  assert.match(html, /<p class="scan-hint" id="scanHint" hidden><\/p>\n<div class="grid2">\n<label class="f">Imię i nazwisko \*/);
   for (const l of ['en', 'de', 'uk']) for (const k of ['Masz niedokończone CV', 'krok {0} z {1}', 'Dokończ', 'Ogłoszenie wymaga:', 'dopisz, jeśli to prawda o Tobie.', 'Zamów CV, które pokryje te wymagania –']) assert.ok(dict(l)[k], `${l}: ${k}`);
 });
 

@@ -48,7 +48,7 @@ test('Kasa: blok zaufania w obu wariantach testu checkout, bez wymyślonych licz
   // B5 (26.10): odznaka „Najczęściej wybierany” tylko z danych (/api/public-stats → popular, min. 10 zamówień z 30 dni), bez statycznej w HTML.
   assert.doesNotMatch(h, /najczęściej wybierany|badge-rec/i);
   assert.match(app, /const lab = s\.popular && \$\(`input\[name=pkg\]\[value="\$\{s\.popular\}"\]`\)\?\.closest\('label'\);/);
-  assert.match(h, /<label class="opt"><input type="radio" name="pkg" value="cv_letter" checked>.*<span>list motywacyjny pod to samo ogłoszenie za<\/span> <span id="letterDiff">10 zł<\/span> <span>więcej<\/span>/);
+  assert.match(h, /<label class="opt"><input type="radio" name="pkg" value="cv_letter">.*<span>list motywacyjny pod to samo ogłoszenie za<\/span> <span id="letterDiff">10 zł<\/span> <span>więcej<\/span>/);
   assert.match(app, /\$\('#letterDiff'\)\.textContent = `\$\{PRICE\.cv_letter - PRICE\.cv\} zł`/);
   assert.equal((h.match(/<!--tp-mini-->/g) || []).length, 1, 'jedno miejsce na TrustBox Mini');
   for (const l of ['en', 'de', 'uk']) {

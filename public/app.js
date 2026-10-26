@@ -10,23 +10,16 @@ const plural = (n, one, few, many) => (n === 1 ? one : n % 10 >= 2 && n % 10 <= 
 const PKG_NAME = { cv: 'CV', cv_letter: 'CV + list motywacyjny', pack3: 'Pakiet 3 CV + listy motywacyjne' };
 let promo = null; // zastosowany kod rabatowy: { code, discount, label }
 let data; // bieżące zamówienie na stronie wyniku
-const STEPS = ['Pakiet i wygląd CV', 'Twoje dane', 'Doświadczenie', 'Wykształcenie i umiejętności', 'Ogłoszenia', 'Podsumowanie'];
-// Test A/B „wizard_order” (lib/ab.js, data-order="b" od serwera): najpierw ogłoszenie, potem dane, doświadczenie, wykształcenie,
-// a pakiet, dodatki, języki i wygląd w podsumowaniu. Kroki zachowują numery sekcji (walidacja, analityka), zmienia się kolejność.
-const ORDER_B = document.getElementById('wiz')?.dataset.order === 'b';
+const STEPS = ['Ogłoszenie i pakiet', 'Twoje dane', 'Doświadczenie', 'Wykształcenie i umiejętności', 'Ogłoszenia', 'Podsumowanie i płatność'];
 // Test A/B „checkout” (lib/ab.js, data-checkout="b" od serwera): cena na górze, metody płatności jako ikony,
 // zgody w układzie kompaktowym – nadal dwa osobne pola (regulamin; osobno zgoda z art. 38 pkt 13), domyślnie odznaczone.
 const CHECKOUT_B = document.getElementById('wiz')?.dataset.checkout === 'b';
-const ORDER = ORDER_B ? [5, 2, 3, 4, 6] : [1, 2, 3, 4, 5, 6];
-if (ORDER_B) {
-  const s1 = document.querySelector('#wiz section[data-step="1"]'), s5 = document.querySelector('#wiz section[data-step="5"]'), s6 = document.querySelector('#wiz section[data-step="6"]');
-  const keep = ['saveLater', 'draftNote', 'fill'].map((id) => document.getElementById(id)).filter(Boolean); // zostają w pierwszym kroku
-  s5.append(...keep);
-  const head = document.createElement('h3'); head.className = 'sh'; head.textContent = 'Twoje zamówienie';
-  s6.prepend(...[...s1.childNodes], head);
-  s1.remove();
-}
-const STEP_TITLE = (n) => (ORDER_B && n === 5 ? 'Od jakiego ogłoszenia zaczynamy?' : ORDER_B && n === 6 ? 'Pakiet, wygląd i podsumowanie' : STEPS[n - 1]);
+// C3 (26.10): kreator na 3 ekrany – 1) ogłoszenie i pakiet, 2) dane (wgrane CV albo e-mail i jedno doświadczenie; reszta zwinięta),
+// 3) podsumowanie z podglądem, wyglądem i płatnością. Sekcje zachowują numery 1, 2 i 6, więc walidacja, analityka (s1/s2/s6, summary_view)
+// i szkice działają jak dotąd; kroki 3–5 ze starszych szkiców i linków trafiają na ekran z tymi polami (stepOf).
+const ORDER = [1, 2, 6];
+const stepOf = (n) => (ORDER.includes(n) ? n : n === 5 ? 1 : n === 3 || n === 4 ? 2 : n === 7 ? 6 : ORDER[0]);
+const STEP_TITLE = (n) => STEPS[n - 1];
 let pendingDraft = ''; // ogłoszenie z rozszerzenia Chrome czekające na formularz skanera
 // Ogłoszenie wklejone na stronie zawodu („Masz ogłoszenie?”, lite.js): jednorazowo z pamięci tej karty.
 try { const a = sessionStorage.getItem('cvpo-scan-ad'); if (a) { sessionStorage.removeItem('cvpo-scan-ad'); pendingDraft = a; setTimeout(() => (pendingDraft = ''), 20000); } } catch {}
@@ -594,7 +587,7 @@ $('#galMore').addEventListener('click', () => {
   if (gal.all) $$('#galGrid .gal-thumb')[GAL_FEATURED.length]?.focus({ preventScroll: true });
   else $('#szablony h2').scrollIntoView({ block: 'start' });
 });
-const drawWizDesign = () => designPicker($('#wizDesign'), design, (d) => { design = d; saveDraft(); });
+const drawWizDesign = () => designPicker($('#wizDesign'), design, (d) => { design = d; saveDraft(); if (step === 6) drawSummary(); }, { thumbs: false }); // C3: mały wybór (nazwy i kolory) pod podglądem na ekranie podsumowania
 /* animowane demo w nagłówku: słowa z ogłoszenia zapalają się w ogłoszeniu i w CV */
 EX[0].groups = [['obsługi klienta', 'obsługa klienta'], ['kasy fiskalnej', 'kasa fiskalna'], ['komunikatywności', 'komunikatywność'], ['pracy zmianowej', 'praca zmianowa']];
 EX[1].groups = [['obsługa zgłoszeń', 'obsługi zgłoszeń'], ['reklamacji', 'reklamacje'], ['CRM'], ['angielskiego', 'angielski']];
@@ -1047,6 +1040,7 @@ function payTrust(n) {
 }
 const nextLabel = () => ($('#next').textContent = step === 6 ? (total() === 0 ? 'Zamów bez opłaty' : fullOn() ? `${tr('Odblokuj swoje CV –')} ${total()} zł` : cfg.demo ? `Przejdź do płatności · ${total()} zł` : `Zapłać ${total()} zł`) : 'Dalej');
 function go(n) {
+  if (n !== 7) n = stepOf(n); // C3: kroki 3–5 (stare szkice, linki) → ekran z tymi polami
   refresh();
   step = n; if (!$('#wiz').hidden) track('step', { s: n });
   $$('#wiz section[data-step]').forEach((s) => (s.hidden = +s.dataset.step !== n));
@@ -1057,7 +1051,7 @@ function go(n) {
   $('#back').hidden = idx === 0 || n === 7;
   $('#next').hidden = n === 7;
   nextLabel(); payTrust(n);
-  if (n === 6) { if ($('#codeInput').value && !promo) applyCode($('#codeInput').value, true); $('#codeBox').open ||= !!$('#codeInput').value.trim() || !!promo; drawSummary(); }
+  if (n === 6) { if ($('#codeInput').value && !promo) applyCode($('#codeInput').value, true); $('#codeBox').open ||= !!$('#codeInput').value.trim() || !!promo; $('#moreOpts').open ||= Object.values(addons()).some(Boolean) || extraLangs().length > 0; drawSummary(); }
   $('#werr').textContent = '';
   $('.wiz-body').scrollTop = 0;
 }
@@ -1068,28 +1062,32 @@ const pvSig = () => JSON.stringify([['headline', 'summary', 'skills'].map((k) =>
 // (górne 40% czytelne, reszta rozmyta). Generowanie trwa ok. minuty: serwer odpowiada „pending”, pytamy ponownie co 3 s.
 // Po limicie (1 na sesję, 2 na IP dziennie, dzienny limit strony) albo błędzie – lekki podgląd poniżej (A1).
 let fullPv = null, fullOff = false, fullRun = '';
+// Podpis danych (nowa generacja) osobno od podpisu obrazka (wygląd, pakiet → cena w stopce): zmiana wyglądu na ekranie podsumowania
+// tylko odświeża obrazek z wyniku zapisanego na serwerze (C3), bez nowej generacji i bez limitu.
 const fullOn = () => !!fullPv && fullPv.sig === fullSig();
-const fullSig = () => JSON.stringify([pvSig(), design, orderPkg(), $('#rewriteMode').checked, ...['name', 'email', 'phone', 'city', 'link'].map((k) => $('#' + k).value)]);
+const fullSig = () => JSON.stringify([pvSig(), $('#rewriteMode').checked, ...['name', 'email', 'phone', 'city', 'link'].map((k) => $('#' + k).value)]);
+const imgSig = () => JSON.stringify([design, orderPkg()]);
 const pvProfile = () => ({ ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, $('#' + k).value])), experience: rows('exp'), education: rows('edu') });
 const fullAvail = () => !fullOff && !!cfg.aiPreview && !!rows('ads')[0]?.text && (rows('exp').length > 0 || rows('edu').length > 0);
 async function fullPreview() {
-  const ad = rows('ads')[0], sig = fullSig();
-  if (!fullAvail() || fullRun === sig) return;
-  if (fullPv?.sig === sig) return drawFull(fullPv);
-  fullRun = sig;
+  const ad = rows('ads')[0], sig = fullSig(), isig = imgSig(), redraw = fullPv?.sig === sig;
+  if ((!redraw && !fullAvail()) || fullRun === sig + isig) return;
+  if (redraw && fullPv.isig === isig) return drawFull(fullPv);
+  fullRun = sig + isig;
   $('#pvBox').hidden = false; $('#pvEx').hidden = true; $('#pvBtn').hidden = true; $('#pvTitle').textContent = tr('Twoje CV pod to ogłoszenie');
-  $('#pvHint').textContent = tr('Piszemy Twoje CV pod to ogłoszenie, zwykle około minuty. Twoje dane i ogłoszenie trafiają w tym celu do dostawcy AI, tak jak przy zamówieniu.');
-  $('#pvOut').replaceChildren(el('div', { className: 'pv-wait' }, el('span', { className: 'spinner sm', ariaHidden: 'true' }), el('span', { textContent: tr('Piszemy Twoje CV…') })));
+  if (!redraw) $('#pvHint').textContent = tr('Piszemy Twoje CV pod to ogłoszenie, zwykle około minuty. Twoje dane i ogłoszenie trafiają w tym celu do dostawcy AI, tak jak przy zamówieniu.');
+  if (!redraw) $('#pvOut').replaceChildren(el('div', { className: 'pv-wait' }, el('span', { className: 'spinner sm', ariaHidden: 'true' }), el('span', { textContent: tr('Piszemy Twoje CV…') })));
   const body = JSON.stringify({ sid: pvSid, profile: pvProfile(), ad, lang: window.I18N?.lang || 'pl', narrow: matchMedia('(max-width: 640px)').matches, design, pkg: orderPkg(), mode: $('#rewriteMode').checked ? 'rewrite' : '' });
   try {
     for (let i = 0; i < 100; i++) {
       const r = await (await fetch('/api/preview-full', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })).json();
-      if (fullRun !== sig) return; // dane zmienione w trakcie
+      if (fullRun !== sig + isig) return; // dane zmienione w trakcie
       if (r.pending) { await new Promise((ok) => setTimeout(ok, 3000)); continue; }
       if (!r.full || !r.image) break;
-      fullPv = { ...r, sig }; fullRun = ''; drawFull(fullPv); nextLabel(); return;
+      fullPv = { ...r, sig, isig }; fullRun = ''; drawFull(fullPv); nextLabel(); return;
     }
   } catch {}
+  if (redraw) { fullRun = ''; return; } // nie udało się tylko przerysować: zostaje poprzedni obrazek
   // Limit albo błąd: od razu lekki podgląd (A1) – klient już poprosił o podgląd.
   fullOff = true; fullRun = ''; fullPv = null; pvHead(); nextLabel();
   if (!pvShown && step === 6) lightPreview();
@@ -1155,7 +1153,7 @@ function drawSummary() {
   $('#pvEx').hidden = !$('#pvBox').hidden; // bez podglądu AI: przykład gotowego CV w modalu (openEx)
   drawWizMatch();
   if (pvShown && pvShown.sig !== pvSig()) pvShown = null; // dane zmienione po podglądzie: podgląd nieaktualny
-  if (fullOn()) drawFull(fullPv);
+  if (fullOn()) fullPreview(); // ten sam wynik: rysunek albo – po zmianie wyglądu – nowy obrazek z pamięci serwera
   else if (!pvShown && !fullRun) { $('#pvOut').replaceChildren(); $('#pvBtn').hidden = false; pvHead(); }
   const ads = rows('ads');
   if (passOn()) {
@@ -1190,15 +1188,14 @@ $('#wantAlerts').onchange = () => {
 $('#wantInv').onchange = () => { $('#invBox').hidden = !$('#wantInv').checked; if ($('#wantInv').checked) $('#invName').focus(); };
 function validate(n) {
   const v = (id) => $('#' + id).value.trim();
-  if (n === 3 && $('#careerOn').checked && !v('careerTo')) return 'Wpisz docelową branżę albo odznacz „Zmieniam branżę”.';
   if (n === 2 && $('#rewriteMode').checked && !imported) return 'Wgraj swoje CV (PDF lub Word): w trybie „Mam już CV” zachowujemy jego treść i kolejność.';
   if (n === 2) { if (!v('name')) return 'Podaj imię i nazwisko.'; if (!/^\S+@\S+\.\S+$/.test(v('email'))) return 'Podaj poprawny adres e-mail.'; }
-  if (n === 4 && !rows('exp').some((e) => e.title || e.company) && !rows('edu').some((e) => e.school)) return 'Dodaj co najmniej jedno stanowisko (krok 3) lub szkołę.';
-  if ((n === 5 || (ORDER_B && n === 6)) && passOn() && nAds() > Math.min(3, myPass.left.matches)) return `W karnecie ${plural(myPass.left.matches, 'zostało', 'zostały', 'zostało')} ${myPass.left.matches} ${plural(myPass.left.matches, 'dopasowanie', 'dopasowania', 'dopasowań')}. Usuń dodatkowe ogłoszenia albo odznacz „Użyj karnetu”.`;
-  // Wariant B: pakietu jeszcze nie wybrano – przy kilku ogłoszeniach zaznaczamy Pakiet 3 (można zmienić w podsumowaniu).
-  if (n === 5 && ORDER_B && !passOn() && nAds() > PKG_ADS[pkg()]) { $('input[name=pkg][value=pack3]').checked = true; refresh(); }
-  if ((n === 5 || (ORDER_B && n === 6)) && !passOn() && nAds() > PKG_ADS[pkg()]) return 'Wybrany pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe ogłoszenia albo wybierz Pakiet 3 za 79 zł.';
-  if (n === 5) for (const [i, a] of rows('ads').entries()) {
+  // Ekran 2: wystarczy wgrane CV albo jedno stanowisko (szkoła z „Więcej danych” też wystarczy, np. dla uczniów i studentów).
+  if (n === 2 && !imported && !rows('exp').some((e) => e.title || e.company) && !rows('edu').some((e) => e.school)) return 'Wgraj swoje CV albo dodaj co najmniej jedno stanowisko (szkołę dodasz w „Więcej danych”).';
+  if (n === 2 && $('#careerOn').checked && !v('careerTo')) { $('#moreData').open = true; return 'Wpisz docelową branżę albo odznacz „Zmieniam branżę”.'; }
+  if (n === 1 && passOn() && nAds() > Math.min(3, myPass.left.matches)) return `W karnecie ${plural(myPass.left.matches, 'zostało', 'zostały', 'zostało')} ${myPass.left.matches} ${plural(myPass.left.matches, 'dopasowanie', 'dopasowania', 'dopasowań')}. Usuń dodatkowe ogłoszenia albo odznacz „Użyj karnetu”.`;
+  if (n === 1 && !passOn() && nAds() > PKG_ADS[pkg()]) return 'Wybrany pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe ogłoszenia albo wybierz Pakiet 3 za 79 zł.';
+  if (n === 1) for (const [i, a] of rows('ads').entries()) {
     if (a.kind === 'profession' && !a.text) return `Ogłoszenie ${i + 1}: wpisz zawód i kliknij „Pokaż wymagania”.`;
     if (a.kind === 'profession' && (rows('ads').length > 1 || (!passOn() && pkg() !== 'cv'))) return 'CV pod zawód (bez ogłoszenia) to jedno CV bez listu. Usuń pozostałe ogłoszenia i wybierz pakiet „CV”.';
     if (!a.text) return `Ogłoszenie ${i + 1}: kliknij „Pobierz” przy linku albo wklej treść oferty.`;
@@ -1394,7 +1391,7 @@ async function importData(b64) {
     const empty = (b) => !rows(b).some((x) => Object.values(x).some(Boolean));
     if (p.experience?.length && empty('exp')) { $('#exp').replaceChildren(); p.experience.forEach((x) => addRow('exp', x)); }
     if (p.education?.length && empty('edu')) { $('#edu').replaceChildren(); p.education.forEach((x) => addRow('edu', x)); }
-    saveDraft(); imported = true; $('#importBox').classList.add('small'); track('cvimport');
+    saveDraft(); imported = true; $('#importBox').classList.add('small'); $('#moreData').open = true; track('cvimport'); // C3: dane z pliku widoczne do sprawdzenia
     st.textContent = j.ai ? 'Gotowe. Uzupełniliśmy formularz danymi z CV (także w kolejnych krokach). Sprawdź je i popraw, jeśli trzeba.' : 'Odczytaliśmy dane kontaktowe. Resztę uzupełnij ręcznie.';
     if (cfg.preview) st.textContent += ' Podgląd: zamiast odczytu pliku wstawiamy przykładowe dane.';
     st.classList.add('good');
@@ -2928,10 +2925,10 @@ if (restoreDraft()) $('#draftNote').hidden = false;
 {
   let d = null; try { d = JSON.parse(localStorage.getItem(DKEY)); } catch {}
   const p = new URLSearchParams(location.search), st = Number(d?.step), label = (d?.f?.headline || d?.ads?.find((a) => a.title)?.title || '').trim().slice(0, 60);
-  if (d && $('#draftNote').hidden === false && ORDER.includes(st) && !window.__ROUTE && !['zamow', 'id', 'draft', 'szkic'].some((k) => p.get(k))) {
-    $('#resumeTxt').textContent = `${tr('Masz niedokończone CV')}${label ? `: ${label}` : ''} · ${tr('krok {0} z {1}').replace('{0}', ORDER.indexOf(st) + 1).replace('{1}', ORDER.length)}`;
+  if (d && $('#draftNote').hidden === false && st >= 1 && st <= 6 && !window.__ROUTE && !['zamow', 'id', 'draft', 'szkic'].some((k) => p.get(k))) {
+    $('#resumeTxt').textContent = `${tr('Masz niedokończone CV')}${label ? `: ${label}` : ''} · ${tr('krok {0} z {1}').replace('{0}', ORDER.indexOf(stepOf(st)) + 1).replace('{1}', ORDER.length)}`;
     $('#resumeBar').hidden = false;
-    $('#resumeGo').onclick = () => { track('draftresume'); $('#resumeBar').hidden = true; openWiz(); go(st); };
+    $('#resumeGo').onclick = () => { track('draftresume'); $('#resumeBar').hidden = true; openWiz(); go(stepOf(st)); };
   }
 }
 refresh(); go(ORDER[0]);
@@ -3020,7 +3017,7 @@ async function loadSrvDraft(t) {
   restoreDraft(d.data); $('#draftNote').hidden = true;
   openWiz(); flash('Wczytaliśmy zapisany szkic. Możesz dokończyć zamówienie.');
   // Link z e-maila (także z przypomnienia) wraca dokładnie do kroku, na którym zapisano szkic.
-  const st = Number(d.data?.step); if (ORDER.includes(st) && st !== ORDER[0]) go(st);
+  const st = stepOf(Number(d.data?.step)); if (st !== ORDER[0]) go(st);
 }
 if (q.get('szkic') && !q.get('id')) loadSrvDraft(q.get('szkic'));
 

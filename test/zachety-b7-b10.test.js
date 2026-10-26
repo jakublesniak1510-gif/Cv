@@ -14,7 +14,7 @@ const app = read('public/app.js'), html = read('public/index.html'), server = re
 const dict = (l) => JSON.parse(read(`public/i18n/${l}.json`));
 
 test('B7: pasek zaufania w kroku 1 – metody z bramek, faktura, 30 dni, poprawki, sprzedawca z NIP i link do /o-serwisie', () => {
-  assert.match(html, /<p class="wiz-today">[^<]+<\/p>\s*<p class="trust1" id="trust1" hidden><\/p>/);
+  assert.match(html, /<\/div>\n<p class="trust1" id="trust1" hidden><\/p>/);
   assert.match(server, /seller: \{ name: seller\(\)\.name, nip: seller\(\)\.nip \}/, 'z lib/invoice.js – te same dane co na fakturach');
   assert.match(app, /payGateways\(\)\.flatMap\(\(g\) => g\.methods \|\| \[\]\)/);
   for (const t of ["'faktura na życzenie'", "'dane usuwane po 30 dniach'", "plural(rev, 'poprawka w cenie', 'poprawki w cenie', 'poprawek w cenie')", "el('a', { href: '/o-serwisie', textContent: `${s.name}, NIP ${s.nip}` })"]) assert.ok(app.includes(t), t);

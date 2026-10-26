@@ -104,8 +104,12 @@ test('Po płatności: samo CV = wynik z podglądu bez generowania; z listem/doda
 });
 
 test('Kreator: podgląd dopiero po kliknięciu „Pokaż moje CV” (notka o AI), ponawia „pending”, po limicie lekki podgląd (A1); przycisk „Odblokuj swoje CV – X zł”', () => {
-  assert.match(app, /if \(fullOn\(\)\) drawFull\(fullPv\);\n  else if \(!pvShown && !fullRun\) \{ \$\('#pvOut'\)\.replaceChildren\(\); \$\('#pvBtn'\)\.hidden = false; pvHead\(\); \}/, 'bez automatycznego startu');
-  assert.doesNotMatch(app.slice(app.indexOf('function drawSummary'), app.indexOf('function drawSummary') + 800), /fullPreview\(\)/);
+  assert.match(app, /if \(fullOn\(\)\) fullPreview\(\); \/\/ [^\n]+\n  else if \(!pvShown && !fullRun\) \{ \$\('#pvOut'\)\.replaceChildren\(\); \$\('#pvBtn'\)\.hidden = false; pvHead\(\); \}/, 'bez automatycznego startu');
+  // C3: w podsumowaniu fullPreview() tylko przy fullOn() – te same dane, więc wyłącznie przerysowanie (np. po zmianie wyglądu), bez generacji.
+  const ds = app.slice(app.indexOf('function drawSummary'), app.indexOf('function drawSummary') + 800);
+  assert.equal((ds.match(/fullPreview\(\)/g) || []).length, 1); assert.match(ds, /if \(fullOn\(\)\) fullPreview\(\);/);
+  assert.match(app, /const ad = rows\('ads'\)\[0\], sig = fullSig\(\), isig = imgSig\(\), redraw = fullPv\?\.sig === sig;/);
+  assert.match(app, /if \(redraw\) \{ fullRun = ''; return; \}/, 'nieudane przerysowanie nie przełącza na lekki podgląd');
   assert.match(app, /\$\('#pvBtn'\)\.onclick = \(\) => \(fullAvail\(\) \? fullPreview\(\) : lightPreview\(\)\);/);
   assert.match(app, /tr\(f \? 'Twoje dane trafią do dostawcy AI tylko po to, żeby przygotować ten podgląd\.' : PV_HEAD\[1\]\)/);
   assert.match(app, /tr\(f \? 'Pokaż moje CV' : 'Pokaż podgląd'\)/);

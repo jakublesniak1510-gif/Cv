@@ -24,7 +24,8 @@ test('Kroki i wyjścia raz na osobę, razem i per wariant; kolejność i nazwy w
     const f = wizardFunnel(Object.values(await analyticsDays()));
     assert.deepEqual(f.map((g) => g.group), ['all', 'wizard_order:A', 'wizard_order:B']);
     const row = (g, l) => f.find((x) => x.group === g).rows.find((r) => r.label === l);
-    assert.equal(row('all', 'Otwarcie kreatora').n, 2); assert.equal(row('all', '2. Dane').n, 2); assert.equal(row('all', '2. Dane').exits, 1);
+    assert.equal(row('all', 'Otwarcie kreatora').n, 2); assert.equal(row('all', '2. Dane').n, 2); assert.equal(row('all', '2. Dane').exits, 2, 'C3: wyjście z dawnego kroku 3 liczy się do „Danych”');
+    assert.deepEqual(f.find((x) => x.group === 'all').rows.map((r) => r.label), ['Otwarcie kreatora', '1. Ogłoszenie i pakiet', '2. Dane', '3. Podsumowanie i płatność', 'Płatność rozpoczęta', 'Opłacone'], 'C3: 3 ekrany');
     assert.equal(row('wizard_order:A', '1. Pakiet').n, 1); assert.equal(row('wizard_order:A', '2. Dane').exits, 1, 'wyjście liczone raz');
     const B = f.find((x) => x.group === 'wizard_order:B').rows.map((r) => r.label);
     assert.deepEqual(B, ['Otwarcie kreatora', '1. Ogłoszenie', '2. Dane', '3. Doświadczenie', '4. Wykształcenie', '5. Pakiet, wygląd i podsumowanie', 'Płatność rozpoczęta', 'Opłacone']);
