@@ -855,6 +855,7 @@ function restoreDraft(from) {
 }
 function refresh() {
   if ($('#langPick').children.length) syncLangPick();
+  $$('.pack3Unit').forEach((x) => (x.textContent = `${PRICE.pack3} zł = ${(PRICE.pack3 / 3).toFixed(2).replace('.', ',')} zł`)); // B6: cena za jedno CV w Pakiecie 3
   $('#letterDiff').textContent = `${PRICE.cv_letter - PRICE.cv} zł`; $('#nextPrice').textContent = `${PRICE.cv_next} zł`; $('#nextLetterPrice').textContent = `${PRICE.cv_next + PRICE.cv_letter - PRICE.cv} zł`; // „Polecany”: dopłata za list do tego samego ogłoszenia, z cennika
   saveDraft();
   $('#total').textContent = total() + ' zł'; if (CHECKOUT_B) $('#totalTop').textContent = total() + ' zł'; if (step === 6) payTrust(6);
@@ -2007,7 +2008,16 @@ async function loadReviews() {
   } catch {}
 }
 loadReviews();
-(async () => { try { const s = await (await fetch('/api/public-stats')).json(); if (s.cvs) { $('#cvCounter').replaceChildren(el('b', { textContent: s.cvs.toLocaleString('pl-PL') }), ' CV przygotowanych pod konkretne ogłoszenia'); $('#cvCounter').hidden = false; }
+// B4/B5 (26.10): prawdziwe liczby z zamówień (serwer zwraca je dopiero powyżej progów) i odznaka najczęściej wybieranego pakietu.
+function drawLive(s) {
+  for (const id of ['liveStats', 'liveStats6']) {
+    const b = $('#' + id); if (!b) continue; b.hidden = !s.week; if (!s.week) continue;
+    b.replaceChildren(el('span', { textContent: tr('CV przygotowanych w ostatnich 7 dniach:') }), ' ', el('b', { textContent: String(s.week.cvs) }), ' · ', el('span', { textContent: tr('Typowy czas dostarczenia:') }), ' ', el('b', { textContent: `${s.week.minutes} min` }));
+  }
+  const lab = s.popular && $(`input[name=pkg][value="${s.popular}"]`)?.closest('label');
+  if (lab && !$('.badge-rec', lab)) { lab.classList.add('rec'); $('.o-t', lab).after(el('span', { className: 'badge-rec', textContent: tr('Najczęściej wybierany') })); }
+}
+(async () => { try { const s = await (await fetch('/api/public-stats')).json(); drawLive(s); if (s.cvs) { $('#cvCounter').replaceChildren(el('b', { textContent: s.cvs.toLocaleString('pl-PL') }), ' CV przygotowanych pod konkretne ogłoszenia'); $('#cvCounter').hidden = false; }
   // Wyniki klientów z ankiety: serwer zwraca je dopiero od OUTCOMES_MIN odpowiedzi (lib/outcomes.js), wcześniej nic nie pokazujemy.
   const o = s.outcome; if (o) { $('#outcomeStat').replaceChildren(`${o.pct}% klientów, którzy odpowiedzieli na naszą ankietę i wysłali CV, dostało co najmniej jedno zaproszenie na rozmowę (n=${o.n}, okres ${o.from}–${o.to}).`, ' ', el('a', { href: '/jak-liczymy', textContent: 'Jak liczymy' })); $('#wyniki').hidden = false; }
 } catch {} })();

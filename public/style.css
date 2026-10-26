@@ -1002,6 +1002,9 @@ ul.checklist{list-style:none;padding-left:0}
 
 /* Kreator: „Polecany” przy CV + list, podgląd dopasowania i blok zaufania przy płatności */
 .opt.rec{position:relative}.badge-rec{position:absolute;top:-10px;right:12px;background:var(--mark);color:#0E1C34;font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px}.opt .rec-note{grid-column:2;font-size:13px}
+/* B4–B6 (26.10): liczby z zamówień (ukryte poniżej progów), odznaka z danych, cena za CV w Pakiecie 3. */
+.live-stats{margin:6px 0 0;font-size:.92rem;color:var(--mute)}.live-stats b{color:var(--ink)}
+.opt .o-d.unit{grid-column:2;font-size:13px}.price-card .unit{font-size:.9rem;color:var(--mute);margin:-6px 0 8px}
 .wiz-match{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 14px;background:var(--surface)}.wiz-match .sh{margin:0 0 6px}.wiz-match p{margin:6px 0}.wiz-match .chip.ok{border-color:var(--ok)}
 .pay-trust{list-style:none;margin:14px 0 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;display:grid;gap:6px;font-size:14px}.pay-trust li::before{content:"✓ ";color:var(--ok);font-weight:700}.pay-trust .pt-methods::before{content:""}.pay-trust .pt-methods{display:flex;flex-wrap:wrap;gap:6px}
 .b2b-prices .m-tier{display:none}

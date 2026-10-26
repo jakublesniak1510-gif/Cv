@@ -60,6 +60,7 @@
     <p class="hero-micro">BLIK lub karta · bez subskrypcji</p>
     <a class="hero-rating" id="heroRating" href="#opinie" hidden></a>
     <p class="counter" id="cvCounter" hidden></p>
+    <p class="live-stats" id="liveStats" hidden></p>
     <ul class="ticks"><li>Raport dopasowania do ogłoszenia</li><li>Darmowa poprawka</li><li>Dane usuwane po 30 dniach</li></ul>
   </div>
   <div class="demo" id="demo" aria-label="Animacja: ogłoszenie zamienia się w dopasowane CV">
@@ -170,7 +171,7 @@
   <div class="prices">
     <div class="price-card"><h3>CV</h3><div class="amt">39 zł</div><ul><li>CV dopasowane do jednego ogłoszenia</li><li>Słowa kluczowe pod systemy ATS</li><li>PDF na stronie i w e-mailu</li></ul><button class="btn ghost" data-open data-pkg="cv">Wybierz CV</button></div>
     <div class="price-card feat"><span class="badge">Polecany</span><h3>CV + list motywacyjny</h3><div class="amt">49 zł</div><ul><li>CV i list pod to samo ogłoszenie</li><li>List na jedną stronę A4, bez ogólników</li><li>PDF na stronie i w e-mailu</li></ul><button class="btn" data-open data-pkg="cv_letter">Wybierz komplet</button></div>
-    <div class="price-card"><span class="badge alt">Do 3 ogłoszeń</span><h3>Pakiet 3 CV + listy</h3><div class="amt">79 zł</div><ul><li>3 CV pod ten sam zawód, każde pod inne ogłoszenie</li><li>List motywacyjny do każdego CV</li><li>Dane wpisujesz tylko raz</li></ul><button class="btn ghost" data-open data-pkg="pack3">Wybierz pakiet</button></div>
+    <div class="price-card"><span class="badge alt">Do 3 ogłoszeń</span><h3>Pakiet 3 CV + listy</h3><div class="amt">79 zł</div><div class="unit"><span class="pack3Unit">79 zł = 26,33 zł</span> <span>za CV</span></div><ul><li>3 CV pod ten sam zawód, każde pod inne ogłoszenie</li><li>List motywacyjny do każdego CV</li><li>Dane wpisujesz tylko raz</li></ul><button class="btn ghost" data-open data-pkg="pack3">Wybierz pakiet</button></div>
     <div class="price-card"><span class="badge alt">Oszczędzasz 19 zł</span><h3>Pewna rozmowa</h3><div class="amt">109 zł</div><ul><li>CV i list motywacyjny pod ogłoszenie</li><li>Przygotowanie do rozmowy: 12 pytań z odpowiedziami</li><li>Symulator rozmowy z oceną odpowiedzi</li></ul><button class="btn ghost" data-open data-pkg="cv_letter" data-addon="Interview,Sim">Wybierz pakiet</button></div>
   </div>
   <p class="hint next-note"><span>Kolejne CV pod nowe ogłoszenie dla klientów:</span> <span id="nextPrice">19 zł</span> <span>(z listem motywacyjnym</span> <span id="nextLetterPrice">29 zł</span><span>), na stronie dokumentów przez 30 dni od opłacenia zamówienia.</span></p>
@@ -522,8 +523,8 @@
       <p class="wiz-today">Aplikujesz dziś? CV i list będą gotowe zwykle w kilka minut.</p>
       <div class="opts" id="pkgOpts">
         <label class="opt"><input type="radio" name="pkg" value="cv"><span class="o-t">Samo CV<b>39 zł</b></span><span class="o-d">CV dopasowane do ogłoszenia</span></label>
-        <label class="opt rec"><input type="radio" name="pkg" value="cv_letter" checked><span class="o-t">CV + list motywacyjny<b>49 zł</b></span><span class="badge-rec">Polecany</span><span class="o-d">Komplet dokumentów pod ogłoszenie</span><span class="o-d rec-note"><span>list motywacyjny pod to samo ogłoszenie za</span> <span id="letterDiff">10 zł</span> <span>więcej</span></span></label>
-        <label class="opt"><input type="radio" name="pkg" value="pack3"><span class="o-t">Pakiet 3 CV + listy<b>79 zł</b></span><span class="o-d">3 CV pod ten sam zawód, każde pod inne ogłoszenie, i list do każdego</span></label>
+        <label class="opt"><input type="radio" name="pkg" value="cv_letter" checked><span class="o-t">CV + list motywacyjny<b>49 zł</b></span><span class="o-d">Komplet dokumentów pod ogłoszenie</span><span class="o-d rec-note"><span>list motywacyjny pod to samo ogłoszenie za</span> <span id="letterDiff">10 zł</span> <span>więcej</span></span></label>
+        <label class="opt"><input type="radio" name="pkg" value="pack3"><span class="o-t">Pakiet 3 CV + listy<b>79 zł</b></span><span class="o-d">3 CV pod ten sam zawód, każde pod inne ogłoszenie, i list do każdego</span><span class="o-d unit"><span class="pack3Unit">79 zł = 26,33 zł</span> <span>za CV</span></span></label>
       </div>
       <h3 class="sh">Dodatki <span class="h">(opcjonalnie, raz na całe zamówienie)</span></h3>
       <div class="opts addons">
@@ -601,6 +602,7 @@
     </section>
     <section data-step="6" hidden>
       <div class="sum-top" id="sumTop" hidden><span>Do zapłaty</span> <b id="totalTop"></b> <small>jednorazowo, bez abonamentu</small></div>
+      <p class="live-stats" id="liveStats6" hidden></p>
       <div id="wizMatch" class="wiz-match" hidden></div>
       <div id="pvBox" class="pv" hidden><div class="pv-head"><b>Tak zacznie się Twoje CV pod to ogłoszenie</b><p class="hint">Pokażemy nagłówek, podsumowanie zawodowe i 5 słów kluczowych z ogłoszenia, które znajdą się w CV. W tym celu Twoje dane i ogłoszenie trafią do dostawcy AI, tak jak przy zamówieniu.</p><button class="btn ghost sm" type="button" id="pvBtn">Pokaż podgląd</button></div><div id="pvOut" aria-live="polite"></div></div>
       <p class="pv-ex" id="pvEx" hidden><button type="button" class="btn ghost sm" data-example="0">Zobacz przykład gotowego CV</button> <span class="hint">Przykładowe ogłoszenie i CV, bez Twoich danych.</span></p>

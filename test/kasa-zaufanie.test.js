@@ -44,9 +44,11 @@ test('Kasa: blok zaufania w obu wariantach testu checkout, bez wymyślonych licz
   assert.doesNotMatch(pt, /CHECKOUT_B/, 'ten sam blok w A i B');
   for (const t of ["'Gotowe zwykle w kilka minut – e-mailem i na stronie'", "'Dane usuwane automatycznie po 30 dniach'", "'Faktura na życzenie'", "plural(rev, 'poprawka w cenie', 'poprawki w cenie', 'poprawek w cenie')", 'cfg.maxRevisions']) assert.ok(pt.includes(t), t);
   assert.match(read('server.js'), /const MAX_REVISIONS = 5;/);
-  assert.doesNotMatch(app + h, /gotowe w 5[–-]10 minut|najczęściej wybierany|odliczani|countdown/i);
-  assert.match(h, /<label class="opt rec"><input type="radio" name="pkg" value="cv_letter" checked>.*<span class="badge-rec">Polecany<\/span>.*<span>list motywacyjny pod to samo ogłoszenie za<\/span> <span id="letterDiff">10 zł<\/span> <span>więcej<\/span>/);
-  assert.equal((h.match(/badge-rec/g) || []).length, 1);
+  assert.doesNotMatch(app + h, /gotowe w 5[–-]10 minut|odliczani|countdown/i);
+  // B5 (26.10): odznaka „Najczęściej wybierany” tylko z danych (/api/public-stats → popular, min. 10 zamówień z 30 dni), bez statycznej w HTML.
+  assert.doesNotMatch(h, /najczęściej wybierany|badge-rec/i);
+  assert.match(app, /const lab = s\.popular && \$\(`input\[name=pkg\]\[value="\$\{s\.popular\}"\]`\)\?\.closest\('label'\);/);
+  assert.match(h, /<label class="opt"><input type="radio" name="pkg" value="cv_letter" checked>.*<span>list motywacyjny pod to samo ogłoszenie za<\/span> <span id="letterDiff">10 zł<\/span> <span>więcej<\/span>/);
   assert.match(app, /\$\('#letterDiff'\)\.textContent = `\$\{PRICE\.cv_letter - PRICE\.cv\} zł`/);
   assert.equal((h.match(/<!--tp-mini-->/g) || []).length, 1, 'jedno miejsce na TrustBox Mini');
   for (const l of ['en', 'de', 'uk']) {
