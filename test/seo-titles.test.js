@@ -96,8 +96,9 @@ test('Strony zawodów: tytuł z szablonu z odmianą z danych, opis ze słowami k
   assert.equal(t(`/uk/${PROF_LANGS.uk.seg}/${PROF_LANGS.uk.prof.hydraulik.slugLang}`), 'Резюме сантехніка під вакансію – зразок і генератор онлайн');
   assert.ok(pages.every((p) => !/5 minut|5 minutes|5 Minuten|5 хвилин/i.test(`${p.title} ${p.desc}`)), 'bez „5 minut” w tytułach i opisach');
   assert.match(d('/cv/kasjer'), /^Wzór CV kasjera ze słowami kluczowymi z ogłoszeń: .+\. Wygeneruj CV pod ogłoszenie lub sprawdź swoje darmowym skanerem\.$/);
-  assert.equal(t('/en/cv/plumber'), 'Plumber CV for a job ad – template and generator');
-  assert.match(t(`/de/lebenslauf/${PROF_LANGS.de.prof.hydraulik.slugLang}`), /^Lebenslauf Installateur zur Stellenanzeige/);
+  // EN i DE od 26.10: tytuł z pierwszym słowem kluczowym zawodu, które się mieści (unikalne tytuły; test/en-zawody-unikalne.test.js).
+  assert.equal(t('/en/cv/plumber'), 'Plumber CV 2026: installing water and drainage systems');
+  assert.match(t(`/de/lebenslauf/${PROF_LANGS.de.prof.hydraulik.slugLang}`), /^Lebenslauf Installateur 2026: /);
   for (const p of PROFESSIONS) {
     const g = profName(p);
     assert.ok(g, `${p.slug}: odmiana z nagłówka`);
