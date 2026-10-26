@@ -12,8 +12,8 @@ const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')
 
 test('Hero: link „Nie wiesz, czy warto? Sprawdź CV za darmo” pod CTA, do skanera w języku strony', async () => {
   const h = read('public/index.html'), hero = h.slice(h.indexOf('<section class="hero"'), h.indexOf('</section>', h.indexOf('<section class="hero"')));
-  assert.ok(hero.indexOf('class="cta"') < hero.indexOf('class="hero-scan"'), 'pod przyciskami');
-  assert.match(hero, /<p class="hero-scan"><a href="\/narzedzia\/skaner-cv">Nie wiesz, czy warto\? Sprawdź CV za darmo<\/a><\/p>/);
+  assert.ok(hero.indexOf('class="hero-ad"') < hero.indexOf('class="hero-scan"'), 'pod polem na ogłoszenie (C4)');
+  assert.match(hero, /<p class="hero-scan"><a href="\/narzedzia\/skaner-cv">Nie wiesz, czy warto\? Sprawdź CV za darmo<\/a> · <button class="link" type="button" data-example>Zobacz przykład<\/button><\/p>/);
   for (const k of ['hero', 'cta']) assert.notEqual(EXPERIMENTS[k].apply(h), h, k);
   const app = express(); seoRoutes(app, 'https://example.test');
   const srv = app.listen(0), U = `http://127.0.0.1:${srv.address().port}`;
