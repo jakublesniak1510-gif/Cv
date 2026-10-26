@@ -56,6 +56,10 @@ test('Do przeglądarki trafia tylko obrazek; ten sam klucz = pamięć (bez drugi
   } finally { srv.close(); }
 });
 
+test('Domyślny dzienny limit strony: 60 (PREVIEW_FULL_DAILY)', () => {
+  assert.match(read('lib/full-preview.js'), /daily = \(\) => Number\(process\.env\.PREVIEW_FULL_DAILY\) \|\| 60/);
+});
+
 test('Limity: 1 nowa generacja na sesję, 2 na IP dziennie, limit dzienny strony → full_preview_limit; błąd nie zużywa limitu', async () => {
   const { srv, post, calls, events } = server_();
   try {
@@ -99,13 +103,17 @@ test('Po płatności: samo CV = wynik z podglądu bez generowania; z listem/doda
   assert.match(server, /if \(hasCritical\(qa\) && aiEnabled\(\) && !full\)/);
 });
 
-test('Kreator: podgląd startuje sam na ostatnim kroku, ponawia „pending”, po limicie lekki podgląd (A1); przycisk „Odblokuj swoje CV – X zł”', () => {
-  assert.match(app, /if \(!pvShown && !fullOn\(\) && !fullRun\) \{ \$\('#pvOut'\)\.replaceChildren\(\); \$\('#pvBtn'\)\.hidden = false; \}\n  fullPreview\(\);/);
+test('Kreator: podgląd dopiero po kliknięciu „Pokaż moje CV” (notka o AI), ponawia „pending”, po limicie lekki podgląd (A1); przycisk „Odblokuj swoje CV – X zł”', () => {
+  assert.match(app, /if \(fullOn\(\)\) drawFull\(fullPv\);\n  else if \(!pvShown && !fullRun\) \{ \$\('#pvOut'\)\.replaceChildren\(\); \$\('#pvBtn'\)\.hidden = false; pvHead\(\); \}/, 'bez automatycznego startu');
+  assert.doesNotMatch(app.slice(app.indexOf('function drawSummary'), app.indexOf('function drawSummary') + 800), /fullPreview\(\)/);
+  assert.match(app, /\$\('#pvBtn'\)\.onclick = \(\) => \(fullAvail\(\) \? fullPreview\(\) : lightPreview\(\)\);/);
+  assert.match(app, /tr\(f \? 'Twoje dane trafią do dostawcy AI tylko po to, żeby przygotować ten podgląd\.' : PV_HEAD\[1\]\)/);
+  assert.match(app, /tr\(f \? 'Pokaż moje CV' : 'Pokaż podgląd'\)/);
   assert.match(app, /if \(r\.pending\) \{ await new Promise\(\(ok\) => setTimeout\(ok, 3000\)\); continue; \}/);
-  assert.match(app, /if \(!pvShown && step === 6\) \$\('#pvBtn'\)\.click\(\);/);
+  assert.match(app, /if \(!pvShown && step === 6\) lightPreview\(\);/);
   assert.match(app, /fullOn\(\) \? `\$\{tr\('Odblokuj swoje CV –'\)\} \$\{total\(\)\} zł`/);
   assert.match(app, /el\('img', \{ className: 'pv-img', src: r\.image, alt: tr\('Podgląd Twojego CV ze znakiem wodnym, dolna część rozmyta'\), draggable: false \}\)/);
   assert.match(app, /\['copy', 'cut', 'contextmenu', 'dragstart'\]\.forEach\(\(ev\) => \$\('#pvOut'\)\.addEventListener/);
   assert.match(html, /<b id="pvTitle">/); assert.match(html, /<p class="hint" id="pvHint">/);
-  for (const l of ['en', 'de', 'uk']) for (const k of ['Odblokuj swoje CV –', 'Twoje CV pod to ogłoszenie', 'Piszemy Twoje CV…', 'Piszemy Twoje CV pod to ogłoszenie, zwykle około minuty. Twoje dane i ogłoszenie trafiają w tym celu do dostawcy AI, tak jak przy zamówieniu.', 'Tak wygląda Twoje CV. Po płatności dostaniesz dokładnie to CV w PDF, bez znaku wodnego i rozmycia.', 'Podgląd Twojego CV ze znakiem wodnym, dolna część rozmyta']) assert.ok(dict(l)[k], `${l}: ${k}`);
+  for (const l of ['en', 'de', 'uk']) for (const k of ['Odblokuj swoje CV –', 'Twoje CV pod to ogłoszenie', 'Piszemy Twoje CV…', 'Piszemy Twoje CV pod to ogłoszenie, zwykle około minuty. Twoje dane i ogłoszenie trafiają w tym celu do dostawcy AI, tak jak przy zamówieniu.', 'Tak wygląda Twoje CV. Po płatności dostaniesz dokładnie to CV w PDF, bez znaku wodnego i rozmycia.', 'Podgląd Twojego CV ze znakiem wodnym, dolna część rozmyta', 'Zobacz swoje CV przed płatnością', 'Twoje dane trafią do dostawcy AI tylko po to, żeby przygotować ten podgląd.', 'Pokaż moje CV']) assert.ok(dict(l)[k], `${l}: ${k}`);
 });
