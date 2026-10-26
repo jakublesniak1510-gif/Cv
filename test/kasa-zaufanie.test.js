@@ -33,7 +33,7 @@ test('Kreator: panel dopasowania w podsumowaniu (per ogłoszenie zwinięty), pod
   const h = read('public/index.html'), app = read('public/app.js');
   const s6 = h.slice(h.indexOf('<section data-step="6"'), h.indexOf('<section data-step="7"'));
   assert.ok(s6.indexOf('id="wizMatch"') < s6.indexOf('id="pvBox"') && s6.indexOf('id="pvBox"') < s6.indexOf('id="sum"'), 'dopasowanie i podgląd nad podsumowaniem');
-  assert.match(s6, /<b>Tak zacznie się Twoje CV pod to ogłoszenie<\/b>/);
+  assert.match(s6, /<b id="pvTitle">Tak zacznie się Twoje CV pod to ogłoszenie<\/b>/);
   assert.match(app, /fetch\('\/api\/wizard-match'/); assert.match(app, /el\('details', \{ className: 'optbox' \}/);
   assert.match(app, /Z ogłoszenia wyciągnęliśmy \$\{m\.n\} \$\{plural\(m\.n, 'wymaganie', 'wymagania', 'wymagań'\)\}/);
 });
