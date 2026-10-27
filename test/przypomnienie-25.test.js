@@ -32,7 +32,7 @@ test('Kasa: osobna, odznaczona zgoda; zgoda ankiety bez „kodu rabatowego”; h
   assert.match(srv, /DELETE_NOTICE_AFTER = 25 \* 864e5/); assert.match(srv, /o\.deleteNotice\.off \|\| age < DELETE_NOTICE_AFTER \|\| Date\.now\(\) - o\.created >= RETENTION_MS/);
   for (const l of ['en', 'de', 'uk']) { const d = JSON.parse(read(`public/i18n/${l}.json`)); assert.ok(d['Przypomnijcie mi 5 dni przed usunięciem moich danych i dokumentów (jeden e-mail, opcjonalnie).'] && d['Zapytajcie mnie raz po miesiącu, jak poszła rekrutacja (jeden e-mail, opcjonalnie).'], l); }
   for (const re of [/Jednorazowy e-mail 5 dni przed usunięciem danych zamówienia \(w 25\. dniu od opłacenia\)/, /Einmalige E-Mail 5 Tage vor dem Löschen der Bestelldaten/, /One-time e-mail 5 days before your order data is deleted/, /Одноразовий лист за 5 днів до видалення даних замовлення/,
-    /<h2>13\. Historia zmian<\/h2>\n<ul><li>25 października 2026 r\. – jednorazowy e-mail 5 dni przed usunięciem danych/, /<h2>13\. Change history<\/h2>\n<ul><li>25 October 2026 – one-time e-mail 5 days before/]) assert.match(pol, re);
+    /<h2>13\. Historia zmian<\/h2>\n<ul>(?:<li>[^<]*<\/li>)*<li>25 października 2026 r\. – jednorazowy e-mail 5 dni przed usunięciem danych/, /<h2>13\. Change history<\/h2>\n<ul>(?:<li>[^<]*<\/li>)*<li>25 October 2026 – one-time e-mail 5 days before/]) assert.match(pol, re);
 });
 
 test('Serwer: zgoda zapisana w zamówieniu; wypis GET (przycisk) i POST (off); bez zgody – brak przypomnienia', async () => {

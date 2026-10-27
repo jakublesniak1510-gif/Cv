@@ -13,6 +13,11 @@
     a.classList.toggle('on', a.dataset.lang === lang);
     a.addEventListener('click', () => window.I18N?.set(a.dataset.lang));
   }
+  // Polecane kursy (linki partnerskie): liczymy kliknięcie – id kursu i strona, bez danych osobowych (lib/affiliates.js).
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[data-aff]'); if (!a || !navigator.sendBeacon) return;
+    try { navigator.sendBeacon('/api/t', JSON.stringify({ e: 'aff', t: a.dataset.aff, g: a.dataset.affPage || '', p: location.pathname, l: lang })); } catch {}
+  });
   // „Zamów CV” na podstronie: kreator otwiera się na stronie głównej (z wybranym pakietem, dodatkami i kodem polecającym).
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-open]'); if (!b) return;
