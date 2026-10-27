@@ -65,6 +65,8 @@ import { previewRoutes, previewFor, cleanupPreviews } from './lib/preview.js';
 import { productRoutes, applyProduct, isProduct, productName, productReturn, PHOTO_UPLOAD_PATHS, cleanupPhotos } from './lib/products.js';
 import { translationRoutes, cleanupTranslations, TR_UPLOAD_PATH } from './lib/translation.js';
 import { translationPageRoutes } from './lib/translation-page.js';
+import { adCheckRoutes, cleanupAdChecks } from './lib/ad-check.js';
+import { adCheckPageRoutes } from './lib/ad-check-page.js';
 import { fullPreviewRoutes, fullPreviewFor, cleanupFullPreviews, reusesWhole } from './lib/full-preview.js';
 import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText, visitInfo, funnelPaid, countEvent, funnelOrder, abExpose } from './lib/analytics.js';
 import { seoReportRoutes, seoWeekly } from './lib/seo-report.js';
@@ -639,6 +641,8 @@ function cleanInvoice(v) {
 previewRoutes(app, { cleanProfile, cleanAds });
 translationRoutes(app, { price: () => PRICES.translation });
 translationPageRoutes(app, BASE_URL);
+adCheckRoutes(app);
+adCheckPageRoutes(app, BASE_URL);
 productRoutes(app, { BASE_URL, DEMO, getOrder, saveOrder, updateOrder, openPayment, pickGateway, BAD_GATEWAY, cleanInvoice, WAIVER, closed: salesClosedFor, CLOSED_MSG, PayOpenError });
 fullPreviewRoutes(app, { cleanProfile, cleanAds, prices: () => PRICES });
 
@@ -1198,6 +1202,7 @@ async function hourly() {
     await cleanupPreviews().catch(() => {});
     await cleanupFullPreviews().catch(() => {});
     await cleanupTranslations().catch(() => {}); // tłumaczenia CV z podglądu (48 h)
+    await cleanupAdChecks().catch(() => {}); // sprawdzenia ogłoszeń z podglądu (48 h)
     await cleanupShareCards().catch(() => {});
     await cleanupPartnerApps().catch(() => {});
     await crmHourly(BASE_URL).catch((e) => logEvent('kontakty', e.message));
