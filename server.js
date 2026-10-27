@@ -32,7 +32,7 @@ import { checkCv } from './lib/cv-check.js';
 import { profReqs } from './lib/prof-ad.js';
 import { landingRoutes } from './lib/landing.js';
 import { outcomes, outcomeRoutes, startOutcome, outcomeLinks, anonymizeOutcomes, publicOutcome, OUTCOME_CONSENT, OUTCOME_AFTER, OT } from './lib/outcomes.js';
-import { mailEnabled, sendReferralMail, sendOrderMail, sendReminder, sendFollowUp, sendDeleteNotice, sendReviewAsk, sendOutcomeAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail, sendOwnerMail, sendPhotoMail } from './lib/mail.js';
+import { mailEnabled, sendReferralMail, sendOrderMail, sendReminder, sendFollowUp, sendDeleteNotice, sendReviewAsk, sendOutcomeAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail, sendOwnerMail, sendProductMail } from './lib/mail.js';
 import { socialRoutes, cleanupChats, botStatus } from './lib/social.js';
 import { b2bRoutes, b2bOrders, fulfillB2b, b2bRefunded, cleanupPartnerApps } from './lib/b2b.js';
 import { b2bMonthly } from './lib/b2b-monthly.js';
@@ -55,6 +55,7 @@ import { renderDocx } from './lib/docx.js';
 import { adminRoutes, isAdmin } from './lib/admin.js';
 import { accountRoutes, accountHourly } from './lib/account.js';
 import { templateRoutes } from './lib/templates.js';
+import { premiumPageRoutes } from './lib/premium-page.js';
 import { abroadRoutes } from './lib/abroad.js';
 import { officialRoutes } from './lib/official.js';
 import { portalRoutes } from './lib/portals.js';
@@ -266,6 +267,7 @@ seoRoutes(app, BASE_URL);
 letterRoutes(app, BASE_URL); // /narzedzia/list-motywacyjny-pod-ogloszenie
 landingRoutes(app, BASE_URL); // /kreator-cv i case study „Jedno CV, dwa ogłoszenia”
 templateRoutes(app, BASE_URL);
+premiumPageRoutes(app, BASE_URL);
 abroadRoutes(app, BASE_URL);
 officialRoutes(app, BASE_URL);
 portalRoutes(app, BASE_URL); // „CV pod ogłoszenie z <portal>” (lib/portals.js)
@@ -899,7 +901,7 @@ async function markPaidAndGenerate(id) {
   inFlight.add(id);
   try {
     if (o.upsellOf) return await applyUpsell(o);
-    if (isProduct(o)) return await applyProduct(o, { getOrder, updateOrder, sendMail: (x, files, inserted) => (mailEnabled() ? sendPhotoMail(x, files, inserted, productReturn(x, BASE_URL)) : Promise.reject(new Error('Wysyłka e-maili wyłączona (brak SMTP)'))),
+    if (isProduct(o)) return await applyProduct(o, { getOrder, updateOrder, sendMail: (x, files, inserted) => (mailEnabled() ? sendProductMail(x, files, inserted, productReturn(x, BASE_URL)) : Promise.reject(new Error('Wysyłka e-maili wyłączona (brak SMTP)'))),
       paidSteps: (paidO) => { recordSale(paidO).catch((e) => console.error('Rejestr sprzedaży', e.message)); notifyNewOrder(paidO, BASE_URL).catch((e) => logEvent('e-mail', `Powiadomienie o zamówieniu: ${e.message}`)); if (paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: id })); countEvent(`product_paid:${paidO.product}`).catch(() => {}); } });
     const paidO = await updateOrder(id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
     const passFree = !!o.pass && !(o.total > 0); // zamówienie w całości z karnetu: przychód był przy zakupie karnetu
