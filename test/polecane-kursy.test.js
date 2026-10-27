@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { AFFILIATES, AFF_NOTE, coursesFor, affHtml, affSummary } from '../lib/affiliates.js';
+import { AFFILIATES, AFF_NOTE, coursesFor, coursesForArticle, affHtml, affSummary } from '../lib/affiliates.js';
 import { PROFESSIONS } from '../lib/content.js';
 import { stripPl } from '../lib/seo.js';
 import { legalBody } from '../lib/legal.js';
@@ -13,13 +13,13 @@ import { legalBody } from '../lib/legal.js';
 // i poradnika, bez cen, z dopiskiem o prowizji, link rel="sponsored nofollow noopener"; zdarzenie aff_click; polityka prywatności.
 const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-const section = (h) => /<section class="aff" data-pl[\s\S]*?<\/section>/.exec(h)?.[0] || '';
+const section = (h) => /<div data-pl-block><div class="aff"[\s\S]*?<!--\/pl-only--><\/div>/.exec(h)?.[0] || '';
 const links = (h) => [...h.matchAll(/<a [^>]*data-aff="[^"]+"[^>]*>/g)].map((m) => m[0]);
 
 test('Dane: 19 kursów z linkiem webep1.com (także Komunikacja i Menedżerskie), zawody istnieją', () => {
   const raw = JSON.parse(read('seo-data/affiliates.json')).kursy, slugs = new Set(PROFESSIONS.map((p) => p.slug));
   assert.equal(AFFILIATES.length, raw.filter((k) => k.url_partnerski).length);
-  assert.equal(AFFILIATES.length, 19, 'wszystkie kursy z potwierdzonymi linkami (bez BHP)');
+  assert.equal(AFFILIATES.length, 28, 'wszystkie kursy z potwierdzonymi linkami (bez BHP): 19 KursySzkolenia, 6 Kursy Zdalne, 3 Talkpal');
   for (const k of AFFILIATES) {
     assert.match(k.url_partnerski, /^https:\/\/webep1\.com\/go\/[0-9a-f]{9,10}$/, k.id);
     assert.doesNotMatch(`${k.nazwa} ${k.opis}`, /zł|gwarant|zarobk|zatrudnien/i, `${k.id}: bez cen i obietnic`);
@@ -28,12 +28,30 @@ test('Dane: 19 kursów z linkiem webep1.com (także Komunikacja i Menedżerskie)
   assert.ok(!AFFILIATES.some((k) => /bhp/i.test(k.nazwa)), 'BHP pomijamy');
 });
 
+test('Partia 2: Kursy Zdalne (opis z zaświadczeniem, bez „uprawnień”), kolejność wg dopasowania, Talkpal w poradnikach z nagłówkiem „Może się przydać”', () => {
+  const kz = AFFILIATES.filter((k) => k.id.startsWith('kz-'));
+  assert.equal(kz.length, 6);
+  for (const k of kz) { assert.equal(k.opis, 'Kurs online z zaświadczeniem o ukończeniu.'); assert.doesNotMatch(k.opis, /uprawnie|honorowan/i); }
+  assert.deepEqual(coursesFor('specjalista-kadr-i-plac').map((k) => k.id), ['kadry-place', 'kz-kadry-place-fakturowanie'], 'po Kadry i Płace, razem 2');
+  assert.deepEqual(coursesFor('sprzedawca').map((k) => k.id), ['sprzedaz', 'kz-sprzedaz-obsluga'], 'drugi po Szkoleniu Sprzedażowym');
+  assert.deepEqual(coursesFor('rekruter').map((k) => k.id)[0], 'kz-rekrutacja');
+  assert.deepEqual(coursesFor('kierowca').map((k) => k.id), ['kz-angielski-kierowcy']);
+  assert.deepEqual(coursesFor('opiekun-osob-starszych').map((k) => k.id), ['kz-opiekun', 'kz-opiekun-pakiet']);
+  assert.equal(coursesForArticle('cv-do-pracy-w-niemczech')[0].url_partnerski, 'https://webep1.com/go/384e601414');
+  assert.equal(coursesForArticle('cv-po-angielsku')[0].url_partnerski, 'https://webep1.com/go/be09989514');
+  assert.ok(!AFFILIATES.filter((k) => k.id === 'talkpal').some((k) => k.zawody.length || k.poradniki.length), 'strona główna Talkpal – rezerwa, nigdzie nie pokazywana');
+  const h = affHtml(['magazynier'], 'poradnik/cv-do-pracy-w-niemczech', { article: 'cv-do-pracy-w-niemczech' });
+  assert.match(h, /<h2 id="aff-h">Może się przydać<\/h2>/); assert.match(h, /Talkpal – nauka języka z AI<\/b><p>Rozmowy w obcym języku z asystentem AI, w aplikacji i przeglądarce\.<\/p>/);
+  assert.equal(links(h).length, 2); for (const a of links(h)) assert.match(a, /rel="sponsored nofollow noopener"/);
+  assert.match(affHtml('kierowca', 'cv/kierowca'), /Kursy, które mogą przydać się w tym zawodzie/, 'strony zawodów bez zmian nagłówka');
+});
+
 test('Dobór: najwyżej 2 kursy, zawód bez mapowania – brak sekcji; HTML z dopiskiem, bez cen, rel sponsored, nowa karta', () => {
   assert.deepEqual(coursesFor('ksiegowa').map((k) => k.id), ['ksiegowosc', 'excel-zaawansowany']);
   assert.equal(coursesFor('asystentka-biura').length, 2, 'najwyżej 2 mimo 4 pasujących');
   assert.deepEqual(coursesFor('kierownik-magazynu').map((k) => k.id), ['menedzerskie', 'excel-zaawansowany'], 'najbardziej dopasowany pierwszy');
   assert.deepEqual(coursesFor('obsluga-klienta').map((k) => k.id), ['obsluga-klienta', 'komunikacja']);
-  assert.deepEqual(coursesFor('kierowca'), []); assert.equal(affHtml('kierowca', 'cv/kierowca'), '');
+  assert.deepEqual(coursesFor('pielegniarka'), []); assert.equal(affHtml('pielegniarka', 'cv/pielegniarka'), '');
   const h = affHtml('pracownik-biurowy', 'cv/pracownik-biurowy');
   assert.match(h, /<h2 id="aff-h">Kursy, które mogą przydać się w tym zawodzie<\/h2><p class="aff-note">Linki partnerskie: jeśli kupisz kurs, otrzymamy prowizję\. Cena dla Ciebie się nie zmienia\.<\/p>/);
   assert.equal(links(h).length, 2);
@@ -52,7 +70,8 @@ test('Strony: /cv, /wzor-cv i poradnik pokazują sekcję pod treścią; zawód b
     const cv = await get('/cv/ksiegowa'), s = section(cv);
     assert.ok(s.includes(AFF_NOTE) && s.includes('Kurs Księgowości Online') && s.includes('Zobacz kurs'));
     assert.ok(cv.indexOf('class="aff"') > cv.indexOf('<h2>Pytania</h2>'), 'pod treścią zawodu, nie w hero');
-    assert.equal(section(await get('/cv/kierowca')), '', 'zawód bez mapowania');
+    assert.equal(section(await get('/cv/pielegniarka')), '', 'zawód bez mapowania');
+    assert.match(section(await get('/poradnik/cv-do-pracy-w-niemczech')), /Może się przydać[\s\S]*webep1\.com\/go\/384e601414/, 'Talkpal w poradniku o Niemczech');
     assert.ok(section(await get('/wzor-cv/ksiegowa')).includes('Kurs Księgowości Online'));
     assert.ok(section(await get('/poradnik/jak-dopasowac-cv-do-ogloszenia')).length > 0, 'poradnik z zawodem w related');
     assert.equal(section(await get('/')), '', 'nie na stronie głównej ani w kreatorze');
