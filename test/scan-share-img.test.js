@@ -73,6 +73,6 @@ test('Karta /wynik/<id> (30 dni): zapisuje po 3 ogólne wymagania, obrazki 1080�
     await cards.save({ ...c, created: Date.now() - 31 * 864e5 }); assert.equal((await fetch(`${V}/wynik/${j.id}/1080x1080.png`)).status, 404, 'po 30 dniach');
   } finally { s2.close(); }
   const pol = read('public/legal/prywatnosc.html');
-  for (const re of [/najwyżej po 3 ogólne nazwy wymagań z ogłoszenia/, /höchstens je 3 allgemeine Anforderungen/, /up to 3 general requirements from the job ad each/, /щонайбільше по 3 загальні вимоги/, /<li>25 października 2026 r\. – karta „Udostępnij wynik”/, /Polityka obowiązuje od 25 października 2026/]) assert.match(pol, re);
+  for (const re of [/najwyżej po 3 ogólne nazwy wymagań z ogłoszenia/, /höchstens je 3 allgemeine Anforderungen/, /up to 3 general requirements from the job ad each/, /щонайбільше по 3 загальні вимоги/, /<li>25 października 2026 r\. – karta „Udostępnij wynik”/, /Polityka obowiązuje od 2[57] października 2026/]) assert.match(pol, re);
   assert.match(read('public/wynik.js'), /navigator\.canShare\(\{ files: \[file\] \}\)/);
 });

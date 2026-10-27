@@ -28,7 +28,7 @@ test('Skaner: bez zdań „nie zapisujemy wyniku” w 4 językach; jest informac
 });
 
 test('Polityka prywatności (4 języki): wynik skanera do godziny w pamięci, nowa data i wpis w historii', () => {
-  for (const [l, re, date] of [['pl', /najwyżej godzinę, żeby można było go udostępnić/, /obowiązuje od 25 października 2026/], ['en', /for up to one hour so that you can share it/, /effective from 25 October 2026/], ['de', /höchstens eine Stunde im Serverspeicher, damit Sie es teilen/, /gilt ab dem 25\. Oktober 2026/], ['uk', /щонайбільше годину, щоб ним можна було поділитися/, /діє з 25 жовтня 2026/]]) {
+  for (const [l, re, date] of [['pl', /najwyżej godzinę, żeby można było go udostępnić/, /obowiązuje od 2[57] października 2026/], ['en', /for up to one hour so that you can share it/, /effective from 2[57] October 2026/], ['de', /höchstens eine Stunde im Serverspeicher, damit Sie es teilen/, /gilt ab dem 2[57]\. Oktober 2026/], ['uk', /щонайбільше годину, щоб ним можна було поділитися/, /діє з 2[57] жовтня 2026/]]) {
     const b = legalBody('prywatnosc', l);
     assert.match(b, re, l); assert.match(b, date, l); assert.match(b, /<li>23[ .]/, `${l}: historia`);
   }

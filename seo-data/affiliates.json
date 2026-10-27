@@ -1,0 +1,24 @@
+{
+  "_opis": "Polecane kursy (linki partnerskie webePartners, program KursySzkolenia.online). Edycja bez kodu: dopisz kurs albo zawód (slug z /cv/<slug>; „kierownik-*” = wszystkie zawody zaczynające się od „kierownik-”). Kurs bez url_partnerski się nie wyświetla. Na stronie najwyżej 2 kursy, w kolejności z tej listy. Bez cen i bez obietnic w opisie.",
+  "kursy": [
+    { "id": "ksiegowosc", "nazwa": "Kurs Księgowości Online", "opis": "Kurs online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/387f7b1414", "zawody": ["ksiegowa", "analityk-finansowy", "specjalista-ds-windykacji"] },
+    { "id": "kadry-place", "nazwa": "Kurs Kadry i Płace", "opis": "Kurs online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/9b3466cd14", "zawody": ["specjalista-kadr-i-plac", "rekruter", "office-manager"] },
+    { "id": "prawo-pracy", "nazwa": "Szkolenie z Prawa Pracy", "opis": "Szkolenie online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/734fe02d14", "zawody": ["specjalista-kadr-i-plac", "rekruter"] },
+    { "id": "ms-word", "nazwa": "Kurs MS Word", "opis": "Kurs online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/1bf0694c14", "zawody": ["pracownik-biurowy", "asystentka-biura"] },
+    { "id": "outlook", "nazwa": "Kurs Outlook", "opis": "Kurs online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/4d5deeb614", "zawody": ["pracownik-biurowy", "office-manager"] },
+    { "id": "zarzadzanie-czasem", "nazwa": "Szkolenie z Zarządzania Czasem", "opis": "Szkolenie online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/218514dc14", "zawody": ["asystentka-biura", "office-manager", "kierownik-projektu"] },
+    { "id": "powerpoint", "nazwa": "Kurs PowerPoint", "opis": "Kurs online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/e98d474e14", "zawody": ["asystentka-biura", "specjalista-marketingu"] },
+    { "id": "sprzedaz", "nazwa": "Szkolenie Sprzedażowe", "opis": "Szkolenie online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/419c5d4b14", "zawody": ["sprzedawca", "kierownik-sklepu", "kierownik-sprzedazy"] },
+    { "id": "negocjacje", "nazwa": "Szkolenie z Negocjacji", "opis": "Szkolenie online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/c650c05714", "zawody": ["przedstawiciel-handlowy", "key-account-manager", "specjalista-zakupow"] },
+    { "id": "telemarketing", "nazwa": "Szkolenie z Telemarketingu", "opis": "Szkolenie online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/c2fde77d14", "zawody": ["konsultant-call-center"] },
+    { "id": "obsluga-klienta", "nazwa": "Szkolenie z Obsługi Klienta", "opis": "Szkolenie online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/dd337b9214", "zawody": ["obsluga-klienta", "recepcjonistka", "konsultant-call-center", "specjalista-helpdesk"] },
+    { "id": "komunikacja", "nazwa": "Szkolenie z Komunikacji", "opis": "Szkolenie online z certyfikatem ukończenia.", "url_partnerski": "", "zawody": ["obsluga-klienta", "specjalista-pr"] },
+    { "id": "grafika", "nazwa": "Kurs Grafiki Komputerowej", "opis": "Kurs online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/ed50238c14", "zawody": ["grafik"] },
+    { "id": "marketing-internetowy", "nazwa": "Kurs Marketingu Internetowego", "opis": "Kurs online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/fe246c1814", "zawody": ["specjalista-marketingu", "specjalista-e-commerce", "specjalista-seo", "specjalista-google-ads"] },
+    { "id": "social-media", "nazwa": "Kurs Social Media Managera", "opis": "Kurs online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/3478a4dd14", "zawody": ["social-media-manager", "specjalista-pr"] },
+    { "id": "menedzerskie", "nazwa": "Szkolenie Menedżerskie", "opis": "Szkolenie online z certyfikatem ukończenia.", "url_partnerski": "", "zawody": ["kierownik-*"] },
+    { "id": "project-manager", "nazwa": "Kurs Project Managera", "opis": "Kurs online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/4cf0ce3514", "zawody": ["kierownik-projektu", "analityk-biznesowy"] },
+    { "id": "excel-podstawowy", "nazwa": "Kurs Excel podstawowy", "opis": "Kurs online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/8bee5a4e14", "zawody": ["pracownik-biurowy", "magazynier", "logistyk", "asystentka-biura"] },
+    { "id": "excel-zaawansowany", "nazwa": "Kurs Excel zaawansowany", "opis": "Kurs online z certyfikatem ukończenia.", "url_partnerski": "https://webep1.com/go/e6e5522714", "zawody": ["analityk-danych", "analityk-finansowy", "ksiegowa", "logistyk", "kierownik-magazynu"] }
+  ]
+}
