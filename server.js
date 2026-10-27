@@ -68,6 +68,8 @@ import { translationPageRoutes } from './lib/translation-page.js';
 import { adCheckRoutes, cleanupAdChecks } from './lib/ad-check.js';
 import { grantRoutes, cleanupGrantDrafts, GRANT_EXTRACT_PATH } from './lib/grant.js';
 import { grantPageRoutes } from './lib/grant-page.js';
+import { offerReplyRoutes, cleanupOfferDrafts } from './lib/offer.js';
+import { offerPageRoutes } from './lib/offer-page.js';
 import { adCheckPageRoutes } from './lib/ad-check-page.js';
 import { fullPreviewRoutes, fullPreviewFor, cleanupFullPreviews, reusesWhole } from './lib/full-preview.js';
 import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText, visitInfo, funnelPaid, countEvent, funnelOrder, abExpose } from './lib/analytics.js';
@@ -648,6 +650,8 @@ adCheckRoutes(app);
 adCheckPageRoutes(app, BASE_URL);
 grantRoutes(app, { prices: () => ({ plan: PRICES.grantplan / 100, full: PRICES.grantfull / 100 }) });
 grantPageRoutes(app, BASE_URL);
+offerReplyRoutes(app);
+offerPageRoutes(app, BASE_URL);
 const productMail = (x, files, inserted) => (mailEnabled() ? sendProductMail(x, files, inserted, productReturn(x, BASE_URL)) : Promise.reject(new Error('Wysyłka e-maili wyłączona (brak SMTP)')));
 productRoutes(app, { BASE_URL, DEMO, getOrder, saveOrder, updateOrder, openPayment, pickGateway, BAD_GATEWAY, cleanInvoice, WAIVER, closed: salesClosedFor, CLOSED_MSG, PayOpenError, sendMail: productMail });
 fullPreviewRoutes(app, { cleanProfile, cleanAds, prices: () => PRICES });
@@ -1210,6 +1214,7 @@ async function hourly() {
     await cleanupTranslations().catch(() => {}); // tłumaczenia CV z podglądu (48 h)
     await cleanupAdChecks().catch(() => {}); // sprawdzenia ogłoszeń z podglądu (48 h)
     await cleanupGrantDrafts().catch(() => {}); // dokumenty do dotacji z podglądu (48 h)
+    await cleanupOfferDrafts().catch(() => {}); // oferty na zlecenie z podglądu (48 h)
     await cleanupShareCards().catch(() => {});
     await cleanupPartnerApps().catch(() => {});
     await crmHourly(BASE_URL).catch((e) => logEvent('kontakty', e.message));

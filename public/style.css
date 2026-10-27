@@ -1115,3 +1115,21 @@ ul.checklist{list-style:none;padding-left:0}
 .grt-fields,.grt-toc{columns:2;gap:24px;font-size:.95rem}
 #grExpAdd,#grCostAdd{margin-bottom:12px}
 @media(max-width:700px){.grt-row,#grCost .grt-row{grid-template-columns:1fr}.grt-del{justify-self:end;width:auto}.grt .grid2{grid-template-columns:1fr}.grt-fields,.grt-toc{columns:1}}
+/* D6: oferta na zlecenie (/uslugi/oferta-na-zlecenie) */
+.ofr textarea,.ofr input[type=text],.ofr select{width:100%}
+.ofr .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ofr-item{grid-template-columns:3fr 1fr 1.4fr auto}
+#ofItemAdd{margin-bottom:12px}
+.ofr-card{position:relative;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.ofr-mark{position:absolute;top:10px;right:12px;font-size:.75rem;font-weight:700;letter-spacing:.08em;color:var(--brand);opacity:.6}
+.ofr-blur{display:grid;gap:8px;margin:8px 0 12px;filter:blur(3px);user-select:none}
+.ofr-blur span{display:block;height:12px;border-radius:6px;background:var(--line)}
+.ofr-blur span:nth-child(3n){width:70%}
+.ofr-sec{margin:16px 0;padding:12px 16px;border:1px solid var(--line);border-radius:12px}
+.ofr-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.ofr-head h2{margin:0}
+.ofr-short{white-space:pre-line}
+.ofr-code{font-size:1.4rem;font-weight:700;letter-spacing:.06em;margin:6px 0;color:var(--ink)}
+#ofCodeBox{margin-top:12px}
+@media(max-width:700px){.ofr .grid2,.ofr-item{grid-template-columns:1fr}}
+.ofr-out,.ofr-prev{max-width:640px}
