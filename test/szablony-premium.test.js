@@ -76,10 +76,10 @@ test('API i strona: zakup, plik dopiero po płatności, strona z galerią i zgod
 
 test('Regulamin (4 języki, 27.10.2026, historia), skrypt strony i tłumaczenia', () => {
   for (const [l, re, hist] of [
-    ['pl', /„Szablony CV premium” to pakiet 10 edytowalnych szablonów CV w formacie Word \(DOCX\)[\s\S]*nie może ich odsprzedawać[\s\S]*Szablony CV premium \(§2 ust\. 7\) – 19 zł\./, /Historia zmian: 27 października 2026 r\. – „Szablony CV premium” \(§2 ust\. 7, §4 ust\. 1\);/],
-    ['en', /“Premium CV templates” is a pack of 10 editable CV templates[\s\S]*Premium CV templates \(§2\(7\)\) – PLN 19\./, /Change history: 27 October 2026 – “Premium CV templates”/],
-    ['de', /„Premium-Lebenslaufvorlagen“ sind ein Paket mit 10 bearbeitbaren[\s\S]*Premium-Lebenslaufvorlagen \(§2 Abs\. 7\) – 19 PLN\./, /Änderungshistorie: 27\. Oktober 2026 – „Premium-Lebenslaufvorlagen“/],
-    ['uk', /«Преміум-шаблони резюме» – це пакет із 10[\s\S]*Преміум-шаблони резюме \(§2 п\. 7\) – 19 zł\./, /Історія змін: 27 жовтня 2026 р\. – «Преміум-шаблони резюме»/]]) {
+    ['pl', /„Szablony CV premium” to pakiet 10 edytowalnych szablonów CV w formacie Word \(DOCX\)[\s\S]*nie może ich odsprzedawać[\s\S]*Szablony CV premium \(§2 ust\. 7\) – 19 zł\./, /Historia zmian: (?:[^;]*; )*27 października 2026 r\. – „Szablony CV premium” \(§2 ust\. 7, §4 ust\. 1\);/],
+    ['en', /“Premium CV templates” is a pack of 10 editable CV templates[\s\S]*Premium CV templates \(§2\(7\)\) – PLN 19\./, /Change history: (?:[^;]*; )*27 October 2026 – “Premium CV templates”/],
+    ['de', /„Premium-Lebenslaufvorlagen“ sind ein Paket mit 10 bearbeitbaren[\s\S]*Premium-Lebenslaufvorlagen \(§2 Abs\. 7\) – 19 PLN\./, /Änderungshistorie: (?:[^;]*; )*27\. Oktober 2026 – „Premium-Lebenslaufvorlagen“/],
+    ['uk', /«Преміум-шаблони резюме» – це пакет із 10[\s\S]*Преміум-шаблони резюме \(§2 п\. 7\) – 19 zł\./, /Історія змін: (?:[^;]*; )*27 жовтня 2026 р\. – «Преміум-шаблони резюме»/]]) {
     const b = legalBody('regulamin', l); assert.match(b, re, l); assert.match(b, hist, l);
   }
   const js = read('public/szablony.js');
