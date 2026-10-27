@@ -1080,3 +1080,7 @@ ul.checklist{list-style:none;padding-left:0}
 .aff-card p{margin:0;color:var(--mute);font-size:14px}
 .aff-card .btn{justify-self:start}
 .firm-short{margin:0;line-height:1.7}
+/* D3: Tłumaczenie CV – podgląd strony 1 (jak C1) */
+.trl-img img{display:block;width:100%;max-width:640px;height:auto;margin:12px 0;border:1px solid var(--line);border-radius:10px;user-select:none;-webkit-user-drag:none}
+.trl .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.trl .grid2{grid-template-columns:1fr}}
