@@ -39,13 +39,14 @@ test('robots.txt nie blokuje /llms.txt', async () => {
   assert.ok(!/^Disallow: \/(llms|$)/m.test(text));
 });
 
-test('/o-serwisie: 200, jeden H1, dane firmy, ceny, link do polityki prywatności, indeksowana, w sitemapie i w stopce', async () => {
+test('/o-serwisie: 200, jeden H1, bez danych właściciela (link do /kontakt), ceny, link do polityki prywatności, indeksowana, w sitemapie i w stopce', async () => {
   const { status, text } = await get('/o-serwisie'), s = seller();
   assert.equal(status, 200);
   const main = /<section class="page" id="page" role="main" data-ssr="1">([\s\S]*?)<\/section>/.exec(text)?.[1] || '';
   assert.equal((main.match(/<h1>/g) || []).length, 1);
   assert.ok(text.includes('<h1>O serwisie CV Pod Ogłoszenie</h1>'));
-  assert.ok(text.includes(`NIP: ${s.nip}`) && text.includes(s.address) && text.includes(s.name));
+  assert.ok(!text.includes(s.nip) && !text.includes(s.address) && !text.includes(s.name), 'dane właściciela tylko na /kontakt (27.10)');
+  assert.ok(text.includes('<h2>Kto prowadzi serwis</h2><p>Serwis prowadzi jednoosobowa działalność gospodarcza z siedzibą w Polsce. Pełne dane firmy: <a href="/kontakt">Kontakt</a>.</p>'));
   assert.ok(text.includes('href="/polityka-prywatnosci"'));
   for (const k of Object.keys(PACKAGES)) assert.ok(text.includes(`<b>${zl(PRICES[k])}</b>`), `cena ${k}`);
   assert.ok(text.includes(`<link rel="canonical" href="${base}/o-serwisie">`) && !text.includes('noindex'));
@@ -53,7 +54,7 @@ test('/o-serwisie: 200, jeden H1, dane firmy, ceny, link do polityki prywatnośc
   assert.ok((await get('/sitemap.xml')).text.includes(`<loc>${base}/o-serwisie</loc>`));
 });
 
-test('JSON-LD Organization na stronie głównej i /o-serwisie: jeden, poprawny, z adresem, NIP i sameAs z Trustpilot', async () => {
+test('JSON-LD Organization na stronie głównej i /o-serwisie: jeden, poprawny, bez danych właściciela, z sameAs (Trustpilot); pełne dane w JSON-LD /kontakt', async () => {
   for (const p of ['/', '/o-serwisie', '/en']) {
     const orgs = lds((await get(p)).text).filter((x) => x['@type'] === 'Organization');
     assert.equal(orgs.length, 1, `${p}: jedna organizacja`);
@@ -61,13 +62,13 @@ test('JSON-LD Organization na stronie głównej i /o-serwisie: jeden, poprawny, 
     assert.equal(o.name, 'CV Pod Ogłoszenie');
     assert.equal(o.url, `${base}/`);
     assert.equal(o.logo, `${base}/logo.svg`);
-    assert.equal(o.taxID, seller().nip);
-    assert.equal(o.address.postalCode, '66-010');
-    assert.equal(o.address.addressCountry, 'PL');
+    for (const k of ['legalName', 'address', 'taxID', 'founder']) assert.equal(o[k], undefined, `${p}: bez ${k}`);
     assert.match(o.email, /@/);
     assert.ok(Array.isArray(o.sameAs) && o.sameAs.includes(TP), `${p}: sameAs`);
     for (const u of ['https://www.youtube.com/@cvpodogloszenie', 'https://www.facebook.com/cvpodogloszenie', 'https://www.instagram.com/cvpodogloszenie']) assert.ok(o.sameAs.includes(u), `${p}: ${u}`);
   }
+  const c = lds((await get('/kontakt')).text).find((x) => x['@type'] === 'ContactPage').mainEntity;
+  assert.equal(c.legalName, seller().name); assert.equal(c.taxID, seller().nip); assert.equal(c.address.postalCode, '66-010');
 });
 
 test('/o-serwisie: Przelewy24 tylko przy aktywnym koncie P24', async () => {

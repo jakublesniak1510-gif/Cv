@@ -26,34 +26,37 @@ test('Daty treści: każda strona (zawód, poradnik, wzór, pracodawca; EN/UK/DE
   assert.deepEqual(stale, [], `Treść tych stron zmieniła się bez aktualizacji daty – uruchom node scripts/content-dates.mjs: ${stale.slice(0, 10).join(', ')}`);
 });
 
-test('Podpis „Autor · Zaktualizowano”, author (Person) i dateModified z danych; strony autora i zasad; lastmod w mapie strony', async () => {
+test('Podpis „Autor: Redakcja CV Pod Ogłoszenie · Zaktualizowano”, author (Organization) i dateModified z danych; dawna strona autora → 301 na zasady; lastmod w mapie strony', async () => {
   const B = 'https://example.test', app = express(); seoRoutes(app, B); templateRoutes(app, B); employerRoutes(app, B);
   const s = app.listen(0), U = `http://127.0.0.1:${s.address().port}`, get = async (p) => (await fetch(U + p)).text();
   const dmy = (iso) => iso.split('-').reverse().join('.'), dt = (u) => D[u].date;
   try {
     const t = Object.values(TEMPLATES)[0], e = EMPLOYERS[0], a = ARTICLES[0], p = PROFESSIONS[0];
     const enP = `en/cv/${PROF_LANGS.en.prof[p.slug].slugLang}`, deA = `de/${ART_LANGS.de.seg}/${ART_LANGS.de.data[a.slug].slugLang}`;
-    const pages = [[`/poradnik/${a.slug}`, dt(`poradnik/${a.slug}`), 'Autor', 'Zaktualizowano'], [`/cv/${p.slug}`, dt(`cv/${p.slug}`), 'Autor', 'Zaktualizowano'], [`/wzor-cv/${t.slug}`, dt(`wzor-cv/${t.slug}`), 'Autor', 'Zaktualizowano'],
-      [`/list-motywacyjny/${t.slug}`, dt(`list-motywacyjny/${t.slug}`), 'Autor', 'Zaktualizowano'], [`/praca-w/${e.slug}`, dt(`praca-w/${e.slug}`), 'Autor', 'Zaktualizowano'],
-      [`/${enP}`, dt(enP), 'Author', 'Updated'], [`/${deA}`, dt(deA), 'Autor', 'Aktualisiert']];
-    for (const [path, d, au, up] of pages) {
+    const R = 'Redakcja CV Pod Ogłoszenie';
+    const pages = [[`/poradnik/${a.slug}`, dt(`poradnik/${a.slug}`), 'Autor', 'Zaktualizowano', R], [`/cv/${p.slug}`, dt(`cv/${p.slug}`), 'Autor', 'Zaktualizowano', R], [`/wzor-cv/${t.slug}`, dt(`wzor-cv/${t.slug}`), 'Autor', 'Zaktualizowano', R],
+      [`/list-motywacyjny/${t.slug}`, dt(`list-motywacyjny/${t.slug}`), 'Autor', 'Zaktualizowano', R], [`/praca-w/${e.slug}`, dt(`praca-w/${e.slug}`), 'Autor', 'Zaktualizowano', R],
+      [`/${enP}`, dt(enP), 'Author', 'Updated', 'CV Pod Ogłoszenie editorial team'], [`/${deA}`, dt(deA), 'Autor', 'Aktualisiert', 'Redaktion CV Pod Ogłoszenie']];
+    for (const [path, d, au, up, who] of pages) {
       const h = await get(path);
-      assert.ok(h.includes(`<p class="byline">${au}: <a href="/autor/jakub-lesniak" rel="author">Jakub Leśniak</a> · ${up}: <time datetime="${d}">${dmy(d)}</time></p>`), `${path}: podpis`);
+      assert.ok(h.includes(`<p class="byline">${au}: <a href="/zasady-redakcyjne" rel="author">${who}</a> · ${up}: <time datetime="${d}">${dmy(d)}</time></p>`), `${path}: podpis`);
+      assert.ok(!h.includes('Leśniak'), `${path}: bez nazwiska właściciela`);
       assert.ok(h.includes(`"dateModified":"${d}"`), `${path}: dateModified`);
-      assert.ok(h.includes(`"author":{"@type":"Person","@id":"${B}/autor/jakub-lesniak#osoba","name":"Jakub Leśniak","url":"${B}/autor/jakub-lesniak"}`), `${path}: author`);
+      assert.ok(h.includes(`"author":{"@type":"Organization","@id":"${B}/#organizacja","name":"CV Pod Ogłoszenie","url":"${B}/"}`), `${path}: author`);
     }
     const home = await get('/');
-    assert.match(home, /"founder":\{"@type":"Person","@id":"https:\/\/example\.test\/autor\/jakub-lesniak#osoba"/, 'Organization → Person (founder)');
-    const au = await get('/autor/jakub-lesniak'), zr = await get('/zasady-redakcyjne'), about = await get('/o-serwisie');
-    assert.match(au, /<h1>Jakub Leśniak<\/h1>/); assert.match(au, /"@type":"ProfilePage"/); assert.match(au, /"worksFor":\{"@id":"https:\/\/example\.test\/#organizacja"\}/);
-    assert.match(au, /href="\/zasady-redakcyjne"/);
+    assert.doesNotMatch(home, /"founder"|"taxID"|"legalName"/, 'Organization bez danych właściciela');
+    const r = await fetch(U + '/autor/jakub-lesniak', { redirect: 'manual' });
+    assert.equal(r.status, 301); assert.equal(r.headers.get('location'), '/zasady-redakcyjne');
+    const zr = await get('/zasady-redakcyjne'), about = await get('/o-serwisie');
     // Bez wymyślonych kwalifikacji i doświadczenia: tylko fakty z /o-serwisie.
-    assert.doesNotMatch(au + zr, /lat doświadczenia|certyfik|ekspert|specjalista HR|rekruter z|doradca kariery z/i);
+    assert.doesNotMatch(zr, /lat doświadczenia|certyfik|ekspert|specjalista HR|rekruter z|doradca kariery z/i);
+    assert.match(zr, /Za treści odpowiada redakcja serwisu CV Pod Ogłoszenie \(dane firmy: <a href="\/kontakt">Kontakt<\/a>\)/); assert.ok(!zr.includes('Leśniak'));
     for (const h2 of ['Źródła', 'Rola AI', 'Aktualizacje', 'Zgłoś błąd']) assert.ok(zr.includes(`<h2>${h2}</h2>`), h2);
     assert.match(zr, /Przed publikacją fakty są sprawdzane ze źródłami, a treść jest poprawiana po każdym zgłoszeniu błędu/); assert.doesNotMatch(zr, /czyta człowiek|sprawdzana i poprawiana, a za jej/);
-    assert.match(about, /href="\/autor\/jakub-lesniak"/); assert.match(about, /href="\/zasady-redakcyjne"/);
+    assert.doesNotMatch(about, /autor\/jakub-lesniak/); assert.match(about, /przygotowuje redakcja serwisu/); assert.match(about, /href="\/zasady-redakcyjne"/);
     const sm = await get('/sitemap.xml');
     assert.ok(sm.includes(`<loc>${B}/cv/${p.slug}</loc><lastmod>${dt(`cv/${p.slug}`)}</lastmod>`), 'lastmod strony zawodu');
-    assert.ok(sm.includes(`<loc>${B}/autor/jakub-lesniak</loc>`) && sm.includes(`<loc>${B}/zasady-redakcyjne</loc>`));
+    assert.ok(!sm.includes('autor/jakub-lesniak') && sm.includes(`<loc>${B}/zasady-redakcyjne</loc>`));
   } finally { s.close(); }
 });
