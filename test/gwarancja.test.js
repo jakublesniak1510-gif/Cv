@@ -28,7 +28,7 @@ test('Strona: zdanie z linkiem do §7a w hero, FAQ, kroku 1 (pasek zaufania) i n
   assert.ok(hero.includes(`<p class="hero-line">39 zł jednorazowo · bez abonamentu · BLIK w 10 sekund · 5 poprawek w cenie<br>${link}</p>`), 'hero');
   assert.match(html, new RegExp(`<details><summary>Co jeśli CV mi się nie spodoba\\?</summary><p>Masz darmową poprawkę:[^<]+${link.replace(/[?.]/g, (c) => `\\${c}`)}</p></details>`), 'FAQ');
   assert.match(app, /const guarLink = \(\) => el\('a', \{ href: `\$\{legalUrl\('regulamin', window\.I18N\?\.lang \|\| 'pl'\)\}#gwarancja`, textContent: tr\('Nie pasuje po poprawkach\? Zwracamy pieniądze\.'\) \}\);/);
-  assert.match(app, /: null, guarLink\(\)\]\.filter\(Boolean\);/, 'krok 1: pasek zaufania');
+  assert.match(app, /textContent: 'Dane firmy' \}\), guarLink\(\)\]\.filter\(Boolean\);/, 'krok 1: pasek zaufania');
   assert.match(app, /\$\{parts\[3\]\}\. `, guarLink\(\)\);/, '„Dostajesz” nad przyciskiem płatności');
   assert.match(app, /a\[href\^="\/regulamin#"\]:not\(\[data-lang\]\)/, 'link w wersjach EN/UK/DE z kotwicą');
   for (const l of ['en', 'de', 'uk']) for (const k of [G, 'Co jeśli CV mi się nie spodoba?']) assert.ok(dict(l)[k], `${l}: ${k}`);

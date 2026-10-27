@@ -1029,16 +1029,16 @@ function getLine(on) {
 }
 // Gwarancja dopasowania (C5): link do §7a regulaminu w języku strony.
 const guarLink = () => el('a', { href: `${legalUrl('regulamin', window.I18N?.lang || 'pl')}#gwarancja`, textContent: tr('Nie pasuje po poprawkach? Zwracamy pieniądze.') });
-// Krok 1 (B7): kompaktowy pasek zaufania – metody płatności z bramek (/api/config → pay), faktura, usuwanie danych, poprawki, sprzedawca z NIP.
+// Krok 1 (B7): kompaktowy pasek zaufania – metody płatności z bramek (/api/config → pay), faktura, usuwanie danych, poprawki, link do danych firmy.
 function drawTrust1() {
   const box = $('#trust1'), ms = [...new Set(payGateways().length ? payGateways().flatMap((g) => g.methods || []) : cfg.pay?.methods || [])].filter((m) => m !== 'Przelewy24');
-  const rev = cfg.maxRevisions || 5, s = cfg.seller;
+  const rev = cfg.maxRevisions || 5;
   const items = [
     el('span', { textContent: (ms.length ? ms : ['BLIK', 'karta', 'Apple Pay / Google Pay']).map(tr).join(' / ') }),
     el('span', { textContent: 'faktura na życzenie' }),
     el('span', { textContent: 'dane usuwane po 30 dniach' }),
     el('span', {}, `${rev} `, el('span', { textContent: plural(rev, 'poprawka w cenie', 'poprawki w cenie', 'poprawek w cenie') })),
-    s?.nip ? el('a', { href: '/o-serwisie', textContent: `${s.name}, NIP ${s.nip}` }) : null, guarLink()].filter(Boolean);
+    el('a', { href: '/kontakt', textContent: 'Dane firmy' }), guarLink()].filter(Boolean);
   box.replaceChildren(...items.flatMap((x, i) => (i ? [' · ', x] : [x]))); box.hidden = false;
 }
 function payTrust(n) {

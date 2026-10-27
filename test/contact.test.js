@@ -21,14 +21,15 @@ test('/kontakt: pełne dane firmy, indeksowana strona w mapie strony, dane struk
   assert.ok((await (await fetch(`${U}/sitemap.xml`)).text()).includes(`${base}/kontakt</loc>`));
 });
 
-test('Strona główna: sekcja „Kontakt” z danymi firmy, menu i stopka prowadzą do /kontakt', async () => {
+test('Strona główna: sekcja „Kontakt” tylko z e-mailem i linkiem „Dane firmy i kontakt” (dane właściciela tylko na /kontakt, 27.10)', async () => {
   const h = await (await fetch(`${U}/`)).text(), sec = h.slice(h.indexOf('id="kontakt"'), h.indexOf('id="newsletter"'));
-  assert.ok(sec.includes('Dane firmy'));
-  for (const t of MUST) assert.ok(sec.includes(t), `sekcja Kontakt: ${t}`);
+  assert.ok(sec.includes('<p class="firm-short">E-mail: <a href="mailto:kontakt@example.test">kontakt@example.test</a><br><a href="/kontakt">Dane firmy i kontakt</a></p>'));
+  for (const t of ['Jakub Leśniak', '9731085406', '522084292', 'Winiary', '577 151 435']) assert.ok(!h.includes(t), `strona główna bez: ${t}`);
   assert.doesNotMatch(h, /<!--dane-firmy-->/); assert.ok(!h.includes('href="/#kontakt">Kontakt</a>'));
   assert.ok((h.match(/href="\/kontakt">Kontakt<\/a>/g) || []).length >= 2, 'menu i stopka');
   const about = await (await fetch(`${U}/o-serwisie`)).text();
-  for (const t of ['522084292', '+48 577 151 435', 'href="/kontakt"']) assert.ok(about.includes(t), t);
+  for (const t of ['522084292', '577 151 435', '9731085406', 'Leśniak']) assert.ok(!about.includes(t), t);
+  assert.ok(about.includes('href="/kontakt"'));
 });
 
 test('Stopka (wszystkie strony, 4 języki): bez NIP i telefonu, link „Dane firmy” do /kontakt#dane-firmy obok „Kontakt”', async () => {
