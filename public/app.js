@@ -821,7 +821,9 @@ const extraLangs = () => $$('#langPick input:checked').map((i) => i.value);
 // Pakiet „Pewna rozmowa”: list + przygotowanie do rozmowy + symulator razem taniej (tak samo liczy serwer, lib/pricing.js).
 const bundleOn = () => pkg() !== 'cv' && addons().interview && addons().sim;
 const addonsTotal = () => Object.entries(addons()).reduce((s, [k, on]) => s + (on ? PRICE[k] : 0), 0) + PRICE.extraLang * extraLangs().length - (bundleOn() ? PRICE.bundleOff : 0);
-const discount = () => (promo?.voucher ? Math.min(PRICE[pkg()], PRICE[promo.voucher]) : promo ? Math.min(promo.percent ? Math.round((PRICE[pkg()] + addonsTotal()) * promo.percent) / 100 : promo.discount, PRICE[pkg()] - 2) : 0);
+// Kod outplacementowy (D7): pokrywa też dodatki z voucherAddons (zaznaczone); przy „Pewnej rozmowie” przygotowanie jest już tańsze o bundleOff.
+const voucherAddonsOff = () => (promo?.voucherAddons || []).reduce((s, k) => s + (addons()[k] ? PRICE[k] - (k === 'interview' && bundleOn() ? PRICE.bundleOff : 0) : 0), 0);
+const discount = () => (promo?.voucher ? Math.min(PRICE[pkg()], PRICE[promo.voucher]) + voucherAddonsOff() : promo ? Math.min(promo.percent ? Math.round((PRICE[pkg()] + addonsTotal()) * promo.percent) / 100 : promo.discount, PRICE[pkg()] - 2) : 0);
 // Karnet (lib/passes.js): zalogowany klient z aktywnym karnetem płaci karnetem; kwotę do dopłaty liczy serwer (/api/passes/quote).
 let myPass = null, passQuote = null, passQT;
 const passOn = () => !!myPass && $('#usePass').checked;
@@ -982,7 +984,10 @@ async function applyCode(raw, quiet) {
   try {
     const r = await fetch(`/api/code/${encodeURIComponent(code)}?email=${encodeURIComponent($('#email').value)}`);
     const j = await r.json(); if (!r.ok) throw new Error(j.error);
-    promo = j; st.className = 'fstatus good'; st.textContent = j.voucher ? `${j.label}: ${PKG_NAME[j.voucher]} bez opłaty` : `${j.label}: −${j.percent ? j.percent + '%' : j.discount + ' zł'}`;
+    promo = j;
+    // Kod z dodatkami w cenie: od razu pakiet i dodatki z kodu (klient może je odznaczyć).
+    if (j.voucherAddons) { const r = $(`input[name=pkg][value=${j.voucher}]`); if (r) r.checked = true; for (const k of j.voucherAddons) { const sel = ADDON_KEYS[k]?.[0], b = sel && $(sel); if (b && !b.checked) { b.checked = true; b.dispatchEvent(new Event("change")); } } }
+    st.className = 'fstatus good'; st.textContent = j.voucherAddons ? `${j.label}: ${PKG_NAME[j.voucher]} i dodatki bez opłaty` : j.voucher ? `${j.label}: ${PKG_NAME[j.voucher]} bez opłaty` : `${j.label}: −${j.percent ? j.percent + '%' : j.discount + ' zł'}`;
   } catch (x) { promo = null; if (!quiet) { st.className = 'fstatus bad'; st.textContent = x.message; } }
   refresh(); if (step === 6) { drawSummary(); nextLabel(); }
 }

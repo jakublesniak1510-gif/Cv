@@ -1133,3 +1133,7 @@ ul.checklist{list-style:none;padding-left:0}
 #ofCodeBox{margin-top:12px}
 @media(max-width:700px){.ofr .grid2,.ofr-item{grid-template-columns:1fr}}
 .ofr-out,.ofr-prev{max-width:640px}
+/* D7: outplacement dla firm (/dla-firm/outplacement) */
+.outp-warn{margin:12px 0}
+.outp-prices td,.outp-prices th{text-align:center}
+.outp-codes code{font-size:.95rem}

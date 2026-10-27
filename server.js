@@ -70,6 +70,7 @@ import { grantRoutes, cleanupGrantDrafts, GRANT_EXTRACT_PATH } from './lib/grant
 import { grantPageRoutes } from './lib/grant-page.js';
 import { offerReplyRoutes, cleanupOfferDrafts } from './lib/offer.js';
 import { offerPageRoutes } from './lib/offer-page.js';
+import { outplacementRoutes } from './lib/outplacement.js';
 import { adCheckPageRoutes } from './lib/ad-check-page.js';
 import { fullPreviewRoutes, fullPreviewFor, cleanupFullPreviews, reusesWhole } from './lib/full-preview.js';
 import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText, visitInfo, funnelPaid, countEvent, funnelOrder, abExpose } from './lib/analytics.js';
@@ -263,16 +264,18 @@ app.use(express.json({ limit: '700kb' }));
 growthRoutes(app, { BASE_URL });
 shareRoutes(app, { BASE_URL, imgLimit: shareImgLimit }); // karta wyniku skanera do udostępnienia (/wynik/<id>, 30 dni, obrazki 1080×1080 i 1080×1920)
 // Instytucje i partnerzy: zamówienie paczki kodów, zgłoszenie do programu partnerskiego, raporty kodów (przed stronami SEO).
-b2bRoutes(app, {
+const b2bPay = {
   BASE_URL, demo: DEMO && !SALES_CLOSED, closedFor: (req) => salesClosedFor(req),
   confirm: (b) => confirmB2b(b),
   // Paczki kodów: tylko Stripe (z fakturą przelewową jako alternatywą w formularzu B2B).
   checkout: GATEWAYS.includes('stripe') ? async (b, returnUrl) => {
-    const sess = await stripeCheckout({ orderId: b.id, amount: b.total, email: b.email, lang: 'pl', name: `CV Pod Ogłoszenie: paczka ${b.qty} kodów (${PACKAGES[b.pkg]?.name})`, description: `${b.org}: ${b.qty} × ${b.unit / 100} zł`.slice(0, 300), returnUrl });
+    const sess = await stripeCheckout({ orderId: b.id, amount: b.total, email: b.email, lang: 'pl', name: `CV Pod Ogłoszenie: paczka ${b.qty} kodów (${b.pkgName || PACKAGES[b.pkg]?.name})`, description: `${b.org}: ${b.qty} × ${b.unit / 100} zł`.slice(0, 300), returnUrl });
     await b2bOrders.update(b.id, { stripe: { sessionId: sess.id } });
     return sess.url;
   } : null,
-});
+};
+b2bRoutes(app, b2bPay);
+outplacementRoutes(app, b2bPay); // D7: /dla-firm/outplacement (kody dla pracowników, panel firmy)
 seoRoutes(app, BASE_URL);
 letterRoutes(app, BASE_URL); // /narzedzia/list-motywacyjny-pod-ogloszenie
 landingRoutes(app, BASE_URL); // /kreator-cv i case study „Jedno CV, dwa ogłoszenia”
@@ -330,7 +333,7 @@ async function checkCode(raw, email) {
   if (!c || c.disabled || Date.now() > c.expires) return { error: 'Ten kod nie istnieje albo wygasł.' };
   const d = codeDiscount(c, email);
   if (d.error) return d;
-  return { code, discount: d.base + d.credit, base: d.base, credit: d.credit, owner: isOwner(c, email), percent: c.percent || 0, voucher: c.voucher || null };
+  return { code, discount: d.base + d.credit, base: d.base, credit: d.credit, owner: isOwner(c, email), percent: c.percent || 0, voucher: c.voucher || null, voucherAddons: c.voucherAddons || null };
 }
 // Rezerwacja kodu przed zapisem zamówienia, w jednej blokadzie zapisu kodów (lib/referral.js: reserveCode).
 // Zamówienie za 0 zł (kod od instytucji, saldo) od razu zajmuje kod na stałe; płatne – do opłacenia albo 24 h.
@@ -369,8 +372,12 @@ async function selfReferral(o) {
 const creditUsedFor = (c, full, total) => (c.credit ? Math.max(0, Math.min(c.credit, full - total - c.base)) : 0);
 // Rabat w groszach: kwotowy albo procentowy (kody akcji promocyjnych z panelu).
 // Kod od instytucji (voucher) pokrywa cały pakiet; przy droższym pakiecie klient dopłaca różnicę.
-const discountFor = (c, pkg, n, ad, returning, langs) => c.voucher ? (PRICES[pkg] <= PRICES[c.voucher] ? 'voucher' : PRICES[c.voucher]) : (c.percent ? Math.round((calcTotal(pkg, n, ad, returning, langs, 0) * c.percent) / 100) : c.discount || 0);
-const discountGr = (disc, pkg) => (disc === 'voucher' ? PRICES[pkg] : disc); // do zapisu w zamówieniu (grosze)
+// Kod outplacementowy (D7) pokrywa też wybrane dodatki: { voucher, addons, amount } – amount to łączny rabat do zapisu w zamówieniu.
+const discountFor = (c, pkg, n, ad, returning, langs) => {
+  if (c.voucherAddons && PRICES[pkg] <= PRICES[c.voucher]) { const v = { voucher: true, addons: c.voucherAddons }; return { ...v, amount: calcTotal(pkg, n, ad, returning, langs, 0) - calcTotal(pkg, n, ad, returning, langs, v) }; }
+  return c.voucher ? (PRICES[pkg] <= PRICES[c.voucher] ? 'voucher' : PRICES[c.voucher]) : (c.percent ? Math.round((calcTotal(pkg, n, ad, returning, langs, 0) * c.percent) / 100) : c.discount || 0);
+};
+const discountGr = (disc, pkg) => (disc === 'voucher' ? PRICES[pkg] : disc?.voucher ? disc.amount : disc); // do zapisu w zamówieniu (grosze)
 const newCode = (prefix) => `${prefix}-${crypto.randomBytes(4).toString('hex').toUpperCase().slice(0, 6)}`;
 // Zgoda z art. 38 pkt 13 ustawy o prawach konsumenta (ta sama treść w kreatorze i przy dokupieniu dodatku).
 const WAIVER = 'Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.';
@@ -435,7 +442,7 @@ app.get('/api/code/:code', async (req, res) => {
   if (r.error) return res.status(404).json({ error: r.error });
   // Kod promocji z kalendarza: do podsumowania zamówienia dołączamy najniższą cenę z 30 dni przed obniżką (Omnibus).
   const promo = activePromo();
-  res.json({ code: r.code, discount: r.discount / 100, percent: r.percent || 0, voucher: r.voucher, label: r.voucher ? 'Kod od instytucji' : r.owner ? 'Twój kod z saldem poleceń' : 'Kod rabatowy', ...(promo && promo.code === r.code ? { calendar: true, lowest: promo.lowest } : {}) });
+  res.json({ code: r.code, discount: r.discount / 100, percent: r.percent || 0, voucher: r.voucher, ...(r.voucherAddons ? { voucherAddons: r.voucherAddons } : {}), label: r.voucherAddons ? 'Kod od pracodawcy (outplacement)' : r.voucher ? 'Kod od instytucji' : r.owner ? 'Twój kod z saldem poleceń' : 'Kod rabatowy', ...(promo && promo.code === r.code ? { calendar: true, lowest: promo.lowest } : {}) });
 });
 
 // Darmowe narzędzia z AI (lib/freeTools.js): ocena zdjęcia do CV (zdjęcia nie zapisujemy) i odpowiedź na pytanie rekrutera.
