@@ -66,6 +66,8 @@ import { productRoutes, applyProduct, isProduct, productName, productReturn, PHO
 import { translationRoutes, cleanupTranslations, TR_UPLOAD_PATH } from './lib/translation.js';
 import { translationPageRoutes } from './lib/translation-page.js';
 import { adCheckRoutes, cleanupAdChecks } from './lib/ad-check.js';
+import { grantRoutes, cleanupGrantDrafts, GRANT_EXTRACT_PATH } from './lib/grant.js';
+import { grantPageRoutes } from './lib/grant-page.js';
 import { adCheckPageRoutes } from './lib/ad-check-page.js';
 import { fullPreviewRoutes, fullPreviewFor, cleanupFullPreviews, reusesWhole } from './lib/full-preview.js';
 import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText, visitInfo, funnelPaid, countEvent, funnelOrder, abExpose } from './lib/analytics.js';
@@ -251,6 +253,7 @@ app.post('/api/cv-check', express.json({ limit: '8mb' }), async (req, res) => {
 // Import kontaktów CSV w panelu może przekraczać ogólny limit 700 KB (parser przed globalnym).
 app.use('/api/admin/contacts/import', express.json({ limit: '3mb' }));
 app.use(PHOTO_UPLOAD_PATHS, express.json({ limit: '6mb' })); // D1: zdjęcie do CV do 4 MB (base64) – przed ogólnym limitem 700 kB
+app.use(GRANT_EXTRACT_PATH, express.json({ limit: '8mb' })); // D5: wzór wniosku z urzędu pracy albo CV do 5 MB (base64)
 app.use(TR_UPLOAD_PATH, express.json({ limit: '8mb' })); // D3: CV do tłumaczenia do 5 MB (base64)
 // Szkic ogłoszenia z rozszerzenia Chrome (własny limit 20 KB i CORS, więc przed globalnym parserem).
 draftRoutes(app);
@@ -643,7 +646,10 @@ translationRoutes(app, { price: () => PRICES.translation });
 translationPageRoutes(app, BASE_URL);
 adCheckRoutes(app);
 adCheckPageRoutes(app, BASE_URL);
-productRoutes(app, { BASE_URL, DEMO, getOrder, saveOrder, updateOrder, openPayment, pickGateway, BAD_GATEWAY, cleanInvoice, WAIVER, closed: salesClosedFor, CLOSED_MSG, PayOpenError });
+grantRoutes(app, { prices: () => ({ plan: PRICES.grantplan / 100, full: PRICES.grantfull / 100 }) });
+grantPageRoutes(app, BASE_URL);
+const productMail = (x, files, inserted) => (mailEnabled() ? sendProductMail(x, files, inserted, productReturn(x, BASE_URL)) : Promise.reject(new Error('Wysyłka e-maili wyłączona (brak SMTP)')));
+productRoutes(app, { BASE_URL, DEMO, getOrder, saveOrder, updateOrder, openPayment, pickGateway, BAD_GATEWAY, cleanInvoice, WAIVER, closed: salesClosedFor, CLOSED_MSG, PayOpenError, sendMail: productMail });
 fullPreviewRoutes(app, { cleanProfile, cleanAds, prices: () => PRICES });
 
 app.post('/api/orders', async (req, res) => {
@@ -909,7 +915,7 @@ async function markPaidAndGenerate(id) {
   inFlight.add(id);
   try {
     if (o.upsellOf) return await applyUpsell(o);
-    if (isProduct(o)) return await applyProduct(o, { getOrder, updateOrder, sendMail: (x, files, inserted) => (mailEnabled() ? sendProductMail(x, files, inserted, productReturn(x, BASE_URL)) : Promise.reject(new Error('Wysyłka e-maili wyłączona (brak SMTP)'))),
+    if (isProduct(o)) return await applyProduct(o, { getOrder, updateOrder, sendMail: productMail,
       paidSteps: (paidO) => { recordSale(paidO).catch((e) => console.error('Rejestr sprzedaży', e.message)); notifyNewOrder(paidO, BASE_URL).catch((e) => logEvent('e-mail', `Powiadomienie o zamówieniu: ${e.message}`)); if (paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: id })); countEvent(`product_paid:${paidO.product}`).catch(() => {}); } });
     const paidO = await updateOrder(id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
     const passFree = !!o.pass && !(o.total > 0); // zamówienie w całości z karnetu: przychód był przy zakupie karnetu
@@ -1203,6 +1209,7 @@ async function hourly() {
     await cleanupFullPreviews().catch(() => {});
     await cleanupTranslations().catch(() => {}); // tłumaczenia CV z podglądu (48 h)
     await cleanupAdChecks().catch(() => {}); // sprawdzenia ogłoszeń z podglądu (48 h)
+    await cleanupGrantDrafts().catch(() => {}); // dokumenty do dotacji z podglądu (48 h)
     await cleanupShareCards().catch(() => {});
     await cleanupPartnerApps().catch(() => {});
     await crmHourly(BASE_URL).catch((e) => logEvent('kontakty', e.message));
