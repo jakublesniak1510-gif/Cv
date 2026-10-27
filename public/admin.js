@@ -388,7 +388,21 @@ loaders.passes = async () => {
         el('td', { textContent: `${p.left.matches}/${p.plan.matches} dop., ${p.left.sim} sym., ${p.left.interview} przyg.` }), el('td', { className: 'num', textContent: day(p.expires) }), el('td', { textContent: ST[p.status] || p.status }), el('td', { className: 'num', textContent: p.flagged ? String(p.flagged) : '' }), el('td', {}, p.status === 'refunded' ? '' : b));
     }))) : el('div', { className: 'empty', textContent: 'Nie ma jeszcze sprzedanych karnetów.' }));
 };
+// Kod testowy 100%: jedna usługa, jedno użycie, 7 dni (lib/test-codes.js).
+async function drawTestCodes() {
+  const { products, list } = await api('/test-codes'), sel = $('#tcProduct');
+  if (!sel.options.length) sel.replaceChildren(...Object.entries(products).map(([k, v]) => el('option', { value: k, textContent: v })));
+  const day = (t) => new Date(t).toLocaleDateString('pl-PL');
+  $('#tcList').replaceChildren(list.length ? el('table', {}, el('thead', {}, el('tr', {}, ['Kod', 'Usługa', 'Ważny do', 'Stan', 'Link'].map((t) => el('th', { textContent: t })))),
+    el('tbody', {}, list.map((c) => el('tr', {}, el('td', { className: 'mono', textContent: c.id }), el('td', { textContent: c.name }), el('td', { className: 'num', textContent: day(c.expires) }),
+      el('td', { textContent: c.usedBy ? `użyty ${day(c.usedAt)}` : c.expired ? 'wygasł' : 'aktywny' }), el('td', {}, c.usedBy || c.expired ? '' : el('a', { href: c.link, target: '_blank', rel: 'noopener', textContent: 'otwórz' })))))) : el('div', { className: 'empty', textContent: 'Brak kodów testowych.' }));
+}
+$('#tcForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try { const c = await post('/test-codes', { product: $('#tcProduct').value }); $('#tcMsg').textContent = `${c.id} – ${c.name}`; drawTestCodes(); } catch (x) { $('#tcMsg').textContent = x.message; }
+});
 loaders.codes = async () => {
+  drawTestCodes().catch(() => {});
   const list = (await api('/codes')).filter((c) => !codeFilter || c.kind === codeFilter);
   if (!list.length) return $('#codeTable').replaceChildren(el('div', { className: 'empty', textContent: 'Brak kodów.' }));
   $('#codeTable').replaceChildren(el('table', {},

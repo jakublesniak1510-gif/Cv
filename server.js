@@ -73,6 +73,7 @@ import { offerPageRoutes } from './lib/offer-page.js';
 import { outplacementRoutes } from './lib/outplacement.js';
 import { selectionRoutes, cleanupSelDrafts, SEL_PATH } from './lib/selection.js';
 import { selectionPageRoutes } from './lib/selection-page.js';
+import { cleanupTestCodes } from './lib/test-codes.js';
 import { adCheckPageRoutes } from './lib/ad-check-page.js';
 import { fullPreviewRoutes, fullPreviewFor, cleanupFullPreviews, reusesWhole } from './lib/full-preview.js';
 import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText, visitInfo, funnelPaid, countEvent, funnelOrder, abExpose } from './lib/analytics.js';
@@ -665,7 +666,7 @@ offerPageRoutes(app, BASE_URL);
 selectionRoutes(app); // D8: za flagą SELECTION_ENABLED (bez niej 404)
 selectionPageRoutes(app, BASE_URL);
 const productMail = (x, files, inserted) => (mailEnabled() ? sendProductMail(x, files, inserted, productReturn(x, BASE_URL)) : Promise.reject(new Error('Wysyłka e-maili wyłączona (brak SMTP)')));
-productRoutes(app, { BASE_URL, DEMO, getOrder, saveOrder, updateOrder, openPayment, pickGateway, BAD_GATEWAY, cleanInvoice, WAIVER, closed: salesClosedFor, CLOSED_MSG, PayOpenError, sendMail: productMail });
+productRoutes(app, { BASE_URL, DEMO, getOrder, saveOrder, updateOrder, openPayment, pickGateway, BAD_GATEWAY, cleanInvoice, WAIVER, closed: salesClosedFor, CLOSED_MSG, PayOpenError, sendMail: productMail, markFree: (id) => markPaidAndGenerate(id) });
 fullPreviewRoutes(app, { cleanProfile, cleanAds, prices: () => PRICES });
 
 app.post('/api/orders', async (req, res) => {
@@ -932,7 +933,7 @@ async function markPaidAndGenerate(id) {
   try {
     if (o.upsellOf) return await applyUpsell(o);
     if (isProduct(o)) return await applyProduct(o, { getOrder, updateOrder, sendMail: productMail,
-      paidSteps: (paidO) => { recordSale(paidO).catch((e) => console.error('Rejestr sprzedaży', e.message)); notifyNewOrder(paidO, BASE_URL).catch((e) => logEvent('e-mail', `Powiadomienie o zamówieniu: ${e.message}`)); if (paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: id })); countEvent(`product_paid:${paidO.product}`).catch(() => {}); } });
+      paidSteps: (paidO) => { if (paidO.testCode) return; /* kod testowy właściciela: bez rejestru sprzedaży, faktury i statystyk */ recordSale(paidO).catch((e) => console.error('Rejestr sprzedaży', e.message)); notifyNewOrder(paidO, BASE_URL).catch((e) => logEvent('e-mail', `Powiadomienie o zamówieniu: ${e.message}`)); if (paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: id })); countEvent(`product_paid:${paidO.product}`).catch(() => {}); } });
     const paidO = await updateOrder(id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
     const passFree = !!o.pass && !(o.total > 0); // zamówienie w całości z karnetu: przychód był przy zakupie karnetu
     if (!o.paidAt && !passFree) funnelPaid(paidO).catch(() => {}); // etap „Opłacone” w lejku liczy serwer, raz na zamówienie
@@ -1228,6 +1229,7 @@ async function hourly() {
     await cleanupGrantDrafts().catch(() => {}); // dokumenty do dotacji z podglądu (48 h)
     await cleanupOfferDrafts().catch(() => {}); // oferty na zlecenie z podglądu (48 h)
     await cleanupSelDrafts().catch(() => {}); // selekcja CV: wersje robocze (48 h)
+    await cleanupTestCodes().catch(() => {}); // kody testowe: 30 dni po wygaśnięciu
     for (const o of Object.values(await allOrders())) if (selectionToPurge(o)) await updateOrder(o.id, selectionPurge).catch(() => {}); // selekcja CV: teksty i wyniki po 7 dniach
     await cleanupShareCards().catch(() => {});
     await cleanupPartnerApps().catch(() => {});

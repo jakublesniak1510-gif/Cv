@@ -2469,9 +2469,10 @@ function photoPro() {
   buy.onclick = async () => {
     st.className = 'fstatus'; buy.disabled = true;
     try {
-      const body = { image: src, frame: fr, crop: val(crop), email: email.value, terms: terms.checked, waiver: waiver.checked, gateway: gwValue(gw), uiLang: window.I18N?.lang || 'pl', ...(forOrder ? { forOrder } : {}), ...(wantInv.checked ? { invoice: { name: invName.value, address: invAddr.value, nip: invNip.value } } : {}) };
+      const body = { testCode: new URLSearchParams(location.search).get('kod') || undefined, image: src, frame: fr, crop: val(crop), email: email.value, terms: terms.checked, waiver: waiver.checked, gateway: gwValue(gw), uiLang: window.I18N?.lang || 'pl', ...(forOrder ? { forOrder } : {}), ...(wantInv.checked ? { invoice: { name: invName.value, address: invAddr.value, nip: invNip.value } } : {}) };
       const r = await fetch('/api/products/photo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      if (j.free) return paid(j.id); // kod testowy właściciela: bez płatności
       if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); return paid(j.id); }
       location.href = j.url;
     } catch (e) { st.className = 'fstatus bad'; st.textContent = e.message; buy.disabled = false; }
