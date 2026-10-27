@@ -138,10 +138,10 @@ test('Strona narzędzia (ramka kadru), link ze strony dokumentów, regulamin (4 
   assert.ok(!fs.existsSync(new URL('../models/modnet.onnx', import.meta.url)));
   assert.match(srv, /if \(isProduct\(o\)\) return await applyProduct\(/);
   for (const [l, re, hist] of [
-    ['pl', /Usługodawca nie zmienia tła, nie retuszuje twarzy i nie zmienia wyglądu osoby na zdjęciu\.[\s\S]*Zdjęcie do CV \(§2 ust\. 6\) – 10 zł\./, /Regulamin obowiązuje od 27 października 2026 r\. Historia zmian: 27 października 2026 r\. – usługa „Zdjęcie do CV” \(§2 ust\. 6, §4 ust\. 1\);/],
-    ['en', /does not change the background, does not retouch the face or change the appearance[\s\S]*CV photo \(§2\(6\)\) – PLN 10/, /effective from 27 October 2026\. Change history: 27 October 2026 – “CV photo” service/],
-    ['de', /verändert den Hintergrund nicht, retuschiert das Gesicht nicht[\s\S]*Bewerbungsfoto \(§2 Abs\. 6\) – 10 PLN/, /gelten ab dem 27\. Oktober 2026\. Änderungshistorie: 27\. Oktober 2026 – Dienstleistung „Bewerbungsfoto“/],
-    ['uk', /не змінює фон, не ретушує обличчя[\s\S]*Фото для резюме \(§2 п\. 6\) – 10 zł/, /діють з 27 жовтня 2026 р\. Історія змін: 27 жовтня 2026 р\. – послуга «Фото для резюме»/]]) {
+    ['pl', /Usługodawca nie zmienia tła, nie retuszuje twarzy i nie zmienia wyglądu osoby na zdjęciu\.[\s\S]*Zdjęcie do CV \(§2 ust\. 6\) – 10 zł\./, /Regulamin obowiązuje od 27 października 2026 r\. Historia zmian: (?:[^;]*; )*27 października 2026 r\. – usługa „Zdjęcie do CV” \(§2 ust\. 6, §4 ust\. 1\);/],
+    ['en', /does not change the background, does not retouch the face or change the appearance[\s\S]*CV photo \(§2\(6\)\) – PLN 10/, /effective from 27 October 2026\. Change history: (?:[^;]*; )*27 October 2026 – “CV photo” service/],
+    ['de', /verändert den Hintergrund nicht, retuschiert das Gesicht nicht[\s\S]*Bewerbungsfoto \(§2 Abs\. 6\) – 10 PLN/, /gelten ab dem 27\. Oktober 2026\. Änderungshistorie: (?:[^;]*; )*27\. Oktober 2026 – Dienstleistung „Bewerbungsfoto“/],
+    ['uk', /не змінює фон, не ретушує обличчя[\s\S]*Фото для резюме \(§2 п\. 6\) – 10 zł/, /діють з 27 жовтня 2026 р\. Історія змін: (?:[^;]*; )*27 жовтня 2026 р\. – послуга «Фото для резюме»/]]) {
     const b = legalBody('regulamin', l); assert.match(b, re, l); assert.match(b, hist, l);
   }
   for (const l of ['en', 'de', 'uk']) {

@@ -1064,3 +1064,11 @@ ul.checklist{list-style:none;padding-left:0}
 .ph-buy{display:grid;gap:10px;max-width:520px}
 .ph-buy .btn{justify-self:start}
 @media(max-width:700px){.ph-pro{padding:14px}.ph-buy .btn{justify-self:stretch}}
+/* D2: Szablony CV premium – galeria na /szablony-premium */
+.prem-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin:12px 0 20px}
+.prem-card{margin:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);display:flex;flex-direction:column}
+.prem-card img{display:block;width:100%;height:auto;border-bottom:1px solid var(--line);user-select:none;-webkit-user-drag:none}
+.prem-card figcaption{padding:10px 12px;display:grid;gap:4px;font-size:14px}
+.prem-card figcaption span{color:var(--mute)}
+.prem .gw-box{display:grid;gap:6px}
+@media(max-width:700px){.prem-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.prem-card figcaption{font-size:13px}}
