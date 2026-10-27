@@ -62,7 +62,7 @@ import { portalRoutes } from './lib/portals.js';
 import { employerRoutes } from './lib/employers.js';
 import { fairRoutes } from './lib/fairs.js';
 import { previewRoutes, previewFor, cleanupPreviews } from './lib/preview.js';
-import { productRoutes, applyProduct, isProduct, productName, productReturn, PHOTO_UPLOAD_PATHS, cleanupPhotos } from './lib/products.js';
+import { productRoutes, applyProduct, isProduct, productName, productReturn, PHOTO_UPLOAD_PATHS, cleanupPhotos, selectionPurge, selectionToPurge } from './lib/products.js';
 import { translationRoutes, cleanupTranslations, TR_UPLOAD_PATH } from './lib/translation.js';
 import { translationPageRoutes } from './lib/translation-page.js';
 import { adCheckRoutes, cleanupAdChecks } from './lib/ad-check.js';
@@ -71,6 +71,8 @@ import { grantPageRoutes } from './lib/grant-page.js';
 import { offerReplyRoutes, cleanupOfferDrafts } from './lib/offer.js';
 import { offerPageRoutes } from './lib/offer-page.js';
 import { outplacementRoutes } from './lib/outplacement.js';
+import { selectionRoutes, cleanupSelDrafts, SEL_PATH } from './lib/selection.js';
+import { selectionPageRoutes } from './lib/selection-page.js';
 import { adCheckPageRoutes } from './lib/ad-check-page.js';
 import { fullPreviewRoutes, fullPreviewFor, cleanupFullPreviews, reusesWhole } from './lib/full-preview.js';
 import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText, visitInfo, funnelPaid, countEvent, funnelOrder, abExpose } from './lib/analytics.js';
@@ -256,7 +258,8 @@ app.post('/api/cv-check', express.json({ limit: '8mb' }), async (req, res) => {
 // Import kontaktów CSV w panelu może przekraczać ogólny limit 700 KB (parser przed globalnym).
 app.use('/api/admin/contacts/import', express.json({ limit: '3mb' }));
 app.use(PHOTO_UPLOAD_PATHS, express.json({ limit: '6mb' })); // D1: zdjęcie do CV do 4 MB (base64) – przed ogólnym limitem 700 kB
-app.use(GRANT_EXTRACT_PATH, express.json({ limit: '8mb' })); // D5: wzór wniosku z urzędu pracy albo CV do 5 MB (base64)
+app.use(GRANT_EXTRACT_PATH, express.json({ limit: '8mb' }));
+app.use(SEL_PATH, express.json({ limit: '6mb' })); // D8: CV do selekcji po jednym pliku do 4 MB (base64) // D5: wzór wniosku z urzędu pracy albo CV do 5 MB (base64)
 app.use(TR_UPLOAD_PATH, express.json({ limit: '8mb' })); // D3: CV do tłumaczenia do 5 MB (base64)
 // Szkic ogłoszenia z rozszerzenia Chrome (własny limit 20 KB i CORS, więc przed globalnym parserem).
 draftRoutes(app);
@@ -659,6 +662,8 @@ grantRoutes(app, { prices: () => ({ plan: PRICES.grantplan / 100, full: PRICES.g
 grantPageRoutes(app, BASE_URL);
 offerReplyRoutes(app);
 offerPageRoutes(app, BASE_URL);
+selectionRoutes(app); // D8: za flagą SELECTION_ENABLED (bez niej 404)
+selectionPageRoutes(app, BASE_URL);
 const productMail = (x, files, inserted) => (mailEnabled() ? sendProductMail(x, files, inserted, productReturn(x, BASE_URL)) : Promise.reject(new Error('Wysyłka e-maili wyłączona (brak SMTP)')));
 productRoutes(app, { BASE_URL, DEMO, getOrder, saveOrder, updateOrder, openPayment, pickGateway, BAD_GATEWAY, cleanInvoice, WAIVER, closed: salesClosedFor, CLOSED_MSG, PayOpenError, sendMail: productMail });
 fullPreviewRoutes(app, { cleanProfile, cleanAds, prices: () => PRICES });
@@ -1222,6 +1227,8 @@ async function hourly() {
     await cleanupAdChecks().catch(() => {}); // sprawdzenia ogłoszeń z podglądu (48 h)
     await cleanupGrantDrafts().catch(() => {}); // dokumenty do dotacji z podglądu (48 h)
     await cleanupOfferDrafts().catch(() => {}); // oferty na zlecenie z podglądu (48 h)
+    await cleanupSelDrafts().catch(() => {}); // selekcja CV: wersje robocze (48 h)
+    for (const o of Object.values(await allOrders())) if (selectionToPurge(o)) await updateOrder(o.id, selectionPurge).catch(() => {}); // selekcja CV: teksty i wyniki po 7 dniach
     await cleanupShareCards().catch(() => {});
     await cleanupPartnerApps().catch(() => {});
     await crmHourly(BASE_URL).catch((e) => logEvent('kontakty', e.message));

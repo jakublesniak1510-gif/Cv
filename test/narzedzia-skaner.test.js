@@ -29,9 +29,9 @@ test('Beacon „toolscan”: raz na odwiedzającego, z nazwą narzędzia, w rapo
   try {
     await send('Mozilla/5.0 A', { e: 'toolscan', t: 'kalkulator-wynagrodzen' }); await send('Mozilla/5.0 A', { e: 'toolscan', t: 'kalkulator-wynagrodzen' });
     await send('Mozilla/5.0 B', { e: 'toolscan', t: '<script>' }); await wait(300);
-    const all = await analyticsDays(), ev = (Array.isArray(all) ? all : Object.values(all)).find((x) => x.events?.tool_scanner)?.events || {};
+    const all = await analyticsDays(), day = (Array.isArray(all) ? all : Object.values(all)).find((x) => x.events?.tool_scanner), ev = day?.events || {};
     assert.equal(ev.tool_scanner, 2); assert.equal(ev['tool_scanner:kalkulator-wynagrodzen'], 1); assert.equal(ev['tool_scanner:inne'], 1);
-    const d = new Date().toISOString().slice(0, 10);
+    const d = day.id; // dzień zapisu (czas Europe/Warsaw), a nie data UTC – inaczej test pada między północą w Polsce a w UTC
     assert.match(funnelText(await funnelRange(d, d)), /Narzędzia → skaner: 2 \(kalkulator-wynagrodzen 1, inne 1\)\./);
   } finally { srv.close(); }
 });
