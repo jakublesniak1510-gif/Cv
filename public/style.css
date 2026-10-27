@@ -1137,3 +1137,23 @@ ul.checklist{list-style:none;padding-left:0}
 .outp-warn{margin:12px 0}
 .outp-prices td,.outp-prices th{text-align:center}
 .outp-codes code{font-size:.95rem}
+/* D8: selekcja CV (/dla-firm/selekcja-cv, za flagą SELECTION_ENABLED) */
+.sel textarea,.sel input[type=text]{width:100%}
+.sel-head{margin:12px 0;font-size:1.05rem}
+.sel-req{display:grid;gap:6px;margin:8px 0}
+.sel-req-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
+.sel-req-row .check{margin:0;white-space:nowrap}
+.sel-prev{position:relative;margin:12px 0;padding:12px;border:1px dashed var(--line);border-radius:10px}
+.sel-table th,.sel-table td{font-size:.85rem;text-align:left;vertical-align:top}
+.sel-blank{color:var(--mute)}
+.sel-cvs li{margin:4px 0}
+.sel-card{margin:12px 0;padding:12px 16px;border:1px solid var(--line);border-radius:12px}
+.sel-card h3{margin:0 0 8px}
+.sel-cells{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.sel-cells q{display:block;margin-top:2px;color:var(--mute);font-size:.9rem}
+.sel-st{display:inline-block;min-width:80px;padding:1px 8px;border-radius:99px;font-size:.8rem;font-weight:600;text-align:center;color:#fff}
+.sel-ok{background:#027A48}.sel-mid{background:#B54708}.sel-no{background:#B42318}
+.sel .pass-form>*{min-width:0}
+.sel-prev{overflow-x:auto}
+.sel input[type=file]{max-width:100%}
+@media(max-width:700px){.sel-req-row{grid-template-columns:1fr auto}.sel-req-row input[type=text]{grid-column:1/-1}}
