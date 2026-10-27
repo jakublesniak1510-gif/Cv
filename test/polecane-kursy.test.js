@@ -16,12 +16,12 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const section = (h) => /<section class="aff" data-pl[\s\S]*?<\/section>/.exec(h)?.[0] || '';
 const links = (h) => [...h.matchAll(/<a [^>]*data-aff="[^"]+"[^>]*>/g)].map((m) => m[0]);
 
-test('Dane: kursy z linkiem webep1.com, bez kursów „do potwierdzenia”, zawody istnieją', () => {
+test('Dane: 19 kursów z linkiem webep1.com (także Komunikacja i Menedżerskie), zawody istnieją', () => {
   const raw = JSON.parse(read('seo-data/affiliates.json')).kursy, slugs = new Set(PROFESSIONS.map((p) => p.slug));
   assert.equal(AFFILIATES.length, raw.filter((k) => k.url_partnerski).length);
-  assert.ok(!AFFILIATES.some((k) => ['komunikacja', 'menedzerskie'].includes(k.id)), 'pominięte do czasu potwierdzenia linku');
+  assert.equal(AFFILIATES.length, 19, 'wszystkie kursy z potwierdzonymi linkami (bez BHP)');
   for (const k of AFFILIATES) {
-    assert.match(k.url_partnerski, /^https:\/\/webep1\.com\/go\/[0-9a-f]{10}$/, k.id);
+    assert.match(k.url_partnerski, /^https:\/\/webep1\.com\/go\/[0-9a-f]{9,10}$/, k.id);
     assert.doesNotMatch(`${k.nazwa} ${k.opis}`, /zł|gwarant|zarobk|zatrudnien/i, `${k.id}: bez cen i obietnic`);
     for (const z of k.zawody) assert.ok(z.endsWith('*') || slugs.has(z), `${k.id}: zawód ${z}`);
   }
@@ -31,6 +31,8 @@ test('Dane: kursy z linkiem webep1.com, bez kursów „do potwierdzenia”, zawo
 test('Dobór: najwyżej 2 kursy, zawód bez mapowania – brak sekcji; HTML z dopiskiem, bez cen, rel sponsored, nowa karta', () => {
   assert.deepEqual(coursesFor('ksiegowa').map((k) => k.id), ['ksiegowosc', 'excel-zaawansowany']);
   assert.equal(coursesFor('asystentka-biura').length, 2, 'najwyżej 2 mimo 4 pasujących');
+  assert.deepEqual(coursesFor('kierownik-magazynu').map((k) => k.id), ['menedzerskie', 'excel-zaawansowany'], 'najbardziej dopasowany pierwszy');
+  assert.deepEqual(coursesFor('obsluga-klienta').map((k) => k.id), ['obsluga-klienta', 'komunikacja']);
   assert.deepEqual(coursesFor('kierowca'), []); assert.equal(affHtml('kierowca', 'cv/kierowca'), '');
   const h = affHtml('pracownik-biurowy', 'cv/pracownik-biurowy');
   assert.match(h, /<h2 id="aff-h">Kursy, które mogą przydać się w tym zawodzie<\/h2><p class="aff-note">Linki partnerskie: jeśli kupisz kurs, otrzymamy prowizję\. Cena dla Ciebie się nie zmienia\.<\/p>/);
