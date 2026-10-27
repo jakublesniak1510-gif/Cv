@@ -100,10 +100,10 @@ test('Zakup: tłumaczenie z podglądu → zamówienie → PDF i DOCX tylko po p�
 
 test('Regulamin i polityka prywatności (4 języki, 27.10.2026), skrypt strony, tłumaczenia', () => {
   for (const [l, re, hist] of [
-    ['pl', /„Tłumaczenie CV” polega na przetłumaczeniu CV[\s\S]*nie jest tłumaczeniem przysięgłym[\s\S]*Tłumaczenie CV \(§2 ust\. 8\) – 19 zł\./, /Historia zmian: 27 października 2026 r\. – „Tłumaczenie CV” \(§2 ust\. 8, §4 ust\. 1\);/],
-    ['en', /“CV translation” consists of translating[\s\S]*not a sworn \(certified\) translation[\s\S]*CV translation \(§2\(8\)\) – PLN 19\./, /Change history: 27 October 2026 – “CV translation”/],
-    ['de', /„Übersetzung des Lebenslaufs“ umfasst[\s\S]*keine beglaubigte Übersetzung[\s\S]*Übersetzung des Lebenslaufs \(§2 Abs\. 8\) – 19 PLN\./, /Änderungshistorie: 27\. Oktober 2026 – „Übersetzung des Lebenslaufs“/],
-    ['uk', /«Переклад резюме» полягає[\s\S]*не є присяжним[\s\S]*Переклад резюме \(§2 п\. 8\) – 19 zł\./, /Історія змін: 27 жовтня 2026 р\. – «Переклад резюме»/]]) {
+    ['pl', /„Tłumaczenie CV” polega na przetłumaczeniu CV[\s\S]*nie jest tłumaczeniem przysięgłym[\s\S]*Tłumaczenie CV \(§2 ust\. 8\) – 19 zł\./, /Historia zmian: (?:[^;]*; )*27 października 2026 r\. – „Tłumaczenie CV” \(§2 ust\. 8, §4 ust\. 1\);/],
+    ['en', /“CV translation” consists of translating[\s\S]*not a sworn \(certified\) translation[\s\S]*CV translation \(§2\(8\)\) – PLN 19\./, /Change history: (?:[^;]*; )*27 October 2026 – “CV translation”/],
+    ['de', /„Übersetzung des Lebenslaufs“ umfasst[\s\S]*keine beglaubigte Übersetzung[\s\S]*Übersetzung des Lebenslaufs \(§2 Abs\. 8\) – 19 PLN\./, /Änderungshistorie: (?:[^;]*; )*27\. Oktober 2026 – „Übersetzung des Lebenslaufs“/],
+    ['uk', /«Переклад резюме» полягає[\s\S]*не є присяжним[\s\S]*Переклад резюме \(§2 п\. 8\) – 19 zł\./, /Історія змін: (?:[^;]*; )*27 жовтня 2026 р\. – «Переклад резюме»/]]) {
     const b = legalBody('regulamin', l); assert.match(b, re, l); assert.match(b, hist, l);
   }
   for (const [l, re] of [['pl', /Gdy zamawiasz tłumaczenie CV, treść wgranego albo wklejonego CV przekazujemy dostawcy narzędzi AI \(Anthropic\)[\s\S]*Tłumaczenie przechowujemy 48 godzin/], ['en', /When you order a CV translation[\s\S]*48 hours/], ['de', /Übersetzung Ihres Lebenslaufs bestellen[\s\S]*48 Stunden/], ['uk', /Коли ви замовляєте переклад резюме[\s\S]*48 годин/]]) assert.match(legalBody('prywatnosc', l), re, l);

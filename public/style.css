@@ -1084,3 +1084,16 @@ ul.checklist{list-style:none;padding-left:0}
 .trl-img img{display:block;width:100%;max-width:640px;height:auto;margin:12px 0;border:1px solid var(--line);border-radius:10px;user-select:none;-webkit-user-drag:none}
 .trl .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:700px){.trl .grid2{grid-template-columns:1fr}}
+/* D4: sprawdzenie ogłoszenia o pracę (/dla-firm/sprawdz-ogloszenie) */
+.adc-res{margin:16px 0}
+.adc-score{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.adc-num{font-size:2rem;color:var(--brand)}
+.adc-list{padding-left:20px}
+.adc-r{margin:10px 0;padding:8px 12px;border-left:4px solid var(--line);background:var(--alt);border-radius:0 8px 8px 0}
+.adc-r p{margin:4px 0}
+.adc-r.sev-hi{border-left-color:#B42318}.adc-r.sev-mid{border-left-color:#B54708}.adc-r.sev-lo{border-left-color:#027A48}
+.adc-tag{font-size:.85rem;font-weight:600;color:var(--mute)}
+.adc-fix{color:var(--mute)}
+.adc-rw{padding:12px 16px;border:1px solid var(--line);border-radius:10px;white-space:pre-line;overflow-wrap:anywhere}
+.adc textarea{width:100%}
+.adc-pos{font-weight:600}
