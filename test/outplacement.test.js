@@ -49,6 +49,7 @@ test('Serwer: zamówienie z fakturą → kody dla każdej osoby, panel bez danyc
     const U = `http://localhost:${port}`, post = (p, b) => fetch(U + p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) }).then(async (r) => ({ status: r.status, j: await r.json() }));
     for (let i = 0; i < 80; i++) { try { await fetch(U + '/api/config'); break; } catch { await wait(150); } }
     const html = await fetch(U + '/dla-firm/outplacement').then((r) => r.text());
+    assert.match(html, /do 10 osób kody od razu, większe zamówienia potwierdzamy w ciągu 1 dnia roboczego/);
     assert.ok(html.includes('od 179 zł za osobę') && html.includes('Bez coachingu na żywo') && html.includes('src="/outplacement.js"') && html.includes('name="nip"') && html.includes('type="date" name="start"'));
     for (const p of ['299 zł', '269 zł', '239 zł', '209 zł', '179 zł', '50+']) assert.ok(html.includes(p), p);
     assert.match(await fetch(U + '/sitemap.xml').then((r) => r.text()), /\/dla-firm\/outplacement</);
@@ -76,6 +77,12 @@ test('Serwer: zamówienie z fakturą → kody dla każdej osoby, panel bez danyc
     assert.equal(saved.total, 0); assert.equal(saved.discount, PRICES.pack3 + PRICES.interview - BUNDLE_OFF + PRICES.sim + PRICES.linkedin + PRICES.docx);
     assert.equal((await cv('ewa@x.pl')).status, 400, 'kod jednorazowy');
     await wait(300);
+    // Faktura z terminem powyżej 10 osób (OUT_AUTO_MAX): zamówienie czeka na zatwierdzenie, żaden kod nie powstaje.
+    const big = await post('/api/outplacement/order', { ...FIRM, nip: '5260000005', email: 'hr2@inna.pl', qty: 11 });
+    assert.equal(big.status, 200); const bigId = big.j.redirect.split('=')[1], bb = JSON.parse(fs.readFileSync(path.join(dir, 'b2b-orders.json'), 'utf8'))[bigId];
+    assert.equal(bb.status, 'approval'); assert.equal(bb.approvalReason, 'ponad 10 kodów outplacementu na fakturę z terminem'); assert.ok(!bb.codes && !bb.code);
+    assert.equal(Object.values(JSON.parse(fs.readFileSync(path.join(dir, 'codes.json'), 'utf8'))).filter((c) => c.outplacement === bigId).length, 0, 'bez kodów');
+    assert.match(await fetch(U + big.j.redirect).then((r) => r.text()), /Potwierdzimy je ręcznie/);
     const ph2 = await fetch(U + panel).then((r) => r.text());
     assert.match(ph2, /<b>1<\/b> z 3/); assert.match(ph2, /wykorzystany/); assert.ok(!ph2.includes('jan@x.pl') && !ph2.includes('Jan Pracownik'), 'bez danych pracownika');
   } finally { srv.kill(); }
