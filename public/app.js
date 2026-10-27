@@ -2,8 +2,18 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const el = (t, p = {}, ...k) => { const e = Object.assign(document.createElement(t), p); e.append(...k.filter((x) => x != null && x !== false)); return e; };
-let PRICE = { cv: 39, cv_letter: 49, pack3: 79, interview: 50, messages: 9, linkedin: 19, sim: 29, docx: 9, extraLang: 5, bundleOff: 19 };
-const ADDON_KEYS = { interview: ['#adInterview', 'Przygotowanie do rozmowy'], messages: ['#adMessages', 'Wiadomość do rekrutera i e-mail z aplikacją'], linkedin: ['#adLinkedin', 'Profil LinkedIn'], sim: ['#adSim', 'Symulator rozmowy kwalifikacyjnej'], docx: ['#adDocx', 'Wersja Word (.docx)'] };
+let PRICE = { cv: 39, cv_letter: 49, pack3: 79, interview: 50, messages: 9, linkedin: 19, sim: 29, docx: 9, photo: 10, extraLang: 5, bundleOff: 19 };
+const ADDON_KEYS = { interview: ['#adInterview', 'Przygotowanie do rozmowy'], messages: ['#adMessages', 'Wiadomość do rekrutera i e-mail z aplikacją'], linkedin: ['#adLinkedin', 'Profil LinkedIn'], sim: ['#adSim', 'Symulator rozmowy kwalifikacyjnej'], docx: ['#adDocx', 'Wersja Word (.docx)'], photo: ['#adPhoto', 'Zdjęcie do CV'] };
+// D1: dodatek „Zdjęcie do CV” na ekranie podsumowania (nad zwiniętymi dodatkami): tło, kadr, jasność zdjęcia z kreatora, bez retuszu twarzy.
+{
+  const more = document.getElementById('moreOpts');
+  if (more) {
+    const box = document.createElement('div'); box.className = 'photo-addon'; box.id = 'photoAddon';
+    box.innerHTML = '<label class="opt"><input type="checkbox" id="adPhoto"><span class="o-t">Zdjęcie do CV<b data-price="photo">+10 zł</b></span><span class="o-d">Jednolite tło, kadr do CV i wyrównana jasność Twojego zdjęcia, wstawione do CV. Bez retuszu twarzy. Zdjęcie dodajesz w „Twoje dane” → „Więcej danych”.</span></label>'
+      + '<label class="f photo-bg" id="photoBgBox" hidden>Tło zdjęcia<select id="photoBg"><option value="jasne">jasne</option><option value="szare">szare</option><option value="niebieskie">niebieskie</option></select></label>';
+    more.before(box);
+  }
+}
 const PKG_ADS = { cv: 1, cv_letter: 1, pack3: 3 };
 // Odmiana po liczebniku (jak lib/plural.js): 1 dopasowanie, 2 dopasowania, 5 dopasowań.
 const plural = (n, one, few, many) => (n === 1 ? one : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? few : many);
@@ -817,6 +827,7 @@ const nAds = () => Math.max(1, $('#ads').children.length);
 const addons = () => Object.fromEntries(Object.entries(ADDON_KEYS).map(([k, [sel]]) => [k, $(sel).checked]));
 // Wersja angielska profilu LinkedIn: opcja widoczna tylko przy zaznaczonym dodatku.
 $('#adLinkedin')?.addEventListener('change', () => { $('#liEnBox').hidden = !$('#adLinkedin').checked; });
+$('#adPhoto')?.addEventListener('change', () => { $('#photoBgBox').hidden = !$('#adPhoto').checked; refresh(); saveDraft(); });
 const extraLangs = () => $$('#langPick input:checked').map((i) => i.value);
 // Pakiet „Pewna rozmowa”: list + przygotowanie do rozmowy + symulator razem taniej (tak samo liczy serwer, lib/pricing.js).
 const bundleOn = () => pkg() !== 'cv' && addons().interview && addons().sim;
@@ -872,7 +883,7 @@ function restoreDraft(from) {
   if (d.design && LEGACY[d.design.tpl]) d.design.tpl = LEGACY[d.design.tpl];
   if (d.design && COLORS[d.design.color] && TPLS.some((t) => t[0] === d.design.tpl)) design = { ...d.design };
   FIELDS.forEach((k) => ($('#' + k).value = d.f[k] || ''));
-  if (d.addons) { Object.entries(ADDON_KEYS).forEach(([k, [sel]]) => ($(sel).checked = !!d.addons[k])); $('#adLinkedinEn').checked = !!d.addons.linkedinEn; $('#liEnBox').hidden = !$('#adLinkedin').checked; }
+  if (d.addons) { Object.entries(ADDON_KEYS).forEach(([k, [sel]]) => ($(sel).checked = !!d.addons[k])); $('#adLinkedinEn').checked = !!d.addons.linkedinEn; $('#liEnBox').hidden = !$('#adLinkedin').checked; $('#photoBgBox').hidden = !$('#adPhoto').checked; }
   (d.langs || []).forEach((l) => { const i = $(`#langPick input[value="${l}"]`); if (i) i.checked = true; });
   setPhoto(d.photo || '');
   ['exp', 'edu', 'ads'].forEach((b) => { $('#' + b).replaceChildren(); (d[b]?.length ? d[b] : [{}]).forEach((v) => addRow(b, v)); });
@@ -1230,6 +1241,7 @@ function validate(n) {
     if (nip && !nipOk(nip)) return 'Sprawdź NIP do faktury – powinien mieć 10 cyfr.';
   }
   if (n === 6 && $('#wantAlerts').checked && $('#alJob').value.trim().length < 2) return 'Wpisz zawód do ofert pracy na e-mail albo odznacz tę opcję.';
+  if (n === 6 && $('#adPhoto').checked && !photo) return 'Dodaj zdjęcie (ekran „Twoje dane”, „Więcej danych”) albo odznacz „Zdjęcie do CV”.';
   if (n === 6 && !$('#consent').checked) return 'Zaakceptuj Regulamin i Politykę prywatności.';
   if (n === 6 && !$('#waiver').checked) return 'Zaznacz zgodę na wykonanie usługi od razu po płatności.';
   return '';
@@ -1333,7 +1345,7 @@ $('#wizForm').onsubmit = async (e) => {
   const v = (id) => $('#' + id).value;
   const body = {
     draftToken: srvToken() || undefined,
-    ...($('#rewriteMode').checked ? { mode: 'rewrite' } : {}), usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, ...(CHECKOUT_B ? { consentForm: 'compact' } : {}), gateway: gwValue($('#gwBox')), outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, deleteNotice: $('#deleteNotice').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    ...($('#rewriteMode').checked ? { mode: 'rewrite' } : {}), usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, ...(CHECKOUT_B ? { consentForm: 'compact' } : {}), gateway: gwValue($('#gwBox')), outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, deleteNotice: $('#deleteNotice').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, ...($('#adPhoto').checked ? { photoBg: $('#photoBg').value } : {}), invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), ...($('#careerOn').checked ? { career: { from: v('careerFrom'), to: v('careerTo'), fit: v('careerFit') } } : {}), experience: rows('exp'), education: rows('edu'), photo },
   };
   // Zgoda na cookies reklamowe (baner): tylko wtedy serwer zgłosi zakup do Meta (Conversions API) z identyfikatorami piksela.
@@ -1702,7 +1714,17 @@ async function poll() {
 $('#payAgain').onclick = async () => { $('#payAgain').disabled = true; try { const gw = gwValue($('#payAgainGw')); const r = await fetch(`/api/orders/${orderId}/pay`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(gw ? { gateway: gw } : {}) }); const j = await r.json(); if (!r.ok) throw new Error(j.error); location.href = j.url; } catch (x) { $('#genMsg').textContent = x.message || 'Nie udało się otworzyć płatności.'; $('#payAgain').disabled = false; } };
 $('#retry').onclick = async () => { await fetch(`/api/orders/${orderId}/retry`, { method: 'POST' }); startResult(orderId); };
 
+// D1: pliki zdjęcia (dodatek w kreatorze) na stronie dokumentów; bez dodatku – link do usługi z wstawieniem zdjęcia do tego CV.
+const PHOTO_NAMES = [['zdjecie-cv-3x4.jpg', 'JPG 3:4'], ['zdjecie-cv-3x4.png', 'PNG 3:4'], ['zdjecie-cv-kwadrat.jpg', 'JPG kwadrat'], ['zdjecie-cv-kwadrat.png', 'PNG kwadrat']];
+function drawPhotoFiles() {
+  let b = $('#photoNote');
+  if (!b) { b = el('p', { id: 'photoNote', className: 'mailnote noprint' }); $('#mailNote').after(b); }
+  b.replaceChildren(...(data.photoFiles
+    ? [el('span', { textContent: 'Zdjęcie do CV:' }), ' ', ...PHOTO_NAMES.flatMap(([f, t], i) => [i ? ' · ' : '', el('a', { href: `/api/products/${orderId}/${f}`, download: f, textContent: t })])]
+    : [el('a', { href: `/narzedzia/zdjecie-do-cv?cv=${encodeURIComponent(orderId)}`, textContent: tr('Zdjęcie do CV: jednolite tło i kadr, wstawione do tego CV – 10 zł') })]));
+}
 function drawInvoice() {
+  drawPhotoFiles();
   let b = $('#invNote');
   if (!data.invoice) { if (b) b.hidden = true; return; }
   if (!b) { b = el('p', { id: 'invNote', className: 'mailnote noprint good' }); $('#mailNote').after(b); }
@@ -2406,8 +2428,72 @@ function toolNotice(box, out, field) {
     el('p', { className: 'hint', textContent: 'Złóż pismo w dwóch egzemplarzach i poproś o potwierdzenie odbioru na Twojej kopii albo wyślij je listem poleconym. Okres wypowiedzenia liczy się od dnia, w którym pracodawca odebrał pismo. Wzór ma charakter informacyjny i nie zastępuje porady prawnej; w razie wątpliwości zapytaj w kadrach albo w Państwowej Inspekcji Pracy.' }));
 }
 
-// --- Ocena zdjęcia do CV (AI, zdjęcia nie zapisujemy) ---
+// --- Zdjęcie do CV (D1, 10 zł): tło, kadr i jasność; darmowy podgląd 300 px ze znakiem wodnym, pliki po płatności ---
+function photoPro() {
+  const q = new URLSearchParams(location.search), forOrder = q.get('cv') || '', paidId = q.get('zamowienie') || '';
+  let src = '';
+  const radios = (name, opts) => el('div', { className: 'seg', role: 'radiogroup' }, ...opts.map(([v, t], i) => el('label', { className: 'chk' }, el('input', { type: 'radio', name, value: v, checked: !i }), ` ${tr(t)}`)));
+  const bg = radios('phBg', [['jasne', 'jasne tło'], ['szare', 'szare tło'], ['niebieskie', 'niebieskie tło']]), crop = radios('phCrop', [['3:4', 'kadr 3:4'], ['1:1', 'kwadrat']]);
+  const val = (g) => g.querySelector('input:checked').value;
+  const img = el('div', { className: 'ph-pro-img' }), st = el('p', { className: 'fstatus', role: 'status' });
+  const email = el('input', { type: 'email', autocomplete: 'email', placeholder: 'twoj@email.pl', maxLength: 160 });
+  const terms = el('input', { type: 'checkbox' }), waiver = el('input', { type: 'checkbox' }), wantInv = el('input', { type: 'checkbox' });
+  const invName = el('input', { type: 'text', maxLength: 200 }), invAddr = el('input', { type: 'text', maxLength: 250 }), invNip = el('input', { type: 'text', maxLength: 16, inputMode: 'numeric' });
+  const inv = el('div', { className: 'invbox', hidden: true }, el('label', { className: 'f' }, tr('Nazwa firmy albo imię i nazwisko'), invName), el('label', { className: 'f' }, tr('Adres'), invAddr), el('label', { className: 'f' }, tr('NIP (pomiń, jeśli kupujesz prywatnie)'), invNip));
+  wantInv.onchange = () => (inv.hidden = !wantInv.checked);
+  const gw = el('div', { className: 'gw-box' }), show = el('button', { type: 'button', className: 'btn ghost', textContent: tr('Pokaż podgląd za darmo') }), buy = el('button', { type: 'button', className: 'btn', textContent: `${tr('Kup zdjęcie do CV –')} ${PRICE.photo} zł` });
+  const buyBox = el('div', { className: 'ph-buy', hidden: true }, el('label', { className: 'f' }, tr('E-mail – wyślemy na niego zdjęcie'), email),
+    el('label', { className: 'check' }, wantInv, el('span', { textContent: tr('Potrzebuję faktury (bez VAT – sprzedawca jest zwolniony z VAT).') })), inv,
+    el('label', { className: 'check' }, terms, el('span', {}, tr('Akceptuję'), ' ', el('a', { href: '/regulamin', target: '_blank', textContent: tr('Regulamin') }), ' ', tr('i'), ' ', el('a', { href: '/polityka-prywatnosci', target: '_blank', textContent: tr('Politykę prywatności') }), '.')),
+    el('label', { className: 'check' }, waiver, el('span', { textContent: tr('Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.') })), gw, buy);
+  const box = el('section', { className: 'ph-pro' }, el('h2', { textContent: tr('Zdjęcie gotowe do CV – 10 zł') }),
+    el('p', { textContent: tr('Zmieniamy tło na jednolite, kadrujemy do CV (3:4 i kwadrat) i wyrównujemy jasność. Nie retuszujemy twarzy i nie zmieniamy wyglądu. Dostajesz pliki JPG i PNG w wysokiej rozdzielczości, a jeśli masz u nas CV – wstawimy zdjęcie także do niego.') }),
+    el('p', { className: 'hint', textContent: tr('Wgraj zdjęcie powyżej. Darmowy podgląd jest mały i ze znakiem wodnym. Zdjęcie do zamówienia przechowujemy 30 dni, potem je usuwamy.') }),
+    el('div', { className: 'ph-opts' }, bg, crop), el('div', { className: 'tool-btns' }, show), img, st, buyBox);
+  if (forOrder) box.append(el('p', { className: 'hint', textContent: tr('Po płatności wstawimy zdjęcie do Twojego CV z tego zamówienia.') }));
+  show.disabled = true;
+  show.onclick = async () => {
+    st.className = 'fstatus'; st.textContent = tr('Przygotowujemy podgląd…'); show.disabled = true;
+    try {
+      const r = await fetch('/api/photo/preview', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: src, bg: val(bg), crop: val(crop) }) });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      img.replaceChildren(el('img', { src: j.image, alt: tr('Podgląd zdjęcia do CV ze znakiem wodnym'), draggable: false })); st.textContent = '';
+      buyBox.hidden = false; if (!gw.childElementCount) gwPicker(gw, 'phGw');
+    } catch (e) { st.className = 'fstatus bad'; st.textContent = e.message; }
+    show.disabled = false;
+  };
+  buy.onclick = async () => {
+    st.className = 'fstatus'; buy.disabled = true;
+    try {
+      const body = { image: src, bg: val(bg), crop: val(crop), email: email.value, terms: terms.checked, waiver: waiver.checked, gateway: gwValue(gw), uiLang: window.I18N?.lang || 'pl', ...(forOrder ? { forOrder } : {}), ...(wantInv.checked ? { invoice: { name: invName.value, address: invAddr.value, nip: invNip.value } } : {}) };
+      const r = await fetch('/api/products/photo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); return paid(j.id); }
+      location.href = j.url;
+    } catch (e) { st.className = 'fstatus bad'; st.textContent = e.message; buy.disabled = false; }
+  };
+  // Powrót z płatności (?zamowienie=<id>): czekamy na potwierdzenie, potem linki do plików.
+  async function paid(id) {
+    buyBox.hidden = true; st.className = 'fstatus'; st.textContent = tr('Przygotowujemy Twoje zdjęcie…');
+    for (let i = 0; i < 60; i++) {
+      const j = await (await fetch(`/api/products/${encodeURIComponent(id)}`)).json().catch(() => ({}));
+      if (j.status === 'done') {
+        st.className = 'fstatus good'; st.replaceChildren(el('b', { textContent: tr('Gotowe. Pobierz zdjęcie:') }), ' ', ...PHOTO_NAMES.flatMap(([f, t], k) => [k ? ' · ' : '', el('a', { href: `/api/products/${encodeURIComponent(id)}/${f}`, download: f, textContent: t })]),
+          ...(j.inserted ? [el('br'), tr('Zdjęcie jest też w Twoim CV – pobierz PDF jeszcze raz na stronie dokumentów.')] : []), ...(j.mailed ? [el('br'), tr('Pliki wysłaliśmy też na e-mail.')] : []));
+        return;
+      }
+      if (j.error) { st.className = 'fstatus bad'; st.textContent = j.error; return; }
+      await new Promise((ok) => setTimeout(ok, 2500));
+    }
+    st.textContent = tr('Płatność jeszcze się potwierdza. Pliki wyślemy na e-mail, gdy będą gotowe.');
+  }
+  if (paidId) setTimeout(() => paid(paidId), 0);
+  return { box, set: (d) => { src = d; show.disabled = false; buyBox.hidden = true; img.replaceChildren(); } };
+}
+
+// --- Ocena zdjęcia do CV (AI, zdjęć nie zapisujemy) ---
 function toolPhoto(box, out) {
+  const pro = photoPro();
   const prev = el('div', { className: 'ph-prev', hidden: true }), status = el('p', { className: 'fstatus', role: 'status' });
   const file = el('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp', hidden: true });
   out.hidden = true;
@@ -2416,6 +2502,7 @@ function toolPhoto(box, out) {
     status.className = 'fstatus'; status.textContent = 'Oceniamy zdjęcie…'; out.hidden = true;
     try {
       const img = await shrinkImage(f, 1000);
+      pro.set(await shrinkImage(f, 2000)); // D1: większa wersja do przygotowania zdjęcia
       prev.hidden = false; prev.replaceChildren(el('img', { src: img, alt: 'Twoje zdjęcie' }));
       const r = await fetch('/api/tools/photo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: img, lang: window.I18N?.lang || 'pl' }) });
       const j = await r.json(); if (!r.ok) throw new Error(j.error);
@@ -2427,7 +2514,7 @@ function toolPhoto(box, out) {
     } catch (e) { status.className = 'fstatus bad'; status.textContent = e.message; }
     file.value = '';
   };
-  box.append(el('div', { className: 'ph-row' }, prev, el('div', {}, el('label', { className: 'btn filebtn' }, 'Wgraj zdjęcie', file), el('p', { className: 'hint', textContent: 'JPG, PNG lub WebP. Zdjęcie jest oceniane i od razu odrzucane, nie zapisujemy go. Limit: 5 ocen na godzinę.' }))), status, out,
+  box.append(el('div', { className: 'ph-row' }, prev, el('div', {}, el('label', { className: 'btn filebtn' }, 'Wgraj zdjęcie', file), el('p', { className: 'hint', textContent: 'JPG, PNG lub WebP. Zdjęcie jest oceniane i od razu odrzucane, nie zapisujemy go. Limit: 5 ocen na godzinę.' }))), status, out, pro.box,
     el('details', { className: 'tips-more' }, el('summary', { textContent: 'Jak zrobić dobre zdjęcie do CV telefonem' }), el('ol', { className: 'tips' }, ...['Stań przodem do okna, w dzień, bez lampy błyskowej.', 'Tło: jasna, gładka ściana albo drzwi.', 'Poproś kogoś o zdjęcie z odległości ok. 1,5 m, telefon na wysokości oczu (nie selfie z ręki).', 'Kadr: głowa i ramiona, wzrok w obiektyw, lekki uśmiech.', 'Strój jak na rozmowę w tej branży: gładka koszula, bluzka lub sweter.', 'Bez filtrów i retuszu: zdjęcie ma Cię przypominać na rozmowie.'].map((t) => el('li', { textContent: t })))));
 }
 

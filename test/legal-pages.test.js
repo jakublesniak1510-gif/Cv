@@ -66,7 +66,7 @@ test('SSR: strony prawne zwracają 200 z tytułem, lang, canonical, hreflang na 
 
 test('Skrypt strony odwołuje się tylko do elementów, które istnieją (regresja: „Moje konto” po usunięciu sekcji prawnych)', () => {
   const js = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'), html = fs.readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
-  const have = new Set([...html.matchAll(/id="([\w-]+)"/g), ...js.matchAll(/\bid: *'([\w-]+)'/g)].map((m) => m[1]));
+  const have = new Set([...html.matchAll(/id="([\w-]+)"/g), ...js.matchAll(/\bid: *'([\w-]+)'/g), ...js.matchAll(/\bid="([\w-]+)"/g)].map((m) => m[1]));
   const missing = [...new Set([...js.matchAll(/\$\('#([\w-]+)'\)/g)].map((m) => m[1]))].filter((i) => !have.has(i));
   assert.deepEqual(missing, []);
   assert.doesNotMatch(js, /Object\.values\(LEGAL\)/);
