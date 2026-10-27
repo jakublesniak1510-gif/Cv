@@ -1097,3 +1097,21 @@ ul.checklist{list-style:none;padding-left:0}
 .adc-rw{padding:12px 16px;border:1px solid var(--line);border-radius:10px;white-space:pre-line;overflow-wrap:anywhere}
 .adc textarea{width:100%}
 .adc-pos{font-weight:600}
+/* D5: dotacja z urzędu pracy (/uslugi/dotacja-z-urzedu-pracy) */
+.grt-warn{margin:12px 0}
+.grt-steps{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 8px}
+.grt-steps span{font-size:.85rem;padding:4px 10px;border:1px solid var(--line);border-radius:99px;color:var(--mute)}
+.grt-steps span.on{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+.grt-step{border:0;padding:0;margin:0;min-width:0}
+.grt-step legend{font-weight:600;font-size:1.15rem;margin-bottom:8px}
+.grt textarea,.grt input[type=text],.grt select{width:100%}
+.grt-rows{display:grid;gap:8px;margin:8px 0}
+.grt-row{display:grid;grid-template-columns:2fr 1fr 2fr auto;gap:8px;align-items:end;padding:8px;border:1px solid var(--line);border-radius:10px}
+#grCost .grt-row{grid-template-columns:2fr 1fr auto}
+.grt-row .f{margin:0}
+.grt-del{min-width:40px}
+.grt-nav{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.grt .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grt-fields,.grt-toc{columns:2;gap:24px;font-size:.95rem}
+#grExpAdd,#grCostAdd{margin-bottom:12px}
+@media(max-width:700px){.grt-row,#grCost .grt-row{grid-template-columns:1fr}.grt-del{justify-self:end;width:auto}.grt .grid2{grid-template-columns:1fr}.grt-fields,.grt-toc{columns:1}}
