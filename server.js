@@ -32,7 +32,7 @@ import { checkCv } from './lib/cv-check.js';
 import { profReqs } from './lib/prof-ad.js';
 import { landingRoutes } from './lib/landing.js';
 import { outcomes, outcomeRoutes, startOutcome, outcomeLinks, anonymizeOutcomes, publicOutcome, OUTCOME_CONSENT, OUTCOME_AFTER, OT } from './lib/outcomes.js';
-import { mailEnabled, sendReferralMail, sendOrderMail, sendReminder, sendFollowUp, sendDeleteNotice, sendReviewAsk, sendOutcomeAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail, sendOwnerMail } from './lib/mail.js';
+import { mailEnabled, sendReferralMail, sendOrderMail, sendReminder, sendFollowUp, sendDeleteNotice, sendReviewAsk, sendOutcomeAsk, sendPayReminder, sendAdminAlert, sendInvoiceMail, sendOwnerMail, sendPhotoMail } from './lib/mail.js';
 import { socialRoutes, cleanupChats, botStatus } from './lib/social.js';
 import { b2bRoutes, b2bOrders, fulfillB2b, b2bRefunded, cleanupPartnerApps } from './lib/b2b.js';
 import { b2bMonthly } from './lib/b2b-monthly.js';
@@ -61,6 +61,7 @@ import { portalRoutes } from './lib/portals.js';
 import { employerRoutes } from './lib/employers.js';
 import { fairRoutes } from './lib/fairs.js';
 import { previewRoutes, previewFor, cleanupPreviews } from './lib/preview.js';
+import { productRoutes, applyProduct, isProduct, productName, productReturn, PHOTO_UPLOAD_PATHS, cleanupPhotos } from './lib/products.js';
 import { fullPreviewRoutes, fullPreviewFor, cleanupFullPreviews, reusesWhole } from './lib/full-preview.js';
 import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText, visitInfo, funnelPaid, countEvent, funnelOrder, abExpose } from './lib/analytics.js';
 import { seoReportRoutes, seoWeekly } from './lib/seo-report.js';
@@ -244,6 +245,7 @@ app.post('/api/cv-check', express.json({ limit: '8mb' }), async (req, res) => {
 
 // Import kontaktów CSV w panelu może przekraczać ogólny limit 700 KB (parser przed globalnym).
 app.use('/api/admin/contacts/import', express.json({ limit: '3mb' }));
+app.use(PHOTO_UPLOAD_PATHS, express.json({ limit: '6mb' })); // D1: zdjęcie do CV do 4 MB (base64) – przed ogólnym limitem 700 kB
 // Szkic ogłoszenia z rozszerzenia Chrome (własny limit 20 KB i CORS, więc przed globalnym parserem).
 draftRoutes(app);
 app.use(express.json({ limit: '700kb' }));
@@ -542,9 +544,9 @@ async function checkout(order, lang, gateway) {
     const l = lang || order.uiLang, n = order.ads?.length || 1;
     const sess = await stripeCheckout({
       orderId: order.id, amount: order.total, email: order.profile.email, lang: l,
-      name: `CV Pod Ogłoszenie: ${order.upsell ? `dodatek – ${order.upsell.name}` : PACKAGES[order.pkg]?.name || 'zamówienie'}`,
-      description: order.upsell ? `Dodatek do zamówienia ${order.upsellOf.slice(0, 8)}` : [`${n} ${n === 1 ? 'ogłoszenie' : 'ogłoszenia'}`, ...Object.keys(ADDONS).filter((k) => order.addons?.[k]).map((k) => ADDONS[k])].join(', ').slice(0, 300),
-      returnUrl: `${BASE_URL}/${['en', 'uk', 'de'].includes(l) ? l : ''}?id=${order.upsellOf || order.id}`, // dodatek: powrót na stronę dokumentów zamówienia
+      name: `CV Pod Ogłoszenie: ${isProduct(order) ? productName(order) : order.upsell ? `dodatek – ${order.upsell.name}` : PACKAGES[order.pkg]?.name || 'zamówienie'}`,
+      description: isProduct(order) ? `${productName(order)} – usługa jednorazowa` : order.upsell ? `Dodatek do zamówienia ${order.upsellOf.slice(0, 8)}` : [`${n} ${n === 1 ? 'ogłoszenie' : 'ogłoszenia'}`, ...Object.keys(ADDONS).filter((k) => order.addons?.[k]).map((k) => ADDONS[k])].join(', ').slice(0, 300),
+      returnUrl: isProduct(order) ? productReturn(order, BASE_URL) : `${BASE_URL}/${['en', 'uk', 'de'].includes(l) ? l : ''}?id=${order.upsellOf || order.id}`, // dodatek: powrót na stronę dokumentów zamówienia
     });
     await updateOrder(order.id, { gateway: 'stripe', payAttempts: (order.payAttempts || 0) + 1, stripe: { sessionId: sess.id } });
     if (!(await holdsCode(order))) { await stripeExpire(sess.id).catch(() => {}); throw new CodeError('Rabat z tego kodu jest już w innym Twoim zamówieniu. Złóż zamówienie ponownie.'); }
@@ -554,7 +556,7 @@ async function checkout(order, lang, gateway) {
   const { token, url } = await p24Register({
     sessionId, amount: order.total, email: order.profile.email, language: lang || order.uiLang,
     description: `CV Pod Ogłoszenie, zamówienie ${order.id}`,
-    urlReturn: `${BASE_URL}/?id=${order.upsellOf || order.id}`, urlStatus: `${BASE_URL}/api/p24/status`,
+    urlReturn: isProduct(order) ? productReturn(order, BASE_URL) : `${BASE_URL}/?id=${order.upsellOf || order.id}`, urlStatus: `${BASE_URL}/api/p24/status`,
   });
   await updateOrder(order.id, (x) => ({ ...x, gateway: 'p24', payAttempts: attempt, p24: { sessionId, token }, p24Sessions: [...(x.p24Sessions || (x.p24?.sessionId ? [x.p24.sessionId] : [])), sessionId].slice(-20) }));
   if (!(await holdsCode(order))) throw new CodeError('Rabat z tego kodu jest już w innym Twoim zamówieniu. Złóż zamówienie ponownie.');
@@ -631,6 +633,7 @@ function cleanInvoice(v) {
 }
 
 previewRoutes(app, { cleanProfile, cleanAds });
+productRoutes(app, { BASE_URL, DEMO, getOrder, saveOrder, updateOrder, openPayment, pickGateway, BAD_GATEWAY, cleanInvoice, WAIVER, closed: salesClosedFor, CLOSED_MSG, PayOpenError });
 fullPreviewRoutes(app, { cleanProfile, cleanAds, prices: () => PRICES });
 
 app.post('/api/orders', async (req, res) => {
@@ -896,6 +899,8 @@ async function markPaidAndGenerate(id) {
   inFlight.add(id);
   try {
     if (o.upsellOf) return await applyUpsell(o);
+    if (isProduct(o)) return await applyProduct(o, { getOrder, updateOrder, sendMail: (x, files, inserted) => (mailEnabled() ? sendPhotoMail(x, files, inserted, productReturn(x, BASE_URL)) : Promise.reject(new Error('Wysyłka e-maili wyłączona (brak SMTP)'))),
+      paidSteps: (paidO) => { recordSale(paidO).catch((e) => console.error('Rejestr sprzedaży', e.message)); notifyNewOrder(paidO, BASE_URL).catch((e) => logEvent('e-mail', `Powiadomienie o zamówieniu: ${e.message}`)); if (paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: id })); countEvent(`product_paid:${paidO.product}`).catch(() => {}); } });
     const paidO = await updateOrder(id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
     const passFree = !!o.pass && !(o.total > 0); // zamówienie w całości z karnetu: przychód był przy zakupie karnetu
     if (!o.paidAt && !passFree) funnelPaid(paidO).catch(() => {}); // etap „Opłacone” w lejku liczy serwer, raz na zamówienie
@@ -1173,6 +1178,7 @@ async function hourly() {
   try {
     const n = await deleteOlderThan(RETENTION_MS);
     if (n) console.log(`Usunięto ${n} zamówień starszych niż 30 dni`);
+    await cleanupPhotos(RETENTION_MS); // zdjęcia z usługi „Zdjęcie do CV” (osobne pliki) – razem z zamówieniami
     await codes.deleteWhere((c) => Date.now() > c.expires && !(c.due > 0)); // kod partnera z niewypłaconą prowizją zostaje do rozliczenia
     await releaseStaleCodes();
     for (const x of Object.values(await allOrders())) if (x.refCtx && Date.now() - (x.created || 0) > 48 * 3600e3) await updateOrder(x.id, (y) => { const { refCtx: _r, ...rest } = y; return rest; });

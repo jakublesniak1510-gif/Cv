@@ -14,9 +14,9 @@ test('Regulamin §7a „Gwarancja dopasowania” (4 języki), data 26.10.2026 w 
   const pl = legalBody('regulamin', 'pl');
   assert.ok(pl.includes('<h2 id="gwarancja">§7a Gwarancja dopasowania</h2>'));
   assert.ok(pl.includes('Gwarancja dopasowania: jeśli po wykorzystaniu poprawek w cenie CV nadal nie odpowiada ogłoszeniu, które podałeś, zwracamy pełną zapłaconą kwotę. Wystarczy napisać na') && pl.includes('w ciągu 14 dni od dostarczenia dokumentów i podać numer zamówienia. Zwrot wykonujemy tą samą metodą płatności w ciągu 14 dni od zgłoszenia. Gwarancja nie ogranicza uprawnień wynikających z przepisów.'));
-  assert.match(pl, /Regulamin obowiązuje od 26 października 2026 r\. Historia zmian: 26 października 2026 r\. – gwarancja dopasowania \(§7a\);/);
+  assert.match(pl, /Regulamin obowiązuje od 2[67] października 2026 r\. Historia zmian: (?:[^;]*; )*26 października 2026 r\. – gwarancja dopasowania \(§7a\);/);
   assert.match(pl, /art\. 38 pkt 13 ustawy o prawach konsumenta/, '§6 bez zmian');
-  for (const [l, h, hist] of [['de', '§7a Passgenauigkeitsgarantie', /gelten ab dem 26\. Oktober 2026\. Änderungshistorie: 26\. Oktober 2026 – Passgenauigkeitsgarantie \(§7a\)/], ['en', '§7a Match guarantee', /effective from 26 October 2026\. Change history: 26 October 2026 – match guarantee \(§7a\)/], ['uk', '§7a Гарантія відповідності', /діють з 26 жовтня 2026 р\. Історія змін: 26 жовтня 2026 р\. – гарантія відповідності \(§7a\)/]]) {
+  for (const [l, h, hist] of [['de', '§7a Passgenauigkeitsgarantie', /gelten ab dem 2[67]\. Oktober 2026\. Änderungshistorie: (?:[^;]*; )*26\. Oktober 2026 – Passgenauigkeitsgarantie \(§7a\)/], ['en', '§7a Match guarantee', /effective from 2[67] October 2026\. Change history: (?:[^;]*; )*26 October 2026 – match guarantee \(§7a\)/], ['uk', '§7a Гарантія відповідності', /діють з 2[67] жовтня 2026 р\. Історія змін: (?:[^;]*; )*26 жовтня 2026 р\. – гарантія відповідності \(§7a\)/]]) {
     const b = legalBody('regulamin', l); assert.ok(b.includes(`<h2 id="gwarancja">${h}</h2>`), l); assert.match(b, hist, l);
   }
   assert.doesNotMatch(pl, /gwarantujemy (zatrudnienie|pracę)/i, 'bez obietnic zatrudnienia');

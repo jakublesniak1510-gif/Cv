@@ -1047,3 +1047,20 @@ ul.checklist{list-style:none;padding-left:0}
 /* C1: pełny podgląd CV – oczekiwanie na generowanie */
 .pv-wait{display:flex;align-items:center;gap:10px;padding:18px 4px;color:var(--mute)}
 .spinner.sm{width:22px;height:22px;border-width:3px;margin:0}
+/* D1: Zdjęcie do CV – usługa na /narzedzia/zdjecie-do-cv (ramka kadru 3:4 na zdjęciu) */
+.ph-edit{display:grid;gap:8px;max-width:360px}
+.ph-frame{position:relative;line-height:0;touch-action:none;user-select:none}
+.ph-frame img{width:100%;height:auto;border-radius:10px;display:block}
+.ph-box{position:absolute;box-sizing:border-box;border:2px solid #fff;border-radius:4px;box-shadow:0 0 0 2px var(--brand),0 0 0 9999px rgba(14,28,52,.45);cursor:move;touch-action:none}
+.ph-frame{overflow:hidden;border-radius:10px}
+.ph-zoom input{width:100%}
+.ph-pro{margin-top:24px;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--surface);display:grid;gap:12px}
+.ph-pro h2{margin:0;font-size:20px}
+.ph-pro p{margin:0}
+.ph-opts{display:flex;flex-wrap:wrap;gap:8px}
+.ph-opts .seg label{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;font-size:14px;cursor:pointer}
+.ph-pro-img:empty{display:none}
+.ph-pro-img img{display:block;width:100%;max-width:300px;height:auto;border-radius:12px;border:1px solid var(--line);user-select:none;-webkit-user-drag:none}
+.ph-buy{display:grid;gap:10px;max-width:520px}
+.ph-buy .btn{justify-self:start}
+@media(max-width:700px){.ph-pro{padding:14px}.ph-buy .btn{justify-self:stretch}}
