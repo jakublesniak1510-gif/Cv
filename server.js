@@ -61,7 +61,7 @@ import { portalRoutes } from './lib/portals.js';
 import { employerRoutes } from './lib/employers.js';
 import { fairRoutes } from './lib/fairs.js';
 import { previewRoutes, previewFor, cleanupPreviews } from './lib/preview.js';
-import { productRoutes, applyProduct, isProduct, productName, productReturn, photoForCv, PHOTO_UPLOAD_PATHS } from './lib/products.js';
+import { productRoutes, applyProduct, isProduct, productName, productReturn, PHOTO_UPLOAD_PATHS, cleanupPhotos } from './lib/products.js';
 import { fullPreviewRoutes, fullPreviewFor, cleanupFullPreviews, reusesWhole } from './lib/full-preview.js';
 import { analyticsRoutes, cleanupAnalytics, funnelRange, funnelText, visitInfo, funnelPaid, countEvent, funnelOrder, abExpose } from './lib/analytics.js';
 import { seoReportRoutes, seoWeekly } from './lib/seo-report.js';
@@ -245,7 +245,7 @@ app.post('/api/cv-check', express.json({ limit: '8mb' }), async (req, res) => {
 
 // Import kontaktów CSV w panelu może przekraczać ogólny limit 700 KB (parser przed globalnym).
 app.use('/api/admin/contacts/import', express.json({ limit: '3mb' }));
-app.use(PHOTO_UPLOAD_PATHS, express.json({ limit: '9mb' })); // D1: zdjęcie do CV do 6 MB (base64) – przed ogólnym limitem 700 kB
+app.use(PHOTO_UPLOAD_PATHS, express.json({ limit: '6mb' })); // D1: zdjęcie do CV do 4 MB (base64) – przed ogólnym limitem 700 kB
 // Szkic ogłoszenia z rozszerzenia Chrome (własny limit 20 KB i CORS, więc przed globalnym parserem).
 draftRoutes(app);
 app.use(express.json({ limit: '700kb' }));
@@ -650,7 +650,6 @@ app.post('/api/orders', async (req, res) => {
     if (!p.name || !/^\S+@\S+\.\S+$/.test(p.email)) return res.status(400).json({ error: 'Podaj imię i nazwisko oraz poprawny e-mail.' });
     if (!p.experience.length && !p.education.length) return res.status(400).json({ error: 'Dodaj doświadczenie lub wykształcenie.' });
     const ad = cleanAddons(addons), langs = usefulExtraLangs(cleanLangs(extraLangs), a);
-    if (ad.photo && !p.photo) return res.status(400).json({ error: 'Dodaj zdjęcie (ekran „Twoje dane”, „Więcej danych”) albo odznacz „Zdjęcie do CV”.' });
     // Karnet (lib/passes.js): każde ogłoszenie = 1 dopasowanie (CV + list), bez kodów rabatowych; dopłata tylko za to, czego karnet nie obejmuje.
     const orderId = crypto.randomUUID();
     let passUse = null;
@@ -669,7 +668,7 @@ app.post('/api/orders', async (req, res) => {
     if (total > 0 && waiver !== true) { if (passUse) await releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {}); return res.status(400).json({ error: 'Zaznacz zgodę na wykonanie usługi od razu po płatności.' }); }
     const shown = await previewFor(p, a[0]).catch(() => null); // podgląd z ostatniego kroku kreatora, jeśli był
     const fullShown = await fullPreviewFor(p, a[0], mode).catch(() => null); // pełne CV z podglądu (C1): po płatności klient dostaje dokładnie to
-    const order = { ...(mode === 'rewrite' ? { mode: 'rewrite' } : {}), preview: shown, ...(fullShown ? { fullPreview: fullShown } : {}), visit: visitInfo(req), refCtx: refCtx(req), invoice: total > 0 ? inv : null, id: orderId, ...(passUse ? { pass: { id: passUse.passId, use: passUse.use, items: passUse.items } } : {}), pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), ...(ad.photo ? { photoBg: ['jasne', 'szare', 'niebieskie'].includes(req.body?.photoBg) ? req.body.photoBg : 'jasne' } : {}), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, deleteNotice: { consent: !!deleteNotice, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, outcomeAsk: outcomeAsk === true ? { consent: true, text: OUTCOME_CONSENT, at: Date.now(), sent: false } : { consent: false, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, ...(waiver === true ? { waiver: { text: WAIVER, at: Date.now(), ...(CHECKOUT_FORMS.has(consentForm) ? { form: consentForm } : {}) } } : {}), status: 'pending', results: [], revisions: 0, maxRevisions: MAX_REVISIONS, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
+    const order = { ...(mode === 'rewrite' ? { mode: 'rewrite' } : {}), preview: shown, ...(fullShown ? { fullPreview: fullShown } : {}), visit: visitInfo(req), refCtx: refCtx(req), invoice: total > 0 ? inv : null, id: orderId, ...(passUse ? { pass: { id: passUse.passId, use: passUse.use, items: passUse.items } } : {}), pkg, addons: ad, extraLangs: langs, code: c.code || null, codeBase: c.base || 0, discount: discountGr(disc, pkg), creditUsed: creditUsedFor(c, calcTotal(pkg, a.length, ad, false, langs, 0), total), total, profile: p, ads: a, design: cleanDesign(design), reminder: { consent: !!reminder, sent: false }, followUp: { consent: !!followUp, sent: false }, deleteNotice: { consent: !!deleteNotice, sent: false }, jobAlerts: jobAlerts && str(jobAlerts.job, 60).length >= 2 ? { job: str(jobAlerts.job, 60), city: str(jobAlerts.city, 40) } : null, reviewAsk: { consent: !!reviewAsk, sent: false }, outcomeAsk: outcomeAsk === true ? { consent: true, text: OUTCOME_CONSENT, at: Date.now(), sent: false } : { consent: false, sent: false }, payReminder: { consent: !!payReminder, sent: false }, uiLang: ['en', 'uk', 'de'].includes(uiLang) ? uiLang : 'pl', createAccount: !!createAccount, ...(waiver === true ? { waiver: { text: WAIVER, at: Date.now(), ...(CHECKOUT_FORMS.has(consentForm) ? { form: consentForm } : {}) } } : {}), status: 'pending', results: [], revisions: 0, maxRevisions: MAX_REVISIONS, created: Date.now(), adConsent: adConsent === true, ...(adConsent === true ? { adCtx: adContext(req, req.body) } : {}) };
     try { await reserveOrderCode(order, c.base); } catch (e) {
       if (passUse) await releasePassOrder({ id: orderId, pass: { id: passUse.passId } }).catch(() => {});
       if (e instanceof CodeError) return res.status(409).json({ error: e.message }); throw e;
@@ -709,7 +708,7 @@ app.post('/api/orders/:id/followup', async (req, res) => {
 
 const view = (o, extra = {}) => ({
   ...extra, id: o.id, pkg: o.pkg, addons: o.addons || {}, extraLangs: o.extraLangs || [], total: o.total, status: o.status, results: o.status === 'done' ? (o.results || []).map(({ qa, ...r }) => r) : [], // dokumenty tylko po opłaceniu i wygenerowaniu (blok A, 26.10) error: o.error, mail: o.mail,
-  design: cleanDesign(o.design), photo: o.profile.photo || '', photoFiles: !!o.photoPro, email: o.profile.email, parentId: o.parentId || null,
+  design: cleanDesign(o.design), photo: o.profile.photo || '', email: o.profile.email, parentId: o.parentId || null,
   paidAt: o.paidAt || null, gateway: o.gateway || null, createAccount: !!o.createAccount, canPay: o.status === 'pending' && !DEMO, revisionsLeft: revLimit(o) - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
   invoice: o.invoice?.pdf ? { number: o.invoice.number } : null, mode: o.mode || null, heard: !!o.heard,
 });
@@ -895,18 +894,13 @@ async function afterPaid(o) {
 
 const inFlight = new Set();
 async function markPaidAndGenerate(id) {
-  let o = await getOrder(id);
+  const o = await getOrder(id);
   if (!o || o.status !== 'pending' || inFlight.has(id)) return;
   inFlight.add(id);
   try {
     if (o.upsellOf) return await applyUpsell(o);
     if (isProduct(o)) return await applyProduct(o, { getOrder, updateOrder, sendMail: (x, files, inserted) => (mailEnabled() ? sendPhotoMail(x, files, inserted, productReturn(x, BASE_URL)) : Promise.reject(new Error('Wysyłka e-maili wyłączona (brak SMTP)'))),
       paidSteps: (paidO) => { recordSale(paidO).catch((e) => console.error('Rejestr sprzedaży', e.message)); notifyNewOrder(paidO, BASE_URL).catch((e) => logEvent('e-mail', `Powiadomienie o zamówieniu: ${e.message}`)); if (paidO.invoice) autoInvoice(paidO).catch((e) => logEvent('faktura', e.message, { orderId: id })); countEvent(`product_paid:${paidO.product}`).catch(() => {}); } });
-    // Dodatek „Zdjęcie do CV” (D1): tło, kadr i jasność zdjęcia z kreatora przed wygenerowaniem CV; oryginał zostaje do pobrania plików.
-    if (o.addons?.photo && o.profile?.photo && !o.photoPro) {
-      try { const photo = await photoForCv(o.profile.photo, o.photoBg); o = await updateOrder(id, (x) => ({ ...x, photoPro: { src: x.profile.photo, bg: x.photoBg || 'jasne' }, profile: { ...x.profile, photo } })); }
-      catch (e) { logEvent('zdjęcie', `Dodatek w zamówieniu: ${e.message}`, { orderId: id }); }
-    }
     const paidO = await updateOrder(id, (x) => ({ ...x, status: 'generating', paidAt: x.paidAt || Date.now() }));
     const passFree = !!o.pass && !(o.total > 0); // zamówienie w całości z karnetu: przychód był przy zakupie karnetu
     if (!o.paidAt && !passFree) funnelPaid(paidO).catch(() => {}); // etap „Opłacone” w lejku liczy serwer, raz na zamówienie
@@ -1184,6 +1178,7 @@ async function hourly() {
   try {
     const n = await deleteOlderThan(RETENTION_MS);
     if (n) console.log(`Usunięto ${n} zamówień starszych niż 30 dni`);
+    await cleanupPhotos(RETENTION_MS); // zdjęcia z usługi „Zdjęcie do CV” (osobne pliki) – razem z zamówieniami
     await codes.deleteWhere((c) => Date.now() > c.expires && !(c.due > 0)); // kod partnera z niewypłaconą prowizją zostaje do rozliczenia
     await releaseStaleCodes();
     for (const x of Object.values(await allOrders())) if (x.refCtx && Date.now() - (x.created || 0) > 48 * 3600e3) await updateOrder(x.id, (y) => { const { refCtx: _r, ...rest } = y; return rest; });
