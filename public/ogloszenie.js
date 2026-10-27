@@ -80,9 +80,10 @@
     $('#adPay').disabled = true; say(pst, tr('Otwieram płatność…'));
     try {
       const gw = buy.querySelector('input[name=adGw]:checked')?.value;
-      const body = { id: previewId, email: $('#adEmail').value, terms: true, waiver: true, gateway: gw, uiLang: ui(), invoice: { name: $('#adInvName').value, address: $('#adInvAddr').value, nip: $('#adInvNip').value } };
+      const body = { id: previewId, testCode: new URLSearchParams(location.search).get('kod') || undefined, email: $('#adEmail').value, terms: true, waiver: true, gateway: gw, uiLang: ui(), invoice: { name: $('#adInvName').value, address: $('#adInvAddr').value, nip: $('#adInvNip').value } };
       const r = await fetch('/api/products/adcheck', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      if (j.free) { $('#adPay').disabled = false; return paid(j.id); } // kod testowy właściciela: bez płatności
       if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); $('#adPay').disabled = false; return paid(j.id); }
       location.href = j.url;
     } catch (x) { say(pst, x.message || tr('Nie udało się otworzyć płatności.'), 'bad'); $('#adPay').disabled = false; }

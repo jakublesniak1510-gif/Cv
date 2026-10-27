@@ -146,9 +146,10 @@
     $('#grPay').disabled = true; say(pst, tr('Otwieram płatność…'));
     try {
       const gw = buy.querySelector('input[name=grGw]:checked')?.value;
-      const body = { id: previewId, email: $('#grEmail').value, terms: true, waiver: true, noGuarantee: true, gateway: gw, uiLang: ui(), ...($('#grInv').checked ? { invoice: { name: $('#grInvName').value, address: $('#grInvAddr').value, nip: $('#grInvNip').value } } : {}) };
+      const body = { id: previewId, testCode: new URLSearchParams(location.search).get('kod') || undefined, email: $('#grEmail').value, terms: true, waiver: true, noGuarantee: true, gateway: gw, uiLang: ui(), ...($('#grInv').checked ? { invoice: { name: $('#grInvName').value, address: $('#grInvAddr').value, nip: $('#grInvNip').value } } : {}) };
       const r = await fetch('/api/products/grant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      if (j.free) { $('#grPay').disabled = false; return paid(j.id); } // kod testowy właściciela: bez płatności
       if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); $('#grPay').disabled = false; return paid(j.id); }
       location.href = j.url;
     } catch (x) { say(pst, x.message || tr('Nie udało się otworzyć płatności.'), 'bad'); $('#grPay').disabled = false; }

@@ -101,9 +101,10 @@
     if (!$('#selTerms').checked || !$('#selDpa').checked || !$('#selWaiver').checked) return say(pst, tr('Zaznacz wszystkie trzy zgody, w tym umowę powierzenia.'), 'bad');
     $('#selPay').disabled = true; say(pst, tr('Otwieram płatność…'));
     try {
-      const body = { id: draft, variant: Number(variant()), requirements: reqs(), email: $('#selEmail').value, terms: true, waiver: true, dpa: true, gateway: $('#selBuy').querySelector('input[name=selGw]:checked')?.value, uiLang: ui(), invoice: { name: $('#selInvName').value, address: $('#selInvAddr').value, nip: $('#selInvNip').value } };
+      const body = { id: draft, testCode: new URLSearchParams(location.search).get('kod') || undefined, variant: Number(variant()), requirements: reqs(), email: $('#selEmail').value, terms: true, waiver: true, dpa: true, gateway: $('#selBuy').querySelector('input[name=selGw]:checked')?.value, uiLang: ui(), invoice: { name: $('#selInvName').value, address: $('#selInvAddr').value, nip: $('#selInvNip').value } };
       const r = await fetch('/api/products/selection', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }), j = await r.json();
       if (!r.ok) throw new Error(j.error);
+      if (j.free) { $('#selPay').disabled = false; return paid(j.id); } // kod testowy właściciela: bez płatności
       if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); $('#selPay').disabled = false; return paid(j.id); }
       location.href = j.url;
     } catch (x) { say(pst, x.message || tr('Nie udało się otworzyć płatności.'), 'bad'); $('#selPay').disabled = false; }

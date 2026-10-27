@@ -42,9 +42,10 @@
     if (!$('#premTerms').checked || !$('#premWaiver').checked) return say(tr('Zaznacz obie zgody, żeby kupić szablony.'), 'bad');
     btn.disabled = true; say(tr('Otwieram płatność…'));
     try {
-      const body = { email: $('#premEmail').value, terms: true, waiver: true, gateway: gateway(), uiLang: window.I18N?.lang || 'pl', ...($('#premInv').checked ? { invoice: { name: $('#premInvName').value, address: $('#premInvAddr').value, nip: $('#premInvNip').value } } : {}) };
+      const body = { testCode: new URLSearchParams(location.search).get('kod') || undefined, email: $('#premEmail').value, terms: true, waiver: true, gateway: gateway(), uiLang: window.I18N?.lang || 'pl', ...($('#premInv').checked ? { invoice: { name: $('#premInvName').value, address: $('#premInvAddr').value, nip: $('#premInvNip').value } } : {}) };
       const r = await fetch('/api/products/templates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      if (j.free) { btn.disabled = false; return paid(j.id); } // kod testowy właściciela: bez płatności
       if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); btn.disabled = false; return paid(j.id); }
       location.href = j.url;
     } catch (x) { say(x.message || tr('Nie udało się otworzyć płatności.'), 'bad'); btn.disabled = false; }

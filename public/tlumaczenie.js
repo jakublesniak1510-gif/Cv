@@ -67,9 +67,10 @@
     $('#trPay').disabled = true; say(pst, tr('Otwieram płatność…'));
     try {
       const gw = buy.querySelector('input[name=trGw]:checked')?.value;
-      const body = { id: previewId, email: $('#trEmail').value, terms: true, waiver: true, gateway: gw, uiLang: ui(), ...($('#trInv').checked ? { invoice: { name: $('#trInvName').value, address: $('#trInvAddr').value, nip: $('#trInvNip').value } } : {}) };
+      const body = { id: previewId, testCode: new URLSearchParams(location.search).get('kod') || undefined, email: $('#trEmail').value, terms: true, waiver: true, gateway: gw, uiLang: ui(), ...($('#trInv').checked ? { invoice: { name: $('#trInvName').value, address: $('#trInvAddr').value, nip: $('#trInvNip').value } } : {}) };
       const r = await fetch('/api/products/translation', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      if (j.free) { $('#trPay').disabled = false; return paid(j.id); } // kod testowy właściciela: bez płatności
       if (j.demo) { await fetch(`/api/orders/${j.id}/demo-pay`, { method: 'POST' }); $('#trPay').disabled = false; return paid(j.id); }
       location.href = j.url;
     } catch (x) { say(pst, x.message || tr('Nie udało się otworzyć płatności.'), 'bad'); $('#trPay').disabled = false; }
