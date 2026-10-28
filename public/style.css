@@ -1172,3 +1172,11 @@ ul.checklist{list-style:none;padding-left:0}
 @media(max-width:1440px){.nav .inner>nav a.nav-t{display:none}}
 @media(max-width:1100px){.nav .inner>nav{display:none}.langsw{margin-left:auto}.menubtn{display:inline-flex}}
 @media(min-width:1001px) and (max-width:1100px){.mnav:not([hidden]){display:grid!important}}
+
+/* Hero „z reklamy” i prostszy krok 1 kreatora (28.10) */
+.hero .ad-hero-col h1{font-size:clamp(30px,4.6vw,50px);line-height:1.1;text-wrap:balance}
+.ad-hero{margin-top:22px}
+.ad-ticks{flex-direction:column;gap:8px;font-size:15px;color:var(--ink)}.ad-ticks a{color:inherit}
+.noad-btn{width:100%;margin:10px 0 4px;white-space:normal}
+.pkg-line{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;margin:16px 0 4px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.pkg-line .link{margin-left:auto}

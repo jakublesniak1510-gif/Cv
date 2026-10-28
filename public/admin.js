@@ -540,6 +540,12 @@ function simpleTable(rows, cols) {
   return el('table', {}, el('thead', {}, el('tr', {}, cols.map(([, h, r]) => el('th', { className: r ? 'r' : '', textContent: h })))),
     el('tbody', {}, rows.map((x) => el('tr', {}, cols.map(([k, , r]) => { const v = typeof k === 'function' ? k(x) : x[k]; return el('td', { className: r ? 'r' : 'ell', textContent: v ?? '–', title: r ? '' : String(v ?? '') }); })))));
 }
+// Tabela, która na telefonie układa się w 2 wiersze na pozycję (nazwa, pod nią liczby z podpisami) – bez ucinania kolumn (28.10).
+function stackTable(rows, cols) {
+  const t = simpleTable(rows, cols); if (t.tagName !== 'TABLE') return t;
+  t.classList.add('stack'); t.querySelectorAll('tbody tr').forEach((tr) => [...tr.children].forEach((td, i) => (td.dataset.label = cols[i][1])));
+  return t;
+}
 const shortUrl = (u) => String(u || '').replace(/^https?:\/\/[^/]+/, '') || '/';
 const QC = [['key', 'Zapytanie'], ['clicks', 'Klik.', 1], ['impressions', 'Wyśw.', 1], ['ctr', 'CTR %', 1], ['position', 'Poz.', 1], ['prevPosition', 'Poz. wcześniej', 1]];
 const PC = [[(x) => shortUrl(x.key), 'Strona'], ['type', 'Typ'], ['lang', 'Język'], ['clicks', 'Klik.', 1], ['impressions', 'Wyśw.', 1], ['ctr', 'CTR %', 1], ['position', 'Poz.', 1]];
@@ -579,13 +585,17 @@ loaders.seo = async () => {
     : [el('p', { className: 'help', textContent: 'Brak testów. Włącz je zmienną EXPERIMENTS w Render, np. {"hero":50,"cta":50} (hero – nagłówek, cta – przycisk główny, checkout – ostatni krok kreatora, scanner – wynik darmowego skanera; liczba = % ruchu w wariancie B). Bez plików cookie: wariant wynika z dziennego, anonimowego skrótu odwiedzającego.' })]));
   const pc = (x) => (x == null ? '–' : `${String(x).replace('.', ',')}%`);
   $('#seoWizard').replaceChildren(...(d.wizard?.length ? d.wizard.map((g) => el('div', { className: 'tbl-wrap' }, el('p', { className: 'help', textContent: g.label }), simpleTable(g.rows, [['label', 'Krok'], ['n', 'Osoby', 1], [(x) => pc(x.rate), '% z poprz.', 1], [(x) => (x.exits == null ? '' : x.exits), 'Wyjścia', 1]]))) : [el('div', { className: 'empty', textContent: 'Brak danych z kreatora w ostatnich 28 dniach.' })]));
+  // 28.10: wyjścia z kroku 1 (powód × źródło) i lejek według źródła z 28 dni (tabele przewijane w poziomie na telefonie).
+  const S1 = ['google', 'facebook', 'direct', 'inne'];
+  $('#seoStep1').replaceChildren(d.step1?.length ? stackTable(d.step1, [['label', 'Powód'], ...S1.map((g) => [(x) => x.src[g], g, 1]), ['n', 'Razem', 1]]) : el('div', { className: 'empty', textContent: 'Brak wyjść z kroku 1 w ostatnich 28 dniach.' }));
+  $('#seoSrc28').replaceChildren(d.sources?.rows?.length ? stackTable(d.sources.rows, [['k', 'Źródło'], ...d.sources.stages.map((label, i) => [(x) => x.v[i], label, 1])]) : el('div', { className: 'empty', textContent: 'Brak danych.' }));
   $('#seoAff').replaceChildren(d.affiliates?.length ? simpleTable(d.affiliates, [['name', 'Kurs'], ['clicks', 'Kliknięcia', 1], ['pages', 'Najczęściej ze stron']]) : el('div', { className: 'empty', textContent: 'Brak kliknięć w ostatnich 28 dniach.' }));
   const h = d.heard;
   $('#seoHeard').replaceChildren(h?.total ? simpleTable(h.counts, [['label', 'Odpowiedź'], ['n', 'Liczba', 1], [(x) => `${String(x.pct).replace('.', ',')}%`, 'Udział', 1]]) : el('div', { className: 'empty', textContent: 'Brak odpowiedzi. Pytanie pojawia się po opłaceniu zamówienia i jest opcjonalne.' }));
   $('#seoHeardTexts').replaceChildren(...(h?.texts?.length ? [el('p', { className: 'help', textContent: 'Dopiski (z zamówień z ostatnich 30 dni; znikają razem z zamówieniem):' }), simpleTable(h.texts, [[(x) => dd(x.at), 'Data'], ['label', 'Odpowiedź'], ['text', 'Dopisek']])] : []));
   const f = r?.funnel;
   $('#seoFunnel').replaceChildren(f ? simpleTable(f.stages, [['label', 'Etap'], ['n', 'Liczba', 1], [(s) => (s.rate == null ? '–' : `${String(s.rate).replace('.', ',')}%`), '% z poprz.', 1], ...['pl', 'en', 'uk', 'de'].map((l) => [(s) => s.lang[l] || 0, l, 1])]) : el('div', { className: 'empty', textContent: 'Brak raportu.' }));
-  $('#seoSrc').replaceChildren(f ? simpleTable(['google', 'youtube', 'facebook', 'instagram', 'tiktok', 'share', 'direct', 'inne'].map((k) => ({ k, v: f.stages.map((s) => s.src[k] || 0) })), [['k', 'Źródło'], ...f.stages.map((s, i) => [(x) => x.v[i], s.label, 1])]) : '');
+  $('#seoSrc').replaceChildren(f ? stackTable(['google', 'youtube', 'facebook', 'instagram', 'tiktok', 'share', 'direct', 'inne'].map((k) => ({ k, v: f.stages.map((s) => s.src[k] || 0) })), [['k', 'Źródło'], ...f.stages.map((s, i) => [(x) => x.v[i], s.label, 1])]) : '');
   $('#seoQueries').replaceChildren(simpleTable(g?.queries, QC));
   const tc = g?.titleCtr;
   $('#seoCtrInfo').textContent = !tc ? 'Brak zmian tytułów w seo-data/title-changes.json przed końcem okresu raportu.' : tc.error ? tc.error : !tc.days ? `Zmiana ${tc.change}: za mało danych (Search Console ma kilkudniowe opóźnienie).` : `Zmiana ${tc.change}: ${tc.days} dni przed (${tc.before.start} – ${tc.before.end}) vs ${tc.days} dni po (${tc.after.start} – ${tc.after.end}).`;
