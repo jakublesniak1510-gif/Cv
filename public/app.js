@@ -21,6 +21,18 @@ const ORDER = [1, 2, 6];
 const stepOf = (n) => (ORDER.includes(n) ? n : n === 5 ? 1 : n === 3 || n === 4 ? 2 : n === 7 ? 6 : ORDER[0]);
 const STEP_TITLE = (n) => STEPS[n - 1];
 let pendingDraft = ''; // ogłoszenie z rozszerzenia Chrome czekające na formularz skanera
+let pkgOpen = false; // krok 1: wybór pakietu rozwinięty („Zmień pakiet”)
+// Wejście z reklamy (utm_source=google|meta, gclid, fbclid; lib/ad-hero.js): hero „z reklamy” na całą wizytę (sessionStorage).
+// Pierwszą odsłonę serwer wysyła już podmienioną (data-adhero), przy kolejnych podmieniamy lewą kolumnę hero z szablonu.
+const AD_Q = new URLSearchParams(location.search), AD_SRC = AD_Q.get('gclid') ? 'google' : AD_Q.get('fbclid') ? 'facebook' : '';
+try { if (/^(google|meta)$/i.test(AD_Q.get('utm_source') || '') || AD_SRC) sessionStorage.setItem('cvpo-adhero', (AD_Q.get('utm_source') || AD_SRC).toLowerCase()); } catch {}
+const adVisit = (() => { try { return sessionStorage.getItem('cvpo-adhero') || ''; } catch { return ''; } })();
+(() => {
+  const hero = $('#top.hero'), tpl = $('#adHeroTpl');
+  if (!adVisit || location.pathname !== '/' || !hero || !tpl || hero.dataset.adhero) return;
+  const col = $('.hero-grid > div', hero); if (!col) return;
+  col.className = 'ad-hero-col'; col.replaceChildren(tpl.content.cloneNode(true)); hero.dataset.adhero = '1';
+})();
 // Ogłoszenie wklejone na stronie zawodu („Masz ogłoszenie?”, lite.js): jednorazowo z pamięci tej karty.
 try { const a = sessionStorage.getItem('cvpo-scan-ad'); if (a) { sessionStorage.removeItem('cvpo-scan-ad'); pendingDraft = a; setTimeout(() => (pendingDraft = ''), 20000); } } catch {}
 let cfg = { demo: false, maxAds: 5, noPrint: false, maxRevisions: 5, loading: true };
@@ -29,7 +41,7 @@ const trackLater = []; // zdarzenia sprzed wczytania konfiguracji (np. powrót z
 function track(e, x = {}) {
   if (cfg.loading) { if (trackLater.length < 10) trackLater.push([e, x]); return; }
   if (cfg.preview || !navigator.sendBeacon) return;
-  try { navigator.sendBeacon('/api/t', JSON.stringify({ e, p: location.pathname, r: document.referrer, u: new URLSearchParams(location.search).get('utm_source') || '', l: (document.documentElement.lang || 'pl').slice(0, 2), ...x })); } catch {}
+  try { navigator.sendBeacon('/api/t', JSON.stringify({ e, p: location.pathname, r: document.referrer, u: new URLSearchParams(location.search).get('utm_source') || AD_SRC, l: (document.documentElement.lang || 'pl').slice(0, 2), ...x })); } catch {}
 }
 // Szablony i kolory: muszą zgadzać się z lib/designs.js.
 const TPLS = [
@@ -725,6 +737,7 @@ function setMode(e, mode) {
   kind.value = mode === 'prof' ? 'profession' : '';
   if (was === 'profession' && mode !== 'prof') { $('[data-k=text]', e).value = ''; $('[data-k=title]', e).value = ''; }
   if (mode === 'prof') { profList(); if (!passOn() && pkg() !== 'cv') { $('input[name=pkg][value=cv]').checked = true; } }
+  if ($('#noAdBtn') && e === $('#ads .entry')) $('#noAdBtn').hidden = mode === 'prof';
   refresh();
 }
 // Lista zawodów do podpowiedzi (z danych stron zawodów) – raz na stronę.
@@ -775,11 +788,11 @@ function initAd(e, mode) {
       const j = await r.json();
       if (!r.ok) throw new Error(j.error);
       $('[data-k=title]', e).value = j.title || ''; $('[data-k=text]', e).value = j.text; if (!j.title) fillTitle(e);
-      e.dataset.fetched = '1'; setMode(e, 'link');
+      e.dataset.fetched = '1'; delete e.dataset.linkErr; setMode(e, 'link');
       status.textContent = `Pobrano${j.title ? ': „' + j.title + '”' : ''}${j.company ? ' (' + j.company + ')' : ''}, ${j.text.length} znaków. Sprawdź treść poniżej.`;
       status.classList.add('good');
     } catch (x) {
-      e.dataset.fetched = '1'; $('.adfields', e).before(status); setMode(e, 'paste');
+      e.dataset.fetched = '1'; e.dataset.linkErr = '1'; $('.adfields', e).before(status); setMode(e, 'paste');
       status.textContent = `${x.message} Wklej treść ogłoszenia poniżej.`; status.classList.add('bad');
     }
     btn.disabled = false;
@@ -881,6 +894,13 @@ function restoreDraft(from) {
   restoring = false; refresh();
   return true;
 }
+// Linia „Pakiet: Samo CV – 39 zł · Zmień pakiet” zamiast nagłówka, zdania i trzech opcji (rozwijane na żądanie).
+function drawPkgLine() {
+  const line = $('#pkgLine'); if (!line) return;
+  const today = $('#pkgOpts').previousElementSibling, head = today?.previousElementSibling, off = passOn() || !pkgOpen;
+  if (today) today.hidden = off; if (head) head.hidden = off; line.hidden = passOn() || pkgOpen;
+  $('#pkgLineName').textContent = `${PKG_LINE[pkg()] || PKG_LINE.cv} – ${PRICE[pkg()] ?? PRICE.cv} zł`;
+}
 function refresh() {
   if ($('#langPick').children.length) syncLangPick();
   $$('.pack3Unit').forEach((x) => (x.textContent = `${PRICE.pack3} zł = ${(PRICE.pack3 / 3).toFixed(2).replace('.', ',')} zł`)); // B6: cena za jedno CV w Pakiecie 3
@@ -891,7 +911,7 @@ function refresh() {
   $('#bundleTip').hidden = pkg() === 'cv';
   $('#brk').textContent = [addonsTotal() ? `dodatki ${addonsTotal()} zł` : '', discount() ? `rabat −${discount()} zł` : ''].filter(Boolean).join(' · ');
   $$('.opt b[data-price]').forEach((b) => (b.textContent = `+${PRICE[b.dataset.price]} zł`));
-  $('#pkgOpts').hidden = passOn();
+  $('#pkgOpts').hidden = passOn() || !pkgOpen; drawPkgLine();
   quotePass();
   const maxA = passOn() ? Math.min(3, myPass.left.matches) : PKG_ADS[pkg()];
   $('#addAd').hidden = maxA === 1; $('#addAd').disabled = nAds() >= maxA;
@@ -993,6 +1013,12 @@ async function applyCode(raw, quiet) {
 }
 $('#codeApply').onclick = () => applyCode($('#codeInput').value);
 $('#toPack').onclick = () => { $('input[name=pkg][value=pack3]').checked = true; refresh(); $('#werr').textContent = ''; };
+// Krok 1 z mniejszą liczbą decyzji (28.10): pakiet domyślnie „Samo CV”, wybór zwinięty do linii „Zmień pakiet”;
+// wyraźna opcja „Nie mam ogłoszenia – wpisz tylko stanowisko” (tryb „Bez ogłoszenia” pierwszego ogłoszenia, CV pod zawód).
+const PKG_LINE = { cv: 'Samo CV', cv_letter: 'CV + list motywacyjny', pack3: 'Pakiet 3 CV + listy' };
+$('#pkgOpts').previousElementSibling.previousElementSibling.before(el('p', { className: 'pkg-line', id: 'pkgLine' }, el('span', { textContent: 'Pakiet:' }), ' ', el('b', { id: 'pkgLineName' }), ' ', el('button', { type: 'button', className: 'link', id: 'pkgChange', textContent: 'Zmień pakiet', onclick: () => { pkgOpen = true; refresh(); $('#pkgOpts input:checked')?.focus(); } })));
+const noAdBtn = el('button', { type: 'button', className: 'btn ghost noad-btn', id: 'noAdBtn', textContent: 'Nie mam ogłoszenia – wpisz tylko stanowisko', onclick: () => { const first = $('#ads .entry'); if (!first) return; setMode(first, 'prof'); $('.profq', first)?.focus(); } });
+$('#ads').after(noAdBtn);
 {
   const ref = new URLSearchParams(location.search).get('ref');
   try { if (ref) localStorage.setItem(REF_KEY, ref); } catch {}
@@ -1257,14 +1283,26 @@ const openWiz = (p) => {
 };
 // Wyjście z kreatora (lejek kreatora, PR N): zamknięcie albo opuszczenie strony na kroku; nie przy przejściu do płatności.
 let leavingToPay = false;
+// step1_exit (28.10): dlaczego ktoś odpada na kroku 1 – „noad” (wybrał „Nie mam ogłoszenia” albo wpisał mniej niż ogłoszenie),
+// „link” (link się nie wczytał i nie wkleił treści), „empty” (zamknął, nic nie wpisując), „other” (miał ogłoszenie, a jednak wyszedł).
+function step1Why() {
+  const e = $('#ads .entry'); if (!e) return 'empty';
+  const text = ($('[data-k=text]', e)?.value || '').trim(), url = ($('[data-k=url]', e)?.value || '').trim(), q = ($('.profq', e)?.value || '').trim();
+  if (e.dataset.mode === 'prof') return 'noad';
+  if (e.dataset.linkErr && text.length < 80) return 'link';
+  if (!text && !url && !q) return 'empty';
+  return text.length < 80 ? 'noad' : 'other';
+}
 const wizExit = () => { if (!$('#wiz').hidden && !leavingToPay && step >= 1 && step <= 6) track('wizexit', { s: step }); };
-addEventListener('pagehide', wizExit);
-const closeWiz = () => { wizExit(); $('#wiz').hidden = true; modal(false); };
+const step1Exit = () => { if (!$('#wiz').hidden && !leavingToPay && step === 1) track('step1exit', { why: step1Why() }); };
+addEventListener('pagehide', wizExit); addEventListener('pagehide', step1Exit);
+const closeWiz = () => { wizExit(); step1Exit(); $('#wiz').hidden = true; modal(false); };
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (!b) return; e.preventDefault(); if (b.dataset.addon) { b.dataset.addon.split(',').forEach((a) => ($('#ad' + a).checked = true)); saveDraft(); } openWiz(b.dataset.pkg); if ('prof' in b.dataset) profStart(); });
 // Zamknięcie przez użytkownika (×, Escape): na telefonie zdejmujemy też wpis historii dodany przy otwarciu kreatora (B8).
 const userCloseWiz = () => { closeWiz(); if (wizPushed) { wizPushed = false; silentBack = true; history.back(); } };
 $('#wizClose').onclick = userCloseWiz;
 // C4: pole w hero – link albo treść ogłoszenia od razu do kreatora (pierwsze ogłoszenie, pakiet „Samo CV”). Link pobieramy jak w kreatorze.
+// Hero „z reklamy” ma ten sam formularz (#heroAd); tam pole przyjmuje też samo stanowisko.
 $('#heroAd')?.addEventListener('submit', (e) => {
   e.preventDefault(); const ta = $('#heroAdIn'), v = ta.value.trim();
   if (!v) { ta.focus(); ta.classList.add('err'); return; }
@@ -1272,6 +1310,8 @@ $('#heroAd')?.addEventListener('submit', (e) => {
   openWiz('cv'); track('heroad');
   const first = $('#ads .entry'); if (!first) return;
   if (/^https?:\/\/\S+$/i.test(v)) { setMode(first, 'link'); $('[data-k=url]', first).value = v; $('.fetchbtn', first).click(); }
+  // Krótki wpis w jednej linii (np. „magazynier”) to stanowisko, nie ogłoszenie: CV pod zawód (tryb „Bez ogłoszenia”).
+  else if (v.length < 60 && !/\n/.test(v)) { setMode(first, 'prof'); first.profRun?.(v); }
   else { setMode(first, 'paste'); $('[data-k=text]', first).value = v.slice(0, 10000); fillTitle(first); }
   saveDraft();
 });
