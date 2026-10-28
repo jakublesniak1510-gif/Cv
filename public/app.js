@@ -246,7 +246,7 @@ function hl(text, kws) {
 }
 
 fetch('/api/config').then((r) => r.json()).then((c) => {
-  cfg = c; if (c.chromeExt) { $('#chromeExt').href = c.chromeExt; $('#chromeExtBox').hidden = false; } window.CONSENT?.init(c.ads); track('pv'); trackLater.splice(0).forEach(([e, x]) => track(e, x)); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; drawPromo(c.promo); drawTrust1(); if (c.salesClosed) $('#demoBar').textContent = 'Strona w przygotowaniu – zamówienia ruszą za kilka dni.'; $('#soonNote').hidden = !c.salesClosed; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
+  cfg = c; if (c.chromeExt) { $('#chromeExt').href = c.chromeExt; $('#chromeExtBox').hidden = false; } window.CONSENT?.init(c.ads); track('pv'); trackLater.splice(0).forEach(([e, x]) => track(e, x)); drawLists(); if (c.prices) PRICE = { ...PRICE, ...c.prices }; refresh(); if ($('#xsell')) drawXsell(); $$('.linkbox').forEach((l) => { if (c.fakeFetch && !$('.hint', l)) l.append(el('p', { className: 'hint', textContent: 'Podgląd: link nie jest naprawdę pobierany, wstawiamy przykładowe ogłoszenie.' })); }); $('#demoBar').hidden = !c.demo; drawPromo(c.promo); drawTrust1(); if (c.salesClosed) $('#demoBar').textContent = 'Strona w przygotowaniu – zamówienia ruszą za kilka dni.'; $('#soonNote').hidden = !c.salesClosed; $('#fill').hidden = !c.demo; $('#printNote').hidden = !c.noPrint; $('#simNote').hidden = !c.demo;
 }).catch(() => drawLists().catch(() => {})); // bez internetu (aplikacja na telefonie): treści z pamięci
 
 /* ---------- Przykład dopasowania ---------- */
@@ -1979,6 +1979,12 @@ function drawFollowup() {
 }
 
 // Dodatki po zakupie: osobna płatność tylko za dodatek, potem dodatek pojawia się w tym zamówieniu.
+// Po zakupie CV jedna dyskretna linijka z usługami obok (28.10): zdjęcie do CV i tłumaczenie, ceny z /api/config (lib/pricing.js).
+function drawXsell() {
+  let p = $('#xsell'); if (!p) { p = el('p', { className: 'hint noprint xsell', id: 'xsell' }); $('#upsell').after(p); }
+  p.hidden = !!cfg.preview || !PRICE.photo || !PRICE.translation;
+  p.replaceChildren(el('span', { textContent: 'Przyda się też:' }), ' ', el('a', { href: '/narzedzia/zdjecie-do-cv' }, el('span', { textContent: 'Zdjęcie do CV' }), ` – ${PRICE.photo} zł`), ' · ', el('a', { href: '/tlumaczenie-cv' }, el('span', { textContent: 'Tłumaczenie CV' }), ` – ${PRICE.translation} zł`));
+}
 let upsellTimer = null;
 const UPSELL_PART = { letter: 'list motywacyjny', interview: 'przygotowanie do rozmowy', sim: 'symulator rozmowy' };
 const UPSELL_HINT = { messages: 'Wiadomość do rekrutera na LinkedIn i gotowy e-mail z aplikacją pod każde CV z tego zamówienia.', linkedin: 'Nagłówek, sekcja „Informacje”, do 15 umiejętności i opisy stanowisk spójne z Twoim CV, do skopiowania na LinkedIn.', letter: 'List motywacyjny do każdego CV z tego zamówienia, pod to samo ogłoszenie.', interview: 'Pytania z tego ogłoszenia z przykładowymi odpowiedziami, autoprezentacja i lista rzeczy do przygotowania.', sim: 'Rozmowa z AI w roli rekrutera pod to stanowisko, z oceną odpowiedzi.', bundle: 'Wszystko, czego brakuje do rozmowy: list, przygotowanie i symulator razem taniej.' };
@@ -2138,7 +2144,7 @@ function showResult() {
   $('#reviseBtn').onclick = openRevise;
   $('#editor').hidden = $('#reviseBox').hidden = true; editing = null;
   if (data.expires) $('#retention').textContent = `Dane tego zamówienia, w tym dokumenty${data.photo ? ' i zdjęcie' : ''}, usuniemy automatycznie ${new Date(data.expires).toLocaleDateString('pl-PL')}. Zapisz PDF-y u siebie.`;
-  drawFollowup(); drawUpsell(); drawMyCode(); drawRate(); drawAcctOffer();
+  drawFollowup(); drawUpsell(); drawXsell(); drawMyCode(); drawRate(); drawAcctOffer();
   draw();
   if (location.hash === '#ocena') setTimeout(() => $('#rate').scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
   if (location.hash === '#kolejne') setTimeout(() => $('#followup').scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
@@ -3180,6 +3186,6 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.ser
   menu.addEventListener('click', (e) => { if (e.target.closest('a,button')) set(false); });
   document.addEventListener('click', (e) => { if (!menu.hidden && !e.target.closest('#mnav,#menuBtn')) set(false); });
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hidden) { set(false); btn.focus(); } });
-  addEventListener('resize', () => { if (innerWidth > 1000 && !menu.hidden) set(false); });
+  addEventListener('resize', () => { if (innerWidth > 1100 && !menu.hidden) set(false); });
 }
 })();

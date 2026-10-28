@@ -73,6 +73,7 @@ import { offerPageRoutes } from './lib/offer-page.js';
 import { outplacementRoutes } from './lib/outplacement.js';
 import { selectionRoutes, cleanupSelDrafts, SEL_PATH } from './lib/selection.js';
 import { selectionPageRoutes } from './lib/selection-page.js';
+import { servicesPageRoutes } from './lib/services-page.js';
 import { cleanupTestCodes } from './lib/test-codes.js';
 import { adCheckPageRoutes } from './lib/ad-check-page.js';
 import { fullPreviewRoutes, fullPreviewFor, cleanupFullPreviews, reusesWhole } from './lib/full-preview.js';
@@ -665,6 +666,7 @@ offerReplyRoutes(app);
 offerPageRoutes(app, BASE_URL);
 selectionRoutes(app); // D8: za flagą SELECTION_ENABLED (bez niej 404)
 selectionPageRoutes(app, BASE_URL);
+servicesPageRoutes(app, BASE_URL);
 const productMail = (x, files, inserted) => (mailEnabled() ? sendProductMail(x, files, inserted, productReturn(x, BASE_URL)) : Promise.reject(new Error('Wysyłka e-maili wyłączona (brak SMTP)')));
 productRoutes(app, { BASE_URL, DEMO, getOrder, saveOrder, updateOrder, openPayment, pickGateway, BAD_GATEWAY, cleanInvoice, WAIVER, closed: salesClosedFor, CLOSED_MSG, PayOpenError, sendMail: productMail, markFree: (id) => markPaidAndGenerate(id) });
 fullPreviewRoutes(app, { cleanProfile, cleanAds, prices: () => PRICES });
