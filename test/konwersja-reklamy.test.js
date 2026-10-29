@@ -26,7 +26,7 @@ test('Hero „z reklamy”: tylko przy utm_source=google|meta, gclid albo fbclid
       const { h, cc } = await get('/' + q), hero = /<section class="hero" id="top" data-adhero="1">([\s\S]*?)<\/section>/.exec(h)?.[1];
       assert.ok(hero, q); assert.match(cc || '', /no-store/);
       const col = /<div class="ad-hero-col">([\s\S]*?)<\/div>\s*<div class="demo"/.exec(hero)[1], t = text(col);
-      assert.match(col, new RegExp(`<h1>CV dopasowane do ogłoszenia w 2 minuty – ${PRICES.cv / 100} zł</h1>`));
+      assert.match(col, new RegExp(`<h1>CV dopasowane do ogłoszenia w kilka minut – ${PRICES.cv / 100} zł</h1>`));
       assert.match(col, /<textarea id="heroAdIn"[^>]*placeholder="Wklej link albo treść ogłoszenia LUB wpisz stanowisko"/);
       assert.match(col, /<button class="btn lg" type="submit">Pokaż moje CV za darmo<\/button>/);
       assert.equal((col.match(/<li>/g) || []).length, 3); assert.match(t, /podgląd CV przed zapłatą/i); assert.match(col, /href="\/regulamin#gwarancja">Gwarancja dopasowania \(§7a/); assert.match(t, /BLIK albo kartą/);

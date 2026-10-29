@@ -23,7 +23,8 @@ test('Warunek: nasze kanały i kampanie „sprzedaz-…” włączają hero; inn
   try {
     for (const q of ['?utm_source=yt', '?utm_source=tiktok&utm_medium=bio', '?utm_campaign=sprzedaz-31-10']) {
       const r = await fetch(U + '/' + q), h = await r.text();
-      assert.match(h, /<section class="hero" id="top" data-adhero="1">/, q); assert.match(r.headers.get('cache-control') || '', /no-store/, q);
+      assert.match(h, /<section class="hero" id="top" data-adhero="1">/, q);
+      assert.match(h, /<h1>CV dopasowane do ogłoszenia w kilka minut – 39 zł<\/h1>/, `${q}: tekst 29.10`); assert.match(r.headers.get('cache-control') || '', /no-store/, q);
     }
     assert.doesNotMatch(await (await fetch(U + '/?utm_source=newsletter')).text(), /data-adhero/);
   } finally { srv.close(); }
