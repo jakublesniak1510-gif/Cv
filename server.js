@@ -748,6 +748,7 @@ const view = (o, extra = {}) => ({
   design: cleanDesign(o.design), photo: o.profile.photo || '', email: o.profile.email, parentId: o.parentId || null,
   paidAt: o.paidAt || null, gateway: o.gateway || null, createAccount: !!o.createAccount, canPay: o.status === 'pending' && !DEMO, revisionsLeft: revLimit(o) - (o.revisions || 0), expires: (o.created || 0) + RETENTION_MS,
   invoice: o.invoice?.pdf ? { number: o.invoice.number } : null, mode: o.mode || null, heard: !!o.heard,
+  notify: o.status === 'done' && !o.upsellOf ? Object.fromEntries(AFTER_NOTIFY.map((k) => [k, !!o[k]?.consent])) : null,
 });
 
 // Faktura PDF dla klienta (link na stronie dokumentów; adres zamówienia jest nie do zgadnięcia, jak przy dokumentach).
@@ -791,6 +792,23 @@ app.get('/api/orders/:id', async (req, res) => {
   }
   const rv = await reviews.get(o.id);
   res.json(view(o, { myCode, review: rv ? { rating: rv.rating, text: rv.text } : null, upsells: offers.map(({ key, name, price, includes }) => ({ key, name, price: price / 100, includes })), upsellBusy }));
+});
+
+// Powiadomienia e-mail po zakupie (29.10): 5 opcjonalnych zgód przeniesionych z ostatniego kroku kreatora na stronę dokumentów.
+// Każda osobno, włączana i wyłączana przez klienta; zapis jak przy zamówieniu ({ consent, sent }), wysyłka bez zmian (te same timery).
+const AFTER_NOTIFY = ['reviewAsk', 'outcomeAsk', 'reminder', 'followUp', 'deleteNotice'];
+app.post('/api/orders/:id/notify', async (req, res) => {
+  const { key, on } = req.body || {};
+  if (!AFTER_NOTIFY.includes(key) || typeof on !== 'boolean') return res.status(400).json({ error: 'Nieznane powiadomienie.' });
+  const o = await getOrder(req.params.id);
+  if (!o || o.status !== 'done' || o.upsellOf) return res.status(404).json({ error: 'Nie ma takiego zamówienia.' });
+  await updateOrder(o.id, (x) => {
+    const prev = x[key] || {}, base = { ...prev, consent: on, sent: !!prev.sent };
+    if (key === 'outcomeAsk') return { ...x, outcomeAsk: on ? { ...base, text: OUTCOME_CONSENT, at: Date.now() } : { ...base, consent: false } };
+    if (key === 'deleteNotice') return { ...x, deleteNotice: on ? { ...base, off: false } : { ...base, off: true, offAt: Date.now() } };
+    return { ...x, [key]: base };
+  });
+  res.json({ ok: true, key, on });
 });
 
 // Karta „Dodaj do zamówienia”: osobna płatność tylko za dodatek (różnica ceny), po opłaceniu dodatek trafia do tego zamówienia.

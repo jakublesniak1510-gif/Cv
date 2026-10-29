@@ -30,7 +30,9 @@ test('Wariant B: zgody kompaktowo (29.10: bez górnej ramki „Do zapłaty” w 
   assert.doesNotMatch(consent, /odstąpienia/, 'regulamin bez zgody na utratę prawa odstąpienia');
   assert.doesNotMatch(html, /id="sumTop"|id="totalTop"/, 'kwota tylko na dole przy „Razem”');
   const opt = /<div class="mail-box" id="optMail">([\s\S]*?)<\/div>\n<\/div>\n<\/section>/.exec(html)[1];
-  for (const id of ['reviewAsk', 'outcomeAsk', 'payRem', 'reminder', 'wantAlerts', 'followUp']) assert.match(opt, new RegExp(`<input type="checkbox" id="${id}">`), id);
+  for (const id of ['payRem', 'wantAlerts']) assert.match(opt, new RegExp(`<input type="checkbox" id="${id}">`), id);
+  // 29.10: pozostałe powiadomienia (ocena, wyniki, kolejne ogłoszenie, rekrutacja, usunięcie danych) na stronie dokumentów po zakupie
+  for (const id of ['reviewAsk', 'outcomeAsk', 'reminder', 'followUp', 'deleteNotice']) { assert.doesNotMatch(opt, new RegExp(`id="${id}"`), id); assert.match(app, new RegExp(`\\['${id}', "`), id); }
   assert.match(app, /const CHECKOUT_B = document\.getElementById\('wiz'\)\?\.dataset\.checkout === 'b';/);
   assert.match(app, /for \(const id of \['consent', 'waiver'\]\) \$\('#' \+ id\)\.closest\('label'\)\.classList\.add\('compact'\)/);
   assert.doesNotMatch(app, /\$\('#consent'\)\.checked = \$\('#waiver'\)\.checked/, 'jedno kliknięcie nie zaznacza obu zgód');

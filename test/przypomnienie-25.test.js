@@ -26,9 +26,10 @@ test('Treść: data usunięcia, link do dokumentów, cena kolejnego CV z cennika
 
 test('Kasa: osobna, odznaczona zgoda; zgoda ankiety bez „kodu rabatowego”; harmonogram; polityka w 4 językach', () => {
   const html = read('public/index.html'), app = read('public/app.js'), srv = read('server.js'), pol = read('public/legal/prywatnosc.html');
-  assert.match(html, /<input type="checkbox" id="deleteNotice"> <span>Przypomnijcie mi 5 dni przed usunięciem moich danych i dokumentów \(jeden e-mail, opcjonalnie\)\.<\/span>/);
-  assert.match(html, /id="followUp"> <span>Zapytajcie mnie raz po miesiącu, jak poszła rekrutacja \(jeden e-mail, opcjonalnie\)\.<\/span>/); assert.doesNotMatch(html, /z kodem rabatowym na kolejne CV, opcjonalnie/);
-  assert.match(app, /deleteNotice: \$\('#deleteNotice'\)\.checked/);
+  // 29.10: obie zgody na stronie dokumentów po zakupie (drawNotify, /api/orders/:id/notify), osobne i odznaczone
+  assert.ok(app.includes("['deleteNotice', \"Przypomnijcie mi 5 dni przed usunięciem moich danych i dokumentów (jeden e-mail, opcjonalnie).\"]"));
+  assert.ok(app.includes("['followUp', \"Zapytajcie mnie raz po miesiącu, jak poszła rekrutacja (jeden e-mail, opcjonalnie).\"]")); assert.doesNotMatch(html + app, /z kodem rabatowym na kolejne CV, opcjonalnie/);
+  assert.match(srv, /if \(key === 'deleteNotice'\) return \{ \.\.\.x, deleteNotice: on \? \{ \.\.\.base, off: false \} : \{ \.\.\.base, off: true, offAt: Date\.now\(\) \} \};/);
   assert.match(srv, /DELETE_NOTICE_AFTER = 25 \* 864e5/); assert.match(srv, /o\.deleteNotice\.off \|\| age < DELETE_NOTICE_AFTER \|\| Date\.now\(\) - o\.created >= RETENTION_MS/);
   for (const l of ['en', 'de', 'uk']) { const d = JSON.parse(read(`public/i18n/${l}.json`)); assert.ok(d['Przypomnijcie mi 5 dni przed usunięciem moich danych i dokumentów (jeden e-mail, opcjonalnie).'] && d['Zapytajcie mnie raz po miesiącu, jak poszła rekrutacja (jeden e-mail, opcjonalnie).'], l); }
   for (const re of [/Jednorazowy e-mail 5 dni przed usunięciem danych zamówienia \(w 25\. dniu od opłacenia\)/, /Einmalige E-Mail 5 Tage vor dem Löschen der Bestelldaten/, /One-time e-mail 5 days before your order data is deleted/, /Одноразовий лист за 5 днів до видалення даних замовлення/,
