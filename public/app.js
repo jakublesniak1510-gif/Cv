@@ -25,7 +25,9 @@ let pkgOpen = false; // krok 1: wybór pakietu rozwinięty („Zmień pakiet”)
 // Wejście z reklamy (utm_source=google|meta, gclid, fbclid; lib/ad-hero.js): hero „z reklamy” na całą wizytę (sessionStorage).
 // Pierwszą odsłonę serwer wysyła już podmienioną (data-adhero), przy kolejnych podmieniamy lewą kolumnę hero z szablonu.
 const AD_Q = new URLSearchParams(location.search), AD_SRC = AD_Q.get('gclid') ? 'google' : AD_Q.get('fbclid') ? 'facebook' : '';
-try { if (/^(google|meta)$/i.test(AD_Q.get('utm_source') || '') || AD_SRC) sessionStorage.setItem('cvpo-adhero', (AD_Q.get('utm_source') || AD_SRC).toLowerCase()); } catch {}
+// jak isAdHit w lib/ad-hero.js: reklamy i nasze kanały (YT, IG, FB, TikTok, Pinterest, kampanie „sprzedaz-…”)
+const AD_HIT = /^(google|meta|yt|youtube|ig|instagram|fb|facebook|tiktok|pinterest)$/i.test(AD_Q.get('utm_source') || '') || /^sprzedaz-/i.test(AD_Q.get('utm_campaign') || '') || AD_SRC;
+try { if (AD_HIT) sessionStorage.setItem('cvpo-adhero', (AD_Q.get('utm_source') || AD_SRC || 'kampania').toLowerCase()); } catch {}
 const adVisit = (() => { try { return sessionStorage.getItem('cvpo-adhero') || ''; } catch { return ''; } })();
 (() => {
   const hero = $('#top.hero'), tpl = $('#adHeroTpl');
