@@ -1194,22 +1194,45 @@ async function lightPreview() {
 // Podgląd dopasowania (krok podsumowania): wymagania z każdego ogłoszenia (silnik skanera bez AI, /api/wizard-match)
 // i które z nich widać w danych z formularza; bez doświadczenia – sama liczba wymagań. Przy kilku ogłoszeniach zwinięte.
 let matchSig = '';
+// Niskie dopasowanie (29.10): pod „Twoje doświadczenie pokrywa X z N” 2–3 spokojne linijki z maks. 3 brakującymi wymaganiami
+// i przyciskiem „Uzupełnij doświadczenie” (krok 2, kursor w opisie ostatniego stanowiska; nic nie wpisujemy za klienta).
+// Po powrocie wynik liczy ten sam /api/wizard-match (bez AI); bez zmiany wyniku wskazówka się nie powtarza. Nic nie blokuje płatności.
+let lowHint = null; // { ad, before, gain } po kliknięciu „Uzupełnij doświadczenie”
+const LOW_MATCH = 40;
+// do 3 słów; bez nawiasu (całego lub uciętego) i bez przecinka/myślnika na końcu: „praca zmianowa (3 zmiany)” → „praca zmianowa”
+const shortKw = (k) => k.split(/\s+/).slice(0, 3).join(' ').replace(/\s*\(.*$/, '').replace(/[\s,;:.–—-]+$/, '') || k.replace(/[()]/g, '').split(/\s+/).slice(0, 3).join(' ');
+function lowMatchEdit(ad, before) {
+  lowHint = { ad, before }; track('lowedit'); go(2);
+  const ta = $$('#exp .entry [data-k=description]').at(-1); if (!ta) return;
+  setTimeout(() => { ta.scrollIntoView({ behavior: 'smooth', block: 'center' }); ta.focus({ preventScroll: true }); ta.setSelectionRange(ta.value.length, ta.value.length); }, 50);
+}
 async function drawWizMatch() {
   const box = $('#wizMatch'), ads = rows('ads').filter((a) => a.text);
   const cv = [$('#headline').value, $('#summary').value, $('#skills').value, $('#certificates').value, ...rows('exp').flatMap((e) => [e.title, e.company, e.description])].filter(Boolean).join('\n'), hasExp = rows('exp').some((e) => e.title || e.description);
-  const sig = JSON.stringify([cv, hasExp, ads.map((a) => a.text)]);
+  const sig = JSON.stringify([cv, hasExp, ads.map((a) => a.text), lowHint]);
   if (!ads.length) { box.hidden = true; matchSig = ''; return; }
   if (sig === matchSig) return; matchSig = sig;
   try {
     const r = await fetch('/api/wizard-match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cv: hasExp ? cv : '', ads: ads.map((a) => a.text) }) });
     if (!r.ok) throw new Error(); const j = await r.json(); if (sig !== matchSig) return;
     const chips = (xs, c) => el('div', { className: 'pv-kw' }, ...xs.map((k) => el('span', { className: `chip ${c}`, textContent: k })));
-    const one = (m) => [el('p', {}, `Z ogłoszenia wyciągnęliśmy ${m.n} ${plural(m.n, 'wymaganie', 'wymagania', 'wymagań')}${hasExp ? '.' : m.n === 1 ? ', z którym dopasujemy CV.' : ', z którymi dopasujemy CV.'}`),
-      ...(hasExp ? [el('p', {}, `Twoje doświadczenie pokrywa ${m.found.length} z nich:`), m.found.length ? chips(m.found, 'ok') : null] : [])].filter(Boolean);
+    let hinted = false;
+    const lowLines = (m, i) => {
+      const pct = Math.round((100 * m.found.length) / m.n);
+      if (lowHint?.ad === i && pct > lowHint.before && lowHint.gain == null) { lowHint.gain = pct; track('lowgain', { b: lowHint.before, a: pct }); }
+      if (!hasExp || hinted || m.n < 3 || pct >= LOW_MATCH || !m.missing.length || (lowHint?.ad === i && pct <= lowHint.before)) return [];
+      hinted = true; track('lowhint');
+      const short = m.missing.slice(0, 3).map(shortKw);
+      return [el('p', { className: 'hint low-hint' }, el('span', { textContent: 'Możesz podnieść dopasowanie. Ogłoszenie wymaga m.in.:' }), ' ', ...short.map((k) => el('span', { className: 'chip mute', textContent: k })), ' ',
+        el('span', { textContent: 'Jeśli robiłeś(-aś) coś podobnego, dopisz to w opisie stanowiska – tylko to, co naprawdę robiłeś(-aś).' })),
+        el('p', {}, el('button', { type: 'button', className: 'btn ghost sm', id: 'lowMatchEdit', textContent: 'Uzupełnij doświadczenie', onclick: () => lowMatchEdit(i, pct) }))];
+    };
+    const one = (m, i) => [el('p', {}, `Z ogłoszenia wyciągnęliśmy ${m.n} ${plural(m.n, 'wymaganie', 'wymagania', 'wymagań')}${hasExp ? '.' : m.n === 1 ? ', z którym dopasujemy CV.' : ', z którymi dopasujemy CV.'}`),
+      ...(hasExp ? [el('p', {}, `Twoje doświadczenie pokrywa ${m.found.length} z nich:`), m.found.length ? chips(m.found, 'ok') : null] : []), ...lowLines(m, i)].filter(Boolean);
     const parts = j.ads.map((m, i) => (m && m.n ? [m, i] : null)).filter(Boolean);
     if (!parts.length) { box.hidden = true; return; }
     box.replaceChildren(el('h3', { className: 'sh', textContent: 'Dopasowanie do ogłoszenia' }),
-      ...(parts.length === 1 && ads.length === 1 ? one(parts[0][0]) : parts.map(([m, i]) => el('details', { className: 'optbox' }, el('summary', {}, `${i + 1}. ${ads[i].title || ''}`.trim()), ...one(m)))),
+      ...(parts.length === 1 && ads.length === 1 ? one(parts[0][0], parts[0][1]) : parts.map(([m, i]) => { const c = one(m, i); return el('details', { className: 'optbox', open: c.some((x) => x.querySelector?.('#lowMatchEdit')) }, el('summary', {}, `${i + 1}. ${ads[i].title || ''}`.trim()), ...c); })),
       el('p', { className: 'hint small', textContent: 'Wstępne porównanie tekstu z formularza z wymaganiami z ogłoszenia, bez AI. Nic nie zapisujemy.' }));
     box.hidden = false;
   } catch { box.hidden = true; matchSig = ''; }

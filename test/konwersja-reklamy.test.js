@@ -82,7 +82,7 @@ test('Panel → Lejek kreatora: wyjścia z kroku 1 (powód × źródło) i lejek
   const html = read('public/admin.html'), adm = read('public/admin.js'), rep = read('lib/seo-report.js');
   assert.match(html, /<div class="tbl-wrap" id="seoStep1"><\/div>/); assert.match(html, /<div class="tbl-wrap" id="seoSrc28"><\/div>/);
   assert.match(adm, /\$\('#seoStep1'\)\.replaceChildren\(d\.step1\?\.length \? stackTable\(/); assert.match(adm, /\$\('#seoSrc'\)\.replaceChildren\(f \? stackTable\(/); assert.match(adm, /\['google', 'facebook', 'direct', 'inne'\]/); assert.match(adm, /\$\('#seoSrc28'\)/);
-  assert.match(rep, /step1: step1Exits\(ev28\), sources: \{ stages: f28\.stages\.map/);
+  assert.match(rep, /step1: step1Exits\(ev28\), lowMatch: lowMatchStats\(ev28\), sources: \{ stages: f28\.stages\.map/);
   const labels = read('lib/analytics.js'); assert.match(labels, /\['last', 'Ostatni krok'\], \['checkout', 'Płatność rozpoczęta'\], \['paid', 'Opłacone'\]/);
   assert.match(read('public/admin.css'), /\.tbl-wrap\{overflow-x:auto/);
 });
