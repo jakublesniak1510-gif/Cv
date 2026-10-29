@@ -21,7 +21,7 @@ test('Duże pole importu na górze kroku danych, upuszczenie pliku, „Nie mam C
   assert.match(app, /\$\('#importManual'\)\.onclick = \(\) => \{ box\.classList\.add\('small'\); \$\('#name'\)\.focus\(\); \};/);
   assert.match(app, /fetch\('\/api\/import'/, 'istniejący import (importCv)');
   assert.match(app, /if \(p\.experience\?\.length && empty\('exp'\)\)/); assert.match(app, /if \(p\.education\?\.length && empty\('edu'\)\)/);
-  assert.match(app, /saveDraft\(\); imported = true; \$\('#importBox'\)\.classList\.add\('small'\); \$\('#moreData'\)\.open = true; track\('cvimport'\);/);
+  assert.match(app, /saveDraft\(\); imported = true; \$\('#importBox'\)\.classList\.add\('small'\); track\('cvimport'\);/); // 29.10: pola opcjonalne i tak widoczne
   for (const l of ['en', 'de', 'uk']) for (const k of ['Masz już CV? Wgraj plik (PDF/Word), uzupełnimy pola za Ciebie', 'Ty tylko sprawdzasz. Pliku nie zapisujemy.', 'Nie mam CV – wpiszę ręcznie', 'Wgraj plik PDF, Word (.docx) albo TXT.']) assert.ok(dict(l)[k], `${l}: ${k}`);
 });
 

@@ -46,6 +46,6 @@ test('Klient: klik „Zapłać” i powód blokady liczone tylko na ostatnim kro
   }
   assert.match(html, /<div class="wiz-foot"><p class="werr-foot" id="werrFoot" aria-hidden="true" hidden><\/p>/);
   assert.match(css, /label\.need\{outline:2px solid var\(--err\)/);
-  // Warianty testu „checkout” bez zmian (CHECKOUT_B: cena na górze, zgody kompaktowo).
-  assert.match(app, /if \(CHECKOUT_B\) \{\n  \$\('#sumTop'\)\.hidden = false;/);
+  // Test „checkout” zostaje (CHECKOUT_B: zgody kompaktowo); 29.10: bez górnej ramki z ceną w obu wariantach.
+  assert.match(app, /if \(CHECKOUT_B\) \{\n  for \(const id of \['consent', 'waiver'\]\)/); assert.doesNotMatch(app, /sumTop/);
 });

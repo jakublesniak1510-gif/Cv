@@ -20,7 +20,7 @@ test('Eksperyment „checkout”: włączany EXPERIMENTS, wariant B oznacza krea
   assert.deepEqual(activeExperiments('{"wizard_order":50,"checkout":50}'), { checkout: 50 }, 'stara wartość w EXPERIMENTS jest pomijana');
 });
 
-test('Wariant B: cena na górze, zgody kompaktowo, ale nadal DWA osobne pola (art. 38 pkt 13 osobno, odznaczone), marketing bez zmian', () => {
+test('Wariant B: zgody kompaktowo (29.10: bez górnej ramki „Do zapłaty” w obu wariantach), ale nadal DWA osobne pola (art. 38 pkt 13 osobno, odznaczone), marketing bez zmian', () => {
   const html = read('public/index.html'), app = read('public/app.js'), srv = read('server.js');
   assert.ok(!html.includes('consentAll'), 'bez połączonego pola');
   const consent = /<label class="check"><input type="checkbox" id="consent">[\s\S]*?<\/label>/.exec(html)[0], waiver = /<label class="check"><input type="checkbox" id="waiver"> <span>([^<]+)<\/span><\/label>/.exec(html);
@@ -28,8 +28,8 @@ test('Wariant B: cena na górze, zgody kompaktowo, ale nadal DWA osobne pola (ar
   assert.equal(waiver[1], /const WAIVER = '([^']+)';/.exec(srv)[1], 'treść w formularzu = treść zapisywana');
   assert.ok(!/checked/.test(consent) && !/id="waiver" checked/.test(html), 'odznaczone');
   assert.doesNotMatch(consent, /odstąpienia/, 'regulamin bez zgody na utratę prawa odstąpienia');
-  assert.match(html, /<div class="sum-top" id="sumTop" hidden>/);
-  const opt = /<details class="optbox" id="optMail">([\s\S]*?)<\/details>/.exec(html)[1];
+  assert.doesNotMatch(html, /id="sumTop"|id="totalTop"/, 'kwota tylko na dole przy „Razem”');
+  const opt = /<div class="mail-box" id="optMail">([\s\S]*?)<\/div>\n<\/div>\n<\/section>/.exec(html)[1];
   for (const id of ['reviewAsk', 'outcomeAsk', 'payRem', 'reminder', 'wantAlerts', 'followUp']) assert.match(opt, new RegExp(`<input type="checkbox" id="${id}">`), id);
   assert.match(app, /const CHECKOUT_B = document\.getElementById\('wiz'\)\?\.dataset\.checkout === 'b';/);
   assert.match(app, /for \(const id of \['consent', 'waiver'\]\) \$\('#' \+ id\)\.closest\('label'\)\.classList\.add\('compact'\)/);

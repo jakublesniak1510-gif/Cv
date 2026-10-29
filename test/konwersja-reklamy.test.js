@@ -44,10 +44,11 @@ test('Hero „z reklamy”: tylko przy utm_source=google|meta, gclid albo fbclid
   assert.ok(Buffer.byteLength(read('public/index.html')) <= 90e3);
 });
 
-test('Krok 1: „Nie mam ogłoszenia – wpisz tylko stanowisko” i pakiet zwinięty do „Zmień pakiet” (domyślnie Samo CV)', () => {
+test('Krok 1: „Nie mam ogłoszenia – wpisz stanowisko” (29.10: pole z podpowiedziami na dole, pod przykładem CV) i pakiet zwinięty do „Zmień pakiet” (domyślnie Samo CV)', () => {
   const app = read('public/app.js'), html = read('public/index.html');
-  assert.match(app, /textContent: 'Nie mam ogłoszenia – wpisz tylko stanowisko', onclick: \(\) => \{ const first = \$\('#ads \.entry'\); if \(!first\) return; setMode\(first, 'prof'\);/);
-  assert.match(app, /\$\('#ads'\)\.after\(noAdBtn\)/);
+  assert.match(app, /\$\('#profEx'\)\.after\(el\('div', \{ className: 'noad-box', id: 'noAdBox' \}/); assert.match(app, /textContent: 'Nie mam ogłoszenia – wpisz stanowisko'/);
+  assert.match(app, /\$\('#noAdQ'\)\.setAttribute\('list', 'profList'\)/, 'podpowiedzi zawodów');
+  assert.match(app, /setMode\(first, 'prof'\); first\.profRun\?\.\(q\);/);
   assert.match(app, /textContent: 'Zmień pakiet', onclick: \(\) => \{ pkgOpen = true; refresh\(\);/);
   assert.match(app, /\$\('#pkgOpts'\)\.hidden = passOn\(\) \|\| !pkgOpen; drawPkgLine\(\);/); assert.match(app, /let pkgOpen = false;/);
   assert.match(html, /<input type="radio" name="pkg" value="cv" checked>/, 'domyślnie CV');
