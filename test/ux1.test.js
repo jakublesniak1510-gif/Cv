@@ -22,7 +22,7 @@ test('Formularze i zgody na telefonie: pola 16px, checkbox 22px, cele dotykowe 4
   const step6 = /<section data-step="6"[\s\S]*?<\/section>/.exec(html)[0], opt = /<div class="mail-box" id="optMail">[\s\S]*?<\/div>\n<\/div>/.exec(step6)[0];
   // 29.10: powiadomienia e-mail nie są zwinięte – osobny podpis w jednym bloku ze zgodami i fakturą; każde pole osobno, odznaczone
   assert.match(opt, /<b class="flabel">Powiadomienia e-mail \(opcjonalnie\)<\/b>/); assert.doesNotMatch(opt, /checked/);
-  for (const id of ['reviewAsk', 'payRem', 'reminder', 'wantAlerts', 'followUp']) assert.ok(opt.includes(`id="${id}"`), `${id} w sekcji powiadomień`);
+  for (const id of ['payRem', 'wantAlerts']) assert.ok(opt.includes(`id="${id}"`), `${id} w sekcji powiadomień`); // reszta po zakupie (29.10)
   for (const id of ['wantInv', 'consent', 'waiver']) assert.ok(step6.includes(`id="${id}"`) && !opt.includes(`id="${id}"`), `${id} na wierzchu`);
   assert.match(step6, /Akceptuję <a href="\/regulamin"[^>]*>Regulamin<\/a> i <a href="\/polityka-prywatnosci"[^>]*>Politykę prywatności<\/a>\./);
   assert.match(step6, /raz w tygodniu/); assert.doesNotMatch(html, /co poniedziałek|zapoznałem|zapomniałeś wpisać/);

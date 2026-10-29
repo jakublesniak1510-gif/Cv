@@ -1067,8 +1067,9 @@ function getLine(on) {
   const g = $('#getLine'); g.hidden = !on; if (!on) return;
   const prof = rows('ads')[0]?.kind === 'profession', p = orderPkg();
   const what = prof ? 'CV pod Twój zawód' : p === 'pack3' ? 'CV z listami motywacyjnymi, każde pod swoje ogłoszenie' : p === 'cv_letter' ? 'CV i list motywacyjny pod to ogłoszenie' : 'CV pod to ogłoszenie';
-  const parts = [what, addons().docx ? 'w PDF i Word' : 'w PDF', 'poprawki w cenie', 'faktura na życzenie'].map(tr); // każdy kawałek osobno w słowniku i18n
-  g.replaceChildren(el('b', { textContent: tr('Dostajesz:') }), ` ${parts[0]} ${parts[1]}, ${parts[2]}, ${parts[3]}. `, guarLink());
+  // 29.10: poprawki, czas i faktura są już na liście korzyści nad zgodami – tu tylko co i w jakim formacie (bez powtórzeń).
+  const parts = [what, addons().docx ? 'w PDF i Word' : 'w PDF'].map(tr); // każdy kawałek osobno w słowniku i18n
+  g.replaceChildren(el('b', { textContent: tr('Dostajesz:') }), ` ${parts[0]} ${parts[1]}. `, guarLink());
 }
 // Gwarancja dopasowania (C5): link do §7a regulaminu w języku strony.
 const guarLink = () => el('a', { href: `${legalUrl('regulamin', window.I18N?.lang || 'pl')}#gwarancja`, textContent: tr('Nie pasuje po poprawkach? Zwracamy pieniądze.') });
@@ -1088,7 +1089,7 @@ function payTrust(n) {
   const box = $('#payTrust'), on = n === 6 && total() > 0;
   getLine(on);
   $('.wiz-foot').classList.toggle('pay', n === 6);
-  box.hidden = !on; $('#payTrustList').hidden = !on;
+  box.hidden = true; $('#payTrustList').hidden = !on; // linia pod przyciskiem powtarzała listę korzyści (29.10) – zostaje tylko lista
   if (n === 6 && total() > 0) { if (!$('#gwBox').childElementCount) gwPicker($('#gwBox'), 'gw'); } else $('#gwBox').hidden = true;
   if (!on) return;
   const g = payGateways().find((x) => x.id === gwValue($('#gwBox'))) || cfg.pay;
@@ -1234,7 +1235,7 @@ function drawSummary() {
   $('#sum').replaceChildren(
     el('div', { className: 'sumrow' }, el('span', { textContent: PKG_NAME[pkg()] }), el('span', { textContent: PRICE[pkg()] + ' zł' })),
     el('div', { className: 'sumrow' }, el('span', { textContent: `Wygląd: ${tplName(design.tpl)}, kolor ${COLOR_NAMES[design.color]}` }), el('span', { textContent: 'w cenie' })),
-    el('div', { className: 'sumrow' }, el('span', { textContent: addons().docx ? 'Format: PDF i Word (.docx)' : 'W cenie: PDF. Wersja Word (.docx) to dodatek' }), el('span', { textContent: addons().docx ? 'PDF w cenie' : `+${PRICE.docx} zł` })),
+    el('div', { className: 'sumrow' }, el('span', { textContent: addons().docx ? 'Format: PDF i Word (.docx)' : 'W cenie: PDF' }), el('span', { textContent: addons().docx ? 'PDF w cenie' : 'w cenie' })), // Word jest w „Dodatkach” (29.10)
     ...ads.map((a, i) => el('div', { className: 'sumrow' }, el('span', { textContent: `Ogłoszenie ${i + 1}: ${a.title}${a.lang === 'en' ? ' (po angielsku)' : ''}` }), el('span', { textContent: 'w cenie' }))),
     ...Object.entries(addons()).filter(([, on]) => on).map(([k]) => el('div', { className: 'sumrow' }, el('span', { textContent: ADDON_KEYS[k][1] }), el('span', { textContent: '+' + PRICE[k] + ' zł' }))),
     ...extraLangs().map((l) => el('div', { className: 'sumrow' }, el('span', { textContent: `Tłumaczenie: ${LANGS[l]}` }), el('span', { textContent: '+' + PRICE.extraLang + ' zł' }))),
@@ -1389,7 +1390,7 @@ $('#wizForm').onsubmit = async (e) => {
   const v = (id) => $('#' + id).value;
   const body = {
     draftToken: srvToken() || undefined,
-    ...($('#rewriteMode').checked ? { mode: 'rewrite' } : {}), usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, ...(CHECKOUT_B ? { consentForm: 'compact' } : {}), gateway: gwValue($('#gwBox')), outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, deleteNotice: $('#deleteNotice').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
+    ...($('#rewriteMode').checked ? { mode: 'rewrite' } : {}), usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', waiver: $('#waiver').checked, ...(CHECKOUT_B ? { consentForm: 'compact' } : {}), gateway: gwValue($('#gwBox')), jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'birth', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), ...($('#careerOn').checked ? { career: { from: v('careerFrom'), to: v('careerTo'), fit: v('careerFit') } } : {}), experience: rows('exp'), education: rows('edu'), photo },
   };
   // Zgoda na cookies reklamowe (baner): tylko wtedy serwer zgłosi zakup do Meta (Conversions API) z identyfikatorami piksela.
@@ -2030,6 +2031,31 @@ function drawFollowup() {
 }
 
 // Dodatki po zakupie: osobna płatność tylko za dodatek, potem dodatek pojawia się w tym zamówieniu.
+// Powiadomienia e-mail po zakupie (29.10): 5 opcjonalnych zgód przeniesionych z ostatniego kroku kreatora – każda osobno,
+// odznaczona, zapis od razu (/api/orders/:id/notify). Zgody udzielone wcześniej w kreatorze są tu zaznaczone i można je wyłączyć.
+const NOTIFY = [
+  ['reviewAsk', "Poproś mnie raz o ocenę dokumentów (jeden e-mail po 4 dniach, opcjonalnie)."],
+  ['outcomeAsk', "Zapytajcie mnie za 14 dni, czy dostałem(-am) zaproszenie na rozmowę (1 wiadomość)."],
+  ['reminder', "Przypomnij mi raz po 7 dniach o możliwości zamówienia CV pod kolejne ogłoszenie (opcjonalnie, jedna wiadomość e-mail)."],
+  ['followUp', "Zapytajcie mnie raz po miesiącu, jak poszła rekrutacja (jeden e-mail, opcjonalnie)."],
+  ['deleteNotice', "Przypomnijcie mi 5 dni przed usunięciem moich danych i dokumentów (jeden e-mail, opcjonalnie)."],
+];
+function drawNotify() {
+  let box = $('#notifyBox'); if (!box) { box = el('section', { className: 'notify noprint', id: 'notifyBox' }); $('#followup').after(box); }
+  box.hidden = !data?.notify || !!cfg.preview; if (box.hidden) return;
+  const st = el('p', { className: 'fstatus', role: 'status' });
+  box.replaceChildren(el('h3', { textContent: 'Powiadomienia e-mail (opcjonalnie)' }), el('p', { className: 'hint', textContent: 'Zaznacz, jeśli chcesz. Każda wiadomość to jeden e-mail na adres z zamówienia.' }),
+    ...NOTIFY.map(([k, label]) => {
+      const c = el('input', { type: 'checkbox', checked: !!data.notify[k] });
+      c.onchange = async () => {
+        c.disabled = true;
+        try { const r = await fetch(`/api/orders/${orderId}/notify`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: k, on: c.checked }) }); if (!r.ok) throw new Error(); data.notify[k] = c.checked; st.className = 'fstatus good'; st.textContent = tr('Zapisano.'); }
+        catch { c.checked = !c.checked; st.className = 'fstatus bad'; st.textContent = tr('Nie udało się zapisać. Spróbuj ponownie.'); }
+        c.disabled = false;
+      };
+      return el('label', { className: 'check' }, c, ' ', el('span', { textContent: label }));
+    }), st);
+}
 // Po zakupie CV jedna dyskretna linijka z usługami obok (28.10): zdjęcie do CV i tłumaczenie, ceny z /api/config (lib/pricing.js).
 function drawXsell() {
   let p = $('#xsell'); if (!p) { p = el('p', { className: 'hint noprint xsell', id: 'xsell' }); $('#upsell').after(p); }
@@ -2195,7 +2221,7 @@ function showResult() {
   $('#reviseBtn').onclick = openRevise;
   $('#editor').hidden = $('#reviseBox').hidden = true; editing = null;
   if (data.expires) $('#retention').textContent = `Dane tego zamówienia, w tym dokumenty${data.photo ? ' i zdjęcie' : ''}, usuniemy automatycznie ${new Date(data.expires).toLocaleDateString('pl-PL')}. Zapisz PDF-y u siebie.`;
-  drawFollowup(); drawUpsell(); drawXsell(); drawMyCode(); drawRate(); drawAcctOffer();
+  drawFollowup(); drawUpsell(); drawXsell(); drawNotify(); drawMyCode(); drawRate(); drawAcctOffer();
   draw();
   if (location.hash === '#ocena') setTimeout(() => $('#rate').scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
   if (location.hash === '#kolejne') setTimeout(() => $('#followup').scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);

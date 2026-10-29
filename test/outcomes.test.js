@@ -88,10 +88,11 @@ test('E-mail ankiety: 3 przyciski, wypis (także List-Unsubscribe), bez obietnic
 
 test('Zgoda w zamówieniu: osobna, odznaczona, z zapisem treści i czasu; wysyłka po 14 dniach; polityka prywatności w 4 językach', () => {
   const html = read('public/index.html'), srv = read('server.js'), app = read('public/app.js');
-  const box = html.match(/<input type="checkbox" id="outcomeAsk"[^>]*>/)?.[0];
-  assert.ok(box && !/checked/.test(box), 'pole jest domyślnie odznaczone');
-  assert.ok(html.includes(oc.OUTCOME_CONSENT), 'treść zgody w formularzu = zapisywana treść');
-  assert.match(app, /outcomeAsk: \$\('#outcomeAsk'\)\.checked/);
+  // 29.10: zgoda na stronie dokumentów po zakupie (drawNotify) – osobne pole, zaznaczone tylko gdy klient wcześniej się zgodził
+  assert.ok(app.includes(`['outcomeAsk', ${JSON.stringify(oc.OUTCOME_CONSENT)}]`), 'treść zgody na stronie = zapisywana treść');
+  assert.match(app, /const c = el\('input', \{ type: 'checkbox', checked: !!data\.notify\[k\] \}\);/, 'pole domyślnie odznaczone');
+  assert.match(srv, /if \(key === 'outcomeAsk'\) return \{ \.\.\.x, outcomeAsk: on \? \{ \.\.\.base, text: OUTCOME_CONSENT, at: Date\.now\(\) \}/);
+  assert.doesNotMatch(html, /id="outcomeAsk"/);
   assert.match(srv, /outcomeAsk === true \? \{ consent: true, text: OUTCOME_CONSENT, at: Date\.now\(\), sent: false \}/);
   assert.match(srv, /Date\.now\(\) - o\.created < OUTCOME_AFTER/); assert.equal(oc.OUTCOME_AFTER, 14 * D); assert.equal(oc.ANON_AFTER, 30 * D);
   assert.match(srv, /anonymizeOutcomes\(\)/); assert.match(srv, /outcome: await publicOutcome\(\)/);

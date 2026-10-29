@@ -1209,3 +1209,5 @@ ul.checklist{list-style:none;padding-left:0}
 #ads .modes [data-mode=prof]{display:none} /* „Bez ogłoszenia” uruchamia pole na dole kroku 1 */
 @media(max-width:640px){.wiz-foot.pay .tot{display:flex;align-items:baseline;justify-content:center;gap:6px;flex-wrap:wrap;flex-basis:100%;order:-1}.wiz-foot.pay .tot small{flex-basis:100%;text-align:center}}
 .codebox{padding:2px 12px}.codebox summary{min-height:40px;display:flex;align-items:center}
+/* Powiadomienia e-mail na stronie dokumentów (29.10) */
+.notify{margin:22px 0;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--surface);display:grid;gap:8px}.notify h3{margin:0}
