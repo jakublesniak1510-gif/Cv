@@ -157,7 +157,20 @@ function drawMix(rep) {
     list('Kody rabatowe', rep.codes, (r) => r.key, 'Bez kodów.'),
   );
 }
-async function loadSales() { drawChart(await api('/sales?range=' + salesRange)); }
+async function loadSales() { drawChart(await api('/sales?range=' + salesRange)); drawEntries(await api('/sales/entries?range=' + salesRange)); }
+// Wpisy rejestru sprzedaży (29.10): „Oznacz jako test” / „Cofnij” z potwierdzeniem, także dla wpisów bez zamówienia.
+function drawEntries(list) {
+  const row = (x) => {
+    const cell = el('td', {}), btn = el('button', { className: 'btn ghost sm', textContent: x.test ? 'Cofnij' : 'Oznacz jako test' });
+    const go = async () => { try { await post(`/sales/${encodeURIComponent(x.id)}/test`, { test: !x.test }); toast(x.test ? 'Wpis znowu liczy się w statystykach.' : 'Oznaczono jako test.'); loadSales(); } catch (e) { toast(e.message); } };
+    btn.onclick = () => cell.replaceChildren(el('span', { className: 'mute', textContent: x.test ? 'Przywrócić do statystyk? ' : `Oznaczyć ${zl(x.total / 100)} jako test? ` }), el('button', { className: 'btn sm', textContent: 'Tak', onclick: go }), ' ', el('button', { className: 'btn ghost sm', textContent: 'Nie', onclick: () => cell.replaceChildren(btn) }));
+    cell.append(btn);
+    return el('tr', {}, el('td', { textContent: dd(x.at) }), el('td', { className: 'r', textContent: zl((x.total - x.refunded) / 100) }), el('td', { textContent: x.pkg || '—' }), el('td', { textContent: x.code || '—' }),
+      el('td', { textContent: x.order ? 'jest' : 'usunięte' }), el('td', {}, x.test ? el('span', { className: 'tag', textContent: 'test' }) : ''), cell);
+  };
+  $('#salesEntries').replaceChildren(list.length ? el('table', {}, el('thead', {}, el('tr', {}, ...['Data', 'Kwota', 'Pakiet', 'Kod', 'Zamówienie', '', ''].map((t, i) => el('th', { className: i === 1 ? 'r' : '', textContent: t })))), el('tbody', {}, list.map(row)))
+    : el('p', { className: 'mute', textContent: 'Brak wpisów w tym okresie.' }));
+}
 $('#salesRange').addEventListener('click', (e) => {
   const b = e.target.closest('button'); if (!b) return; salesRange = b.dataset.k;
   $$('#salesRange button').forEach((x) => x.setAttribute('aria-pressed', x === b)); loadSales().catch((x) => toast(x.message));
