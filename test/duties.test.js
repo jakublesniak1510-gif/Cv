@@ -7,9 +7,9 @@ import { PROFESSIONS } from '../lib/content.js';
 import { PROF_EXTRA } from '../lib/prof-extra/index.js';
 import { DUTIES, DUTIES_INDEX, dutiesPath } from '../lib/duties.js';
 
-// „Zakres obowiązków” dla 30 zawodów: kompletne sekcje, zasady redakcyjne jak przy stronach zawodów, noindex do przeglądu.
-test('Treść: 30 zawodów z rozbudowaną stroną CV, kompletne sekcje, bez liczb, obietnic i form rodzajowych, bez powtórzeń', () => {
-  assert.deepEqual(Object.keys(DUTIES).sort(), Object.keys(PROF_EXTRA).sort());
+// „Zakres obowiązków” dla 30 zawodów z rozbudowaną stroną CV i malarza budowlanego (zapytanie GSC 29.10): kompletne sekcje, zasady redakcyjne jak przy stronach zawodów.
+test('Treść: 30 zawodów z rozbudowaną stroną CV + malarz budowlany, kompletne sekcje, bez liczb, obietnic i form rodzajowych, bez powtórzeń', () => {
+  assert.deepEqual(Object.keys(DUTIES).sort(), [...Object.keys(PROF_EXTRA), 'malarz-budowlany'].sort());
   const seen = new Set();
   for (const [s, d] of Object.entries(DUTIES)) {
     const p = PROFESSIONS.find((x) => x.slug === s);
@@ -41,7 +41,7 @@ test('Strony: 200, indeksowane (bez noindex), w mapie strony, linki do CV pod og
     }
     assert.equal((await fetch(`${U}/zawod/nie-ma/zakres-obowiazkow`)).status, 404);
     const hub = await fetch(`${U}/zawod/zakres-obowiazkow`), hh = await hub.text();
-    assert.equal(hub.headers.get('x-robots-tag'), null); assert.doesNotMatch(hh, /<meta name="robots" content="noindex/); assert.equal((hh.match(/href="\/zawod\/[\w-]+\/zakres-obowiazkow"/g) || []).length, 30, 'lista 30 stron');
+    assert.equal(hub.headers.get('x-robots-tag'), null); assert.doesNotMatch(hh, /<meta name="robots" content="noindex/); assert.equal((hh.match(/href="\/zawod\/[\w-]+\/zakres-obowiazkow"/g) || []).length, 31, 'lista 31 stron');
     const cv = await (await fetch(`${U}/cv/kasjer`)).text(); assert.ok(cv.includes('href="/zawod/kasjer/zakres-obowiazkow"'), 'link ze strony CV');
     assert.match(fs.readFileSync(new URL('../public/index.html', import.meta.url), 'utf8'), /<template id="pg-dla-firm"[\s\S]*href="\/zawod\/zakres-obowiazkow"[\s\S]*<\/template>/, 'link z /dla-firm');
     assert.match(await (await fetch(`${U}/${dutiesPath('kasjer')}`)).text(), /<title>Obowiązki i wymagania kasjera/);

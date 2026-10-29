@@ -1318,5 +1318,49 @@
    "Warto zaznaczyć poziom języka angielskiego i kontakt z partnerami zagranicznymi."
   ],
   "dla_firm": "Warto napisać, za które procesy odpowiada stanowisko – zamówienia, transport, stany – i z jakich systemów korzysta. Znajomość konkretnego systemu, np. SAP, lepiej oznaczyć jako atut, jeśli firma wdraża nowe osoby w jego obsługę."
+ },
+ "malarz-budowlany": {
+  "nazwaD": "malarza budowlanego",
+  "intro": "Malarz budowlany przygotowuje i maluje ściany, sufity oraz elewacje w nowych budynkach i przy remontach. Pracuje w mieszkaniach, biurowcach, obiektach handlowych i na rusztowaniach przy elewacjach. Zwykle wykonuje też drobne prace wykończeniowe, takie jak szpachlowanie i tapetowanie.",
+  "obowiazki": [
+   "przygotowanie podłoża: gruntowanie, szpachlowanie i szlifowanie",
+   "malowanie ścian i sufitów wałkiem i pędzlem",
+   "malowanie natryskowe agregatem malarskim",
+   "zabezpieczanie okien, podłóg i stolarki przed malowaniem",
+   "dobór i przygotowanie farb oraz mas szpachlowych",
+   "prace elewacyjne z rusztowania",
+   "tapetowanie i klejenie fototapet",
+   "naprawa pęknięć i ubytków w tynku",
+   "malowanie elementów stalowych i drewnianych",
+   "sprzątanie stanowiska po zakończeniu prac"
+  ],
+  "wymagania": {
+   "niezbedne": [
+    "doświadczenie w pracach malarskich",
+    "umiejętność przygotowania podłoża pod malowanie",
+    "dokładność i staranność wykończenia",
+    "aktualne badania lekarskie, przy elewacjach także do pracy na wysokości",
+    "przestrzeganie zasad BHP"
+   ],
+   "mile_widziane": [
+    "obsługa agregatu malarskiego",
+    "doświadczenie przy elewacjach i tynkach cienkowarstwowych",
+    "prawo jazdy kat. B",
+    "własne narzędzia malarskie"
+   ]
+  },
+  "warunki": [
+   "umowa o pracę, umowa zlecenie albo współpraca na podstawie działalności",
+   "praca w budynkach i na zewnątrz, zależnie od pory roku",
+   "praca w dzień, czasem także w soboty",
+   "dojazd na różne budowy w regionie"
+  ],
+  "jak_w_cv": [
+   "Wymień rodzaje prac: przygotowanie podłoża, malowanie wałkiem i agregatem, elewacje, tapetowanie.",
+   "Podaj typy obiektów, w których pracujesz, np. mieszkania deweloperskie, biura, elewacje budynków wielorodzinnych.",
+   "Badania do pracy na wysokości i obsługę agregatu wpisz w osobnej linii.",
+   "Warto zaznaczyć, czy pracujesz samodzielnie, czy w brygadzie."
+  ],
+  "dla_firm": "Warto napisać, czy chodzi o prace wewnątrz, elewacje czy jedno i drugie, i czy praca obejmuje przygotowanie podłoża. Jeśli firma zapewnia narzędzia i agregat, dobrze to zaznaczyć, bo kandydaci często o to pytają."
  }
 }
