@@ -1180,3 +1180,32 @@ ul.checklist{list-style:none;padding-left:0}
 .noad-btn{width:100%;margin:10px 0 4px;white-space:normal}
 .pkg-line{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;margin:16px 0 4px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 .pkg-line .link{margin-left:auto}
+
+/* Kreator po „Zamów CV” (29.10): większe okno, większe czcionki i pola, jedna kolumna, mniej elementów naraz */
+.wiz-box{width:min(940px,100%);height:min(94vh,1100px);font-size:17px}
+@media(max-width:640px){.wiz-box{width:100%;height:100%;max-height:none;border-radius:0}}
+.wiz-head{padding:26px 32px 10px}.wiz-head h2{font-size:30px}
+.wiz-body{padding:8px 32px 22px}.wiz-foot{padding:16px 32px}
+@media(max-width:640px){.wiz-head{padding:18px 16px 8px}.wiz-head h2{font-size:24px}.wiz-body{padding:6px 16px 18px}.wiz-foot{padding:12px 16px}}
+.wiz-body .f{font-size:16px}.wiz-body .f input,.wiz-body .f textarea,.wiz-body .f select{font-size:17px;padding:13px 14px;min-height:50px}
+.wiz-body .check{font-size:16px}.wiz-body .hint{font-size:15px}.wiz-body .sh{font-size:20px;margin-top:22px}
+.wiz-body .grid2{grid-template-columns:1fr}.wiz-body .grid4{grid-template-columns:1fr 1fr}.wiz-body .grid4>:nth-child(-n+2){grid-column:1/-1}
+@media(min-width:900px){.wiz-body .grid4{grid-template-columns:2fr 2fr 1fr 1fr}.wiz-body .grid4>:nth-child(-n+2){grid-column:auto}}
+@media(min-width:900px){.wiz-body .grid2{grid-template-columns:1fr 1fr}}
+#stepper li{height:6px}
+/* krok 2: pozostałe dane od razu widoczne */
+.more-data{border:0;padding:0;background:none}.more-data>.sh:first-child{margin-top:26px}
+/* krok 1: „Nie mam ogłoszenia – wpisz stanowisko” na dole */
+.noad-box{margin-top:18px;padding:16px;border:1px dashed var(--line);border-radius:12px;background:var(--surface)}
+.noad-box .urlrow{display:flex;gap:8px;margin-top:6px}.noad-box input{flex:1;min-width:0}
+#ads .profbox>.f{display:none}
+/* krok 3: kod rabatowy jako mały prostokąt, jeden blok zgód, faktury i powiadomień */
+.codebox{display:inline-block;max-width:100%;margin:10px 0 4px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;font-size:15px}
+.codebox[open]{display:block}.codebox summary{cursor:pointer}
+#consentBox{display:grid;gap:10px;margin-top:16px}
+#consentBox .invbox{margin:0 0 0 30px}
+.mail-box{display:grid;gap:8px;margin-top:8px;padding-top:12px;border-top:1px solid var(--line)}
+.wiz-foot .tot small{display:block;font-size:12px;color:var(--mute)}
+#ads .modes [data-mode=prof]{display:none} /* „Bez ogłoszenia” uruchamia pole na dole kroku 1 */
+@media(max-width:640px){.wiz-foot.pay .tot{display:flex;align-items:baseline;justify-content:center;gap:6px;flex-wrap:wrap;flex-basis:100%;order:-1}.wiz-foot.pay .tot small{flex-basis:100%;text-align:center}}
+.codebox{padding:2px 12px}.codebox summary{min-height:40px;display:flex;align-items:center}

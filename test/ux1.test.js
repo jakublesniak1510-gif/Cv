@@ -14,14 +14,15 @@ const read = (f) => fs.readFileSync(f, 'utf8');
 const html = read('public/index.html'), css = read('public/style.css'), app = read('public/app.js');
 
 // Poprawki z przeglądu UX zakupu na telefonie i audytu wydajności.
-test('Formularze i zgody na telefonie: pola 16px, checkbox 22px, cele dotykowe 44px, opcjonalne e-maile zwinięte', () => {
+test('Formularze i zgody na telefonie: pola 16px, checkbox 22px, cele dotykowe 44px, opcjonalne e-maile w bloku zgód', () => {
   assert.match(css, /input:not\(\[type=checkbox\]\)[^{]*,select,textarea\{font-size:16px!important\}/);
   assert.match(css, /\.check input\[type=checkbox\],\.check input\[type=radio\]\{width:22px;height:22px/);
   assert.match(css, /\.check\{min-height:44px/);
   for (const r of [/details>summary\{min-height:44px/, /\.rm\{min-height:44px/, /#toPack\{min-height:44px\}/, /\.chipsel button,\.more a,\.prof-results a\{min-height:44px\}/, /\.foot-cols a\{display:flex;align-items:center;min-height:44px\}/]) assert.match(css, r);
-  const step6 = /<section data-step="6"[\s\S]*?<\/section>/.exec(html)[0], opt = /<details class="optbox" id="optMail">[\s\S]*?<\/details>/.exec(step6)[0];
-  assert.match(opt, /<summary>Powiadomienia e-mail \(opcjonalnie\)<\/summary>/);
-  for (const id of ['reviewAsk', 'payRem', 'reminder', 'wantAlerts', 'followUp']) assert.ok(opt.includes(`id="${id}"`), `${id} w zwiniętej sekcji`);
+  const step6 = /<section data-step="6"[\s\S]*?<\/section>/.exec(html)[0], opt = /<div class="mail-box" id="optMail">[\s\S]*?<\/div>\n<\/div>/.exec(step6)[0];
+  // 29.10: powiadomienia e-mail nie są zwinięte – osobny podpis w jednym bloku ze zgodami i fakturą; każde pole osobno, odznaczone
+  assert.match(opt, /<b class="flabel">Powiadomienia e-mail \(opcjonalnie\)<\/b>/); assert.doesNotMatch(opt, /checked/);
+  for (const id of ['reviewAsk', 'payRem', 'reminder', 'wantAlerts', 'followUp']) assert.ok(opt.includes(`id="${id}"`), `${id} w sekcji powiadomień`);
   for (const id of ['wantInv', 'consent', 'waiver']) assert.ok(step6.includes(`id="${id}"`) && !opt.includes(`id="${id}"`), `${id} na wierzchu`);
   assert.match(step6, /Akceptuję <a href="\/regulamin"[^>]*>Regulamin<\/a> i <a href="\/polityka-prywatnosci"[^>]*>Politykę prywatności<\/a>\./);
   assert.match(step6, /raz w tygodniu/); assert.doesNotMatch(html, /co poniedziałek|zapoznałem|zapomniałeś wpisać/);

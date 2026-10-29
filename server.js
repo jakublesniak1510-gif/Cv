@@ -304,6 +304,8 @@ function cleanProfile(p = {}) {
   return {
     name: str(p.name, 100), headline: str(p.headline, 120), email: str(p.email, 120),
     phone: str(p.phone, 40), city: str(p.city, 80), link: str(p.link, 200),
+    // Data urodzenia (29.10): opcjonalna, tylko gdy klient wpisze (RODO: minimalizacja); nie trafia do AI – lib/generate.js: withBirth.
+    ...(str(p.birth, 20) ? { birth: str(p.birth, 20) } : {}),
     summary: str(p.summary, 1500),
     experience: arr(p.experience, 12).map((e) => ({
       title: str(e?.title, 120), company: str(e?.company, 120), from: str(e?.from, 20),

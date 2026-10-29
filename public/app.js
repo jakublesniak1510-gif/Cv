@@ -90,15 +90,18 @@ const EU_LBL = {
   fr: { digital: 'Compétences numériques', driving: 'Permis de conduire', note: 'Mise en page inspirée d’Europass, préparée sur cvpodogloszenie.pl. Ce n’est pas un document officiel Europass.' },
 };
 const LBL2 = {
-  pl: { cvTitle: 'Życiorys', personal: 'Dane osobowe', phone: 'Telefon', email: 'E-mail', city: 'Miejsce zamieszkania', web: 'Profil', more: 'Umiejętności i języki', native: 'ojczysty', placeDate: 'Miejscowość, data', sign: 'Podpis', level: 'Poziom' },
-  en: { cvTitle: 'Curriculum Vitae', personal: 'Personal details', phone: 'Phone', email: 'Email', city: 'Location', web: 'Profile', more: 'Skills and languages', native: 'native', placeDate: 'Place, date', sign: 'Signature', level: 'Level' },
-  de: { cvTitle: 'Lebenslauf', personal: 'Persönliche Daten', phone: 'Telefon', email: 'E-Mail', city: 'Wohnort', web: 'Profil', more: 'Kenntnisse und Fähigkeiten', native: 'Muttersprache', placeDate: 'Ort, Datum', sign: 'Unterschrift', level: 'Niveau' },
-  uk: { cvTitle: 'Резюме', personal: 'Особисті дані', phone: 'Телефон', email: 'E-mail', city: 'Місце проживання', web: 'Профіль', more: 'Навички та мови', native: 'рідна', placeDate: 'Місто, дата', sign: 'Підпис', level: 'Рівень' },
-  es: { cvTitle: 'Currículum vitae', personal: 'Datos personales', phone: 'Teléfono', email: 'Correo', city: 'Residencia', web: 'Perfil', more: 'Habilidades e idiomas', native: 'nativo', placeDate: 'Lugar y fecha', sign: 'Firma', level: 'Nivel' },
-  fr: { cvTitle: 'Curriculum vitae', personal: 'Informations personnelles', phone: 'Téléphone', email: 'E-mail', city: 'Domicile', web: 'Profil', more: 'Compétences et langues', native: 'langue maternelle', placeDate: 'Lieu, date', sign: 'Signature', level: 'Niveau' },
+  pl: { cvTitle: 'Życiorys', personal: 'Dane osobowe', phone: 'Telefon', email: 'E-mail', city: 'Miejsce zamieszkania', birth: 'Data urodzenia', web: 'Profil', more: 'Umiejętności i języki', native: 'ojczysty', placeDate: 'Miejscowość, data', sign: 'Podpis', level: 'Poziom' },
+  en: { cvTitle: 'Curriculum Vitae', personal: 'Personal details', phone: 'Phone', email: 'Email', city: 'Location', birth: 'Date of birth', web: 'Profile', more: 'Skills and languages', native: 'native', placeDate: 'Place, date', sign: 'Signature', level: 'Level' },
+  de: { cvTitle: 'Lebenslauf', personal: 'Persönliche Daten', phone: 'Telefon', email: 'E-Mail', city: 'Wohnort', birth: 'Geburtsdatum', web: 'Profil', more: 'Kenntnisse und Fähigkeiten', native: 'Muttersprache', placeDate: 'Ort, Datum', sign: 'Unterschrift', level: 'Niveau' },
+  uk: { cvTitle: 'Резюме', personal: 'Особисті дані', phone: 'Телефон', email: 'E-mail', city: 'Місце проживання', birth: 'Дата народження', web: 'Профіль', more: 'Навички та мови', native: 'рідна', placeDate: 'Місто, дата', sign: 'Підпис', level: 'Рівень' },
+  es: { cvTitle: 'Currículum vitae', personal: 'Datos personales', phone: 'Teléfono', email: 'Correo', city: 'Residencia', birth: 'Fecha de nacimiento', web: 'Perfil', more: 'Habilidades e idiomas', native: 'nativo', placeDate: 'Lugar y fecha', sign: 'Firma', level: 'Nivel' },
+  fr: { cvTitle: 'Curriculum vitae', personal: 'Informations personnelles', phone: 'Téléphone', email: 'E-mail', city: 'Domicile', birth: 'Date de naissance', web: 'Profil', more: 'Compétences et langues', native: 'langue maternelle', placeDate: 'Lieu, date', sign: 'Signature', level: 'Niveau' },
 };
 // Rodzaj pozycji kontaktowej (do tabel danych osobowych) i podział „język + poziom CEFR”.
-const contactKind = (x) => (/@/.test(x) ? 'email' : /^\+?[\d\s()./-]{7,}$/.test(x) ? 'phone' : /https?:|www\.|\.(com|pl|de|io|net|org|eu)\b|linkedin|github/i.test(x) ? 'web' : 'city');
+// Data urodzenia (29.10, lib/generate.js: withBirth) przychodzi jako „Etykieta: wartość” – rodzaj „birth”, a przy własnej etykiecie pokazujemy samą wartość.
+const BIRTH_RE = /^(Data urodzenia|Date of birth|Geburtsdatum|Дата народження|Fecha de nacimiento|Date de naissance):\s*/;
+const contactVal = (x) => String(x).replace(BIRTH_RE, '');
+const contactKind = (x) => (BIRTH_RE.test(x) ? 'birth' : /@/.test(x) ? 'email' : /^\+?[\d\s()./-]{7,}$/.test(x) ? 'phone' : /https?:|www\.|\.(com|pl|de|io|net|org|eu)\b|linkedin|github/i.test(x) ? 'web' : 'city');
 const NATIVE = /\s*[(,–-]?\s*(język ojczysty|ojczysty|native( speaker)?|muttersprache|рідна( мова)?|nativo|langue maternelle)\)?\s*/i;
 const langLevel = (t, M) => { const m = /^(.*?)[\s,–-]*\b([ABC][12])\b(.*)$/i.exec(t); return m ? [(m[1] + m[3]).trim(), m[2].toUpperCase()] : NATIVE.test(t) ? [t.replace(NATIVE, ' ').trim(), M?.native || ''] : [t, '']; };
 const LANGS = { pl: 'polski', en: 'angielski', de: 'niemiecki', uk: 'ukraiński', es: 'hiszpański', fr: 'francuski' };
@@ -157,7 +160,7 @@ function parts(c, kw, lang = 'pl', photo = '') {
     })) : null),
     contactSec: () => sec(L.contact, el('ul', { className: 'clist' }, ...contact.map((x) => el('li', { textContent: x })))),
     // Lebenslauf: dane osobowe w tabeli, daty w lewej kolumnie, miejsce/data/podpis na końcu.
-    persData: () => (contact.length ? sec(M.personal, el('dl', { className: 'kv' }, ...contact.flatMap((x) => [el('dt', { textContent: M[contactKind(x)] }), el('dd', { textContent: x })]))) : null),
+    persData: () => (contact.length ? sec(M.personal, el('dl', { className: 'kv' }, ...contact.flatMap((x) => [el('dt', { textContent: M[contactKind(x)] }), el('dd', { textContent: contactVal(x) })]))) : null),
     tRows: (items, titleOf, orgOf) => items.map((e) => el('div', { className: 'row' }, el('div', { className: 'd', textContent: e.period || '' }),
       el('div', { className: 'c' }, el('b', { textContent: titleOf(e) || '' }), orgOf(e) ? el('div', { className: 'co', textContent: orgOf(e) }) : null,
         e.bullets?.length ? el('ul', {}, ...e.bullets.map((b) => el('li', {}, hl(b, kw)))) : null))),
@@ -171,7 +174,7 @@ function parts(c, kw, lang = 'pl', photo = '') {
       el('div', {}, el('span', { className: 'line' }), el('small', { textContent: M.sign }))),
     kicker: () => el('div', { className: 'kick', textContent: M.cvTitle }),
     // Europass: dane kontaktowe z etykietami, wpisy z datą nad stanowiskiem, tabela języków z poziomem.
-    persLine: () => el('ul', { className: 'pl' }, ...contact.map((x) => el('li', {}, el('small', { textContent: M[contactKind(x)] + ': ' }), x))),
+    persLine: () => el('ul', { className: 'pl' }, ...contact.map((x) => el('li', {}, el('small', { textContent: M[contactKind(x)] + ': ' }), contactVal(x)))),
     eRows: (items, titleOf, orgOf) => items.map((e) => el('div', { className: 'ent' }, e.period ? el('div', { className: 'dt', textContent: e.period }) : null,
       el('div', { className: 'ttl', textContent: titleOf(e) || '' }), orgOf(e) ? el('div', { className: 'co', textContent: orgOf(e) }) : null,
       e.bullets?.length ? el('ul', {}, ...e.bullets.map((b) => el('li', {}, hl(b, kw)))) : null)),
@@ -737,7 +740,7 @@ function setMode(e, mode) {
   kind.value = mode === 'prof' ? 'profession' : '';
   if (was === 'profession' && mode !== 'prof') { $('[data-k=text]', e).value = ''; $('[data-k=title]', e).value = ''; }
   if (mode === 'prof') { profList(); if (!passOn() && pkg() !== 'cv') { $('input[name=pkg][value=cv]').checked = true; } }
-  if ($('#noAdBtn') && e === $('#ads .entry')) $('#noAdBtn').hidden = mode === 'prof';
+  if ($('#noAdQ') && e === $('#ads .entry') && mode === 'prof' && !$('#noAdQ').value) $('#noAdQ').value = $('.profq', e)?.value || '';
   refresh();
 }
 // Lista zawodów do podpowiedzi (z danych stron zawodów) – raz na stronę.
@@ -860,7 +863,7 @@ const loadMyPass = () => fetch('/api/passes/mine', { credentials: 'same-origin' 
 loadMyPass();
 $('#usePass').onchange = () => refresh();
 
-const DKEY = 'cvpo-draft-v1', FIELDS = ['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'];
+const DKEY = 'cvpo-draft-v1', FIELDS = ['name', 'email', 'phone', 'city', 'link', 'birth', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'];
 let saveT, restoring = false;
 const draftData = () => ({ step, design, photo, addons: { ...addons(), linkedinEn: $('#adLinkedinEn').checked }, langs: extraLangs(), pkg: pkg(), f: Object.fromEntries(FIELDS.map((k) => [k, $('#' + k).value])), exp: rows('exp'), edu: rows('edu'), ads: rows('ads') });
 // Szkic na serwerze („Wyślij mi link do dokończenia”, lib/wizard-drafts.js): po wysłaniu linku formularz synchronizuje się z nim (bez zdjęcia).
@@ -906,10 +909,11 @@ function refresh() {
   $$('.pack3Unit').forEach((x) => (x.textContent = `${PRICE.pack3} zł = ${(PRICE.pack3 / 3).toFixed(2).replace('.', ',')} zł`)); // B6: cena za jedno CV w Pakiecie 3
   $('#letterDiff').textContent = `${PRICE.cv_letter - PRICE.cv} zł`; $('#nextPrice').textContent = `${PRICE.cv_next} zł`; $('#nextLetterPrice').textContent = `${PRICE.cv_next + PRICE.cv_letter - PRICE.cv} zł`; // „Polecany”: dopłata za list do tego samego ogłoszenia, z cennika
   saveDraft();
-  $('#total').textContent = total() + ' zł'; if (CHECKOUT_B) $('#totalTop').textContent = total() + ' zł'; if (step === 6) payTrust(6);
+  $('#total').textContent = total() + ' zł'; if (step === 6) payTrust(6);
   $('#bundleTip').textContent = pkg() === 'cv' ? '' : bundleOn() ? `Masz pakiet „Pewna rozmowa”: ${PRICE.bundleOff} zł taniej.` : `Pakiet „Pewna rozmowa”: zaznacz przygotowanie do rozmowy i symulator, a zapłacisz ${PRICE.bundleOff} zł mniej.`;
   $('#bundleTip').hidden = pkg() === 'cv';
-  $('#brk').textContent = [addonsTotal() ? `dodatki ${addonsTotal()} zł` : '', discount() ? `rabat −${discount()} zł` : ''].filter(Boolean).join(' · ');
+  // Na ostatnim kroku pod „Razem” małym drukiem: „jednorazowo, bez abonamentu” (29.10: zamiast górnej ramki „Do zapłaty”).
+  $('#brk').textContent = [addonsTotal() ? `dodatki ${addonsTotal()} zł` : '', discount() ? `rabat −${discount()} zł` : '', step === 6 ? 'jednorazowo, bez abonamentu' : ''].filter(Boolean).join(' · ');
   $$('.opt b[data-price]').forEach((b) => (b.textContent = `+${PRICE[b.dataset.price]} zł`));
   $('#pkgOpts').hidden = passOn() || !pkgOpen; drawPkgLine();
   quotePass();
@@ -1017,8 +1021,16 @@ $('#toPack').onclick = () => { $('input[name=pkg][value=pack3]').checked = true;
 // wyraźna opcja „Nie mam ogłoszenia – wpisz tylko stanowisko” (tryb „Bez ogłoszenia” pierwszego ogłoszenia, CV pod zawód).
 const PKG_LINE = { cv: 'Samo CV', cv_letter: 'CV + list motywacyjny', pack3: 'Pakiet 3 CV + listy' };
 $('#pkgOpts').previousElementSibling.previousElementSibling.before(el('p', { className: 'pkg-line', id: 'pkgLine' }, el('span', { textContent: 'Pakiet:' }), ' ', el('b', { id: 'pkgLineName' }), ' ', el('button', { type: 'button', className: 'link', id: 'pkgChange', textContent: 'Zmień pakiet', onclick: () => { pkgOpen = true; refresh(); $('#pkgOpts input:checked')?.focus(); } })));
-const noAdBtn = el('button', { type: 'button', className: 'btn ghost noad-btn', id: 'noAdBtn', textContent: 'Nie mam ogłoszenia – wpisz tylko stanowisko', onclick: () => { const first = $('#ads .entry'); if (!first) return; setMode(first, 'prof'); $('.profq', first)?.focus(); } });
-$('#ads').after(noAdBtn);
+// 29.10: „Nie mam ogłoszenia – wpisz stanowisko” na samym dole kroku 1, pod „Zobacz przykład CV dla Twojego zawodu”:
+// pole zawodu z podpowiedziami (lista zawodów), a wymagania pokazujemy w pierwszym ogłoszeniu (tryb „Bez ogłoszenia”).
+const noAdRun = () => {
+  const first = $('#ads .entry'), q = $('#noAdQ').value.trim(); if (!first) return;
+  if (q.length < 3) { $('#noAdQ').focus(); $('#noAdQ').classList.add('err'); return; }
+  $('#noAdQ').classList.remove('err'); setMode(first, 'prof'); first.profRun?.(q); first.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+$('#profEx').after(el('div', { className: 'noad-box', id: 'noAdBox' }, el('label', { className: 'f', htmlFor: 'noAdQ' }, el('b', { textContent: 'Nie mam ogłoszenia – wpisz stanowisko' }), ' ', el('span', { className: 'h', textContent: 'zrobimy CV pod typowe wymagania zawodu' })),
+  el('span', { className: 'urlrow' }, el('input', { type: 'text', id: 'noAdQ', autocomplete: 'off', placeholder: 'np. magazynier, kasjerka', onfocus: profList, onkeydown: (k) => { if (k.key === 'Enter') { k.preventDefault(); noAdRun(); } } }), el('button', { type: 'button', className: 'btn sm', id: 'noAdGo', textContent: 'Pokaż wymagania', onclick: noAdRun }))));
+$('#noAdQ').setAttribute('list', 'profList');
 {
   const ref = new URLSearchParams(location.search).get('ref');
   try { if (ref) localStorage.setItem(REF_KEY, ref); } catch {}
@@ -1027,8 +1039,8 @@ $('#ads').after(noAdBtn);
 }
 $('#wizForm').addEventListener('input', saveDraft);
 $('#gwBox').addEventListener('change', () => payTrust(step));
+// 29.10: bez górnej ramki „Do zapłaty” (kwota tylko na dole przy „Razem”, tuż nad przyciskiem) – w obu wariantach testu.
 if (CHECKOUT_B) {
-  $('#sumTop').hidden = false;
   for (const id of ['consent', 'waiver']) $('#' + id).closest('label').classList.add('compact');
 }
 $('#addExp').onclick = () => addRow('exp');
@@ -1095,8 +1107,7 @@ function payTrust(n) {
 const nextLabel = () => ($('#next').textContent = step === 6 ? (total() === 0 ? 'Zamów bez opłaty' : fullOn() ? `${tr('Odblokuj swoje CV –')} ${total()} zł` : cfg.demo ? `Przejdź do płatności · ${total()} zł` : `Zapłać ${total()} zł`) : 'Dalej');
 function go(n) {
   if (n !== 7) n = stepOf(n); // C3: kroki 3–5 (stare szkice, linki) → ekran z tymi polami
-  refresh();
-  step = n; if (!$('#wiz').hidden) track('step', { s: n });
+  step = n; refresh(); if (!$('#wiz').hidden) track('step', { s: n }); // refresh po zmianie kroku: dopisek pod „Razem” na ostatnim kroku
   $$('#wiz section[data-step]').forEach((s) => (s.hidden = +s.dataset.step !== n));
   const idx = n === 7 ? ORDER.length : ORDER.indexOf(n);
   $('#stepper').replaceChildren(...ORDER.map((_, i) => el('li', { className: i < idx ? 'done' : i === idx ? 'cur' : '' })));
@@ -1119,9 +1130,9 @@ let fullPv = null, fullOff = false, fullRun = '';
 // Podpis danych (nowa generacja) osobno od podpisu obrazka (wygląd, pakiet → cena w stopce): zmiana wyglądu na ekranie podsumowania
 // tylko odświeża obrazek z wyniku zapisanego na serwerze (C3), bez nowej generacji i bez limitu.
 const fullOn = () => !!fullPv && fullPv.sig === fullSig();
-const fullSig = () => JSON.stringify([pvSig(), $('#rewriteMode').checked, ...['name', 'email', 'phone', 'city', 'link'].map((k) => $('#' + k).value)]);
+const fullSig = () => JSON.stringify([pvSig(), $('#rewriteMode').checked, ...['name', 'email', 'phone', 'city', 'link', 'birth'].map((k) => $('#' + k).value)]);
 const imgSig = () => JSON.stringify([design, orderPkg()]);
-const pvProfile = () => ({ ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, $('#' + k).value])), experience: rows('exp'), education: rows('edu') });
+const pvProfile = () => ({ ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'birth', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, $('#' + k).value])), experience: rows('exp'), education: rows('edu') });
 const fullAvail = () => !fullOff && !!cfg.aiPreview && !!rows('ads')[0]?.text && (rows('exp').length > 0 || rows('edu').length > 0);
 async function fullPreview() {
   const ad = rows('ads')[0], sig = fullSig(), isig = imgSig(), redraw = fullPv?.sig === sig;
@@ -1193,7 +1204,7 @@ async function drawWizMatch() {
     if (!r.ok) throw new Error(); const j = await r.json(); if (sig !== matchSig) return;
     const chips = (xs, c) => el('div', { className: 'pv-kw' }, ...xs.map((k) => el('span', { className: `chip ${c}`, textContent: k })));
     const one = (m) => [el('p', {}, `Z ogłoszenia wyciągnęliśmy ${m.n} ${plural(m.n, 'wymaganie', 'wymagania', 'wymagań')}${hasExp ? '.' : m.n === 1 ? ', z którym dopasujemy CV.' : ', z którymi dopasujemy CV.'}`),
-      ...(hasExp ? [el('p', {}, `Twoje doświadczenie pokrywa ${m.found.length} z nich:`), m.found.length ? chips(m.found, 'ok') : null, m.missing.length ? el('p', { textContent: 'W CV ujmiemy też:' }) : null, m.missing.length ? chips(m.missing, '') : null] : [])].filter(Boolean);
+      ...(hasExp ? [el('p', {}, `Twoje doświadczenie pokrywa ${m.found.length} z nich:`), m.found.length ? chips(m.found, 'ok') : null] : [])].filter(Boolean);
     const parts = j.ads.map((m, i) => (m && m.n ? [m, i] : null)).filter(Boolean);
     if (!parts.length) { box.hidden = true; return; }
     box.replaceChildren(el('h3', { className: 'sh', textContent: 'Dopasowanie do ogłoszenia' }),
@@ -1229,8 +1240,8 @@ function drawSummary() {
     ...extraLangs().map((l) => el('div', { className: 'sumrow' }, el('span', { textContent: `Tłumaczenie: ${LANGS[l]}` }), el('span', { textContent: '+' + PRICE.extraLang + ' zł' }))),
     ...(bundleOn() ? [el('div', { className: 'sumrow' }, el('span', { textContent: 'Pakiet „Pewna rozmowa”' }), el('span', { textContent: '−' + PRICE.bundleOff + ' zł' }))] : []),
     ...(discount() ? [el('div', { className: 'sumrow' }, el('span', {}, el('span', { textContent: promo.label }), ' ' + promo.code), el('span', { textContent: '−' + discount() + ' zł' }))] : []),
-    ...(discount() && promo.calendar && promo.lowest ? [el('div', { className: 'sumrow lowest' }, lowestNote(promo.lowest, 'lowest', pkg()))] : []),
-    el('div', { className: 'sumrow' }, el('span', { textContent: 'Razem' }), el('span', { textContent: total() + ' zł' })));
+    ...(discount() && promo.calendar && promo.lowest ? [el('div', { className: 'sumrow lowest' }, lowestNote(promo.lowest, 'lowest', pkg()))] : []));
+  // 29.10: kwota „Razem” tylko na dole, tuż nad przyciskiem płatności (stopka kreatora), bez powtórzenia w liście pozycji.
 }
 const nipOk = (n) => /^\d{10}$/.test(n) && [6, 5, 7, 2, 3, 4, 5, 6, 7].reduce((s, w, i) => s + w * +n[i], 0) % 11 === +n[9];
 // Oferty pracy na e-mail przy zamówieniu: zawód z pierwszego ogłoszenia, miasto z danych kandydata.
@@ -1246,7 +1257,7 @@ function validate(n) {
   if (n === 2) { if (!v('name')) return 'Podaj imię i nazwisko.'; if (!/^\S+@\S+\.\S+$/.test(v('email'))) return 'Podaj poprawny adres e-mail.'; }
   // Ekran 2: wystarczy wgrane CV albo jedno stanowisko (szkoła z „Więcej danych” też wystarczy, np. dla uczniów i studentów).
   if (n === 2 && !imported && !rows('exp').some((e) => e.title || e.company) && !rows('edu').some((e) => e.school)) return 'Wgraj swoje CV albo dodaj co najmniej jedno stanowisko (szkołę dodasz w „Więcej danych”).';
-  if (n === 2 && $('#careerOn').checked && !v('careerTo')) { $('#moreData').open = true; return 'Wpisz docelową branżę albo odznacz „Zmieniam branżę”.'; }
+  if (n === 2 && $('#careerOn').checked && !v('careerTo')) { return 'Wpisz docelową branżę albo odznacz „Zmieniam branżę”.'; }
   if (n === 1 && passOn() && nAds() > Math.min(3, myPass.left.matches)) return `W karnecie ${plural(myPass.left.matches, 'zostało', 'zostały', 'zostało')} ${myPass.left.matches} ${plural(myPass.left.matches, 'dopasowanie', 'dopasowania', 'dopasowań')}. Usuń dodatkowe ogłoszenia albo odznacz „Użyj karnetu”.`;
   if (n === 1 && !passOn() && nAds() > PKG_ADS[pkg()]) return 'Wybrany pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe ogłoszenia albo wybierz Pakiet 3 za 79 zł.';
   if (n === 1) for (const [i, a] of rows('ads').entries()) {
@@ -1379,7 +1390,7 @@ $('#wizForm').onsubmit = async (e) => {
   const body = {
     draftToken: srvToken() || undefined,
     ...($('#rewriteMode').checked ? { mode: 'rewrite' } : {}), usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', reminder: $('#reminder').checked, waiver: $('#waiver').checked, ...(CHECKOUT_B ? { consentForm: 'compact' } : {}), gateway: gwValue($('#gwBox')), outcomeAsk: $('#outcomeAsk').checked, followUp: $('#followUp').checked, deleteNotice: $('#deleteNotice').checked, jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, reviewAsk: $('#reviewAsk').checked, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
-    profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), ...($('#careerOn').checked ? { career: { from: v('careerFrom'), to: v('careerTo'), fit: v('careerFit') } } : {}), experience: rows('exp'), education: rows('edu'), photo },
+    profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'birth', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), ...($('#careerOn').checked ? { career: { from: v('careerFrom'), to: v('careerTo'), fit: v('careerFit') } } : {}), experience: rows('exp'), education: rows('edu'), photo },
   };
   // Zgoda na cookies reklamowe (baner): tylko wtedy serwer zgłosi zakup do Meta (Conversions API) z identyfikatorami piksela.
   try { if (localStorage.getItem('cvpo-consent') === 'granted') { const ck = (n) => (document.cookie.match(new RegExp('(?:^|; )' + n + '=([^;]*)')) || [])[1]; Object.assign(body, { adConsent: true, fbp: ck('_fbp'), fbc: ck('_fbc') }); } } catch {}
@@ -1458,7 +1469,7 @@ async function importData(b64) {
     const empty = (b) => !rows(b).some((x) => Object.values(x).some(Boolean));
     if (p.experience?.length && empty('exp')) { $('#exp').replaceChildren(); p.experience.forEach((x) => addRow('exp', x)); }
     if (p.education?.length && empty('edu')) { $('#edu').replaceChildren(); p.education.forEach((x) => addRow('edu', x)); }
-    saveDraft(); imported = true; $('#importBox').classList.add('small'); $('#moreData').open = true; track('cvimport'); // C3: dane z pliku widoczne do sprawdzenia
+    saveDraft(); imported = true; $('#importBox').classList.add('small'); track('cvimport'); // C3: dane z pliku od razu widoczne do sprawdzenia (pola opcjonalne nie są zwinięte)
     st.textContent = j.ai ? 'Gotowe. Uzupełniliśmy formularz danymi z CV (także w kolejnych krokach). Sprawdź je i popraw, jeśli trzeba.' : 'Odczytaliśmy dane kontaktowe. Resztę uzupełnij ręcznie.';
     if (cfg.preview) st.textContent += ' Podgląd: zamiast odczytu pliku wstawiamy przykładowe dane.';
     st.classList.add('good');

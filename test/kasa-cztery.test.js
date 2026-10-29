@@ -8,8 +8,10 @@ const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')
 const html = read('public/index.html'), app = read('public/app.js'), css = read('public/style.css');
 const step6 = html.slice(html.indexOf('<section data-step="6"'), html.indexOf('<section data-step="7"'));
 
-test('Zgody w jednej ramce na końcu kroku 6 (teksty bez zmian), kod rabatowy w zwiniętym <details>', () => {
-  assert.match(step6, /<div class="consent-box" id="consentBox">\s*<label class="check"><input type="checkbox" id="consent">[\s\S]*?<input type="checkbox" id="waiver">[\s\S]*?<\/label>\s*<\/div>\s*<\/section>/, 'ramka ze zgodami tuż przed końcem kroku (nad stopką z przyciskiem)');
+test('Zgody, faktura i powiadomienia w jednym bloku na końcu kroku 6 (teksty bez zmian), kod rabatowy w zwiniętym <details> pod płatnością', () => {
+  // 29.10: jeden nierozwijany blok – zgody (osobne, odznaczone), „Potrzebuję faktury” i powiadomienia e-mail – tuż przed końcem kroku (nad „Razem” i przyciskiem)
+  assert.match(step6, /<div class="consent-box" id="consentBox">\s*<label class="check"><input type="checkbox" id="consent">[\s\S]*?<input type="checkbox" id="waiver">[\s\S]*?<input type="checkbox" id="wantInv">[\s\S]*?<div class="mail-box" id="optMail">[\s\S]*?<\/div>\s*<\/div>\s*<\/section>/, 'blok zgód, faktury i powiadomień na końcu kroku');
+  assert.ok(step6.indexOf('id="payTrustList"') < step6.indexOf('id="codeBox"') && step6.indexOf('id="codeBox"') < step6.indexOf('id="consentBox"'), 'kod rabatowy tuż pod informacją o płatności');
   assert.ok(step6.includes('Akceptuję <a href="/regulamin" target="_blank" rel="noopener">Regulamin</a> i <a href="/polityka-prywatnosci" target="_blank" rel="noopener">Politykę prywatności</a>. Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów.'));
   assert.ok(step6.includes('Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.'));
   assert.ok(step6.indexOf('id="payTrustList"') < step6.indexOf('id="consentBox"') && step6.indexOf('id="gwBox"') < step6.indexOf('id="consentBox"'));

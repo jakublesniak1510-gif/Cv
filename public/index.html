@@ -561,12 +561,13 @@
 <h3 class="sh">Doświadczenie</h3>
 <p class="hint">Dodaj prace od najnowszej. Każdy punkt obowiązków w nowej linii. Im konkretniej (liczby, wyniki), tym lepsze CV.</p>
 <div id="exp"></div><button type="button" class="btn ghost sm" id="addExp">+ Dodaj stanowisko</button>
-<details class="optbox more-data" id="moreData"><summary>Więcej danych <span class="h">(opcjonalnie: kontakt, zdjęcie, wykształcenie, umiejętności)</span></summary>
+<div class="optbox more-data" id="moreData"><h3 class="sh">Pozostałe dane <span class="h">(opcjonalnie)</span></h3>
 <div class="grid2">
 <label class="f">Telefon<input type="tel" id="phone" autocomplete="tel"></label>
 <label class="f">Miasto<input type="text" id="city"></label>
 <label class="f">Link <span class="h">LinkedIn, portfolio</span><input type="text" id="link"></label>
 <label class="f">Ogólny zawód <span class="h">gdy ogłoszenie nie ma nazwy</span><input type="text" id="headline"></label>
+<label class="f">Data urodzenia <span class="h">podaj tylko, jeśli pracodawca tego wymaga</span><input type="text" id="birth" maxlength="20" placeholder="np. 14.05.1990"></label>
 </div>
 <label class="f">Krótko o sobie <span class="h">opcjonalnie</span><textarea id="summary"></textarea></label>
 <div class="photo-row"><div class="photo-prev" id="photoPrev" aria-hidden="true"></div><div><b>Zdjęcie</b> <span class="h">opcjonalnie</span><p class="hint">Pojawi się w każdym szablonie, a gdy go nie dodasz, CV wygląda dobrze także bez niego. Zdjęcie nie trafia do AI.</p><label class="btn ghost sm filebtn">Dodaj zdjęcie<input type="file" id="photoFile" accept="image/jpeg,image/png,image/webp" hidden></label> <button type="button" class="link" id="photoDel" hidden>Usuń zdjęcie</button></div></div>
@@ -586,16 +587,15 @@
 </div>
 <label class="f">Zainteresowania <span class="h">opcjonalnie</span><input type="text" id="interests"></label>
 <label class="f">Uwagi dla autora <span class="h">np. zmiana branży, przerwa w pracy</span><textarea id="notes"></textarea></label>
-</details>
+</div>
 </section>
 <section data-step="6" hidden>
-<div class="sum-top" id="sumTop" hidden><span>Do zapłaty</span> <b id="totalTop"></b> <small>jednorazowo, bez abonamentu</small></div>
 <p class="live-stats" id="liveStats6" hidden></p>
-<div id="wizMatch" class="wiz-match" hidden></div>
-<div id="pvBox" class="pv" hidden><div class="pv-head"><b id="pvTitle">Tak zacznie się Twoje CV pod to ogłoszenie</b><p class="hint" id="pvHint">Pokażemy nagłówek, podsumowanie zawodowe i 5 słów kluczowych z ogłoszenia, które znajdą się w CV. W tym celu Twoje dane i ogłoszenie trafią do dostawcy AI, tak jak przy zamówieniu.</p><button class="btn ghost sm" type="button" id="pvBtn">Pokaż podgląd</button></div><div id="pvOut" aria-live="polite"></div></div>
-<p class="pv-ex" id="pvEx" hidden><button type="button" class="btn ghost sm" data-example="0">Zobacz przykład gotowego CV</button> <span class="hint">Przykładowe ogłoszenie i CV, bez Twoich danych.</span></p>
 <h3 class="sh">Wygląd CV <span class="h">(możesz go zmienić także po zakupie)</span></h3>
 <div id="wizDesign"></div>
+<div id="pvBox" class="pv" hidden><div class="pv-head"><b id="pvTitle">Tak zacznie się Twoje CV pod to ogłoszenie</b><p class="hint" id="pvHint">Pokażemy nagłówek, podsumowanie zawodowe i 5 słów kluczowych z ogłoszenia, które znajdą się w CV. W tym celu Twoje dane i ogłoszenie trafią do dostawcy AI, tak jak przy zamówieniu.</p><button class="btn ghost sm" type="button" id="pvBtn">Pokaż podgląd</button></div><div id="pvOut" aria-live="polite"></div></div>
+<p class="pv-ex" id="pvEx" hidden><button type="button" class="btn ghost sm" data-example="0">Zobacz przykład gotowego CV</button> <span class="hint">Przykładowe ogłoszenie i CV, bez Twoich danych.</span></p>
+<div id="wizMatch" class="wiz-match" hidden></div>
 <details class="optbox" id="moreOpts"><summary>Dodatki i tłumaczenie <span class="h">(opcjonalnie)</span></summary>
 <h3 class="sh">Dodatki <span class="h">(opcjonalnie, raz na całe zamówienie)</span></h3>
 <div class="opts addons">
@@ -612,7 +612,13 @@
 <div class="langpick" id="langPick"></div>
 </details>
 <div id="sum"></div>
+<div id="gwBox" class="gw-box" hidden></div>
+<ul class="pay-trust" id="payTrustList" hidden></ul>
 <details class="codebox" id="codeBox"><summary>Mam kod rabatowy</summary><label class="f">Kod rabatowy<span class="urlrow"><input type="text" id="codeInput" autocomplete="off" placeholder="np. KOD-AB12CD"><button type="button" class="btn ghost sm" id="codeApply">Zastosuj</button></span></label><p class="fstatus" id="codeMsg" role="status"></p></details>
+<!--tp-mini-->
+<div class="consent-box" id="consentBox">
+<label class="check"><input type="checkbox" id="consent"> <span>Akceptuję <a href="/regulamin" target="_blank" rel="noopener">Regulamin</a> i <a href="/polityka-prywatnosci" target="_blank" rel="noopener">Politykę prywatności</a>. Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów.</span></label>
+<label class="check"><input type="checkbox" id="waiver"> <span>Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.</span></label>
 <label class="check"><input type="checkbox" id="wantInv"> <span>Potrzebuję faktury (bez VAT – sprzedawca jest zwolniony z VAT).</span></label>
 <div class="invbox" id="invBox" hidden>
 <label class="f">Nazwa firmy albo imię i nazwisko<input type="text" id="invName" maxlength="200" autocomplete="organization"></label>
@@ -620,7 +626,7 @@
 <label class="f">NIP (pomiń, jeśli kupujesz prywatnie)<input type="text" id="invNip" maxlength="16" inputmode="numeric" placeholder="np. 1234563218"></label>
 <p class="hint">Fakturę wyślemy na e-mail podany w zamówieniu.</p>
 </div>
-<details class="optbox" id="optMail"><summary>Powiadomienia e-mail (opcjonalnie)</summary>
+<div class="mail-box" id="optMail"><b class="flabel">Powiadomienia e-mail (opcjonalnie)</b>
 <label class="check"><input type="checkbox" id="reviewAsk"> <span>Poproś mnie raz o ocenę dokumentów (jeden e-mail po 4 dniach, opcjonalnie).</span></label>
 <label class="check"><input type="checkbox" id="outcomeAsk"> <span>Zapytajcie mnie za 14 dni, czy dostałem(-am) zaproszenie na rozmowę (1 wiadomość).</span></label>
 <label class="check"><input type="checkbox" id="payRem"> <span>Jeśli nie dokończę płatności, przypomnijcie mi raz e-mailem (opcjonalnie).</span></label>
@@ -633,15 +639,7 @@
 </div>
 <label class="check"><input type="checkbox" id="followUp"> <span>Zapytajcie mnie raz po miesiącu, jak poszła rekrutacja (jeden e-mail, opcjonalnie).</span></label>
 <label class="check"><input type="checkbox" id="deleteNotice"> <span>Przypomnijcie mi 5 dni przed usunięciem moich danych i dokumentów (jeden e-mail, opcjonalnie).</span></label>
-</details>
-<p class="perk small">Po opłaceniu dostaniesz <b>swój kod −10 zł</b> (ważny 90 dni): na kolejne zamówienie dla Ciebie i dla Twoich znajomych.</p>
-<p class="hint trust-mini">W cenie: raport dopasowania, darmowa poprawka i edycja tekstu. Dane usuwamy automatycznie po 30 dniach.</p>
-<div id="gwBox" class="gw-box" hidden></div>
-<ul class="pay-trust" id="payTrustList" hidden></ul>
-<!--tp-mini-->
-<div class="consent-box" id="consentBox">
-<label class="check"><input type="checkbox" id="consent"> <span>Akceptuję <a href="/regulamin" target="_blank" rel="noopener">Regulamin</a> i <a href="/polityka-prywatnosci" target="_blank" rel="noopener">Politykę prywatności</a>. Wiem, że moje dane trafią do dostawcy AI wyłącznie w celu przygotowania dokumentów.</span></label>
-<label class="check"><input type="checkbox" id="waiver"> <span>Chcę, aby usługa została wykonana od razu po płatności. Wiem, że po jej wykonaniu tracę prawo do odstąpienia od umowy.</span></label>
+</div>
 </div>
 </section>
 <section data-step="7" hidden>
