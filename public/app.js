@@ -2345,7 +2345,8 @@ async function loadContent() {
     try {
       const pr = await (await fetch(`/content/prof-${l}.json`)).json();
       CONTENT.prof = pr;
-      CONTENT.INDEX = CONTENT.INDEX.map((p) => (pr.index[p.slug] ? { ...p, ...pr.index[p.slug] } : p));
+      // zawody bez tłumaczenia (np. tylko po polsku) nie trafiają do indeksu strony w innym języku
+      CONTENT.INDEX = CONTENT.INDEX.filter((p) => pr.index[p.slug]).map((p) => ({ ...p, ...pr.index[p.slug] }));
       CONTENT.POPULAR = CONTENT.POPULAR.map((p) => pr.popular[p.slug] || p);
       CONTENT.CITIES = (CONTENT.CITIES || []).map((c) => pr.cities[c.slug] || c);
     } catch {}

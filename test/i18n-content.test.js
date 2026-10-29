@@ -9,8 +9,9 @@ const dict = (l) => JSON.parse(read(`i18n/${l}.json`));
 const LANGS = ['en', 'uk', 'de'];
 
 test('Liczba zawodów w tekstach strony zgadza się z liczbą podstron we wszystkich językach', () => {
+  // Polska wersja: wszystkie zawody; tłumaczenia: zawody z wersją w danym języku (część nowych zawodów jest tylko po polsku, 29.10).
   const n = PROFESSIONS.length;
-  for (const l of LANGS) assert.equal(Object.keys(PROF_LANGS[l].prof).length, n, `podstrony zawodów: ${l}`);
+  for (const l of LANGS) assert.ok(Object.keys(PROF_LANGS[l].prof).every((s) => PROFESSIONS.some((p) => p.slug === s)), `podstrony zawodów: ${l}`);
   const html = read('index.html'), counts = [...html.matchAll(/dla (\d+) zawodów/g)].map((m) => +m[1]);
   assert.ok(counts.length >= 2, 'teksty z liczbą zawodów w index.html');
   assert.deepEqual([...new Set(counts)], [n]);
@@ -19,7 +20,7 @@ test('Liczba zawodów w tekstach strony zgadza się z liczbą podstron we wszyst
     assert.equal(keys.length, counts.length, `tłumaczenia: ${l}`);
     for (const k of keys) {
       assert.ok(html.includes(k), `klucz ${l} pasuje do strony: ${k}`);
-      assert.match(d[k], new RegExp(`\\b${n}\\b`), `liczba w tłumaczeniu ${l}: ${d[k]}`);
+      assert.match(d[k], new RegExp(`\\b${Object.keys(PROF_LANGS[l].prof).length}\\b`), `liczba w tłumaczeniu ${l}: ${d[k]}`);
     }
   }
 });
