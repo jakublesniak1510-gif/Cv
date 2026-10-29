@@ -90,7 +90,7 @@ test('JSON-LD strony głównej: poprawna składnia, SoftwareApplication z Aggreg
 const NOT_PERSON = ['obsluga-klienta', 'specjalista-kadr-i-plac'];
 test('Strony zawodów: tytuł z szablonu z odmianą z danych, opis ze słowami kluczowymi i skanerem, bez błędów odmiany', () => {
   const t = (u) => pages.find((p) => p.u === u)?.title, d = (u) => pages.find((p) => p.u === u)?.desc;
-  assert.equal(t('/cv/kasjer'), 'CV kasjera pod ogłoszenie – wzór i generator online');
+  assert.equal(t('/cv/kasjer'), 'CV kasjera 2026 – wzór i przykłady pod ogłoszenie');
   // Strony z raportu GSC 26.10 (pozycje 8–20, 0 kliknięć) mają ręczne tytuły i opisy: lib/seo-titles.js CTR_SEO.
   for (const [u, x] of Object.entries(CTR_SEO)) { if (x.title) assert.equal(t('/' + u), x.title, u); assert.equal(d('/' + u), x.desc, u); assert.ok((!x.title || x.title.length <= 60) && x.desc.length <= 155, u); }
   assert.equal(t(`/uk/${PROF_LANGS.uk.seg}/${PROF_LANGS.uk.prof.hydraulik.slugLang}`), 'Резюме сантехніка під вакансію – зразок і генератор онлайн');
@@ -123,7 +123,8 @@ test('Poradniki z GSC: czasownik + korzyść, rok z daty treści przy klauzuli R
   assert.match(t('/en/guides/gdpr-clause-on-a-cv'), /^GDPR clause for a CV in Poland 20\d\d: /);
   assert.doesNotMatch(t('/poradnik/przerwa-w-zatrudnieniu-w-cv'), y, 'rok tylko przy treści rocznej');
   assert.equal(t('/narzedzia/podziekowanie-po-rozmowie'), 'Podziękowanie po rozmowie kwalifikacyjnej – darmowy wzór');
-  const ch = JSON.parse(fs.readFileSync(new URL('../seo-data/title-changes.json', import.meta.url), 'utf8')).at(-1);
+  const all = JSON.parse(fs.readFileSync(new URL('../seo-data/title-changes.json', import.meta.url), 'utf8')), ch = all.find((x) => x.date === '2026-10-23');
+  assert.equal(all.at(-1).variantB?.title, ch.variantB.title, 'przypomnienie o wariancie B przeniesione do ostatniej zmiany');
   assert.equal(ch.variantB.title, 'Dopasuj CV do ogłoszenia – darmowy skaner CV i list motywacyjny');
   for (const u of ['/poradnik/cv-dla-studenta', '/poradnik/podsumowanie-zawodowe-w-cv', '/poradnik/zdjecie-w-cv', '/de/tools/dsgvo-klausel-lebenslauf']) assert.ok(ch.pages.includes(u) && t(u).length <= 60, u);
   assert.equal(t('/de/tools/dsgvo-klausel-lebenslauf'), 'DSGVO-Klausel im Lebenslauf (Polen) kostenlos erstellen');

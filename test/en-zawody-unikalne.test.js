@@ -35,7 +35,8 @@ test('Tytuły zawodów EN i DE unikalne (słowo kluczowe zawodu), PL bez zmian',
     const ts = Object.values(PROF_LANGS[l].prof).map((p) => profSeo(p, l).seoTitle);
     assert.equal(new Set(ts).size, ts.length, `${l}: unikalne tytuły`); assert.ok(ts.every((t) => t && t.length <= 60), l);
   }
-  assert.equal(profSeo({ title: 'CV hydraulika: wzór i wskazówki', keywords: ['instalacje'] }, 'pl').seoTitle, 'CV hydraulika pod ogłoszenie – wzór i generator online');
+  assert.equal(profSeo({ title: 'CV hydraulika: wzór i wskazówki', keywords: ['instalacje'] }, 'pl', '2026-10-21').seoTitle, 'CV hydraulika 2026 – wzór i przykłady pod ogłoszenie');
+  assert.equal(profSeo({ title: 'CV hydraulika: wzór i wskazówki', keywords: [] }, 'pl', '2027-01-05').seoTitle, 'CV hydraulika 2027 – wzór i przykłady pod ogłoszenie', 'rok z daty treści');
 });
 
 test('Strona /en/cv/recruiter: nowy wstęp, sekcje, źródła, tytuł; self-canonical i hreflang; /en/cv/packer bez sekcji', async () => {

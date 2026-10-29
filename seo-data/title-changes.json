@@ -9,5 +9,16 @@
       "consider": "2026-11-20",
       "status": "do rozważenia – nie wdrożone; decyzja po 4 tygodniach danych z sekcji „CTR po zmianie tytułów”"
     }
+  },
+  {
+    "date": "2026-10-29",
+    "note": "Strony zawodów PL: nowy szablon tytułu „CV {zawodu} {rok} – wzór i przykłady pod ogłoszenie” (rok z daty treści); ręczne tytuły z CTR_SEO bez zmian",
+    "pages": ["/cv/*"],
+    "variantB": {
+      "page": "/",
+      "title": "Dopasuj CV do ogłoszenia – darmowy skaner CV i list motywacyjny",
+      "consider": "2026-11-20",
+      "status": "do rozważenia – nie wdrożone; decyzja po 4 tygodniach danych z sekcji „CTR po zmianie tytułów”"
+    }
   }
 ]
