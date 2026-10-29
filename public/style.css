@@ -1217,3 +1217,7 @@ ul.checklist{list-style:none;padding-left:0}
 
 /* Poradniki: długie adresy w treści (np. …/zawod/operator-wozka-widlowego/zakres-obowiazkow) łamią się na telefonie zamiast poszerzać stronę. */
 .article p a{overflow-wrap:anywhere}
+
+/* 29.10: wyraźny przycisk „Nie mam ogłoszenia – zwykłe CV pod zawód” w hero (obramowanie ghost; telefon: pełna szerokość pod głównym przyciskiem). */
+.hero-noad-btn{border:2px solid var(--brand)}.hero-cta-b{display:grid;gap:10px;justify-items:start}
+@media(max-width:700px){.hero-cta-b{justify-items:stretch}.hero-cta-b .btn{width:100%}}
