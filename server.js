@@ -17,7 +17,7 @@ import { docFile } from './lib/doc-names.js';
 import { cvToText } from './lib/cv-text.js';
 import { generateForAd, generateFreeQs, generateMessages, linkedinChecked, reviseDoc, translateResult, scanCv, assistant } from './lib/generate.js';
 import { aiEnabled, AiRefusal } from './lib/ai.js';
-import { checkResult, hasCritical, recordQa, QA_LABELS } from './lib/qa.js';
+import { checkResult, hasCritical, recordQa, QA_LABELS, qaFixNote } from './lib/qa.js';
 import { renderCv } from './lib/pdf.js';
 import { fetchAd, AdError } from './lib/fetchAd.js';
 import { adFromImage, AdImageError } from './lib/adImage.js';
@@ -952,12 +952,13 @@ async function markPaidAndGenerate(id) {
       // generujemy resztę, a CV podmieniamy na to z podglądu (klient dostaje CV, które widział).
       const full = i === 0 ? o.fullPreview : null;
       const gen = full && reusesWhole(o) ? async () => structuredClone(full)
-        : async () => { const r = await generateForAd({ profile: o.profile, ad, withLetter, addons: o.addons, preview: full ? { headline: full.cv?.headline, summary: full.cv?.summary, keywords: full.keywords || [] } : i === 0 ? o.preview : null, rewrite: o.mode === 'rewrite' }); return full ? { ...r, cv: structuredClone(full.cv), match: full.match ?? r.match, keywords: full.keywords ?? r.keywords, position: full.position || r.position } : r; };
+        : async (fix = '') => { const r = await generateForAd({ profile: o.profile, ad, withLetter, addons: o.addons, fix, preview: full ? { headline: full.cv?.headline, summary: full.cv?.summary, keywords: full.keywords || [] } : i === 0 ? o.preview : null, rewrite: o.mode === 'rewrite' }); return full ? { ...r, cv: structuredClone(full.cv), match: full.match ?? r.match, keywords: full.keywords ?? r.keywords, position: full.position || r.position } : r; };
       let r = await gen(), qa = await qaOf(r, o, ad, withLetter);
       // Błąd krytyczny (placeholder, firma spoza profilu, zły język, klauzula…): jedna ponowna generacja, zostaje lepsza wersja.
       // Nie przy CV z pełnego podglądu – klient zapłacił za to, co widział (alert do właściciela i tak idzie).
       if (hasCritical(qa) && aiEnabled() && !full) {
-        const r2 = await gen().catch(() => null), qa2 = r2 && (await qaOf(r2, o, ad, withLetter));
+        // Druga próba dostaje konkretny błąd (np. pracodawcy spoza danych klienta i listę dozwolonych firm), nie ten sam prompt.
+        const r2 = await gen(qaFixNote(r, o.profile)).catch(() => null), qa2 = r2 && (await qaOf(r2, o, ad, withLetter));
         if (r2 && crit(qa2) <= crit(qa)) { r = r2; qa = qa2; }
         qa = { ...qa, retried: true };
       }
