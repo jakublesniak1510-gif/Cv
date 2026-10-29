@@ -179,7 +179,7 @@ function orderTable(rows, compact = false) {
     el('tbody', {}, rows.map((o) => {
       const tr = el('tr', { className: 'click', tabIndex: 0 },
         el('td', { className: 'num', textContent: dt(o.created) }), el('td', { className: 'ell', textContent: o.email, title: o.email }),
-        el('td', {}, o.pkgName, o.prof ? el('span', { className: 'tag', textContent: 'pod zawód', style: 'margin-left:6px' }) : null, o.followup ? el('span', { className: 'tag', textContent: 'kolejne', style: 'margin-left:6px' }) : null, o.invoice ? el('span', { className: 'tag', textContent: o.invoice === 'todo' ? 'faktura do wystawienia' : 'faktura ✓', style: 'margin-left:6px' }) : null),
+        el('td', {}, o.pkgName, o.prof ? el('span', { className: 'tag', textContent: 'pod zawód', style: 'margin-left:6px' }) : null, o.followup ? el('span', { className: 'tag', textContent: 'kolejne', style: 'margin-left:6px' }) : null, o.invoice ? el('span', { className: 'tag', textContent: o.invoice === 'todo' ? 'faktura do wystawienia' : 'faktura ✓', style: 'margin-left:6px' }) : null, o.test ? el('span', { className: 'tag', textContent: 'test', style: 'margin-left:6px' }) : null),
         compact ? null : el('td', { className: 'mono', textContent: o.code || '—' }), el('td', { className: 'r', textContent: zl(o.total) }),
         el('td', {}, status(o.status)), compact ? null : el('td', {}, mailSt(o.mail)));
       tr.addEventListener('click', () => openOrder(o.id));
@@ -221,6 +221,10 @@ async function openOrder(id) {
   bResend.onclick = () => run(bResend, async () => { const r = await post(`/orders/${id}/resend`); if (!r.ok) throw new Error(r.mail.status === 'skipped' ? 'Wysyłka e-mail jest wyłączona (brak ustawień poczty SMTP_USER/SMTP_PASS).' : 'E-mail nie doszedł. Sprawdź adres.'); }, 'E-mail wysłany.');
   const bRegen = el('button', { className: 'btn ghost sm', textContent: 'Generuj ponownie', disabled: !['paid', 'done'].includes(o.status) });
   bRegen.onclick = () => confirmBox('Wygenerować dokumenty od nowa?', 'Obecne dokumenty i poprawki klienta zostaną zastąpione nowymi. Klient dostanie nowy e-mail.', 'Generuj ponownie', false, () => run(bRegen, () => post(`/orders/${id}/regenerate`), 'Generowanie rozpoczęte.'));
+  // Zamówienie testowe właściciela (lib/test-orders.js): poza lejkiem, A/B, przychodem i rozliczeniami kodu; faktura i rejestr sprzedaży bez zmian.
+  const bTest = o.test === 'code' ? null : el('button', { className: 'btn ghost sm', textContent: o.test ? 'Cofnij oznaczenie testu' : 'Oznacz jako test', disabled: !o.test && !o.paidAt });
+  if (bTest) bTest.onclick = () => (o.test ? run(bTest, () => post(`/orders/${id}/test`, { test: false }), 'Zamówienie znowu liczy się w statystykach.')
+    : confirmBox('Oznaczyć jako zamówienie testowe?', 'Zamówienie wypadnie z lejka sprzedaży i kreatora, raportu A/B, statystyk przychodu i rozliczeń kodu (prowizja albo nagroda za polecenie). Faktura i rejestr sprzedaży zostają bez zmian. Możesz to cofnąć.', 'Oznacz jako test', false, () => run(bTest, () => post(`/orders/${id}/test`, { test: true }), 'Oznaczono jako test.')));
   const bDel = el('button', { className: 'btn danger sm', textContent: 'Usuń dane' });
   bDel.onclick = () => confirmBox('Usunąć wszystkie dane tego zamówienia?', 'Na żądanie klienta (RODO). Znikną dane, zdjęcie i dokumenty; link klienta przestanie działać. Nie da się tego cofnąć.', 'Usuń na zawsze', true, async () => {
     try { await api(`/orders/${id}`, { method: 'DELETE' }); toast('Dane usunięte.'); closeDrawer(); loaders[current()]?.(); } catch (x) { toast(x.message); }
@@ -237,9 +241,9 @@ async function openOrder(id) {
   const x = el('button', { className: 'x', textContent: '×', ariaLabel: 'Zamknij' }); x.onclick = closeDrawer;
   p.replaceChildren(...[
     el('div', { className: 'top' }, el('h2', { id: 'dTitle', textContent: o.name || o.email }), x),
-    el('div', { className: 'actions' }, status(o.status), mailSt(o.mail), o.followup ? el('span', { className: 'tag', textContent: 'kolejne zamówienie' }) : null),
+    el('div', { className: 'actions' }, status(o.status), mailSt(o.mail), o.followup ? el('span', { className: 'tag', textContent: 'kolejne zamówienie' }) : null, o.test ? el('span', { className: 'tag', textContent: o.test === 'code' ? 'test (kod testowy)' : 'test – poza statystykami' }) : null),
     o.error ? el('p', { className: 'msg bad', style: 'margin:0', textContent: o.error }) : null,
-    el('div', {}, el('h3', { textContent: 'Działania' }), el('div', { className: 'actions' }, bResend, bRegen, bDel,
+    el('div', {}, el('h3', { textContent: 'Działania' }), el('div', { className: 'actions' }, bResend, bRegen, bTest, bDel,
       el('a', { className: 'btn ghost sm', href: o.link, target: '_blank', rel: 'noopener', textContent: 'Strona klienta ↗' })), act),
     el('div', {}, el('h3', { textContent: 'Zamówienie' }), kv([
       ['Numer', el('span', { className: 'mono', textContent: o.id })], ['Złożone', dt(o.created)], ['Opłacone', dt(o.paidAt)],
