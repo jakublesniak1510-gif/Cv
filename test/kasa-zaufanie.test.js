@@ -36,7 +36,7 @@ test('Kreator: panel dopasowania w podsumowaniu (per ogłoszenie zwinięty), pod
   assert.ok(s6.indexOf('id="pvBox"') < s6.indexOf('id="wizMatch"') && s6.indexOf('id="wizMatch"') < s6.indexOf('id="sum"'), 'podgląd i dopasowanie nad podsumowaniem');
   assert.doesNotMatch(app, /W CV ujmiemy też/);
   assert.match(s6, /<b id="pvTitle">Tak zacznie się Twoje CV pod to ogłoszenie<\/b>/);
-  assert.match(app, /fetch\('\/api\/wizard-match'/); assert.match(app, /el\('details', \{ className: 'optbox' \}/);
+  assert.match(app, /fetch\('\/api\/wizard-match'/); assert.match(app, /el\('details', \{ className: 'optbox', open: /); // 29.10: otwarte, gdy w środku jest wskazówka przy niskim dopasowaniu
   assert.match(app, /Z ogłoszenia wyciągnęliśmy \$\{m\.n\} \$\{plural\(m\.n, 'wymaganie', 'wymagania', 'wymagań'\)\}/);
 });
 
