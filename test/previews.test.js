@@ -19,7 +19,7 @@ function webpSize(b) {
   throw new Error(`nieznany WebP ${k}`);
 }
 
-test('Pliki podglądów: 25 wzorów CV, 25 listów (800 px, < 80 KB) i 150 przykładów CV zawodów (480 px, < 40 KB); wymiary jak w manifeście', () => {
+test('Pliki podglądów: 25 wzorów CV, 25 listów (800 px, < 80 KB) i przykład CV każdego zawodu (480 px, < 40 KB); wymiary jak w manifeście', () => {
   const check = (name, width, maxKb) => {
     const b = fs.readFileSync(`public/podglad/${name}.webp`);
     assert.ok(b.length < maxKb * 1000, `${name}: ${b.length} B`);
@@ -49,6 +49,6 @@ test('Podglądy na stronach (lazy, width/height, alt) i w mapie strony (image:im
     assert.match(sm, /xmlns:image="http:\/\/www\.google\.com\/schemas\/sitemap-image\/1\.1"/);
     assert.ok(sm.includes(`<loc>${B}/wzor-cv/${t.slug}</loc><lastmod>`) && sm.includes(`<image:image><image:loc>${B}/podglad/wzor-cv-${t.slug}.webp</image:loc></image:image>`));
     assert.ok(sm.includes(`<image:loc>${B}/podglad/cv-${p.slug}.webp</image:loc>`));
-    assert.equal((sm.match(/<image:image>/g) || []).length, 200);
+    assert.equal((sm.match(/<image:image>/g) || []).length, 50 + PROFESSIONS.length, '50 wzorów + przykład CV każdego zawodu');
   } finally { s.close(); }
 });

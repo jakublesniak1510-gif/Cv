@@ -107,7 +107,7 @@ test('Strony zawodów: tytuł z szablonu z odmianą z danych, opis ze słowami k
     const gw = g.toLowerCase().split(' '), nw = p.name.split(' / ')[0].toLowerCase().split(' ');
     if (NOT_PERSON.includes(p.slug)) assert.match(g, /^w /, `${p.slug}: wyjątek`);
     else assert.ok(gw.some((w, i) => w !== nw[i] && /(a|y|i|ego|ej|u|ów)$/u.test(w)), `${p.slug}: „${g}” nie wygląda na dopełniacz od „${p.name}”`);
-    for (const l of ['pl', 'en', 'uk', 'de']) {
+    for (const l of ['pl', 'en', 'uk', 'de'].filter((l) => l === 'pl' || PROF_LANGS[l].prof[p.slug])) { // część zawodów tylko po polsku
       const x = profSeo(l === 'pl' ? p : { ...p, ...PROF_LANGS[l].prof[p.slug] }, l);
       assert.ok(x.seoTitle && x.seoTitle.length <= 60 && x.metaDescription.length <= 155, `${l}/${p.slug}`);
       assert.doesNotMatch(x.seoTitle + x.metaDescription, /undefined|  |\s[,.]/, `${l}/${p.slug}: puste pola`);

@@ -33,7 +33,7 @@ test('Wszystkie strony zawodów w 4 językach: „Masz ogłoszenie?” do skaner
   const srv = app.listen(0), U = `http://127.0.0.1:${srv.address().port}`;
   try {
     for (const l of ['pl', 'en', 'uk', 'de']) {
-      for (const p of PROFESSIONS) {
+      for (const p of PROFESSIONS.filter((x) => l === 'pl' || PROF_LANGS[l].prof[x.slug])) { // część zawodów tylko po polsku
         const url = l === 'pl' ? `/cv/${p.slug}` : `/${l}/${PROF_LANGS[l].seg}/${PROF_LANGS[l].prof[p.slug].slugLang}`;
         const h = await (await fetch(U + url)).text();
         assert.ok(h.includes(`<form class="paste-ad" data-scan="${SCAN[l]}" novalidate>`) && /<form class="paste-ad"[\s\S]*?<textarea name="ad"/.test(h), `${url}: blok „Masz ogłoszenie?”`);
