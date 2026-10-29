@@ -17,7 +17,9 @@ const app = read('public/app.js');
 test('Warunek, treść i wygląd: < 40%, ≥ 3 wymagania, maks. 3 krótkie hasła, ghost-przycisk; bez obietnic i presji', () => {
   assert.match(app, /const LOW_MATCH = 40;/);
   assert.match(app, /if \(!hasExp \|\| hinted \|\| m\.n < 3 \|\| pct >= LOW_MATCH \|\| !m\.missing\.length \|\| \(lowHint\?\.ad === i && pct <= lowHint\.before\)\) return \[\];/, 'warunek i brak powtórki przy niezmienionym wyniku');
-  assert.match(app, /m\.missing\.slice\(0, 3\)\.map\(\(k\) => k\.split\(\/\\s\+\/\)\.slice\(0, 3\)\.join\(' '\)\)/, 'maks. 3 hasła, do 3 słów');
+  assert.match(app, /m\.missing\.slice\(0, 3\)\.map\(shortKw\)/, 'maks. 3 hasła');
+  const shortKw = new Function(`${/const shortKw = [^\n]+/.exec(app)[0]} return shortKw;`)();
+  for (const [k, want] of [['praca zmianowa (3 zmiany)', 'praca zmianowa'], ['praca zmianowa (3)', 'praca zmianowa'], ['obsługa wózków widłowych (UDT)', 'obsługa wózków widłowych'], ['dokładność, rzetelność i punktualność', 'dokładność, rzetelność i'], ['praca w magazynie, zmiany', 'praca w magazynie'], ['wózki widłowe, UDT', 'wózki widłowe, UDT'], ['wózki widłowe – UDT', 'wózki widłowe'], ['komunikatywność', 'komunikatywność'], ['(mile widziane) doświadczenie', 'mile widziane doświadczenie']]) assert.equal(shortKw(k), want, k);
   assert.match(app, /'Możesz podnieść dopasowanie\. Ogłoszenie wymaga m\.in\.:'/);
   assert.match(app, /'Jeśli robiłeś\(-aś\) coś podobnego, dopisz to w opisie stanowiska – tylko to, co naprawdę robiłeś\(-aś\)\.'/);
   assert.match(app, /className: 'btn ghost sm', id: 'lowMatchEdit', textContent: 'Uzupełnij doświadczenie'/);

@@ -1199,6 +1199,8 @@ let matchSig = '';
 // Po powrocie wynik liczy ten sam /api/wizard-match (bez AI); bez zmiany wyniku wskazówka się nie powtarza. Nic nie blokuje płatności.
 let lowHint = null; // { ad, before, gain } po kliknięciu „Uzupełnij doświadczenie”
 const LOW_MATCH = 40;
+// do 3 słów; bez nawiasu (całego lub uciętego) i bez przecinka/myślnika na końcu: „praca zmianowa (3 zmiany)” → „praca zmianowa”
+const shortKw = (k) => k.split(/\s+/).slice(0, 3).join(' ').replace(/\s*\(.*$/, '').replace(/[\s,;:.–—-]+$/, '') || k.replace(/[()]/g, '').split(/\s+/).slice(0, 3).join(' ');
 function lowMatchEdit(ad, before) {
   lowHint = { ad, before }; track('lowedit'); go(2);
   const ta = $$('#exp .entry [data-k=description]').at(-1); if (!ta) return;
@@ -1220,7 +1222,7 @@ async function drawWizMatch() {
       if (lowHint?.ad === i && pct > lowHint.before && lowHint.gain == null) { lowHint.gain = pct; track('lowgain', { b: lowHint.before, a: pct }); }
       if (!hasExp || hinted || m.n < 3 || pct >= LOW_MATCH || !m.missing.length || (lowHint?.ad === i && pct <= lowHint.before)) return [];
       hinted = true; track('lowhint');
-      const short = m.missing.slice(0, 3).map((k) => k.split(/\s+/).slice(0, 3).join(' '));
+      const short = m.missing.slice(0, 3).map(shortKw);
       return [el('p', { className: 'hint low-hint' }, el('span', { textContent: 'Możesz podnieść dopasowanie. Ogłoszenie wymaga m.in.:' }), ' ', ...short.map((k) => el('span', { className: 'chip mute', textContent: k })), ' ',
         el('span', { textContent: 'Jeśli robiłeś(-aś) coś podobnego, dopisz to w opisie stanowiska – tylko to, co naprawdę robiłeś(-aś).' })),
         el('p', {}, el('button', { type: 'button', className: 'btn ghost sm', id: 'lowMatchEdit', textContent: 'Uzupełnij doświadczenie', onclick: () => lowMatchEdit(i, pct) }))];
