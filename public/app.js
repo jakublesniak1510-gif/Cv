@@ -1334,7 +1334,9 @@ const wizExit = () => { if (!$('#wiz').hidden && !leavingToPay && step >= 1 && s
 const step1Exit = () => { if (!$('#wiz').hidden && !leavingToPay && step === 1) track('step1exit', { why: step1Why() }); };
 addEventListener('pagehide', wizExit); addEventListener('pagehide', step1Exit);
 const closeWiz = () => { wizExit(); step1Exit(); $('#wiz').hidden = true; modal(false); };
-document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (!b) return; e.preventDefault(); if (b.dataset.addon) { b.dataset.addon.split(',').forEach((a) => ($('#ad' + a).checked = true)); saveDraft(); } openWiz(b.dataset.pkg); if ('prof' in b.dataset) profStart(); });
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (!b) return; e.preventDefault(); if (b.dataset.addon) { b.dataset.addon.split(',').forEach((a) => ($('#ad' + a).checked = true)); saveDraft(); } openWiz(b.dataset.pkg); if ('prof' in b.dataset) profStart(); if (b.dataset.noad) heroNoad(b.dataset.noad); });
+// 29.10: „Nie mam ogłoszenia – zwykłe CV pod zawód” w hero; w hero „z reklamy” wpisane stanowisko od razu trafia do trybu zawodu.
+function heroNoad(v) { track('heronoad', { v }); const q = v === 'ad' ? $('#heroAdIn')?.value.trim() : ''; if (q && q.length < 60 && !/\n/.test(q)) $('#ads .entry')?.profRun?.(q); }
 // Zamknięcie przez użytkownika (×, Escape): na telefonie zdejmujemy też wpis historii dodany przy otwarciu kreatora (B8).
 const userCloseWiz = () => { closeWiz(); if (wizPushed) { wizPushed = false; silentBack = true; history.back(); } };
 $('#wizClose').onclick = userCloseWiz;

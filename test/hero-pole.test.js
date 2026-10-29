@@ -15,7 +15,7 @@ const dict = (l) => JSON.parse(read(`public/i18n/${l}.json`));
 
 test('Hero: pole na ogłoszenie i przycisk zaraz pod nagłówkiem, linia warunków, skaner niżej jako druga ścieżka', () => {
   const hero = html.slice(html.indexOf('<section class="hero"'), html.indexOf('</section>', html.indexOf('<section class="hero"')));
-  assert.match(hero, /<p class="lead">[^<]+<\/p>\s*<form class="hero-ad" id="heroAd" novalidate><textarea id="heroAdIn" rows="2" aria-label="Link albo treść ogłoszenia" placeholder="Wklej link albo treść ogłoszenia"><\/textarea><button class="btn lg" type="submit">Zrób CV pod to ogłoszenie – 39 zł<\/button><p class="hero-line">39 zł jednorazowo · bez abonamentu · BLIK w 10 sekund · 5 poprawek w cenie<br><a href="\/regulamin#gwarancja">Nie pasuje po poprawkach\? Zwracamy pieniądze\.<\/a><\/p><\/form>/);
+  assert.match(hero, /<p class="lead">[^<]+<\/p>\s*<form class="hero-ad" id="heroAd" novalidate><textarea id="heroAdIn" rows="2" aria-label="Link albo treść ogłoszenia" placeholder="Wklej link albo treść ogłoszenia"><\/textarea><button class="btn lg" type="submit">Zrób CV pod to ogłoszenie – 39 zł<\/button><a class="btn ghost lg hero-noad-btn"[^>]*>Nie mam ogłoszenia – zwykłe CV pod zawód – 39 zł<\/a><p class="hero-line">39 zł jednorazowo · bez abonamentu · BLIK w 10 sekund · 5 poprawek w cenie<br><a href="\/regulamin#gwarancja">Nie pasuje po poprawkach\? Zwracamy pieniądze\.<\/a><\/p><\/form>/);
   assert.ok(hero.indexOf('id="heroAd"') < hero.indexOf('hero-scan'), 'skaner pod polem');
   assert.doesNotMatch(hero, /data-open>Zamów CV od 39 zł/, 'jeden główny przycisk');
   assert.ok(html.indexOf('id="skaner"') > html.indexOf('id="heroAd"'));
@@ -31,7 +31,7 @@ test('Wysłanie: kreator „Samo CV”, link → pobranie jak w kreatorze, treś
 
 test('Test A/B „cta”: wariant B zamiast pola prowadzi do skanera', () => {
   const b = EXPERIMENTS.cta.apply(html);
-  assert.ok(!b.includes('id="heroAd"') && b.includes('<div class="cta"><a class="btn lg" href="#skaner">Sprawdź za darmo, potem zrób CV</a></div>'));
+  assert.ok(!b.includes('id="heroAd"') && b.includes('<div class="cta hero-cta-b"><a class="btn lg" href="#skaner">Sprawdź za darmo, potem zrób CV</a><a class="btn ghost lg hero-noad-btn"'), 'przycisk bez ogłoszenia zostaje także w wariancie B');
 });
 
 test('Zdarzenie hero_ad_submit w raporcie lejka', async () => {
