@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { EXPERIMENTS, activeExperiments, abReport, abText } from '../lib/ab.js';
+import { freePort } from './helpers/free-port.js';
 
 // Test A/B „checkout”: wariant B ostatniego kroku kreatora (tylko kod; włączenie zmienną EXPERIMENTS).
 const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
@@ -50,7 +51,7 @@ test('Raport A/B: konwersja ostatni krok → opłacone per wariant i test istotn
 });
 
 test('Zamówienie: ta sama treść zgody z art. 38 pkt 13 w obu wariantach, w B oznaczony formularz „compact”', async () => {
-  const port = 4400 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-abco-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-abco-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // Kreator i kasa: podgląd dopasowania (silnik skanera bez AI, /api/wizard-match), podgląd początku CV w podsumowaniu,
 // blok zaufania przy płatności (oba warianty testu checkout), „Polecany” przy CV + list. Bez liczników czasu i wymyślonych liczb.
@@ -12,7 +13,7 @@ const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')
 const AD = 'Magazynier. Wymagania: obsługa wózka widłowego, uprawnienia UDT, znajomość SAP, gotowość do pracy zmianowej, certyfikat BHP.';
 
 test('/api/wizard-match: wymagania z ogłoszenia i pokrycie z danych formularza; bez doświadczenia sama liczba; nic nie zapisuje', { timeout: 60_000 }, async () => {
-  const port = 5900 + Math.floor(Math.random() * 90), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-wm-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-wm-'));
   const srv = spawn(process.execPath, ['server.js'], { env: { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '' }, stdio: 'ignore' });
   const U = `http://localhost:${port}`, post = (b) => fetch(U + '/api/wizard-match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) });
   try {

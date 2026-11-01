@@ -7,10 +7,11 @@ import { spawn } from 'node:child_process';
 import { ATS_ARTICLES } from '../lib/articles-ats.js';
 import { ARTICLES } from '../lib/content.js';
 import { ART_TOPICS } from '../lib/seo.js';
+import { freePort } from './helpers/free-port.js';
 
 // PR C2: poradniki o ATS i dopasowaniu CV z elementami interaktywnymi, list pod ogłoszenie, rozbudowa podsumowania.
 const SLUGS = ['ats-mity-i-fakty', 'format-cv-pod-ats', 'czy-dopasowywac-cv-do-kazdej-oferty', 'cv-pod-ai', 'slowa-kluczowe-ats-wedlug-zawodu'];
-const port = 4500 + Math.floor(Math.random() * 90), U = `http://localhost:${port}`;
+const port = await freePort(), U = `http://localhost:${port}`;
 const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
 let srv;
 before(async () => {

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // D3 (27.10): Tłumaczenie CV – 19 zł. Wgrane CV → jedno zapytanie do AI (wierne tłumaczenie) → podgląd strony 1 jak C1 →
 // zakup → dokładnie to tłumaczenie w PDF i DOCX. Języki: EN/DE/UK/PL + beta FR/NL/NO/CS/IT/ES. Nie jest tłumaczeniem przysięgłym.
@@ -69,7 +70,7 @@ test('Podgląd: walidacja, oczekiwanie i ponowne pytanie, obrazek (bez tekstu CV
 });
 
 test('Zakup: tłumaczenie z podglądu → zamówienie → PDF i DOCX tylko po płatności; zgoda na treść cyfrową', async () => {
-  const port = 5900 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-trs-')), id = 'a'.repeat(32);
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-trs-')), id = 'a'.repeat(32);
   fs.writeFileSync(path.join(dir, 'translations.json'), JSON.stringify({ [id]: { id, at: Date.now(), lang: 'en', design: { tpl: 'nowoczesny', color: 'niebieski' }, result: cleanTranslation(OUT, 'en') } }));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });

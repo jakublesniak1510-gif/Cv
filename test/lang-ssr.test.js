@@ -4,9 +4,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // Wersje językowe w SSR (Google indeksuje HTML z serwera): tytuł, opis, og/twitter i <html lang> w języku z adresu.
-const port = 4900 + Math.floor(Math.random() * 90), U = `http://localhost:${port}`;
+const port = await freePort(), U = `http://localhost:${port}`;
 let srv;
 const get = async (p) => { const r = await fetch(U + p, { redirect: 'manual' }); return { r, h: await r.text() }; };
 const meta = (h, re) => re.exec(h)?.[1];

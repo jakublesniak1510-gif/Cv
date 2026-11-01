@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // Dane właściciela tylko w kontakcie (prośba z 27.10): imię i nazwisko, adres, NIP, REGON i telefon na /kontakt oraz tam,
 // gdzie wymaga prawo (regulamin, polityka prywatności, faktury, e-maile z zamówieniem, dokumenty B2B). Nigdzie indziej.
@@ -12,7 +13,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
 
 test('Strony publiczne bez danych właściciela; /kontakt, /regulamin, /polityka-prywatnosci z pełnymi danymi', async () => {
-  const port = 5600 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-own-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-own-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

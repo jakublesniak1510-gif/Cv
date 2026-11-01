@@ -8,9 +8,10 @@ import { PACKAGES, PRICES, PASSES, B2B_MIN } from '../lib/pricing.js';
 import { PROFESSIONS } from '../lib/content.js';
 import { PROF_LANGS } from '../lib/professions-i18n.js';
 import { profSeo, profName, ART_SEO, CTR_SEO } from '../lib/seo-titles.js';
+import { freePort } from './helpers/free-port.js';
 
 // Tytuły i opisy wszystkich stron z mapy strony: długość, unikalność, bez obietnic; dane strukturalne strony głównej.
-const port = 4600 + Math.floor(Math.random() * 300), U = `http://localhost:${port}`;
+const port = await freePort(), U = `http://localhost:${port}`;
 let srv, pages = [];
 const dec = (s) => s.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
 const meta = (h, re) => dec(re.exec(h)?.[1] || '');

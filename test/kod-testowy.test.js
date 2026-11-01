@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // Kod testowy 100% (27.10): panel admina → jednorazowy kod na jedną wybraną usługę (dotacja, oferta na zlecenie, tłumaczenie…),
 // ważny 7 dni; nie działa na inne usługi; zamówienie za 0 zł bez płatności i faktury; wygenerowanie i użycie w dzienniku zdarzeń.
@@ -32,7 +33,7 @@ test('Generowanie i użycie: jedna usługa, jedno użycie, 7 dni, wpisy w dzienn
 });
 
 test('Serwer: panel admina generuje kod, zakup usługi z ?kod= za 0 zł bez płatności i faktury; inna usługa i drugi raz – odmowa', async () => {
-  const port = 7100 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-tc-srv-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-tc-srv-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1', ADMIN_PASSWORD: 'tajne-haslo-testowe' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // D8 (27.10): Selekcja CV dla małych firm – 49 zł do 20 CV, 89 zł do 50 CV, za flagą SELECTION_ENABLED (domyślnie wyłączona).
 // Tabela wymagań (tak/częściowo/nie + cytat z CV), bez rankingu, dane o cechach chronionych usunięte. „To narzędzie pomocnicze.
@@ -57,7 +58,7 @@ test('Analiza CV: status tak/częściowo/nie, cytat tylko dosłowny z CV, bez da
 test('Flaga wyłączona (domyślnie): strona, API, umowa powierzenia i wpisy w regulaminie niewidoczne', async () => {
   for (const l of ['pl', 'en', 'de', 'uk']) { assert.ok(!/§2 ust\. 13|§2\(13\)|§2 Abs\. 13|§2 п\. 13/.test(legalBody('regulamin', l)), l); assert.ok(!legalBody('regulamin', l).includes('<!--sel')); }
   assert.ok(!/Selekcja CV:|CV screening:|Lebenslauf-Vorauswahl:|Відбір резюме:/.test(['pl', 'en', 'de', 'uk'].map((l) => legalBody('prywatnosc', l)).join('')));
-  const port = 6600 + Math.floor(Math.random() * 200), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-sel-off-')), srv = spawnSrv(dir, port, { SELECTION_ENABLED: '' });
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-sel-off-')), srv = spawnSrv(dir, port, { SELECTION_ENABLED: '' });
   try {
     const U = `http://localhost:${port}`; await up(U);
     for (const p of ['/dla-firm/selekcja-cv', '/regulamin/umowa-powierzenia', '/legal/powierzenie.html']) assert.equal((await fetch(U + p)).status, 404, p);
@@ -68,7 +69,7 @@ test('Flaga wyłączona (domyślnie): strona, API, umowa powierzenia i wpisy w r
 });
 
 test('Flaga włączona: strona z nagłówkiem, umowa powierzenia, wgrywanie CV (tekst bez danych chronionych), zakup z NIP i umową, tabela, pliki', async () => {
-  const port = 6800 + Math.floor(Math.random() * 200), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-sel-on-')), id = 'a'.repeat(32);
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-sel-on-')), id = 'a'.repeat(32);
   fs.writeFileSync(path.join(dir, 'selection-drafts.json'), JSON.stringify({ [id]: { id, at: Date.now(), position: 'Magazynier', requirements: REQ, excluded: [], cvs: [] } }));
   const srv = spawnSrv(dir, port, { SELECTION_ENABLED: '1' });
   try {

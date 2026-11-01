@@ -10,6 +10,7 @@ import { PRICES, ADDONS, calcTotal, orderPkgName } from '../lib/pricing.js';
 import { invoiceLines } from '../lib/invoice.js';
 import { applyProduct, PHOTO_FILES, isProduct, productReturn, savePhoto, cleanupPhotos } from '../lib/products.js';
 import { legalBody } from '../lib/legal.js';
+import { freePort } from './helpers/free-port.js';
 
 // D1 (27.10): Zdjęcie do CV – 10 zł. Kadr według ramki klienta (3:4 i kwadrat) i jasność, bez AI i bez zmiany tła (pamięć serwera:
 // obróbka w procesie potomnym, jeden plik na proces, zdjęcie w osobnym pliku, nie w orders.json);
@@ -101,7 +102,7 @@ test('Po płatności: pliki, wstawienie do CV tego samego klienta (inny e-mail �
 });
 
 test('API: podgląd bez zapisu, zamówienie, pliki dopiero po płatności', async () => {
-  const port = 4700 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-photo-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-photo-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

@@ -6,6 +6,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { freePort } from './helpers/free-port.js';
 
 // Tryb PAY_PROVIDER=both na atrapach Stripe i Przelewy24: wybór bramki, zmiana bramki przy ponownej płatności,
 // starsza sesja P24, zła kwota/podpis, wpłata P24 do zamówienia opłaconego już przez Stripe, kolejne zamówienie
@@ -53,7 +54,7 @@ function mocks() {
 }
 
 test('PAY_PROVIDER=both: wybór bramki, zmiana bramki, sesje P24, wpłata po Stripe, followup/dodatek przez P24, błąd rejestracji, zwrot', { timeout: 90_000 }, async () => {
-  const m = mocks(), port = 4700 + Math.floor(Math.random() * 200), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-both-'));
+  const m = mocks(), port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-both-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', SALES_OPEN: '1', PAY_PROVIDER: 'both',
     P24_MERCHANT_ID: String(MERCHANT), P24_CRC: CRC, P24_API_KEY: KEY, P24_BASE_URL: `http://localhost:${m.p24.address().port}`,
     STRIPE_SECRET_KEY: 'sk_test_x', STRIPE_WEBHOOK_SECRET: 'whsec_x', STRIPE_API_BASE: `http://localhost:${m.stripe.address().port}` };
@@ -147,7 +148,7 @@ test('Panel admina: zwrot dla P24 i baner sandboxa; karnety i paczki kodów z in
 });
 
 test('Tryb both: błąd rejestracji P24 zwalnia kod i karnet; zwrot P24 z panelu admina; po pełnym zwrocie bez poprawek i dokupień; „Dokończ płatność” = ostatnia bramka', { timeout: 90_000 }, async () => {
-  const m = mocks(), port = 4900 + Math.floor(Math.random() * 90), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-both2-'));
+  const m = mocks(), port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-both2-'));
   fs.writeFileSync(path.join(dir, 'codes.json'), JSON.stringify({ AKCJA10: { id: 'AKCJA10', amount: 1000, usedBy: [], expires: Date.now() + 1e9, kind: 'akcja' } }));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', SALES_OPEN: '1', PAY_PROVIDER: 'both', ADMIN_PASSWORD: 'tajne-haslo-testowe',
     P24_MERCHANT_ID: String(MERCHANT), P24_CRC: CRC, P24_API_KEY: KEY, P24_BASE_URL: `http://localhost:${m.p24.address().port}`,

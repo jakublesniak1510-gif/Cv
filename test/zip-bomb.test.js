@@ -8,6 +8,7 @@ import { once } from 'node:events';
 import { spawn } from 'node:child_process';
 import { Document, Packer, Paragraph } from 'docx';
 import { extractText, zipCheck, ImportError } from '../lib/importCv.js';
+import { freePort } from './helpers/free-port.js';
 
 // „Zip bomb” w DOCX: mały plik, który po rozpakowaniu ma setki MB. Mammoth rozpakowuje w całości do pamięci,
 // więc extractText musi go odrzucić wcześniej (centralny katalog ZIP + próbne rozpakowanie z limitem).
@@ -62,7 +63,7 @@ test('Zwykły DOCX nadal się wczytuje', async () => {
 });
 
 test('API: /api/import i /api/scan zwracają 422 na bombę, serwer działa dalej', async () => {
-  const port = 4700 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-zip-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-zip-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '' };
   const srv = spawn(process.execPath, ['--max-old-space-size=256', 'server.js'], { env, stdio: 'ignore' });
   try {

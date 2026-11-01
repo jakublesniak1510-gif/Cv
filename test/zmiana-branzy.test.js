@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { careerNote } from '../lib/generate.js';
+import { freePort } from './helpers/free-port.js';
 
 const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -27,7 +28,7 @@ test('Kreator: przełącznik i 3 pola w ekranie danych („Pozostałe dane”, w
   assert.match(app, /if \(n === 2 && \$\('#careerOn'\)\.checked && !v\('careerTo'\)\) \{ return 'Wpisz docelową branżę/);
   assert.match(app, /career: \{ from: v\('careerFrom'\), to: v\('careerTo'\), fit: v\('careerFit'\) \}/);
   for (const l of ['en', 'de', 'uk']) assert.ok(JSON.parse(read(`public/i18n/${l}.json`))['Zmieniam branżę'], l);
-  const port = 6200 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-career-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-career-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

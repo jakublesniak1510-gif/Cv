@@ -6,6 +6,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { freePort } from './helpers/free-port.js';
 
 // Pełna ścieżka płatności na atrapie Przelewy24: rejestracja → powiadomienie z podpisem → verify → dokumenty.
 const CRC = 'testcrc123', MERCHANT = 111222, KEY = 'apikey';
@@ -31,7 +32,7 @@ test('Przelewy24: rejestracja, powiadomienie, weryfikacja', { timeout: 30_000 },
       res.statusCode = 404; res.end('{}');
     });
   }).listen(0);
-  const mockPort = mock.address().port, port = 3990 + Math.floor(Math.random() * 9);
+  const mockPort = mock.address().port, port = await freePort();
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-p24-'));
   const srv = spawn(process.execPath, ['server.js'], { env: { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', P24_MERCHANT_ID: String(MERCHANT), P24_CRC: CRC, P24_API_KEY: KEY, P24_BASE_URL: `http://localhost:${mockPort}` }, stdio: 'ignore' });
   try {

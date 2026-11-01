@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // D4 (27.10): Sprawdzenie ogłoszenia o pracę dla pracodawców – 19 zł, /dla-firm/sprawdz-ogloszenie. Bezpłatnie wynik i 3 uwagi
 // (bez poprawek), po płatności pełny raport z tego samego wyniku (bez drugiego zapytania do AI), faktura z NIP obowiązkowa.
@@ -65,7 +66,7 @@ test('Podgląd: walidacja, oczekiwanie, limit 3 na IP, błąd nie zużywa limitu
 });
 
 test('Strona i zakup: faktura z NIP obowiązkowa, raport dopiero po płatności (na stronie i w PDF), sitemap, link z /dla-firm', async () => {
-  const port = 5300 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-ad-srv-')), id = 'b'.repeat(32);
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-ad-srv-')), id = 'b'.repeat(32);
   fs.writeFileSync(path.join(dir, 'ad-checks.json'), JSON.stringify({ [id]: { id, at: Date.now(), result: cleanAdCheck(OUT) } }));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });

@@ -6,6 +6,7 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { upsellOffers, upsellPlan, PRICES, BUNDLE_OFF } from '../lib/pricing.js';
 import { invoiceLines } from '../lib/invoice.js';
+import { freePort } from './helpers/free-port.js';
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const zl = (gr) => gr / 100;
@@ -28,7 +29,7 @@ test('Dodatki po zakupie: oferty i ceny = różnica cennika (bez zmian cen)', ()
 });
 
 test('Dodatki po zakupie: osobna płatność, po opłaceniu dodatek dopisany i wygenerowany w tym samym zamówieniu', async () => {
-  const port = 4100 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-upsell-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-upsell-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {
@@ -89,7 +90,7 @@ test('Dodatki po zakupie: osobna płatność, po opłaceniu dodatek dopisany i w
 });
 
 test('Profil LinkedIn dokupiony do zamówienia z dodatkowym językiem: trafia też do wersji językowej; zgoda zapisana', async () => {
-  const port = 4400 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-upsell-li-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-upsell-li-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

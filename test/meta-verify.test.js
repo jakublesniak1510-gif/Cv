@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import express from 'express';
+import { freePort } from './helpers/free-port.js';
 
 // META_DOMAIN_VERIFY: metatag weryfikacji domeny Meta w <head> stron (strona główna, strony zawodów, lekkie podstrony);
 // bez zmiennej – brak tagu. Wartość escapowana.
@@ -27,7 +28,7 @@ test('Z META_DOMAIN_VERIFY: tag na /, /cv/kierowca i /kreator-cv (escapowany), t
 });
 
 test('Bez META_DOMAIN_VERIFY: brak tagu', { timeout: 60_000 }, async () => {
-  const port = 5400 + Math.floor(Math.random() * 90), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-meta-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-meta-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', META_DOMAIN_VERIFY: '' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {
@@ -38,7 +39,7 @@ test('Bez META_DOMAIN_VERIFY: brak tagu', { timeout: 60_000 }, async () => {
 });
 
 test('Z PINTEREST_VERIFY (osobny proces, bo index.html jest w pamięci): <meta name="p:domain_verify"> w <head>, escapowany, raz; obok tagu Meta', { timeout: 60_000 }, async () => {
-  const port = 5500 + Math.floor(Math.random() * 90), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-pin-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-pin-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', META_DOMAIN_VERIFY: 'fb1', PINTEREST_VERIFY: ' 9f8e7d6c5b4a"> ' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

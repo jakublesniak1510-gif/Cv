@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // D6 (27.10): Oferta na zlecenie dla fachowców – 29 zł, pakiet 5 ofert za 99 zł (kod ważny 90 dni), /uslugi/oferta-na-zlecenie.
 // Krótka odpowiedź (do 600 znaków), dłuższa oferta, wycena w punktach (z cen fachowca), pytania. Bez wymyślonych referencji i cen.
@@ -96,7 +97,7 @@ test('Podgląd i kod: limit 3 na IP, błąd nie zużywa, 503 bez AI, wykorzystan
 });
 
 test('Strona i zakup: oferta 29 zł i pakiet 99 zł z kodem (oferta z podglądu to pierwsza z 5), treść dopiero po płatności', async () => {
-  const port = 5900 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-of-srv-')), id = 'c'.repeat(32), d = O.cleanOffer(IN);
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-of-srv-')), id = 'c'.repeat(32), d = O.cleanOffer(IN);
   fs.writeFileSync(path.join(dir, 'offer-drafts.json'), JSON.stringify({ [id]: { id, at: Date.now(), input: d, result: O.cleanOfferResult(OUT, d) } }));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });

@@ -8,6 +8,7 @@ import { AFFILIATES, AFF_NOTE, coursesFor, coursesForArticle, affHtml, affSummar
 import { PROFESSIONS } from '../lib/content.js';
 import { stripPl } from '../lib/seo.js';
 import { legalBody } from '../lib/legal.js';
+import { freePort } from './helpers/free-port.js';
 
 // Polecane kursy (afiliacja webePartners, 27.10): seo-data/affiliates.json, najwyżej 2 kursy na polskich stronach zawodu, wzoru CV
 // i poradnika, bez cen, z dopiskiem o prowizji, link rel="sponsored nofollow noopener"; zdarzenie aff_click; polityka prywatności.
@@ -61,7 +62,7 @@ test('Dobór: najwyżej 2 kursy, zawód bez mapowania – brak sekcji; HTML z do
 });
 
 test('Strony: /cv, /wzor-cv i poradnik pokazują sekcję pod treścią; zawód bez kursów i wersje EN/DE/UK – nie; klik liczony bez danych osobowych', async () => {
-  const port = 5300 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-aff-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-aff-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {
