@@ -16,12 +16,12 @@ test('Duże pole importu na górze kroku danych, upuszczenie pliku, „Nie mam C
   const s2 = html.slice(html.indexOf('<section data-step="2"'), html.indexOf('<section data-step="3"'));
   assert.match(s2, /^<section data-step="2" hidden>\s*<div class="import big" id="importBox"><div><b>Masz już CV\? Wgraj plik \(PDF\/Word\), uzupełnimy pola za Ciebie<\/b>/, 'pierwszy element kroku');
   assert.match(s2, /<input type="file" id="importFile" accept="\.pdf,\.docx,\.txt" hidden>/);
-  assert.match(s2, /<button type="button" class="link" id="importManual">Nie mam CV – wpiszę ręcznie<\/button>/);
+  assert.match(s2, /<button type="button" class="link" id="importPaste">Wklej tekst CV<\/button><button type="button" class="link" id="importManual">Nie mam CV – wpiszę ręcznie<\/button>/);
   assert.match(app, /box\.addEventListener\('drop', async \(e\) => \{/);
   assert.match(app, /\$\('#importManual'\)\.onclick = \(\) => \{ box\.classList\.add\('small'\); \$\('#name'\)\.focus\(\); \};/);
   assert.match(app, /fetch\('\/api\/import'/, 'istniejący import (importCv)');
   assert.match(app, /if \(p\.experience\?\.length && empty\('exp'\)\)/); assert.match(app, /if \(p\.education\?\.length && empty\('edu'\)\)/);
-  assert.match(app, /saveDraft\(\); imported = true; \$\('#importBox'\)\.classList\.add\('small'\); track\('cvimport'\);/); // 29.10: pola opcjonalne i tak widoczne
+  assert.match(app, /saveDraft\(\); imported = true; importFailed = false; \$\('#importBox'\)\.classList\.add\('small'\); \$\('#importPasteBox'\)\.hidden = true; track\('cvimport', \{ via \}\);/); // 29.10: pola opcjonalne i tak widoczne
   for (const l of ['en', 'de', 'uk']) for (const k of ['Masz już CV? Wgraj plik (PDF/Word), uzupełnimy pola za Ciebie', 'Ty tylko sprawdzasz. Pliku nie zapisujemy.', 'Nie mam CV – wpiszę ręcznie', 'Wgraj plik PDF, Word (.docx) albo TXT.']) assert.ok(dict(l)[k], `${l}: ${k}`);
 });
 

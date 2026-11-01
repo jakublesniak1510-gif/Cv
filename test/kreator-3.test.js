@@ -33,7 +33,7 @@ test('Ekran 2: plik CV na górze, imię i e-mail, jedno stanowisko; reszta od ra
   for (const id of ['phone', 'city', 'link', 'birth', 'headline', 'summary', 'photoFile', 'careerOn', 'edu', 'skills', 'languages', 'certificates', 'interests', 'notes']) assert.ok(more.includes(`id="${id}"`), id);
   assert.match(app, /if \(n === 2 && !imported && !rows\('exp'\)\.some\(\(e\) => e\.title \|\| e\.company\) && !rows\('edu'\)\.some\(\(e\) => e\.school\)\) return 'Wgraj swoje CV albo dodaj co najmniej jedno stanowisko/);
   assert.match(app, /if \(n === 2\) \{ if \(!v\('name'\)\) return 'Podaj imię i nazwisko\.'; if \(!\/\^\\S\+@\\S\+\\\.\\S\+\$\/\.test\(v\('email'\)\)\) return 'Podaj poprawny adres e-mail\.'; \}/);
-  assert.match(app, /\$\('#importBox'\)\.classList\.add\('small'\); track\('cvimport'\);/, 'po imporcie dane z pliku od razu widoczne');
+  assert.match(app, /\$\('#importBox'\)\.classList\.add\('small'\); \$\('#importPasteBox'\)\.hidden = true; track\('cvimport', \{ via \}\);/, 'po imporcie dane z pliku od razu widoczne');
 });
 
 test('Ekran 3 (29.10): wygląd → podgląd → dopasowanie → dodatki i tłumaczenie (zwinięte, otwarte gdy coś wybrano) → płatność → kod → zgody; zmiana wyglądu tylko przerysowuje podgląd', () => {

@@ -1221,3 +1221,6 @@ ul.checklist{list-style:none;padding-left:0}
 /* 29.10: wyraźny przycisk „Nie mam ogłoszenia – zwykłe CV pod zawód” w hero (obramowanie ghost; telefon: pełna szerokość pod głównym przyciskiem). */
 .hero-noad-btn{border:2px solid var(--brand)}.hero-cta-b{display:grid;gap:10px;justify-items:start}
 @media(max-width:700px){.hero-cta-b{justify-items:stretch}.hero-cta-b .btn{width:100%}}
+
+/* 2.11: krok „Dane” – wklejony tekst CV zamiast pliku */
+.import-paste{display:grid;gap:8px;margin:-4px 0 14px}.import-paste textarea{width:100%;font:inherit;font-size:16px;padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}.import-paste .btn{justify-self:start}
