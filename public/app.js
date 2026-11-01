@@ -29,6 +29,12 @@ const AD_Q = new URLSearchParams(location.search), AD_SRC = AD_Q.get('gclid') ? 
 const AD_HIT = /^(google|meta|yt|youtube|ig|instagram|fb|facebook|tiktok|pinterest)$/i.test(AD_Q.get('utm_source') || '') || /^sprzedaz-/i.test(AD_Q.get('utm_campaign') || '') || AD_SRC;
 try { if (AD_HIT) sessionStorage.setItem('cvpo-adhero', (AD_Q.get('utm_source') || AD_SRC || 'kampania').toLowerCase()); } catch {}
 const adVisit = (() => { try { return sessionStorage.getItem('cvpo-adhero') || ''; } catch { return ''; } })();
+// Źródło wejścia do zamówienia (2.11, atrybucja): źródło pierwszej odsłony tej wizyty (sessionStorage – jak hero „z reklamy”),
+// a przy zgodzie na cookies reklamowe także pierwsze wejście z ostatnich 30 dni (localStorage). Serwer liczy z tego źródło (sourceOf).
+const SRC_NOW = { u: AD_Q.get('utm_source') || AD_SRC || '', r: document.referrer && !document.referrer.startsWith(location.origin) ? document.referrer.slice(0, 200) : '' };
+try { if (!sessionStorage.getItem('cvpo-src')) sessionStorage.setItem('cvpo-src', JSON.stringify(SRC_NOW)); } catch {}
+try { if (localStorage.getItem('cvpo-consent') === 'granted') { const f = JSON.parse(localStorage.getItem('cvpo-ft') || 'null'); if (!f || Date.now() - f.at > 30 * 864e5) localStorage.setItem('cvpo-ft', JSON.stringify({ ...SRC_NOW, at: Date.now() })); } } catch {}
+const visitSrc = () => { const o = { l: (document.documentElement.lang || 'pl').slice(0, 2) }; try { o.session = JSON.parse(sessionStorage.getItem('cvpo-src') || 'null'); if (localStorage.getItem('cvpo-consent') === 'granted') o.first = JSON.parse(localStorage.getItem('cvpo-ft') || 'null'); } catch {} return o; };
 (() => {
   const hero = $('#top.hero'), tpl = $('#adHeroTpl');
   if (!adVisit || location.pathname !== '/' || !hero || !tpl || hero.dataset.adhero) return;
@@ -1424,7 +1430,7 @@ $('#wizForm').onsubmit = async (e) => {
   if (!last) return go(ORDER[ORDER.indexOf(step) + 1]);
   const v = (id) => $('#' + id).value;
   const body = {
-    draftToken: srvToken() || undefined,
+    draftToken: srvToken() || undefined, src: visitSrc(),
     ...($('#rewriteMode').checked ? { mode: 'rewrite' } : {}), usePass: passOn(), design, addons: { ...addons(), linkedinEn: $('#adLinkedin').checked && $('#adLinkedinEn').checked }, extraLangs: extraLangs(), code: passOn() ? '' : promo?.code || '', waiver: $('#waiver').checked, ...(CHECKOUT_B ? { consentForm: 'compact' } : {}), gateway: gwValue($('#gwBox')), jobAlerts: $('#wantAlerts').checked ? { job: $('#alJob').value, city: $('#alCity').value } : null, payReminder: $('#payRem').checked, invoice: $('#wantInv').checked ? { name: $('#invName').value, address: $('#invAddr').value, nip: $('#invNip').value } : null, uiLang: window.I18N?.lang || 'pl', pkg: orderPkg(), consent: $('#consent').checked && $('#waiver').checked, ads: rows('ads'),
     profile: { ...Object.fromEntries(['name', 'email', 'phone', 'city', 'link', 'birth', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'].map((k) => [k, v(k)])), ...($('#careerOn').checked ? { career: { from: v('careerFrom'), to: v('careerTo'), fit: v('careerFit') } } : {}), experience: rows('exp'), education: rows('edu'), photo },
   };
