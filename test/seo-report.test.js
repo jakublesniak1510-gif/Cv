@@ -79,7 +79,7 @@ test('Lejek: etapy raz na osobę, język, źródło; raport tekstowy', async () 
     for (const b of [{ e: 'pv', r: 'https://www.google.com/', l: 'pl' }, { e: 'pv', r: 'https://checkout.stripe.com/' }, { e: 'start' }, { e: 'step', s: 6 }, { e: 'checkout' }, { e: 'checkout' }, { e: 'paid', o: 'zam1' }]) await send('1.1.1.1', b);
     // „Opłacone” liczy serwer przy płatności: źródło zapisane w zamówieniu przy jego tworzeniu; zdarzenie „paid” z przeglądarki jest ignorowane
     const visit = await (await fetch(`${U}/zamowienie`, { method: 'POST', headers: { 'X-Forwarded-For': '1.1.1.1', 'User-Agent': 'Mozilla/5.0 Test' } })).json();
-    assert.deepEqual(visit, { src: 'google', lang: 'pl' });
+    assert.deepEqual(visit, { src: 'google', srcFrom: 'server', lang: 'pl' });
     await an.funnelPaid({ visit });
     for (const b of [{ e: 'pv', u: 'tiktok', l: 'uk' }, { e: 'start', l: 'pl' }, { e: 'step', s: 3 }]) await send('2.2.2.2', b);
     await send('3.3.3.3', { e: 'pv', l: 'de' });
