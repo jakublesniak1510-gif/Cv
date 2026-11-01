@@ -605,6 +605,8 @@ loaders.seo = async () => {
   // 28.10: wyjścia z kroku 1 (powód × źródło) i lejek według źródła z 28 dni (tabele przewijane w poziomie na telefonie).
   const S1 = ['google', 'facebook', 'direct', 'inne'];
   $('#seoStep1').replaceChildren(d.step1?.length ? stackTable(d.step1, [['label', 'Powód'], ...S1.map((g) => [(x) => x.src[g], g, 1]), ['n', 'Razem', 1]]) : el('div', { className: 'empty', textContent: 'Brak wyjść z kroku 1 w ostatnich 28 dniach.' }));
+  $('#seoStep2').replaceChildren(d.step2?.length ? stackTable(d.step2, [['label', 'Powód'], ...S1.map((g) => [(x) => x.src[g], g, 1]), ['n', 'Razem', 1]]) : el('div', { className: 'empty', textContent: 'Brak wyjść z kroku 2 w ostatnich 28 dniach.' }));
+  $('#seoStep2Import').textContent = d.step2Import ? `Import CV w kroku 2 (28 dni): ${d.step2Import.n} – z pliku ${d.step2Import.file}, z wklejonego tekstu ${d.step2Import.text}.` : '';
   const lm = d.lowMatch; // 29.10: pokazana / kliknięta / wynik wzrósł (średnio przed → po)
   $('#seoLowMatch').replaceChildren(lm && (lm.hint || lm.edit) ? simpleTable([lm], [['hint', 'Pokazana', 1], ['edit', 'Kliknięta „Uzupełnij”', 1], ['gain', 'Wynik wzrósł', 1], [(x) => (x.gain ? `${x.before}% → ${x.after}%` : '–'), 'Średnio przed → po', 1]]) : el('div', { className: 'empty', textContent: 'Wskazówka nie była jeszcze pokazana.' }));
   $('#seoSrc28').replaceChildren(d.sources?.rows?.length ? stackTable(d.sources.rows, [['k', 'Źródło'], ...d.sources.stages.map((label, i) => [(x) => x.v[i], label, 1])]) : el('div', { className: 'empty', textContent: 'Brak danych.' }));

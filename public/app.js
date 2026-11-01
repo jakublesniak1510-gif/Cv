@@ -1332,8 +1332,16 @@ function step1Why() {
 }
 const wizExit = () => { if (!$('#wiz').hidden && !leavingToPay && step >= 1 && step <= 6) track('wizexit', { s: step }); };
 const step1Exit = () => { if (!$('#wiz').hidden && !leavingToPay && step === 1) track('step1exit', { why: step1Why() }); };
-addEventListener('pagehide', wizExit); addEventListener('pagehide', step1Exit);
-const closeWiz = () => { wizExit(); step1Exit(); $('#wiz').hidden = true; modal(false); };
+// step2_exit (2.11): wyjście na kroku „Dane” – „import_fail” (import CV się nie udał, pola puste), „empty” (nic nie wpisał), „close” (dane wpisane).
+function step2Why() {
+  const filled = ['name', 'email'].some((k) => $('#' + k).value.trim()) || rows('exp').some((x) => x.title);
+  return filled ? 'close' : importFailed ? 'import_fail' : 'empty';
+}
+const step2Exit = () => { if (!$('#wiz').hidden && !leavingToPay && step === 2) track('step2exit', { why: step2Why() }); };
+// Autozapis szkicu co 10 s na kroku „Dane” (oprócz zapisu przy każdej zmianie): localStorage i szkic na serwerze, przywracany po powrocie.
+setInterval(() => { if (!$('#wiz').hidden && step === 2) saveDraft(); }, 10000);
+addEventListener('pagehide', wizExit); addEventListener('pagehide', step1Exit); addEventListener('pagehide', step2Exit);
+const closeWiz = () => { wizExit(); step1Exit(); step2Exit(); $('#wiz').hidden = true; modal(false); };
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (!b) return; e.preventDefault(); if (b.dataset.addon) { b.dataset.addon.split(',').forEach((a) => ($('#ad' + a).checked = true)); saveDraft(); } openWiz(b.dataset.pkg); if ('prof' in b.dataset) profStart(); if (b.dataset.noad) heroNoad(b.dataset.noad); });
 // 29.10: „Nie mam ogłoszenia – zwykłe CV pod zawód” w hero; w hero „z reklamy” wpisane stanowisko od razu trafia do trybu zawodu.
 function heroNoad(v) { track('heronoad', { v }); const q = v === 'ad' ? $('#heroAdIn')?.value.trim() : ''; if (q && q.length < 60 && !/\n/.test(q)) $('#ads .entry')?.profRun?.(q); }
@@ -1481,12 +1489,20 @@ $('#importFile').onchange = async (e) => {
     importData(await fileB64(file));
   });
   $('#importManual').onclick = () => { box.classList.add('small'); $('#name').focus(); };
+  // 2.11: drugi wariant importu – wklejony tekst CV (ten sam import co plik TXT).
+  $('#importPaste').onclick = () => { $('#importPasteBox').hidden = false; $('#importText').focus(); };
+  $('#importTextGo').onclick = () => {
+    const t = $('#importText').value.trim(), st = $('#importStatus'); st.className = 'fstatus';
+    if (t.length < 40) { st.textContent = 'Wklej cały tekst CV (co najmniej kilka linijek).'; st.classList.add('bad'); return; }
+    importData(textB64(t), 'text');
+  };
 }
 // Tryb „Mam już CV” (PR T): wymaga wgranego CV; zamówienie z mode: 'rewrite' (generator zachowuje treść i kolejność).
 let imported = false;
 $('#careerOn').onchange = () => { $('#careerBox').hidden = !$('#careerOn').checked; };
 $('#rewriteMode').onchange = () => { $('#rewriteNote').hidden = !$('#rewriteMode').checked; };
-async function importData(b64) {
+let importFailed = false; // 2.11: do powodu wyjścia z kroku 2 („import_fail”)
+async function importData(b64, via = 'file') {
   const st = $('#importStatus'); st.className = 'fstatus';
   st.textContent = 'Czytam Twoje CV…';
   try {
@@ -1497,11 +1513,11 @@ async function importData(b64) {
     const empty = (b) => !rows(b).some((x) => Object.values(x).some(Boolean));
     if (p.experience?.length && empty('exp')) { $('#exp').replaceChildren(); p.experience.forEach((x) => addRow('exp', x)); }
     if (p.education?.length && empty('edu')) { $('#edu').replaceChildren(); p.education.forEach((x) => addRow('edu', x)); }
-    saveDraft(); imported = true; $('#importBox').classList.add('small'); track('cvimport'); // C3: dane z pliku od razu widoczne do sprawdzenia (pola opcjonalne nie są zwinięte)
+    saveDraft(); imported = true; importFailed = false; $('#importBox').classList.add('small'); $('#importPasteBox').hidden = true; track('cvimport', { via }); // C3: dane z pliku od razu widoczne do sprawdzenia (pola opcjonalne nie są zwinięte)
     st.textContent = j.ai ? 'Gotowe. Uzupełniliśmy formularz danymi z CV (także w kolejnych krokach). Sprawdź je i popraw, jeśli trzeba.' : 'Odczytaliśmy dane kontaktowe. Resztę uzupełnij ręcznie.';
     if (cfg.preview) st.textContent += ' Podgląd: zamiast odczytu pliku wstawiamy przykładowe dane.';
     st.classList.add('good');
-  } catch (x) { st.textContent = x.message || 'Nie udało się odczytać pliku.'; st.classList.add('bad'); }
+  } catch (x) { importFailed = true; st.textContent = x.message || 'Nie udało się odczytać pliku.'; st.classList.add('bad'); }
 }
 
 /* darmowy skaner CV (na stronie głównej i na podstronie /narzedzia/skaner-cv) */
