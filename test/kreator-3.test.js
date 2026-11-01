@@ -31,7 +31,7 @@ test('Ekran 2: plik CV na górze, imię i e-mail, jedno stanowisko; reszta od ra
   assert.ok(s2.indexOf('id="exp"') < s2.indexOf('id="moreData"'), 'doświadczenie widoczne');
   assert.ok(more.length > 100 && !/<details class="optbox more-data"/.test(s2), 'bez rozwijania');
   for (const id of ['phone', 'city', 'link', 'birth', 'headline', 'summary', 'photoFile', 'careerOn', 'edu', 'skills', 'languages', 'certificates', 'interests', 'notes']) assert.ok(more.includes(`id="${id}"`), id);
-  assert.match(app, /if \(n === 2 && !imported && !rows\('exp'\)\.some\(\(e\) => e\.title \|\| e\.company\) && !rows\('edu'\)\.some\(\(e\) => e\.school\)\) return 'Wgraj swoje CV albo dodaj co najmniej jedno stanowisko/);
+  assert.match(app, /if \(n === 2 && !imported && !\$\('#noExp'\)\.checked && !rows\('exp'\)\.some\(\(e\) => e\.title \|\| e\.company\) && !rows\('edu'\)\.some\(\(e\) => e\.school\)\) return 'Wgraj swoje CV albo dodaj co najmniej jedno stanowisko/);
   assert.match(app, /if \(n === 2\) \{ if \(!v\('name'\)\) return 'Podaj imię i nazwisko\.'; if \(!\/\^\\S\+@\\S\+\\\.\\S\+\$\/\.test\(v\('email'\)\)\) return 'Podaj poprawny adres e-mail\.'; \}/);
   assert.match(app, /\$\('#importBox'\)\.classList\.add\('small'\); \$\('#importPasteBox'\)\.hidden = true; track\('cvimport', \{ via \}\);/, 'po imporcie dane z pliku od razu widoczne');
 });
