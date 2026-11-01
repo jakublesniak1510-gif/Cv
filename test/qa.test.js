@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'qa-'));
 const { checkResult, hasCritical, sameName, recordQa, qaWeeks, weekOf } = await import('../lib/qa.js');
@@ -73,7 +74,7 @@ test('Statystyki tygodniowe', async () => {
 
 test('Zamówienie: kontrola jakości zapisana w zamówieniu i w statystykach, bez flag w odpowiedzi dla klienta', async () => {
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-  const port = 4400 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-qa-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-qa-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

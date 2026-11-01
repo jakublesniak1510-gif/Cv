@@ -4,13 +4,14 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // Widżet Trustpilot: tylko przy TRUSTPILOT_BUSINESS_UNIT_ID + TRUSTPILOT_SHOW=1. Micro Review Count pod hero (język wg wersji),
 // Mini nad przyciskiem płatności; CSP dopuszcza widget.trustpilot.com tylko wtedy. Bez zmiennych – bez zmian w HTML i CSP.
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const BU = '5f1e2d3c4b5a69788796a5b4';
 async function withServer(env, fn) {
-  const port = 5600 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-tp-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-tp-'));
   const srv = spawn(process.execPath, ['server.js'], { env: { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SALES_OPEN: '1', TRUSTPILOT_BUSINESS_UNIT_ID: '', TRUSTPILOT_SHOW: '', ...env }, stdio: 'ignore' });
   const U = `http://localhost:${port}`;
   try {

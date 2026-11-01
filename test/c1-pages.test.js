@@ -8,11 +8,12 @@ import { checkCv } from '../lib/cv-check.js';
 import { caseScores, CASE } from '../lib/landing.js';
 import { TOOLS } from '../lib/tools.js';
 import { TOOL_LANGS, toolUrl } from '../lib/tools-i18n.js';
+import { freePort } from './helpers/free-port.js';
 
 // PR C1: „Sprawdź CV” i „Test CV pod ATS” (bez ogłoszenia), /kreator-cv, case study „Jedno CV, dwa ogłoszenia”.
 const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
 const CV = `Anna Przykładowa\nanna@example.com · +48 600 000 000\nPodsumowanie\nSpecjalistka obsługi klienta.\nDoświadczenie zawodowe\nKonsultantka, sklep internetowy, 03.2021 – obecnie\nObsługa klientów przez czat i e-mail, reklamacje i zwroty, praca w systemie CRM.\nWykształcenie\nLiceum ogólnokształcące, 2014 – 2018\nUmiejętności\nCRM, Excel, obsługa klienta\nJęzyki\nangielski B2\n${'Opis obowiązków i efektów pracy w zespole obsługi klienta. '.repeat(20)}\nWyrażam zgodę na przetwarzanie moich danych osobowych (RODO).`;
-const port = 4600 + Math.floor(Math.random() * 200), U = `http://localhost:${port}`;
+const port = await freePort(), U = `http://localhost:${port}`;
 let srv;
 before(async () => {
   srv = spawn(process.execPath, ['server.js'], { env: { ...process.env, PORT: String(port), DATA_DIR: fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-c1-')), BASE_URL: U, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '' }, stdio: 'ignore' });

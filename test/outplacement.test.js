@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // D7 (27.10): Outplacement dla firm (/dla-firm/outplacement). Cena za osobę od liczby osób: 1–4 → 299, 5+ → 269, 10+ → 239, 25+ → 209,
 // 50+ → 179 zł. Każda osoba: własny jednorazowy kod (Pakiet 3 + przygotowanie, symulator, LinkedIn, Word), ważny 90 dni od daty przekazania.
@@ -42,7 +43,7 @@ test('Zamówienie firmy: NIP obowiązkowy, data przekazania od dziś do 60 dni, 
 });
 
 test('Serwer: zamówienie z fakturą → kody dla każdej osoby, panel bez danych pracowników, PDF; kod pracownika = zamówienie za 0 zł', async () => {
-  const port = 6200 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-out-srv-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-out-srv-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

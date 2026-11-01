@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // „Oznacz jako test” (28.10): opłacone zamówienie właściciela wypada z lejka sprzedaży i kreatora („Opłacone”), raportu A/B,
 // statystyk przychodu i rozliczeń kodu; faktura i wpis w rejestrze sprzedaży zostają (tylko flaga). „Cofnij” przywraca wszystko.
@@ -77,7 +78,7 @@ test('Kod TEST-… i „Oznacz jako test” – ten sam wynik w raportach: poza 
 });
 
 test('Panel: endpoint tylko po zalogowaniu, przycisk „Oznacz jako test” / „Cofnij” i znacznik „test”; strona klienta bez zmian', async () => {
-  const port = 7400 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-testorder-srv-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-testorder-srv-'));
   fs.writeFileSync(path.join(dir, 'orders.json'), JSON.stringify({ 'o-srv': base('o-srv', { visit: null }) }));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', ADMIN_PASSWORD: 'tajne-haslo-testowe' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });

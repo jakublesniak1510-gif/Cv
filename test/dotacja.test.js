@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // D5 (27.10): Dotacja z urzędu pracy – biznesplan 349 zł, wniosek + biznesplan 549 zł, /uslugi/dotacja-z-urzedu-pracy. Kreator (urząd,
 // PKD, CV, wydatki, prognoza 12/24 mies., wzór wniosku z urzędu) → podgląd (rozmyta strona 1) → zakup → PDF/DOCX (+ pola wniosku)
@@ -136,7 +137,7 @@ test('Poprawki: 3 w cenie, licznik rośnie po udanej poprawce, nowe pliki e-mail
 });
 
 test('Strona i zakup: zgoda „bez gwarancji”, pliki dopiero po płatności (3 w wariancie z wnioskiem), sitemap, link w stopce', async () => {
-  const port = 5600 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-gr-srv-')), id = 'd'.repeat(32), d = G.cleanGrant(IN);
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-gr-srv-')), id = 'd'.repeat(32), d = G.cleanGrant(IN);
   fs.writeFileSync(path.join(dir, 'grant-drafts.json'), JSON.stringify({ [id]: { id, at: Date.now(), input: d, result: G.cleanGrantResult(OUT, d, G.forecast(d)) } }));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });

@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { HEARD, heardInput, heardSummary } from '../lib/heard.js';
+import { freePort } from './helpers/free-port.js';
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
@@ -20,7 +21,7 @@ test('Odpowiedzi: 6 opcji, walidacja, dopisek skrócony; zestawienie z udziałam
 });
 
 test('API: tylko opłacone zamówienie, raz, licznik w statystykach; widok zamówienia z heard; UI i panel', async () => {
-  const port = 4700 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-heard-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-heard-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

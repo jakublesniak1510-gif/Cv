@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'passes-'));
 process.env.SMTP_URL = 'json';
@@ -90,7 +91,7 @@ test('Zwrot: proporcjonalnie do ceny według wag z cennika, tylko zużycia (nie 
 
 test('Serwer (demo): /karnety, zakup, logowanie po płatności, zamówienie z karnetem za 0 zł i z dopłatą', async () => {
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-  const port = 4700 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-pass-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-pass-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

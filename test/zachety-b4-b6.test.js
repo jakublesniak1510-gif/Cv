@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // B4–B6 (26.10): liczby tylko z prawdziwych zamówień i ukryte poniżej progów; odznaka z danych; cena za CV w Pakiecie 3.
 const { liveStats, LIVE_MIN_CVS, LIVE_MAX_MEDIAN, POPULAR_MIN } = await import('../lib/live-stats.js');
@@ -56,7 +57,7 @@ test('/api/public-stats: week i popular z zamówień w magazynie (serwer)', { ti
   const { saveOrder } = await import('../lib/store.js');
   const now = Date.now();
   for (let i = 0; i < 20; i++) await saveOrder({ id: `w${i}`, status: 'done', pkg: i < 12 ? 'cv_letter' : 'cv', total: 4900, created: now - 3600e3, paidAt: now - 3600e3, doneAt: now - 3600e3 + 4 * 60000, profile: { email: 'a@b.pl' }, ads: [], results: [{}] });
-  const port = 5950 + Math.floor(Math.random() * 40);
+  const port = await freePort();
   const p = spawn(process.execPath, ['server.js'], { env: { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '' }, stdio: 'ignore' });
   try {
     let j; for (let i = 0; i < 60; i++) { try { j = await (await fetch(`http://localhost:${port}/api/public-stats`)).json(); break; } catch { await new Promise((r) => setTimeout(r, 150)); } }

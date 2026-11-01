@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 process.env.SMTP_URL = 'json';
 const { deleteNoticeMail } = await import('../lib/mail.js');
@@ -37,7 +38,7 @@ test('Kasa: osobna, odznaczona zgoda; zgoda ankiety bez „kodu rabatowego”; h
 });
 
 test('Serwer: zgoda zapisana w zamówieniu; wypis GET (przycisk) i POST (off); bez zgody – brak przypomnienia', async () => {
-  const port = 6500 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-dn-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-dn-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 process.env.SMTP_URL = 'json';
 const { cvToText } = await import('../lib/cv-text.js');
@@ -32,7 +33,7 @@ test('Mail: .txt przy każdym CV z nazwą jak PDF i zdanie o formularzach portal
 });
 
 test('Pobieranie /api/orders/:id/txt/:i, przycisk przy CV, regulamin §5 i historia w 4 językach', async () => {
-  const port = 5000 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-txt-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-txt-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

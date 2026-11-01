@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // Krótszy krok 3 (29.10): w kreatorze tylko 2 powiadomienia (przypomnienie o płatności, oferty pracy); 5 pozostałych
 // na stronie dokumentów po zakupie (osobne, odznaczone, zapis od razu); bez powtórzeń „kilka minut” i „faktura”; „W cenie: PDF”.
@@ -22,7 +23,7 @@ test('Krok 3: dwa powiadomienia, bez powtórzeń; „W cenie: PDF” (Word w dod
 });
 
 test('Strona dokumentów: 5 powiadomień do zaznaczenia; zapis /api/orders/:id/notify; stan w zamówieniu; wysyłka bez zmian', async () => {
-  const port = 7700 + Math.floor(Math.random() * 200), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-notify-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-notify-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

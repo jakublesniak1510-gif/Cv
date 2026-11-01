@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { scanForVariant, abHome, abReport, abText, activeExperiments } from '../lib/ab.js';
+import { freePort } from './helpers/free-port.js';
 
 // Test A/B „scanner”: w B serwer obcina wynik skanera (3 braki + missingMore, bez wskazówek) w odpowiedzi /api/scan;
 // A = dzisiejszy wynik. Lejek per wariant: skan → klik „Zrób CV” → zamówienie → opłacone.
@@ -15,7 +16,7 @@ const CV = 'Jan Test\njan@test.pl\nMagazynier w Hurtowni ABC 2019-2024: obsługa
 const AD = 'Magazynier. Wymagania: obsługa wózka widłowego, uprawnienia UDT, znajomość SAP, prawo jazdy kat. B, doświadczenie w logistyce, obsługa systemu WMS, gotowość do pracy zmianowej, język angielski, Excel, certyfikat BHP.';
 
 async function server(EXPERIMENTS, fn) {
-  const port = 5700 + Math.floor(Math.random() * 250), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-abs-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-abs-'));
   const srv = spawn(process.execPath, ['server.js'], { env: { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SALES_OPEN: '1', EXPERIMENTS, STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '' }, stdio: 'ignore' });
   const U = `http://localhost:${port}`;
   try {

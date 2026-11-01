@@ -10,6 +10,7 @@ import { PRICES, orderPkgName } from '../lib/pricing.js';
 import { invoiceLines } from '../lib/invoice.js';
 import { PRODUCTS, DIGITAL_WAIVER } from '../lib/products.js';
 import { legalBody } from '../lib/legal.js';
+import { freePort } from './helpers/free-port.js';
 
 // D2 (27.10): Szablony CV premium – 10 szablonów Word (DOCX) w ZIP za 19 zł, /szablony-premium. Podglądy ze znakiem wodnym,
 // pliki tylko po płatności (pobranie i e-mail), faktura, zgoda na dostarczenie treści cyfrowej, regulamin (4 języki).
@@ -44,7 +45,7 @@ test('Paczka: 10 różnych szablonów DOCX i instrukcja; podpowiedzi zamiast fik
 });
 
 test('API i strona: zakup, plik dopiero po płatności, strona z galerią i zgodą na treść cyfrową, sitemap', async () => {
-  const port = 5000 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-prem-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-prem-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

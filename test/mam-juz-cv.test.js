@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { REWRITE_NOTE } from '../lib/generate.js';
+import { freePort } from './helpers/free-port.js';
 
 const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -24,7 +25,7 @@ test('Kreator: przełącznik przy imporcie, wymagane wgrane CV, mode w zamówien
   assert.match(app, /if \(n === 2 && \$\('#rewriteMode'\)\.checked && !imported\) return/);
   assert.match(app, /\.\.\.\(\$\('#rewriteMode'\)\.checked \? \{ mode: 'rewrite' \} : \{\}\)/);
   for (const l of ['en', 'de', 'uk']) assert.ok(JSON.parse(read(`public/i18n/${l}.json`))['Mam już CV – popraw je pod ogłoszenie, zachowując jego treść'], l);
-  const port = 5900 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-rewrite-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-rewrite-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { emailHash, codeDiscount, reserveCode, applyPaidCode, releaseCode, staleReservations, CodeError, RESERVE_TTL } from '../lib/referral.js';
+import { freePort } from './helpers/free-port.js';
 
 // Kody z limitem: rezerwacja przy składaniu zamówienia (w jednej blokadzie zapisu), a nie dopiero po wygenerowaniu dokumentów.
 const FAR = Date.now() + 864e5 * 30;
@@ -40,7 +41,7 @@ test('Rezerwacja: maxUses, raz na osobę, saldo właściciela, przejęcie przez 
 
 test('Serwer (demo): 5 równoległych zamówień z kodem maxUses 1 → dokładnie 1; rezerwacja salda właściciela', async () => {
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-  const port = 5100 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-codes-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-codes-'));
   fs.writeFileSync(path.join(dir, 'codes.json'), JSON.stringify({
     INST1: { id: 'INST1', amount: 0, voucher: 'cv', maxUses: 1, usedBy: [], expires: FAR },
     'KOD-OWN1': { id: 'KOD-OWN1', amount: 1000, ownerHash: emailHash('own@x.pl'), usedBy: [], referrals: 0, credit: 5000, expires: FAR },
@@ -73,7 +74,7 @@ test('Serwer (demo): 5 równoległych zamówień z kodem maxUses 1 → dokładni
 
 test('Serwer (demo): samopolecenie bez nagrody (to samo IP co zamówienie właściciela w 24 h), polecenie z innego IP z nagrodą; poprawki: limit 5, tożsamość z oryginału', async () => {
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-  const port = 5500 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-self-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-self-'));
   fs.writeFileSync(path.join(dir, 'codes.json'), JSON.stringify({ 'KOD-OWN2': { id: 'KOD-OWN2', amount: 1000, ownerHash: emailHash('own@x.pl'), usedBy: [], referrals: 0, credit: 0, expires: FAR } }));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });

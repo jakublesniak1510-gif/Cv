@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import http from 'node:http';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // /api/config (też health check Rendera) nie może czekać na Stripe: metody płatności z pamięci, odświeżanie w tle (limit 3 s).
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -16,7 +17,7 @@ test('/api/config odpowiada od razu, gdy API Stripe wisi; metody uzupełniają s
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({ data: [{ is_default: true, active: true, blik: { available: true, display_preference: { value: 'on' } }, card: { available: true, display_preference: { value: 'on' } } }] }));
   }).listen(0);
-  const port = 5900 + Math.floor(Math.random() * 90), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-pm-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-pm-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', P24_MERCHANT_ID: '', STRIPE_SECRET_KEY: 'sk_test_x', STRIPE_WEBHOOK_SECRET: 'whsec_x', STRIPE_API_BASE: `http://localhost:${mock.address().port}`, SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

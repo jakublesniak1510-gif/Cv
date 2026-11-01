@@ -9,6 +9,7 @@ import { profReqs, profAdText, findProfession, PROF_NOTE } from '../lib/prof-ad.
 import { seoRoutes } from '../lib/seo.js';
 import { legalBody } from '../lib/legal.js';
 import { PROF_LANGS } from '../lib/professions-i18n.js';
+import { freePort } from './helpers/free-port.js';
 
 // „CV pod zawód”: CV bez konkretnego ogłoszenia, pod typowe wymagania zawodu z danych serwisu (39 zł, jedno CV bez listu).
 const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
@@ -61,7 +62,7 @@ test('Regulamin (4 języki): CV pod zawód w §2, wyjątek w §3, data 24.10.202
 });
 
 test('API: /api/prof-reqs; zamówienie CV pod zawód tylko jako jedno CV bez listu; rodzaj zapisany w zamówieniu', { timeout: 60_000 }, async () => {
-  const port = 5300 + Math.floor(Math.random() * 90), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-prof-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-prof-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', SALES_OPEN: '1' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
   try {

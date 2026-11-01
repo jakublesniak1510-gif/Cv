@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // „Oznacz jako test” na wpisie rejestru sprzedaży (29.10): działa też, gdy zamówienia już nie ma (testy właściciela usunięte
 // z zakładki Zamówienia). Wpis zostaje, znika z przychodu i lejka („Opłacone”: suma i język), rozliczenie kodu cofnięte;
@@ -45,7 +46,7 @@ test('Wpis bez zamówienia: test → poza przychodem i lejkiem, kod cofnięty; C
 });
 
 test('Panel: endpointy tylko po zalogowaniu, lista wpisów z flagą „zamówienie usunięte”, przycisk z potwierdzeniem', async () => {
-  const port = 7300 + Math.floor(Math.random() * 300), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-saletest-srv-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-saletest-srv-'));
   fs.writeFileSync(path.join(dir, 'sales.json'), JSON.stringify({ 'gone-1': { id: 'gone-1', at: now - 864e5, day: '2026-10-24', pkg: 'cv', total: 3900, refunded: 0, uiLang: 'pl', test: false } }));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', ADMIN_PASSWORD: 'tajne-haslo-testowe' };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });

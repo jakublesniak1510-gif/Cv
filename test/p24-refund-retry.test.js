@@ -6,6 +6,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { freePort } from './helpers/free-port.js';
 
 // Zwrot P24 z panelu: prawdziwy powód odrzucenia trafia do komunikatu i do „Zdarzeń”; po próbie bez odpowiedzi
 // (zerwane połączenie) ponowne kliknięcie w ciągu 10 min najpierw sprawdza listę zwrotów i nie zleca drugiego zwrotu.
@@ -31,7 +32,7 @@ test('Zwrot P24: powód odrzucenia w komunikacie i Zdarzeniach; ponowienie po ze
     if (req.url.startsWith('/api/v1/transaction/by/sessionId/')) return res.end(JSON.stringify({ data: { status: 0 } }));
     res.statusCode = 404; res.end('{}');
   }).listen(0);
-  const port = 5100 + Math.floor(Math.random() * 90), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-p24r-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-p24r-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', SALES_OPEN: '1', PAY_PROVIDER: 'p24', ADMIN_PASSWORD: 'tajne-haslo-testowe',
     STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: String(MERCHANT), P24_CRC: CRC, P24_API_KEY: KEY, P24_BASE_URL: `http://localhost:${p24.address().port}` };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });
@@ -89,7 +90,7 @@ test('Zwrot zrobiony poza panelem: „Oznacz jako zwrócone” zapisuje zwrot be
     if (req.url === '/api/v1/transaction/refund') { res.statusCode = 409; return res.end(JSON.stringify({ error: [{ ...b.refunds[0], status: false, message: 'Insufficient funds available' }], code: 409 })); }
     res.statusCode = 404; res.end('{}');
   }).listen(0);
-  const port = 5200 + Math.floor(Math.random() * 90), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-p24m-'));
+  const port = await freePort(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-p24m-'));
   const env = { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', SALES_OPEN: '1', PAY_PROVIDER: 'p24', ADMIN_PASSWORD: 'tajne-haslo-testowe',
     STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: String(MERCHANT), P24_CRC: CRC, P24_API_KEY: KEY, P24_BASE_URL: `http://localhost:${p24.address().port}` };
   const srv = spawn(process.execPath, ['server.js'], { env, stdio: 'ignore' });

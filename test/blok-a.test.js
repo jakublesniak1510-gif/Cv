@@ -4,14 +4,15 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { freePort } from './helpers/free-port.js';
 
 // Blok A (26.10, „zero CV za darmo”): podgląd jako obrazek bez tekstu, dokumenty tylko po „done”, bezpiecznik trybu demo,
 // limit sprawdzania kodów, znak wodny na przykładzie.
 const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const { previewSvg, previewPng } = await import('../lib/preview-img.js');
-const start = (env) => {
-  const port = 5600 + Math.floor(Math.random() * 300), dir = env.DATA_DIR || fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-a-'));
+const start = async (env) => {
+  const port = await freePort(), dir = env.DATA_DIR || fs.mkdtempSync(path.join(os.tmpdir(), 'cvpo-a-'));
   const p = spawn(process.execPath, ['server.js'], { env: { ...process.env, PORT: String(port), DATA_DIR: dir, BASE_URL: `http://localhost:${port}`, ANTHROPIC_API_KEY: '', SMTP_URL: '', STRIPE_SECRET_KEY: '', P24_MERCHANT_ID: '', ...env }, stdio: ['ignore', 'ignore', 'pipe'] });
   let err = ''; p.stderr.on('data', (d) => (err += d));
   return { p, U: `http://localhost:${port}`, err: () => err };
@@ -42,7 +43,7 @@ test('A2 + A4: zamówienie przed „done” bez dokumentów w /api/orders/:id; 1
   const res = [{ position: 'Kasjer', cv: { name: 'Anna', summary: 'TAJNE CV' }, letter: 'TAJNY LIST' }];
   await saveOrder({ id: 'gen-1', status: 'generating', pkg: 'cv', total: 3900, created: Date.now(), profile: { email: 'a@x.pl' }, ads: [], results: res });
   await saveOrder({ id: 'done-1', status: 'done', pkg: 'cv', total: 3900, created: Date.now(), profile: { email: 'a@x.pl' }, ads: [], results: res });
-  const s = start({ DATA_DIR: dir });
+  const s = await start({ DATA_DIR: dir });
   try {
     await up(s.U);
     const g = await (await fetch(s.U + '/api/orders/gen-1')).json();
@@ -55,7 +56,7 @@ test('A2 + A4: zamówienie przed „done” bez dokumentów w /api/orders/:id; 1
 });
 
 test('A3: PAY_PROVIDER=demo przy BASE_URL produkcji → serwer nie startuje (kod 1, czytelny log)', { timeout: 30_000 }, async () => {
-  const s = start({ PAY_PROVIDER: 'demo', BASE_URL: 'https://cvpodogloszenie.pl' });
+  const s = await start({ PAY_PROVIDER: 'demo', BASE_URL: 'https://cvpodogloszenie.pl' });
   const code = await new Promise((r) => s.p.on('exit', r));
   assert.equal(code, 1); assert.match(s.err(), /PAY_PROVIDER=demo przy BASE_URL produkcji/);
 });
