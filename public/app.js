@@ -873,7 +873,7 @@ $('#usePass').onchange = () => refresh();
 
 const DKEY = 'cvpo-draft-v1', FIELDS = ['name', 'email', 'phone', 'city', 'link', 'birth', 'headline', 'summary', 'skills', 'languages', 'certificates', 'interests', 'notes'];
 let saveT, restoring = false;
-const draftData = () => ({ step, design, photo, addons: { ...addons(), linkedinEn: $('#adLinkedinEn').checked }, langs: extraLangs(), pkg: pkg(), f: Object.fromEntries(FIELDS.map((k) => [k, $('#' + k).value])), exp: rows('exp'), edu: rows('edu'), ads: rows('ads') });
+const draftData = () => ({ step, design, photo, addons: { ...addons(), linkedinEn: $('#adLinkedinEn').checked }, langs: extraLangs(), pkg: pkg(), f: Object.fromEntries(FIELDS.map((k) => [k, $('#' + k).value])), exp: rows('exp'), edu: rows('edu'), ads: rows('ads'), noExp: $('#noExp').checked });
 // Szkic na serwerze („Wyślij mi link do dokończenia”, lib/wizard-drafts.js): po wysłaniu linku formularz synchronizuje się z nim (bez zdjęcia).
 const SKEY = 'cvpo-srv-draft';
 const srvToken = () => { try { return localStorage.getItem(SKEY) || ''; } catch { return ''; } };
@@ -902,6 +902,7 @@ function restoreDraft(from) {
   (d.langs || []).forEach((l) => { const i = $(`#langPick input[value="${l}"]`); if (i) i.checked = true; });
   setPhoto(d.photo || '');
   ['exp', 'edu', 'ads'].forEach((b) => { $('#' + b).replaceChildren(); (d[b]?.length ? d[b] : [{}]).forEach((v) => addRow(b, v)); });
+  $('#noExp').checked = !!d.noExp; noExpSync();
   restoring = false; refresh();
   return true;
 }
@@ -1288,7 +1289,7 @@ function validate(n) {
   if (n === 2 && $('#rewriteMode').checked && !imported) return 'Wgraj swoje CV (PDF lub Word): w trybie „Mam już CV” zachowujemy jego treść i kolejność.';
   if (n === 2) { if (!v('name')) return 'Podaj imię i nazwisko.'; if (!/^\S+@\S+\.\S+$/.test(v('email'))) return 'Podaj poprawny adres e-mail.'; }
   // Ekran 2: wystarczy wgrane CV albo jedno stanowisko (szkoła z „Więcej danych” też wystarczy, np. dla uczniów i studentów).
-  if (n === 2 && !imported && !rows('exp').some((e) => e.title || e.company) && !rows('edu').some((e) => e.school)) return 'Wgraj swoje CV albo dodaj co najmniej jedno stanowisko (szkołę dodasz w „Więcej danych”).';
+  if (n === 2 && !imported && !$('#noExp').checked && !rows('exp').some((e) => e.title || e.company) && !rows('edu').some((e) => e.school)) return 'Wgraj swoje CV albo dodaj co najmniej jedno stanowisko (szkołę dodasz w „Więcej danych”).';
   if (n === 2 && $('#careerOn').checked && !v('careerTo')) { return 'Wpisz docelową branżę albo odznacz „Zmieniam branżę”.'; }
   if (n === 1 && passOn() && nAds() > Math.min(3, myPass.left.matches)) return `W karnecie ${plural(myPass.left.matches, 'zostało', 'zostały', 'zostało')} ${myPass.left.matches} ${plural(myPass.left.matches, 'dopasowanie', 'dopasowania', 'dopasowań')}. Usuń dodatkowe ogłoszenia albo odznacz „Użyj karnetu”.`;
   if (n === 1 && !passOn() && nAds() > PKG_ADS[pkg()]) return 'Wybrany pakiet obejmuje jedno ogłoszenie. Usuń dodatkowe ogłoszenia albo wybierz Pakiet 3 za 79 zł.';
@@ -1506,6 +1507,10 @@ $('#importFile').onchange = async (e) => {
 // Tryb „Mam już CV” (PR T): wymaga wgranego CV; zamówienie z mode: 'rewrite' (generator zachowuje treść i kolejność).
 let imported = false;
 $('#careerOn').onchange = () => { $('#careerBox').hidden = !$('#careerOn').checked; };
+// 2.11: „Nie mam jeszcze doświadczenia zawodowego” – spełnia warunek kroku 2 (jak szkoła), chowa pola stanowisk i prowadzi do szkoły,
+// kursów i umiejętności (CV na wykształceniu i umiejętnościach).
+const noExpSync = () => { const on = $('#noExp').checked; $('#noExpHint').hidden = !on; $('#exp').hidden = on; $('#addExp').hidden = on; };
+$('#noExp').onchange = () => { noExpSync(); saveDraft(); if ($('#noExp').checked) { const s = $('#edu [data-k=school]'); s?.scrollIntoView({ behavior: 'smooth', block: 'center' }); s?.focus({ preventScroll: true }); } };
 $('#rewriteMode').onchange = () => { $('#rewriteNote').hidden = !$('#rewriteMode').checked; };
 let importFailed = false; // 2.11: do powodu wyjścia z kroku 2 („import_fail”)
 async function importData(b64, via = 'file') {
