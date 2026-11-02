@@ -96,6 +96,18 @@
     "url": "https://biurokarier.amu.edu.pl/"
   },
   {
+    "nazwa": "Targi Pracy Pracuj.pl (Festiwal Pracy) – Warszawa",
+    "miasto": "Warszawa",
+    "data": "2027-03-09",
+    "potwierdzona": true,
+    "ostatnia_edycja": "edycja stacjonarna w Warszawie w marcu 2026 (strona nie podaje dokładnej daty)",
+    "miejsce": "EXPO XXI Warszawa, ul. Ignacego Prądzyńskiego 12/14",
+    "organizator": "Grupa Pracuj S.A.",
+    "dla_kogo": "studenci, absolwenci, młodzi specjaliści oraz osoby szukające nowej pracy",
+    "bezplatne": "tak (bezpłatny bilet wstępu, zapisy wkrótce)",
+    "url": "https://festiwal.pracuj.pl/warszawa/"
+  },
+  {
     "nazwa": "33. Inżynierskie Targi Pracy",
     "miasto": "Warszawa",
     "data": "2027-03-09 – 2027-03-10",
@@ -134,74 +146,74 @@
   {
     "nazwa": "Absolvent Talent Days Warszawa – edycja wiosenna",
     "miasto": "Warszawa",
-    "data": "wiosna 2027 – termin do potwierdzenia",
-    "potwierdzona": false,
+    "data": "2027-04-06",
+    "potwierdzona": true,
     "ostatnia_edycja": "2026-10-27",
-    "miejsce": "PGE Narodowy (ostatnio)",
+    "miejsce": "PGE Narodowy, Warszawa",
     "organizator": "Absolvent Talent Days (Absolvent Consulting)",
     "dla_kogo": "studenci, absolwenci, młodzi profesjonaliści",
     "bezplatne": "tak (rejestracja) – do potwierdzenia",
-    "url": "https://talentdays.pl/targi-pracy"
+    "url": "https://talentdays.pl/dla-pracodawcow"
   },
   {
     "nazwa": "Absolvent Talent Days Kraków – edycja wiosenna",
     "miasto": "Kraków",
-    "data": "wiosna 2027 – termin do potwierdzenia",
-    "potwierdzona": false,
+    "data": "2027-03-16",
+    "potwierdzona": true,
     "ostatnia_edycja": "2026-10-13",
-    "miejsce": "CKF_13 (ostatnio)",
+    "miejsce": "CKF_13, Kraków",
     "organizator": "Absolvent Talent Days (Absolvent Consulting)",
     "dla_kogo": "studenci, absolwenci, młodzi profesjonaliści",
     "bezplatne": "tak (rejestracja) – do potwierdzenia",
-    "url": "https://talentdays.pl/targi-pracy"
+    "url": "https://talentdays.pl/dla-pracodawcow"
   },
   {
     "nazwa": "Absolvent Talent Days Wrocław – edycja wiosenna",
     "miasto": "Wrocław",
-    "data": "wiosna 2027 – termin do potwierdzenia",
-    "potwierdzona": false,
+    "data": "2027-03-11",
+    "potwierdzona": true,
     "ostatnia_edycja": "2026-10-20",
-    "miejsce": "Uniwersytet DSW (Ideis) (ostatnio)",
+    "miejsce": "Uniwersytet DSW (Ideis), Wrocław",
     "organizator": "Absolvent Talent Days (Absolvent Consulting)",
     "dla_kogo": "studenci, absolwenci, młodzi profesjonaliści",
     "bezplatne": "tak (rejestracja) – do potwierdzenia",
-    "url": "https://talentdays.pl/targi-pracy"
+    "url": "https://talentdays.pl/dla-pracodawcow"
   },
   {
     "nazwa": "Absolvent Talent Days Katowice – edycja wiosenna",
     "miasto": "Katowice/Gliwice",
-    "data": "wiosna 2027 – termin do potwierdzenia",
-    "potwierdzona": false,
+    "data": "2027-03-18",
+    "potwierdzona": true,
     "ostatnia_edycja": "2026-10-22 (wiosna 2026: 2026-03-19)",
-    "miejsce": "MCK Katowice (ostatnio)",
+    "miejsce": "MCK Katowice",
     "organizator": "Absolvent Talent Days (Absolvent Consulting)",
     "dla_kogo": "studenci, absolwenci, młodzi profesjonaliści",
     "bezplatne": "tak (rejestracja) – do potwierdzenia",
-    "url": "https://talentdays.pl/targi-pracy"
+    "url": "https://talentdays.pl/dla-pracodawcow"
   },
   {
     "nazwa": "Absolvent Talent Days Poznań – edycja wiosenna",
     "miasto": "Poznań",
-    "data": "wiosna 2027 – termin do potwierdzenia",
-    "potwierdzona": false,
+    "data": "2027-03-09",
+    "potwierdzona": true,
     "ostatnia_edycja": "2026-11-03",
-    "miejsce": "Concordia Design Poznań (ostatnio)",
+    "miejsce": "Concordia Design Poznań",
     "organizator": "Absolvent Talent Days (Absolvent Consulting)",
     "dla_kogo": "studenci, absolwenci, młodzi profesjonaliści",
     "bezplatne": "tak (rejestracja) – do potwierdzenia",
-    "url": "https://talentdays.pl/targi-pracy"
+    "url": "https://talentdays.pl/dla-pracodawcow"
   },
   {
     "nazwa": "Absolvent Talent Days Gdańsk – edycja wiosenna",
     "miasto": "Gdańsk/Trójmiasto",
-    "data": "wiosna 2027 – termin do potwierdzenia",
-    "potwierdzona": false,
+    "data": "2027-03-23",
+    "potwierdzona": true,
     "ostatnia_edycja": "2026-11-05 (wiosna 2026: 2026-03-26)",
-    "miejsce": "Plenum Gdańsk (ostatnio)",
+    "miejsce": "Plenum Gdańsk",
     "organizator": "Absolvent Talent Days (Absolvent Consulting)",
     "dla_kogo": "studenci, absolwenci, młodzi profesjonaliści",
     "bezplatne": "tak (rejestracja) – do potwierdzenia",
-    "url": "https://talentdays.pl/targi-pracy"
+    "url": "https://talentdays.pl/dla-pracodawcow"
   },
   {
     "nazwa": "Targi Pracy PW / Targi Pracy PW IT Online",
@@ -398,10 +410,10 @@
   {
     "nazwa": "Inżynierskie Targi Pracy BEST Gdańsk",
     "miasto": "Gdańsk/Trójmiasto",
-    "data": "wiosna 2027 – termin do potwierdzenia",
-    "potwierdzona": false,
+    "data": "2027-03-09 – 2027-03-10",
+    "potwierdzona": true,
     "ostatnia_edycja": "2026-03-04 – 2026-03-05",
-    "miejsce": "Dziedzińce Gmachu Głównego PG, ul. Narutowicza 11/12",
+    "miejsce": "Dziedzińce Gmachu Głównego Politechniki Gdańskiej, ul. Gabriela Narutowicza 11/12",
     "organizator": "Stowarzyszenie Studentów BEST Gdańsk",
     "dla_kogo": "studenci i absolwenci uczelni technicznych",
     "bezplatne": "nie podano na stronie",
@@ -420,16 +432,16 @@
     "url": "https://pg.edu.pl/biuro-karier/2026-04/targi-pracy-i-dzien-otwarty-wydzialu-chemicznego-zaplanuj-z-nami-swoja-przyszlosc"
   },
   {
-    "nazwa": "Akademickie Targi Pracy (ATP) Łódź",
+    "nazwa": "XXII Akademickie Targi Pracy (ATP) Łódź",
     "miasto": "Łódź",
-    "data": "wiosna 2027 – termin do potwierdzenia",
-    "potwierdzona": false,
+    "data": "2027-04-22",
+    "potwierdzona": true,
     "ostatnia_edycja": "2026-04-16 (XXI edycja)",
-    "miejsce": "Hala EXPO Łódź, al. Politechniki 4",
+    "miejsce": "Łódź – miejsce do potwierdzenia (poprzednie edycje: Hala EXPO Łódź, al. Politechniki 4)",
     "organizator": "Politechnika Łódzka, Uniwersytet Medyczny w Łodzi, Urząd Miasta Łodzi",
     "dla_kogo": "studenci i absolwenci",
     "bezplatne": "tak (bez rejestracji)",
-    "url": "https://p.lodz.pl/uczelnia/informacje-dla-mediow/xxi-edycja-akademickich-targow-pracy-lodzkie-targi-w-europejskim-formacie"
+    "url": "https://atp.lodz.pl/"
   },
   {
     "nazwa": "Targi Pracy, Przedsiębiorczości i Technologii Politechniki Śląskiej – edycja wiosenna",
