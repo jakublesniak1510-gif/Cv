@@ -1580,17 +1580,15 @@ function bindScan(ui) {
   };
 }
 bindScan({ form: $('#scanForm'), file: $('#scanFile'), fileName: $('#scanFileName'), ad: $('#scanAd'), btn: $('#scanBtn'), msg: $('#scanMsg'), result: $('#scanResult') });
-// Formularz skanera na podstronie narzędzia: te same pola co na stronie głównej, wynik pod formularzem.
+const SCAN_HOME = [$('#scanForm').parentElement, $('#scanResult').parentElement];
+const homeScan = () => { if ($('#scanForm').parentElement !== SCAN_HOME[0]) { SCAN_HOME[0].append($('#scanForm')); SCAN_HOME[1].append($('#scanResult')); } };
+// Formularz skanera na podstronie narzędzia: ten sam formularz #scanForm co na stronie głównej (przenoszony, nie kopiowany),
+// żeby na stronie był jeden formularz skanera. Ponowne rysowanie strony (route + __ROUTE, zmiana zgody, wstecz) przenosi
+// ten sam węzeł, więc wklejone ogłoszenie i wybrany plik zostają. homeScan() odkłada go na stronę główną.
 function toolScan(box) {
-  const file = el('input', { type: 'file', accept: '.pdf,.docx,.txt', hidden: true }), fileName = el('span', { className: 'hint', textContent: 'nie wybrano pliku' });
-  const ad = el('textarea', { rows: 4, placeholder: 'Wklej link (https://…) albo całą treść ogłoszenia' }), btn = el('button', { className: 'btn', type: 'submit', textContent: 'Sprawdź za darmo' });
-  const msg = el('p', { className: 'fstatus', role: 'status' }), result = el('div', { className: 'scan-result', hidden: true });
-  const form = el('form', { className: 'scan-card', noValidate: true },
-    el('div', { className: 'f' }, '1. Twoje CV ', el('span', { className: 'h', textContent: 'PDF, Word lub TXT, do 5 MB' }), el('div', { className: 'filerow' }, el('label', { className: 'btn ghost sm filebtn' }, 'Wybierz plik', file), fileName)),
-    el('label', { className: 'f' }, '2. Link do ogłoszenia albo jego treść', ad), btn, msg, el('p', { className: 'hint small', textContent: 'Nie zapisujemy pliku ani treści CV. Sam wynik jest w pamięci serwera do godziny.' }));
-  if (pendingDraft) ad.value = pendingDraft;
-  bindScan({ form, file, fileName, ad, btn, msg, result });
-  box.classList.remove('tool-box'); box.append(form, result);
+  const ad = $('#scanAd');
+  if (pendingDraft && !ad.value.trim()) ad.value = pendingDraft;
+  box.classList.remove('tool-box'); box.append($('#scanForm'), $('#scanResult'));
   if (cfg.chromeExt) box.append(el('p', { className: 'chrome-ext' }, el('a', { className: 'btn ghost sm', href: cfg.chromeExt, target: '_blank', rel: 'noopener', textContent: 'Dodaj do Chrome' }), ' ', el('span', { className: 'hint', textContent: 'Skaner jednym kliknięciem na stronie ogłoszenia.' })));
 }
 // „Sprawdź CV” (ats = false) i „Test CV pod ATS” (ats = true): /api/cv-check odczytuje tekst z pliku i sprawdza budowę CV
@@ -2927,7 +2925,7 @@ async function showPage(r, push = true) {
   $('#page').hidden = false; $('#pageNote').hidden = (window.I18N?.lang || 'pl') === 'pl' || (kind === 'poradnik' && !!item.slugLang) || (kind === 'cv' && !!C.prof) || (kind === 'narzedzia' && !!item.slugLang) || STATIC_PAGES.includes(kind);
   // Przełącznik języka prowadzi do tej samej strony w innym języku (narzędzia mają adresy w każdym języku).
   $$('.langsw a').forEach((a) => { const L = a.dataset.lang; a.setAttribute('href', kind === 'narzedzia' && TOOL_SEG[L] && item.slugs?.[L] ? `/${L}/${TOOL_SEG[L]}/${item.slugs[L]}` : L === 'pl' && kind === 'narzedzia' ? `/narzedzia/${slug}` : L === 'pl' ? '/' : '/' + L); });
-  $('#page').replaceChildren(node()); $('#page').dataset.ssr = '';
+  homeScan(); $('#page').replaceChildren(node()); $('#page').dataset.ssr = '';
   // Ten sam tytuł co z serwera: nazwę serwisu dopisujemy tylko, gdy całość mieści się w ok. 60 znakach (Google ucina dłuższe).
   try { const t = STATIC_PAGES.includes(kind) ? window.I18N.t(item.title) : item.seoTitle || item.title; document.title = t.length <= 40 ? `${t} | CV Pod Ogłoszenie` : t; } catch {}
   setMeta(item.metaDescription);
@@ -2938,7 +2936,7 @@ async function showPage(r, push = true) {
 const resetLangSw = () => $$('.langsw a').forEach((a) => a.setAttribute('href', a.dataset.lang === 'pl' ? '/' : '/' + a.dataset.lang));
 function showHome(push) {
   resetLangSw();
-  $('#page').hidden = $('#pageNote').hidden = true; $('#account').hidden = true; $('#landing').hidden = false;
+  homeScan(); $('#page').hidden = $('#pageNote').hidden = true; $('#account').hidden = true; $('#landing').hidden = false;
   try { document.title = HOME_TITLE; } catch {}
   if (push) navTo('');
   window.scrollTo(0, 0);
@@ -3158,7 +3156,7 @@ function route() {
     if (PROF_SEG[dm[1]] === dm[2]) return showPage('prof/' + dm[3] + (dm[4] ? '/' + dm[4] : ''), false);
     if (TOOL_SEG[dm[1]] === dm[2] && !dm[4]) return showPage('tool/' + dm[3], false);
   }
-  $('#page').hidden = $('#pageNote').hidden = true; resetLangSw();
+  homeScan(); $('#page').hidden = $('#pageNote').hidden = true; resetLangSw();
   $('#landing').hidden = false;
   try { document.title = HOME_TITLE; } catch {} const t = location.hash.length > 1 && document.getElementById(location.hash.slice(1)); if (t) settleScroll(t);
 }
@@ -3211,10 +3209,9 @@ async function loadDraft(id) {
   let d; try { const r = await fetch(`/api/ad-draft/${encodeURIComponent(id)}`); d = await r.json(); if (!r.ok) throw new Error(d.error); } catch (x) { alert(x.message || 'Nie udało się wczytać ogłoszenia.'); return; }
   const text = d.text;
   if (/^\/(?:[a-z]{2}\/)?(?:narzedzia|tools|instrumenty)\/(?:skaner|cv-scanner|lebenslauf|skaner-rezyume)/.test(location.pathname)) {
-    // Formularz skanera na stronie narzędzia powstaje po wczytaniu treści strony: oddajemy mu szkic przy tworzeniu.
-    // Strona narzędzia może się przy starcie narysować ponownie, więc szkic zostaje do wzięcia przez kilka sekund.
+    // Strona narzędzia przenosi #scanForm do treści strony; szkic czeka też chwilę na wypadek, gdyby strona jeszcze się rysowała.
     pendingDraft = text; setTimeout(() => (pendingDraft = ''), 20000);
-    const t = $('#page form.scan-card textarea'); if (t) t.value = text;
+    $('#scanAd').value = text; // jeden formularz skanera (#scanForm) – także na stronie narzędzia
     return;
   }
   const first = $('#ads .entry');
