@@ -18,8 +18,9 @@ test('Skaner: bez zdań „nie zapisujemy wyniku” w 4 językach; jest informac
   const html = read('public/index.html'), scan = /<form[^>]*id="scanForm"[\s\S]*?<\/form>/.exec(html)?.[0] || html.slice(0, html.indexOf('</section>', html.indexOf('scanForm')));
   assert.doesNotMatch(scan, BAD); assert.match(scan, /Sam wynik jest w pamięci serwera do godziny\./);
   assert.doesNotMatch(html, /nie zapisuje ani pliku, ani wyniku|nie zapisuje pliku ani wyniku/);
-  const app = read('public/app.js'), tool = app.slice(app.indexOf('2. Link do ogłoszenia albo jego treść'), app.indexOf('2. Link do ogłoszenia albo jego treść') + 300);
-  assert.match(tool, /Sam wynik jest w pamięci serwera do godziny\./);
+  // Strona narzędzia używa tego samego formularza #scanForm (sprawdzonego wyżej), bez własnej kopii tekstu.
+  const app = read('public/app.js'), tool = app.slice(app.indexOf('function toolScan('), app.indexOf('function toolScanBlock('));
+  assert.match(tool, /\$\('#scanForm'\)/);
   for (const l of ['en', 'uk', 'de']) {
     const d = JSON.parse(read(`public/i18n/${l}.json`));
     assert.ok(d['Nie zapisujemy pliku ani treści CV. Sam wynik jest w pamięci serwera do godziny.'], l);
