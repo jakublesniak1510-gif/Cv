@@ -398,10 +398,10 @@
   {
     "nazwa": "Targi Pracy i Staży UAM (Wydział Matematyki i Informatyki)",
     "miasto": "Poznań",
-    "data": "wiosna 2027 – termin do potwierdzenia",
-    "potwierdzona": false,
+    "data": "2027-03-23",
+    "potwierdzona": true,
     "ostatnia_edycja": "2026-03-31",
-    "miejsce": "Wydział Matematyki i Informatyki UAM",
+    "miejsce": "Wydział Matematyki i Informatyki UAM, Kampus Morasko, ul. Uniwersytetu Poznańskiego 4 (godz. 10:30–14:30)",
     "organizator": "WMI UAM / Biuro Karier UAM",
     "dla_kogo": "studenci IT i data science",
     "bezplatne": "nie podano na stronie",
@@ -504,16 +504,16 @@
     "url": "https://targikariera.zut.edu.pl/"
   },
   {
-    "nazwa": "Targi Pracy Szczecin (PUP) – edycja wiosenna",
+    "nazwa": "Targi Pracy Szczecin – edycja wiosenna",
     "miasto": "Szczecin",
-    "data": "wiosna 2027 – termin do potwierdzenia",
-    "potwierdzona": false,
+    "data": "2027-04-21",
+    "potwierdzona": true,
     "ostatnia_edycja": "2026-10-21 (26. edycja jesienna); wiosna: 2026-04-22 (25. edycja)",
-    "miejsce": "ENEA Arena, ul. Szafera 3/5/7",
-    "organizator": "Powiatowy Urząd Pracy w Szczecinie",
+    "miejsce": "ENEA Arena, ul. Szafera 3/5/7 (godz. 10:00–15:30)",
+    "organizator": "Polska Fundacja Społeczeństwa Przedsiębiorczego (Targi Pracy Szczecin); wydarzenie promowane przez Powiatowy Urząd Pracy w Szczecinie",
     "dla_kogo": "wszyscy (od 16 lat)",
-    "bezplatne": "tak (bez rejestracji)",
-    "url": "https://szczecin.praca.gov.pl/strona-glowna/-/asset_publisher/Qat7ebECUfDp/content/zaproszenie-na-targi-pracy-2026-jesien?p_r_p_assetEntryId=70125809"
+    "bezplatne": "tak (wstęp całkowicie bezpłatny)",
+    "url": "https://targipracy.szczecin.pl/"
   },
   {
     "nazwa": "Targi Pracy w Białymstoku (PUP/WUP)",
